@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -49,6 +50,15 @@ func New(pool *pgxpool.Pool, secure bool) *Manager {
 	m.Cookie.SameSite = http.SameSiteLaxMode
 	m.Cookie.Secure = secure
 	m.Cookie.Path = "/"
+	// Клиент прервал запрос (ушёл со страницы, отменил загрузку тайла) — ответ уже никому
+	// не нужен, это не ошибка сервера.
+	m.ErrorFunc = func(w http.ResponseWriter, r *http.Request, err error) {
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+		slog.ErrorContext(r.Context(), "session store", "error", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
 	return &Manager{SessionManager: m}
 }
 
