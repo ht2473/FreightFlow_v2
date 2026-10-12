@@ -16,9 +16,22 @@ const keepDist: Plugin = {
   },
 };
 
-// Запросы к серверу приложения в разработке: API, страницы входа и общая статика.
+// Запросы к серверу приложения в разработке: API, страницы входа, карта и общая статика.
 const backend = "http://localhost:8080";
-const proxied = ["/api", "/login", "/logout", "/setup-2fa", "/invite", "/password", "/static", "/healthz", "/readyz"];
+const proxied = [
+  "/api",
+  "/login",
+  "/logout",
+  "/setup-2fa",
+  "/invite",
+  "/password",
+  "/static",
+  // Ресурсы карты; сама страница /map — маршрут SPA.
+  "^/map/",
+  "^/tiles/",
+  "/healthz",
+  "/readyz",
+];
 
 export default defineConfig({
   plugins: [react(), babel({ presets: [reactCompilerPreset()] }), keepDist],

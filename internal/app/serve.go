@@ -18,6 +18,7 @@ import (
 	"freightflow/internal/platform/mail"
 	"freightflow/internal/platform/secret"
 	"freightflow/internal/platform/session"
+	"freightflow/internal/tiles"
 	"freightflow/internal/web"
 )
 
@@ -62,10 +63,15 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 		return err
 	}
 
+	bm := tiles.NewBasemap(cfg.DataDir, env.Log.With("component", "tiles"))
+	defer bm.Close()
+	mapHandler := tiles.New(tiles.Deps{Basemap: bm, Log: env.Log})
+
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthz", healthz())
 	mux.Handle("GET /readyz", readyz(pool))
 	mux.Handle("/api/v1/", apiHandler)
+	mux.Handle("/map/", mapHandler)
 	mux.Handle("/", webHandler)
 
 	crossOrigin, err := httpx.CrossOrigin()

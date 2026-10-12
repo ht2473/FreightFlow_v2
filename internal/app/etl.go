@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"freightflow/internal/ingest"
+	"freightflow/internal/ingest/sources/basemap"
 	"freightflow/internal/ingest/sources/osm"
 	"freightflow/internal/platform/blob"
 	"freightflow/internal/platform/jobs"
@@ -44,6 +45,7 @@ func dataSources(env *Env) []ingest.Source {
 	cfg := env.Config
 	return []ingest.Source{
 		osm.New(osm.Config{DatabaseURL: cfg.DatabaseURL, OutputDir: filepath.Join(cfg.DataDir, "osm")}),
+		basemap.New(basemap.Config{DataDir: cfg.DataDir}),
 	}
 }
 

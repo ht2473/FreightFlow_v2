@@ -311,7 +311,7 @@ func (s *Service) execute(ctx context.Context, run sqlc.IngestRun, src Source, d
 	}
 
 	snapshot := toSnapshot(snap)
-	rl.Info(ctx, "загрузка в базу")
+	rl.Info(ctx, "загрузка")
 	failed := false
 	stats, err := src.Load(ctx, LoadEnv{
 		Pool: s.d.Pool, Blobs: s.d.Blobs, Snapshot: snapshot, RunID: run.ID, TempDir: tmp, Log: rl,
