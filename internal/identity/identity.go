@@ -76,4 +76,5 @@ var (
 	ErrEmailTaken         = errors.New("email already registered")
 	ErrInvalidToken       = errors.New("invalid or expired token")
 	ErrLastAdmin          = errors.New("cannot remove the last administrator")
+	ErrTOTPEnabled        = errors.New("second factor already enabled")
 )

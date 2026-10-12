@@ -103,6 +103,9 @@ func TestTOTPFlowWithRecoveryCode(t *testing.T) {
 	if err != nil || len(codes) != recoveryCodeCount {
 		t.Fatalf("confirm totp: %d codes, %v", len(codes), err)
 	}
+	if _, err := s.BeginTOTPSetup(ctx, u.ID); !errors.Is(err, ErrTOTPEnabled) {
+		t.Fatalf("setup over enabled 2FA: got %v", err)
+	}
 
 	res, err := s.Authenticate(ctx, "admin@example.com", "надёжный пароль 2026", RequestMeta{})
 	if err != nil || !res.NeedsSecondFactor {

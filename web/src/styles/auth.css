@@ -80,6 +80,15 @@
   padding: 8px;
 }
 
+.qr-hint {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.auth-card .qr-form {
+  margin-top: 18px;
+}
+
 .secret-code {
   font-family: var(--mono);
   font-size: 13px;

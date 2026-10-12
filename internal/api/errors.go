@@ -64,6 +64,8 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 		return problem.New(http.StatusConflict, "email_taken", "Пользователь с таким адресом уже существует")
 	case errors.Is(err, identity.ErrLastAdmin):
 		return problem.New(http.StatusConflict, "last_admin", "Нельзя лишить прав последнего администратора")
+	case errors.Is(err, identity.ErrTOTPEnabled):
+		return problem.New(http.StatusConflict, "totp_enabled", "Двухфакторная защита уже включена")
 	case errors.Is(err, identity.ErrInvalidCode):
 		p := problem.New(http.StatusUnprocessableEntity, "invalid_code", "Неверный код")
 		p.Errors = []problem.FieldError{{Field: "code", Message: "Неверный код подтверждения"}}

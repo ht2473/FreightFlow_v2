@@ -269,6 +269,11 @@ func (s *Service) BeginTOTPSetup(ctx context.Context, userID uuid.UUID) (TOTPSet
 	if err != nil {
 		return TOTPSetup{}, mapNotFound(err)
 	}
+	// Новый секрет сбрасывает признак включения; при действующей защите
+	// это было бы отключением 2FA без подтверждения паролем.
+	if u.TotpEnabled {
+		return TOTPSetup{}, ErrTOTPEnabled
+	}
 	key, err := generateTOTP(u.Email)
 	if err != nil {
 		return TOTPSetup{}, fmt.Errorf("generate totp: %w", err)

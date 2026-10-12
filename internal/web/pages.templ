@@ -109,15 +109,16 @@ templ secondFactorPage(p page, f formState, next string) {
 	}
 }
 
-templ setupTOTPPage(p page, f formState, qrDataURI, secret string) {
+templ setupTOTPPage(p page, f formState, qrDataURI, secret, next string) {
 	@authLayout(p) {
 		<h1>Двухфакторная защита</h1>
-		<p class="auth-lead">Для администраторов вход защищается вторым фактором. Отсканируйте код в приложении-аутентификаторе и введите шестизначный код.</p>
+		<p class="auth-lead">Отсканируйте код в приложении-аутентификаторе и введите шестизначный код. Для администраторов защита обязательна.</p>
 		@notices(f)
 		<img class="qr" src={ templ.SafeURL(qrDataURI) } alt="QR-код для приложения-аутентификатора"/>
-		<p class="field-hint" style="text-align:center;margin-bottom:6px">Или введите ключ вручную:</p>
+		<p class="field-hint qr-hint">Или введите ключ вручную:</p>
 		<div class="secret-code">{ secret }</div>
-		<form method="post" action="/setup-2fa" novalidate style="margin-top:18px">
+		<form class="qr-form" method="post" action="/setup-2fa" novalidate>
+			<input type="hidden" name="next" value={ next }/>
 			@textField("code", "Код из приложения", "text", "one-time-code", f, true, "")
 			<div class="auth-actions">
 				<button class="btn btn-primary btn-block" type="submit">Включить защиту</button>

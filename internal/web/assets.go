@@ -70,7 +70,7 @@ func (a *assets) serveStatic(w http.ResponseWriter, r *http.Request) bool {
 			return false
 		}
 	}
-	if !fs.ValidPath(name) || name == "." || strings.HasSuffix(name, ".html") || strings.HasPrefix(name, ".vite") {
+	if !fs.ValidPath(name) || name == "." || strings.HasSuffix(name, ".html") || hasHiddenSegment(name) {
 		return false
 	}
 	f, err := a.files.Open(name)
@@ -90,4 +90,14 @@ func (a *assets) serveStatic(w http.ResponseWriter, r *http.Request) bool {
 	}
 	http.ServeFileFS(w, r, a.files, name) //nolint:gosec // fs.FS не выходит за пределы корня, путь проверен fs.ValidPath
 	return true
+}
+
+// hasHiddenSegment сообщает, есть ли в пути служебный элемент (.vite, .gitkeep).
+func hasHiddenSegment(name string) bool {
+	for seg := range strings.SplitSeq(name, "/") {
+		if strings.HasPrefix(seg, ".") {
+			return true
+		}
+	}
+	return false
 }

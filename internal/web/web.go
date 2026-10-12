@@ -233,12 +233,17 @@ func (h *handler) secondFactor(w http.ResponseWriter, r *http.Request) {
 // --- Подключение второго фактора ---
 
 func (h *handler) setupTOTPForm(w http.ResponseWriter, r *http.Request) {
+	next := safeNext(r.URL.Query().Get("next"))
 	uid, _, ok := h.Sessions.UserID(r.Context())
 	if !ok {
-		http.Redirect(w, r, "/login?next=/setup-2fa", http.StatusSeeOther)
+		http.Redirect(w, r, "/login?next="+url.QueryEscape("/setup-2fa?next="+next), http.StatusSeeOther)
 		return
 	}
 	setup, err := h.Identity.BeginTOTPSetup(r.Context(), uid)
+	if errors.Is(err, identity.ErrTOTPEnabled) {
+		http.Redirect(w, r, next, http.StatusSeeOther) //nolint:gosec // next проверен safeNext
+		return
+	}
 	if err != nil {
 		h.internalError(w, r, err)
 		return
@@ -248,7 +253,7 @@ func (h *handler) setupTOTPForm(w http.ResponseWriter, r *http.Request) {
 		h.internalError(w, r, err)
 		return
 	}
-	h.render(w, r, http.StatusOK, setupTOTPPage(h.page(r, "Двухфакторная защита"), formState{}, qr, setup.Secret))
+	h.render(w, r, http.StatusOK, setupTOTPPage(h.page(r, "Двухфакторная защита"), formState{}, qr, setup.Secret, next))
 }
 
 func (h *handler) setupTOTP(w http.ResponseWriter, r *http.Request) {
@@ -257,7 +262,7 @@ func (h *handler) setupTOTP(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	next := safeNext(r.URL.Query().Get("next"))
+	next := safeNext(r.PostFormValue("next"))
 	codes, err := h.Identity.ConfirmTOTP(r.Context(), uid, r.PostFormValue("code"), meta(r))
 	if errors.Is(err, identity.ErrInvalidCode) {
 		// Секрет уже сохранён: показываем тот же код заново.
@@ -272,7 +277,7 @@ func (h *handler) setupTOTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		f := formState{Errors: map[string]string{"code": "Неверный код. Отсканируйте новый QR-код и попробуйте снова."}}
-		h.render(w, r, http.StatusUnprocessableEntity, setupTOTPPage(h.page(r, "Двухфакторная защита"), f, qr, setup.Secret))
+		h.render(w, r, http.StatusUnprocessableEntity, setupTOTPPage(h.page(r, "Двухфакторная защита"), f, qr, setup.Secret, next))
 		return
 	}
 	if err != nil {
