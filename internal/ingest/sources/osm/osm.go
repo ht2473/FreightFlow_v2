@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
 	"freightflow/etl"
@@ -259,23 +260,10 @@ func (s *Source) Load(ctx context.Context, env ingest.LoadEnv) (ingest.LoadStats
 		return nil, err
 	}
 
-	transform, err := etl.FS.ReadFile("osm/transform.sql")
-	if err != nil {
-		return nil, err
-	}
 	env.Log.Info(ctx, "перенос в домен")
 	var stats ingest.LoadStats
 	err = db.InTx(ctx, env.Pool, func(tx pgx.Tx) error {
-		if _, err := tx.Exec(ctx, `SELECT set_config('ff.source', $1, true), set_config('ff.snapshot', $2, true)`,
-			Code, env.Snapshot.ID.String()); err != nil {
-			return fmt.Errorf("set transform parameters: %w", err)
-		}
-		// Скрипт из нескольких операторов выполняется простым протоколом (без параметров).
-		if _, err := tx.Exec(ctx, string(transform)); err != nil {
-			return fmt.Errorf("transform: %w", err)
-		}
-		stats, err = collectStats(ctx, tx)
-		if err != nil {
+		if stats, err = transform(ctx, tx, env.Snapshot.ID); err != nil {
 			return err
 		}
 		if !checkQuality(ctx, env, stats) {
@@ -283,10 +271,24 @@ func (s *Source) Load(ctx context.Context, env ingest.LoadEnv) (ingest.LoadStats
 		}
 		return nil
 	})
+	return stats, err
+}
+
+// transform переносит osm_stage в домен в транзакции tx (etl/osm/transform.sql) и считает итог.
+func transform(ctx context.Context, tx pgx.Tx, snapshot uuid.UUID) (ingest.LoadStats, error) {
+	script, err := etl.FS.ReadFile("osm/transform.sql")
 	if err != nil {
-		return stats, err
+		return nil, err
 	}
-	return stats, nil
+	if _, err := tx.Exec(ctx, `SELECT set_config('ff.source', $1, true), set_config('ff.snapshot', $2, true)`,
+		Code, snapshot.String()); err != nil {
+		return nil, fmt.Errorf("set transform parameters: %w", err)
+	}
+	// Скрипт из нескольких операторов выполняется простым протоколом (без параметров).
+	if _, err := tx.Exec(ctx, string(script)); err != nil {
+		return nil, fmt.Errorf("transform: %w", err)
+	}
+	return collectStats(ctx, tx)
 }
 
 // extractRegions за один проход вырезает город (с агломерацией внутри ЦКАД) и регион
