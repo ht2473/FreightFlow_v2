@@ -1,23 +1,11 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { account, axeViolations, login as loginAs } from "./support";
 
-const email = process.env.FF_E2E_EMAIL ?? "";
-const password = process.env.FF_E2E_PASSWORD ?? "";
+const analyst = account("FF_E2E");
 
-test.skip(!email || !password, "нужны FF_E2E_EMAIL и FF_E2E_PASSWORD");
+test.skip(!analyst.email || !analyst.password, "нужны FF_E2E_EMAIL и FF_E2E_PASSWORD");
 
-async function login(page: Page, next = "/") {
-  await page.goto(`/login?next=${encodeURIComponent(next)}`);
-  await page.getByLabel("Электронная почта").fill(email);
-  await page.getByLabel("Пароль", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Войти" }).click();
-}
-
-/** Серьёзные нарушения доступности на странице. */
-async function axeViolations(page: Page) {
-  const res = await new AxeBuilder({ page }).analyze();
-  return res.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id);
-}
+const login = (page: Page, next = "/") => loginAs(page, analyst, next);
 
 test("вход, оболочка, палитра команд, тема и выход", async ({ page }) => {
   await login(page);

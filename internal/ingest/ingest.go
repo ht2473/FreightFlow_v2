@@ -88,12 +88,17 @@ type FetchEnv struct {
 	HTTP *outbound.Client
 	// Previous — последний загруженный снимок (валидаторы для условного запроса), если есть.
 	Previous *Snapshot
+	// Stored возвращает сохранённый снимок этой версии набора, если его файл на месте
+	// (например, получен запуском, который не дошёл до загрузки): повторно качать не нужно.
+	Stored func(ctx context.Context, version string) (*Snapshot, error)
 	// Secret возвращает значение обязательной настройки.
 	Secret func(name string) string
 	// Store сохраняет сырьё в каталог снимков источника.
 	Store func(ctx context.Context, ext string, r io.Reader) (blob.Object, error)
 	// TempDir — рабочий каталог запуска; удаляется после завершения.
 	TempDir string
+	// WorkDir — постоянный каталог источника между запусками (недокачанные файлы).
+	WorkDir string
 	Log     RunLog
 }
 

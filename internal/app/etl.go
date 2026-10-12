@@ -5,10 +5,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"path/filepath"
 	"text/tabwriter"
 	"time"
 
 	"freightflow/internal/ingest"
+	"freightflow/internal/ingest/sources/osm"
 	"freightflow/internal/platform/blob"
 	"freightflow/internal/platform/jobs"
 )
@@ -24,6 +26,7 @@ func newIngest(ctx context.Context, env *Env, rt *runtime, client *jobs.Client) 
 		Secrets: map[string]string{
 			"FF_MOSDATA_API_KEY": cfg.MosDataAPIKey,
 		},
+		WorkDir:   filepath.Join(cfg.DataDir, "work"),
 		RuCAFile:  cfg.RuCAFile,
 		UserAgent: "FreightFlow/" + Version,
 	}, dataSources(env)...)
@@ -37,8 +40,11 @@ func newIngest(ctx context.Context, env *Env, rt *runtime, client *jobs.Client) 
 }
 
 // dataSources — загрузчики, подключённые в приложении.
-func dataSources(_ *Env) []ingest.Source {
-	return nil
+func dataSources(env *Env) []ingest.Source {
+	cfg := env.Config
+	return []ingest.Source{
+		osm.New(osm.Config{DatabaseURL: cfg.DatabaseURL, OutputDir: filepath.Join(cfg.DataDir, "osm")}),
+	}
 }
 
 func openBlobs(env *Env) (*blob.Store, error) {
@@ -64,6 +70,16 @@ func runETL(ctx context.Context, env *Env, args []string) error {
 	switch args[0] {
 	case "list":
 		return etlList(ctx, env, svc)
+	case "regions":
+		// Многоугольники вырезки OSM из загруженных границ; запускается из корня репозитория.
+		files, err := osm.ExportRegions(ctx, rt.pool, filepath.Join("etl", "regions"))
+		if err != nil {
+			return err
+		}
+		for _, f := range files {
+			fmt.Fprintln(env.Stdout, f)
+		}
+		return nil
 	case "run":
 		fs := flag.NewFlagSet("etl run", flag.ContinueOnError)
 		fs.SetOutput(env.Stderr)
@@ -126,5 +142,5 @@ func etlList(ctx context.Context, env *Env, svc *ingest.Service) error {
 }
 
 func etlUsage(env *Env) {
-	fmt.Fprintln(env.Stderr, "Использование: freightflow etl list | etl run [-force] <источник>")
+	fmt.Fprintln(env.Stderr, "Использование: freightflow etl list | etl run [-force] <источник> | etl regions")
 }

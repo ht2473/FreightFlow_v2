@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type CoreApiToken struct {
@@ -111,6 +112,72 @@ type CoreUserSetting struct {
 	UpdatedAt time.Time
 }
 
+type InfraFacility struct {
+	ID              uuid.UUID
+	TypeCode        string
+	Name            *string
+	Status          string
+	Point           interface{}
+	Footprint       interface{}
+	Territory       interface{}
+	Point3857       interface{}
+	Footprint3857   interface{}
+	BuildingAreaM2  *float64
+	TerritoryAreaM2 *float64
+	Buildings       int32
+	Levels          *int16
+	// оценка: площадь застройки × этажность (модель)
+	FloorAreaM2 *float64
+	Address     *string
+	DistrictID  *uuid.UUID
+	OkrugID     *uuid.UUID
+	RegionID    *uuid.UUID
+	// внутреннее из колец, внутри которого объект; outside — за ЦКАД
+	Ring              *string
+	Confidence        float32
+	ConfidenceReasons json.RawMessage
+	Attrs             json.RawMessage
+	OsmType           string
+	OsmID             int64
+	SourceCode        string
+	SnapshotID        *uuid.UUID
+	FirstSeenAt       time.Time
+	LastSeenAt        time.Time
+	UpdatedAt         time.Time
+}
+
+type InfraIndustrialZone struct {
+	ID          uuid.UUID
+	Name        *string
+	Geom        interface{}
+	Geom3857    interface{}
+	AreaM2      float64
+	Tags        json.RawMessage
+	OsmType     string
+	OsmID       int64
+	SourceCode  string
+	SnapshotID  *uuid.UUID
+	FirstSeenAt time.Time
+	LastSeenAt  time.Time
+}
+
+// АЗС, стоянки грузовиков, площадки отдыха, рынки и ярмарки, вокзалы, ж/д грузовые пункты, таможня, порты
+type InfraPoi struct {
+	ID          uuid.UUID
+	Kind        string
+	Name        *string
+	Point       interface{}
+	Point3857   interface{}
+	Area        interface{}
+	Tags        json.RawMessage
+	OsmType     string
+	OsmID       int64
+	SourceCode  string
+	SnapshotID  *uuid.UUID
+	FirstSeenAt time.Time
+	LastSeenAt  time.Time
+}
+
 type IngestDataVersion struct {
 	Domain      string
 	Version     int64
@@ -188,9 +255,106 @@ type IngestSource struct {
 	SyncedAt   time.Time
 }
 
+type NetworkBridge struct {
+	ID         uuid.UUID
+	SegmentID  *uuid.UUID
+	Name       *string
+	Kind       string
+	LengthM    float64
+	MaxweightT pgtype.Numeric
+	MaxheightM pgtype.Numeric
+	Geom       interface{}
+	Geom3857   interface{}
+	OsmID      int64
+	SourceCode string
+	SnapshotID *uuid.UUID
+}
+
+type NetworkRestriction struct {
+	ID        uuid.UUID
+	SegmentID uuid.UUID
+	Kind      string
+	Value     pgtype.Numeric
+	Unit      *string
+	Direction int16
+	// условие действия (*:conditional), например «Mo-Fr 07:00-22:00»
+	Condition  *string
+	Raw        string
+	Origin     string
+	Confidence float32
+	SourceCode string
+	SnapshotID *uuid.UUID
+}
+
+type NetworkRoadSegment struct {
+	ID    uuid.UUID
+	OsmID int64
+	Class string
+	Name  *string
+	Ref   *string
+	// 1 — по направлению линии, -1 — против, 0 — в обе стороны
+	Oneway      int16
+	Lanes       *int16
+	Maxspeed    *int16
+	Bridge      bool
+	Tunnel      bool
+	Layer       int16
+	Ring        *string
+	LengthM     float64
+	Tags        json.RawMessage
+	Geom        interface{}
+	Geom3857    interface{}
+	SourceCode  string
+	SnapshotID  *uuid.UUID
+	FirstSeenAt time.Time
+	LastSeenAt  time.Time
+}
+
 type NotifyOutbox struct {
 	ID        int64
 	Type      string
 	Payload   json.RawMessage
 	CreatedAt time.Time
+}
+
+type RefFacilityType struct {
+	Code        string
+	Name        string
+	Description string
+	Icon        string
+	Ord         int16
+}
+
+type TerritoryAdminArea struct {
+	ID uuid.UUID
+	// region — Москва, Московская область; okrug — административный округ Москвы; municipal_district — городской округ области; district — район или поселение Москвы
+	Kind        string
+	AdminLevel  int16
+	Name        string
+	ShortName   *string
+	ParentID    *uuid.UUID
+	OsmID       int64
+	Tags        json.RawMessage
+	Geom        interface{}
+	Geom3857    interface{}
+	AreaKm2     float64
+	SourceCode  string
+	SnapshotID  *uuid.UUID
+	FirstSeenAt time.Time
+	LastSeenAt  time.Time
+}
+
+type TerritoryRingZone struct {
+	Code       string
+	Name       string
+	Ord        int16
+	Line       interface{}
+	Zone       interface{}
+	Line3857   interface{}
+	Zone3857   interface{}
+	LengthKm   float64
+	AreaKm2    *float64
+	SourceCode string
+	SnapshotID *uuid.UUID
+	UpdatedAt  time.Time
 }

@@ -35,6 +35,44 @@ tasks:
       VERSION:
         sh: git describe --tags --always --dirty 2>/dev/null || echo dev
 
+  build:linux:
+    desc: Собрать бинарник для контейнера worker
+    env:
+      GOOS: linux
+      GOARCH: amd64
+      CGO_ENABLED: "0"
+    cmds:
+      - go build -ldflags "-X freightflow/internal/app.Version={{.VERSION}}" -o bin/linux/freightflow ./cmd/freightflow
+    vars:
+      VERSION:
+        sh: git describe --tags --always --dirty 2>/dev/null || echo dev
+
+  etl:image:
+    desc: Собрать образ worker с инструментами OSM
+    deps: [build:linux]
+    cmds:
+      - "{{.COMPOSE}} --profile etl build worker"
+
+  etl:up:
+    desc: Запустить worker в контейнере (очереди с инструментами OSM)
+    deps: [build:linux]
+    cmds:
+      - "{{.COMPOSE}} --profile etl up -d worker"
+
+  etl:run:
+    desc: "Загрузить источник в контейнере worker: task etl:run SOURCE=osm [FORCE=1]"
+    deps: [build:linux]
+    requires:
+      vars: [SOURCE]
+    cmds:
+      - "{{.COMPOSE}} --profile etl run --rm worker etl run {{if .FORCE}}-force {{end}}{{.SOURCE}}"
+
+  etl:list:
+    desc: Источники данных и последние запуски
+    deps: [build]
+    cmds:
+      - "{{.BIN}} etl list"
+
   serve:
     desc: Запустить веб-сервер (в разработке — вместе с фоновыми задачами)
     deps: [build]

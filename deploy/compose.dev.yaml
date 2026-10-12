@@ -38,6 +38,30 @@ services:
       - "8035:8025"
       - "1035:1025"
 
+  # Фоновые задачи с инструментами OSM (osm2pgsql, osmium, gdal): task etl:up / task etl:run.
+  # Бинарник подключается из bin/linux — после изменений кода достаточно task build:linux.
+  worker:
+    build:
+      context: ..
+      dockerfile: deploy/docker/worker.Dockerfile
+    image: freightflow/worker:dev
+    profiles: ["etl"]
+    env_file: ../.env
+    environment:
+      FF_DATABASE_URL: postgres://freightflow:freightflow@db:5432/freightflow?sslmode=disable
+      FF_DATA_DIR: /data
+      FF_RU_CA_FILE: /data/certs/russian_trusted_root_ca.pem
+      FF_WORKER_METRICS_ADDR: 0.0.0.0:9091
+      HTTP_PROXY: ${FF_DOCKER_HTTP_PROXY:-}
+      HTTPS_PROXY: ${FF_DOCKER_HTTP_PROXY:-}
+      NO_PROXY: db,localhost,127.0.0.1
+    volumes:
+      - ../var:/data
+      - ../bin/linux/freightflow:/usr/local/bin/freightflow:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
   routing:
     image: ghcr.io/valhalla/valhalla:3.9.1
     profiles: ["routing"]

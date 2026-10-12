@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -89,6 +90,26 @@ func TestConditionalRequest(t *testing.T) {
 
 	if _, err := c.Get(context.Background(), srv.URL, Validators{ETag: `"v1"`}); !errors.Is(err, ErrNotModified) {
 		t.Fatalf("want ErrNotModified, got %v", err)
+	}
+}
+
+func TestGetFromResumesWithRange(t *testing.T) {
+	t.Parallel()
+	const body = "0123456789"
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeContent(w, r, "f.bin", time.Time{}, strings.NewReader(body))
+	}))
+	defer srv.Close()
+	c, _ := newTestClient(t, srv, true)
+
+	resp, err := c.GetFrom(t.Context(), srv.URL, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	got, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusPartialContent || string(got) != body[4:] {
+		t.Fatalf("status %d, body %q", resp.StatusCode, got)
 	}
 }
 

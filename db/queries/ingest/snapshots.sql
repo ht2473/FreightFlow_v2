@@ -40,3 +40,9 @@ RETURNING version;
 
 -- name: ListDataVersions :many
 SELECT * FROM ingest.data_version ORDER BY domain;
+
+-- name: FindSnapshotByVersion :one
+SELECT * FROM ingest.snapshot
+WHERE source_code = $1 AND source_version = $2
+ORDER BY fetched_at DESC
+LIMIT 1;

@@ -34,6 +34,37 @@ func (q *Queries) BumpDataVersion(ctx context.Context, arg BumpDataVersionParams
 	return version, err
 }
 
+const findSnapshotByVersion = `-- name: FindSnapshotByVersion :one
+SELECT id, source_code, path, sha256, size_bytes, format, source_version, record_count, validators, fetched_at, loaded_at FROM ingest.snapshot
+WHERE source_code = $1 AND source_version = $2
+ORDER BY fetched_at DESC
+LIMIT 1
+`
+
+type FindSnapshotByVersionParams struct {
+	SourceCode    string
+	SourceVersion *string
+}
+
+func (q *Queries) FindSnapshotByVersion(ctx context.Context, arg FindSnapshotByVersionParams) (IngestSnapshot, error) {
+	row := q.db.QueryRow(ctx, findSnapshotByVersion, arg.SourceCode, arg.SourceVersion)
+	var i IngestSnapshot
+	err := row.Scan(
+		&i.ID,
+		&i.SourceCode,
+		&i.Path,
+		&i.Sha256,
+		&i.SizeBytes,
+		&i.Format,
+		&i.SourceVersion,
+		&i.RecordCount,
+		&i.Validators,
+		&i.FetchedAt,
+		&i.LoadedAt,
+	)
+	return i, err
+}
+
 const lastLoadedSnapshot = `-- name: LastLoadedSnapshot :one
 SELECT id, source_code, path, sha256, size_bytes, format, source_version, record_count, validators, fetched_at, loaded_at FROM ingest.snapshot
 WHERE source_code = $1 AND loaded_at IS NOT NULL

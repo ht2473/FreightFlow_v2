@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 	"time"
@@ -46,6 +47,8 @@ type Deps struct {
 	Log  *slog.Logger
 	// Secrets — значения обязательных настроек источников по именам переменных.
 	Secrets map[string]string
+	// WorkDir — каталог постоянных рабочих файлов источников; пусто — только временные.
+	WorkDir string
 	// RuCAFile — сертификат Минцифры для российских государственных источников.
 	RuCAFile  string
 	UserAgent string
@@ -235,6 +238,13 @@ func (s *Service) execute(ctx context.Context, run sqlc.IngestRun, src Source, d
 		return "", nil, nil, fmt.Errorf("create temp dir: %w", err)
 	}
 	defer os.RemoveAll(tmp)
+	work := tmp
+	if s.d.WorkDir != "" {
+		work = filepath.Join(s.d.WorkDir, desc.Code)
+		if err := os.MkdirAll(work, 0o750); err != nil {
+			return "", nil, nil, fmt.Errorf("create work dir: %w", err)
+		}
+	}
 
 	var client *outbound.Client
 	if len(desc.Hosts) > 0 {
@@ -259,11 +269,15 @@ func (s *Service) execute(ctx context.Context, run sqlc.IngestRun, src Source, d
 	fetched, err := src.Fetch(ctx, FetchEnv{
 		HTTP:     client,
 		Previous: prev,
-		Secret:   func(name string) string { return s.d.Secrets[name] },
+		Stored: func(ctx context.Context, version string) (*Snapshot, error) {
+			return s.storedSnapshot(ctx, desc.Code, version)
+		},
+		Secret: func(name string) string { return s.d.Secrets[name] },
 		Store: func(ctx context.Context, ext string, r io.Reader) (blob.Object, error) {
 			return s.d.Blobs.Put(ctx, dir, ext, r)
 		},
 		TempDir: tmp,
+		WorkDir: work,
 		Log:     rl,
 	})
 	if err != nil {
@@ -378,6 +392,25 @@ func (s *Service) lastSnapshot(ctx context.Context, code string) (*Snapshot, err
 	}
 	if err != nil {
 		return nil, fmt.Errorf("last snapshot: %w", err)
+	}
+	out := toSnapshot(snap)
+	return &out, nil
+}
+
+func (s *Service) storedSnapshot(ctx context.Context, code, version string) (*Snapshot, error) {
+	snap, err := s.q.FindSnapshotByVersion(ctx, sqlc.FindSnapshotByVersionParams{SourceCode: code, SourceVersion: &version})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("find snapshot: %w", err)
+	}
+	p, err := s.d.Blobs.LocalPath(snap.Path)
+	if err != nil {
+		return nil, err
+	}
+	if st, err := os.Stat(p); err != nil || st.Size() != snap.SizeBytes {
+		return nil, nil //nolint:nilerr // файла нет или он неполный — снимок получается заново
 	}
 	out := toSnapshot(snap)
 	return &out, nil

@@ -1,0 +1,3 @@
+# Образ worker получает только собранный бинарник.
+*
+!bin/linux/freightflow

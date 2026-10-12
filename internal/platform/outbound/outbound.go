@@ -132,6 +132,27 @@ type Response struct {
 
 // Get выполняет GET с повторами. При совпадении валидаторов возвращает ErrNotModified.
 func (c *Client) Get(ctx context.Context, rawURL string, v Validators) (*Response, error) {
+	return c.do(ctx, rawURL, func(h http.Header) {
+		if v.ETag != "" {
+			h.Set("If-None-Match", v.ETag)
+		}
+		if v.LastModified != "" {
+			h.Set("If-Modified-Since", v.LastModified)
+		}
+	})
+}
+
+// GetFrom запрашивает файл начиная с байта offset (докачка). Ответ 206 содержит остаток
+// файла, 200 — файл целиком: сервер не поддерживает диапазоны, и писать нужно с начала.
+func (c *Client) GetFrom(ctx context.Context, rawURL string, offset int64) (*Response, error) {
+	return c.do(ctx, rawURL, func(h http.Header) {
+		if offset > 0 {
+			h.Set("Range", "bytes="+strconv.FormatInt(offset, 10)+"-")
+		}
+	})
+}
+
+func (c *Client) do(ctx context.Context, rawURL string, header func(http.Header)) (*Response, error) {
 	var last error
 	for attempt := 0; attempt <= c.retries; attempt++ {
 		if attempt > 0 {
@@ -144,12 +165,7 @@ func (c *Client) Get(ctx context.Context, rawURL string, v Validators) (*Respons
 			return nil, fmt.Errorf("outbound: %w", err)
 		}
 		req.Header.Set("User-Agent", c.userAgent)
-		if v.ETag != "" {
-			req.Header.Set("If-None-Match", v.ETag)
-		}
-		if v.LastModified != "" {
-			req.Header.Set("If-Modified-Since", v.LastModified)
-		}
+		header(req.Header)
 
 		resp, err := c.http.Do(req)
 		if err != nil {
