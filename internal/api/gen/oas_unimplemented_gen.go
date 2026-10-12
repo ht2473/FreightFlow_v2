@@ -85,6 +85,15 @@ func (UnimplementedHandler) GetMe(ctx context.Context) (r *Me, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// GetRun implements getRun operation.
+//
+// Запуск с журналом и проверками качества.
+//
+// GET /data/runs/{runId}
+func (UnimplementedHandler) GetRun(ctx context.Context, params GetRunParams) (r *RunDetail, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetSettings implements getSettings operation.
 //
 // Личные настройки.
@@ -130,6 +139,24 @@ func (UnimplementedHandler) ListRoles(ctx context.Context) (r []Role, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// ListRuns implements listRuns operation.
+//
+// Запуски источника.
+//
+// GET /data/sources/{code}/runs
+func (UnimplementedHandler) ListRuns(ctx context.Context, params ListRunsParams) (r []Run, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListSources implements listSources operation.
+//
+// Источники данных со свежестью и последним запуском.
+//
+// GET /data/sources
+func (UnimplementedHandler) ListSources(ctx context.Context) (r []SourceInfo, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListTokens implements listTokens operation.
 //
 // Токены API пользователя.
@@ -166,6 +193,15 @@ func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenP
 	return ht.ErrNotImplemented
 }
 
+// StartRun implements startRun operation.
+//
+// Запустить загрузку.
+//
+// POST /data/sources/{code}/runs
+func (UnimplementedHandler) StartRun(ctx context.Context, req *StartRun, params StartRunParams) (r *Run, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateMe implements updateMe operation.
 //
 // Изменить имя.
@@ -181,6 +217,15 @@ func (UnimplementedHandler) UpdateMe(ctx context.Context, req *UpdateProfile) (r
 //
 // PUT /me/settings
 func (UnimplementedHandler) UpdateSettings(ctx context.Context, req *Settings) (r *Settings, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateSource implements updateSource operation.
+//
+// Включить или выключить загрузку по расписанию.
+//
+// PATCH /data/sources/{code}
+func (UnimplementedHandler) UpdateSource(ctx context.Context, req *UpdateSource, params UpdateSourceParams) (r *SourceInfo, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

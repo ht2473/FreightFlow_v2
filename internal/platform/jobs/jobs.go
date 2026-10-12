@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os/exec"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -57,11 +58,29 @@ type Args = river.JobArgs
 type Registry struct {
 	workers  *river.Workers
 	periodic []*river.PeriodicJob
+	tools    map[string][]string
 }
 
 // NewRegistry создаёт пустой реестр.
 func NewRegistry() *Registry {
-	return &Registry{workers: river.NewWorkers()}
+	return &Registry{workers: river.NewWorkers(), tools: map[string][]string{}}
+}
+
+// RequireTools отмечает, что задачам очереди нужны внешние программы. Процесс, в котором
+// их нет (например, сервер на Windows), такую очередь не обслуживает — её задачи
+// выполнит worker в контейнере с инструментами.
+func (r *Registry) RequireTools(queue string, tools ...string) {
+	r.tools[queue] = append(r.tools[queue], tools...)
+}
+
+// missingTool возвращает первую недоступную программу очереди.
+func (r *Registry) missingTool(queue string) string {
+	for _, t := range r.tools[queue] {
+		if _, err := exec.LookPath(t); err != nil {
+			return t
+		}
+	}
+	return ""
 }
 
 // Register добавляет обработчик задач одного вида.
@@ -69,13 +88,14 @@ func Register[T river.JobArgs](r *Registry, w river.Worker[T]) {
 	river.AddWorker(r.workers, w)
 }
 
-// Every ставит задачу по расписанию с заданным интервалом. Повтор на старте нужен
+// Every ставит задачу по расписанию с заданным интервалом. id различает периодические
+// задачи одного вида (например, расписания разных источников). Запуск при старте нужен
 // задачам, которые важно выполнить сразу после развёртывания.
-func (r *Registry) Every(interval time.Duration, args Args, opts *river.InsertOpts, runOnStart bool) {
+func (r *Registry) Every(id string, interval time.Duration, args Args, opts *river.InsertOpts, runOnStart bool) {
 	r.periodic = append(r.periodic, river.NewPeriodicJob(
 		river.PeriodicInterval(interval),
 		func() (river.JobArgs, *river.InsertOpts) { return args, opts },
-		&river.PeriodicJobOpts{ID: args.Kind(), RunOnStart: runOnStart},
+		&river.PeriodicJobOpts{ID: id, RunOnStart: runOnStart},
 	))
 }
 
@@ -100,11 +120,15 @@ func NewInserter(pool *pgxpool.Pool, log *slog.Logger) (*Client, error) {
 // NewWorker создаёт клиент, который исполняет задачи всех очередей и ставит периодические.
 // Запуск — Start, остановка — Stop (дожидается текущих задач).
 func NewWorker(pool *pgxpool.Pool, log *slog.Logger, reg *Registry, obs Observability) (*Client, error) {
+	l := log.With("component", "jobs")
 	queues := make(map[string]river.QueueConfig, len(queueWorkers))
 	for q, n := range queueWorkers {
+		if tool := reg.missingTool(q); tool != "" {
+			l.Info("queue skipped: required tool not found", "queue", q, "tool", tool)
+			continue
+		}
 		queues[q] = river.QueueConfig{MaxWorkers: n}
 	}
-	l := log.With("component", "jobs")
 	c, err := river.NewClient(riverpgxv5.New(pool), &river.Config{
 		Schema:       migrate.QueueSchema,
 		Logger:       l,

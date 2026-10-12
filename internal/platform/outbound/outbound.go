@@ -37,7 +37,8 @@ type Config struct {
 	Direct bool
 	// RootCAFile — дополнительный корневой сертификат (PEM), например Минцифры.
 	RootCAFile string
-	// Timeout — предел на один запрос, включая чтение тела; 0 — 60 секунд.
+	// Timeout — предел на один запрос, включая чтение тела; 0 — 60 секунд. Для больших
+	// файлов задаётся с запасом на всю загрузку.
 	Timeout time.Duration
 	// Retries — число повторов при сетевых сбоях и ответах 429/502/503/504; 0 — 3.
 	Retries int
@@ -55,8 +56,8 @@ type Client struct {
 	sleep     func(context.Context, time.Duration) error
 }
 
-// New создаёт клиент.
-func New(cfg Config) (*Client, error) {
+// New создаёт клиент. Контекст ограничивает определение адресов системного прокси.
+func New(ctx context.Context, cfg Config) (*Client, error) {
 	if len(cfg.Hosts) == 0 {
 		return nil, errors.New("outbound: allowlist is empty")
 	}
@@ -75,7 +76,7 @@ func New(cfg Config) (*Client, error) {
 	}
 	dialer := &net.Dialer{Timeout: 15 * time.Second, KeepAlive: 30 * time.Second}
 	if !cfg.AllowPrivate {
-		dialer.Control = publicOnly(proxyAddrs())
+		dialer.Control = publicOnly(proxyAddrs(ctx))
 	}
 	transport := &http.Transport{
 		Proxy:                 proxy,
@@ -313,7 +314,7 @@ func publicOnly(proxies map[string]bool) func(network, address string, _ syscall
 var cgnat = netip.MustParsePrefix("100.64.0.0/10")
 
 // proxyAddrs — адреса системного прокси из окружения (host:port).
-func proxyAddrs() map[string]bool {
+func proxyAddrs(ctx context.Context) map[string]bool {
 	out := map[string]bool{}
 	for _, k := range []string{"HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"} {
 		v := os.Getenv(k)
@@ -328,8 +329,8 @@ func proxyAddrs() map[string]bool {
 		if port == "" {
 			port = "80"
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		ips, err := net.DefaultResolver.LookupHost(ctx, host)
+		lctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+		ips, err := net.DefaultResolver.LookupHost(lctx, host)
 		cancel()
 		if err != nil {
 			continue

@@ -111,6 +111,83 @@ type CoreUserSetting struct {
 	UpdatedAt time.Time
 }
 
+type IngestDataVersion struct {
+	Domain      string
+	Version     int64
+	PublishedAt time.Time
+	SourceCode  *string
+	RunID       *uuid.UUID
+}
+
+type IngestQualityCheck struct {
+	ID        uuid.UUID
+	RunID     uuid.UUID
+	Code      string
+	Title     string
+	Severity  string
+	Passed    bool
+	Observed  []byte
+	Expected  []byte
+	Message   *string
+	CheckedAt time.Time
+}
+
+type IngestRun struct {
+	ID         uuid.UUID
+	SourceCode string
+	Status     string
+	Trigger    string
+	Forced     bool
+	StartedBy  *uuid.UUID
+	QueuedAt   time.Time
+	StartedAt  *time.Time
+	FinishedAt *time.Time
+	SnapshotID *uuid.UUID
+	Stats      json.RawMessage
+	Error      *string
+	Log        json.RawMessage
+}
+
+type IngestSchemaSnapshot struct {
+	ID         uuid.UUID
+	SourceCode string
+	SnapshotID *uuid.UUID
+	Schema     json.RawMessage
+	Hash       string
+	CreatedAt  time.Time
+}
+
+type IngestSnapshot struct {
+	ID            uuid.UUID
+	SourceCode    string
+	Path          string
+	Sha256        string
+	SizeBytes     int64
+	Format        string
+	SourceVersion *string
+	RecordCount   *int64
+	Validators    json.RawMessage
+	FetchedAt     time.Time
+	LoadedAt      *time.Time
+}
+
+type IngestSource struct {
+	Code        string
+	Title       string
+	Publisher   string
+	Url         string
+	License     string
+	Attribution string
+	Domains     []string
+	// период автоматической загрузки; NULL — только вручную
+	IntervalS *int32
+	RuNetwork bool
+	Enabled   bool
+	// источник описан в текущей версии кода
+	Registered bool
+	SyncedAt   time.Time
+}
+
 type NotifyOutbox struct {
 	ID        int64
 	Type      string

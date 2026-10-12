@@ -38,17 +38,18 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	defer rt.close(ctx)
 	pool := rt.pool
 
-	ids, err := newIdentity(ctx, env, pool)
+	mods, err := newModules(ctx, env, rt)
 	if err != nil {
 		return err
 	}
+	ids := mods.identity
 	sessions := session.New(pool, !cfg.IsDev())
 	mailer := mail.NewSender(mail.Config{
 		Host: cfg.SMTP.Host, Port: cfg.SMTP.Port, User: cfg.SMTP.User, Password: cfg.SMTP.Password, From: cfg.SMTP.From,
 	})
 
 	apiHandler, err := api.New(api.Deps{
-		Identity: ids, Sessions: sessions, Mailer: mailer, BaseURL: cfg.BaseURL, Log: env.Log,
+		Identity: ids, Ingest: mods.ingest, Sessions: sessions, Mailer: mailer, BaseURL: cfg.BaseURL, Log: env.Log,
 		Meters: rt.tel.Meters, Tracers: rt.tel.Tracers,
 	})
 	if err != nil {
@@ -91,7 +92,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	g.Go(func() error { return rt.serveMetrics(gctx, env, cfg.MetricsAddr) })
 	g.Go(func() error { return events.Listen(gctx, pool, rt.bus, env.Log) })
 	if *withWorker {
-		g.Go(func() error { return rt.runWorkers(gctx, env, registry(env, pool, ids)) })
+		g.Go(func() error { return rt.runWorkers(gctx, env, mods.registry(env, pool)) })
 	}
 	return g.Wait()
 }

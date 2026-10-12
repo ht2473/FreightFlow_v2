@@ -248,6 +248,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/data/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Источники данных со свежестью и последним запуском */
+        get: operations["listSources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/data/sources/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Включить или выключить загрузку по расписанию */
+        patch: operations["updateSource"];
+        trace?: never;
+    };
+    "/data/sources/{code}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Запуски источника */
+        get: operations["listRuns"];
+        put?: never;
+        /** Запустить загрузку */
+        post: operations["startRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/data/runs/{runId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Запуск с журналом и проверками качества */
+        get: operations["getRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -390,6 +459,81 @@ export interface components {
             /** Format: uuid */
             nextCursor?: string;
         };
+        SourceInfo: {
+            code: string;
+            title: string;
+            publisher: string;
+            url: string;
+            license: string;
+            attribution: string;
+            domains: string[];
+            /** @description Период загрузки по расписанию; нет — только вручную */
+            intervalSeconds?: number;
+            /** @description Российский государственный ресурс (прямое соединение) */
+            ruNetwork: boolean;
+            enabled: boolean;
+            lastRun?: components["schemas"]["Run"];
+            /** Format: date-time */
+            lastSuccessAt?: string;
+            /** Format: int64 */
+            recordCount?: number;
+            /**
+             * @description fresh — загружено в срок; stale — пропущено больше двух периодов; never — ни одной успешной загрузки
+             * @enum {string}
+             */
+            freshness: "fresh" | "stale" | "never";
+        };
+        UpdateSource: {
+            enabled: boolean;
+        };
+        StartRun: {
+            /** @description Загрузить, даже если снимок не изменился */
+            force?: boolean;
+        };
+        Run: {
+            /** Format: uuid */
+            id: string;
+            source: string;
+            /** @enum {string} */
+            status: "queued" | "running" | "succeeded" | "unchanged" | "failed";
+            /** @enum {string} */
+            trigger: "schedule" | "manual" | "cli";
+            forced: boolean;
+            /** Format: date-time */
+            queuedAt: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            stats: {
+                [key: string]: number;
+            };
+            error?: string;
+        };
+        RunDetail: {
+            run: components["schemas"]["Run"];
+            log: components["schemas"]["RunLogEntry"][];
+            checks: components["schemas"]["QualityCheck"][];
+        };
+        RunLogEntry: {
+            /** Format: date-time */
+            at: string;
+            /** @enum {string} */
+            level: "info" | "warn";
+            message: string;
+        };
+        QualityCheck: {
+            code: string;
+            title: string;
+            /** @enum {string} */
+            severity: "info" | "warning" | "critical";
+            passed: boolean;
+            observed?: unknown;
+            expected?: unknown;
+            message?: string;
+            /** Format: date-time */
+            checkedAt: string;
+        };
     };
     responses: {
         /** @description Ошибка (RFC 9457) */
@@ -403,6 +547,7 @@ export interface components {
         };
     };
     parameters: {
+        SourceCode: string;
         UserId: string;
         TokenId: string;
     };
@@ -869,6 +1014,131 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditPage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Источники */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceInfo"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: components["parameters"]["SourceCode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSource"];
+            };
+        };
+        responses: {
+            /** @description Источник */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceInfo"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listRuns: {
+        parameters: {
+            query?: {
+                /** @description Время постановки последнего запуска предыдущей страницы */
+                before?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                code: components["parameters"]["SourceCode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Запуски от новых к старым */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    startRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: components["parameters"]["SourceCode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartRun"];
+            };
+        };
+        responses: {
+            /** @description Запуск поставлен в очередь */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                runId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Запуск */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunDetail"];
                 };
             };
             default: components["responses"]["Problem"];

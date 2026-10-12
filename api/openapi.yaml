@@ -18,6 +18,8 @@ tags:
     description: Текущий пользователь
   - name: admin
     description: Администрирование
+  - name: data
+    description: Источники данных и загрузки
 
 paths:
   /me:
@@ -347,6 +349,106 @@ paths:
               schema: { $ref: "#/components/schemas/AuditPage" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /data/sources:
+    get:
+      tags: [data]
+      operationId: listSources
+      summary: Источники данных со свежестью и последним запуском
+      x-permission: data.manage
+      responses:
+        "200":
+          description: Источники
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SourceInfo" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /data/sources/{code}:
+    patch:
+      tags: [data]
+      operationId: updateSource
+      summary: Включить или выключить загрузку по расписанию
+      x-permission: data.manage
+      parameters:
+        - $ref: "#/components/parameters/SourceCode"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateSource" }
+      responses:
+        "200":
+          description: Источник
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SourceInfo" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /data/sources/{code}/runs:
+    get:
+      tags: [data]
+      operationId: listRuns
+      summary: Запуски источника
+      x-permission: data.manage
+      parameters:
+        - $ref: "#/components/parameters/SourceCode"
+        - name: before
+          in: query
+          description: Время постановки последнего запуска предыдущей страницы
+          schema: { type: string, format: date-time }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: Запуски от новых к старым
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Run" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [data]
+      operationId: startRun
+      summary: Запустить загрузку
+      x-permission: data.manage
+      parameters:
+        - $ref: "#/components/parameters/SourceCode"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StartRun" }
+      responses:
+        "202":
+          description: Запуск поставлен в очередь
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Run" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /data/runs/{runId}:
+    get:
+      tags: [data]
+      operationId: getRun
+      summary: Запуск с журналом и проверками качества
+      x-permission: data.manage
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Запуск
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunDetail" }
+        default: { $ref: "#/components/responses/Problem" }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -358,6 +460,11 @@ components:
       scheme: bearer
 
   parameters:
+    SourceCode:
+      name: code
+      in: path
+      required: true
+      schema: { type: string, pattern: "^[a-z][a-z0-9_]*$", maxLength: 64 }
     UserId:
       name: userId
       in: path
@@ -593,3 +700,102 @@ components:
           type: array
           items: { $ref: "#/components/schemas/AuditRecord" }
         nextCursor: { type: string, format: uuid }
+
+    SourceInfo:
+      type: object
+      required: [code, title, publisher, url, license, attribution, domains, ruNetwork, enabled, freshness]
+      properties:
+        code: { type: string }
+        title: { type: string }
+        publisher: { type: string }
+        url: { type: string }
+        license: { type: string }
+        attribution: { type: string }
+        domains:
+          type: array
+          items: { type: string }
+        intervalSeconds:
+          type: integer
+          description: Период загрузки по расписанию; нет — только вручную
+        ruNetwork:
+          type: boolean
+          description: Российский государственный ресурс (прямое соединение)
+        enabled: { type: boolean }
+        lastRun: { $ref: "#/components/schemas/Run" }
+        lastSuccessAt: { type: string, format: date-time }
+        recordCount: { type: integer, format: int64 }
+        freshness:
+          type: string
+          enum: [fresh, stale, never]
+          description: fresh — загружено в срок; stale — пропущено больше двух периодов; never — ни одной успешной загрузки
+
+    UpdateSource:
+      type: object
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
+
+    StartRun:
+      type: object
+      properties:
+        force:
+          type: boolean
+          description: Загрузить, даже если снимок не изменился
+
+    Run:
+      type: object
+      required: [id, source, status, trigger, forced, queuedAt, stats]
+      properties:
+        id: { type: string, format: uuid }
+        source: { type: string }
+        status:
+          type: string
+          enum: [queued, running, succeeded, unchanged, failed]
+        trigger:
+          type: string
+          enum: [schedule, manual, cli]
+        forced: { type: boolean }
+        queuedAt: { type: string, format: date-time }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+        stats:
+          type: object
+          additionalProperties: { type: integer, format: int64 }
+        error: { type: string }
+
+    RunDetail:
+      type: object
+      required: [run, log, checks]
+      properties:
+        run: { $ref: "#/components/schemas/Run" }
+        log:
+          type: array
+          items: { $ref: "#/components/schemas/RunLogEntry" }
+        checks:
+          type: array
+          items: { $ref: "#/components/schemas/QualityCheck" }
+
+    RunLogEntry:
+      type: object
+      required: [at, level, message]
+      properties:
+        at: { type: string, format: date-time }
+        level:
+          type: string
+          enum: [info, warn]
+        message: { type: string }
+
+    QualityCheck:
+      type: object
+      required: [code, title, severity, passed, checkedAt]
+      properties:
+        code: { type: string }
+        title: { type: string }
+        severity:
+          type: string
+          enum: [info, warning, critical]
+        passed: { type: boolean }
+        observed: {}
+        expected: {}
+        message: { type: string }
+        checkedAt: { type: string, format: date-time }

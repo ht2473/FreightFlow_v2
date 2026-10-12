@@ -140,10 +140,10 @@ tasks:
       - npm test
 
   e2e:
-    desc: Сквозные тесты в браузере (нужны `task serve` и `task web:dev`)
+    desc: "Сквозные тесты в браузере (нужны `task serve` и `task web:dev`); файл: task e2e -- data.spec.ts"
     dir: web
     cmds:
-      - npx playwright test
+      - npx playwright test {{.CLI_ARGS}}
 
   vuln:
     desc: Проверка уязвимостей в зависимостях

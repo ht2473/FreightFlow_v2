@@ -599,6 +599,52 @@ func (s *Me) SetTotpEnabled(val bool) {
 	s.TotpEnabled = val
 }
 
+// NewOptBool returns new OptBool with value set to v.
+func NewOptBool(v bool) OptBool {
+	return OptBool{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBool is optional bool.
+type OptBool struct {
+	Value bool
+	Set   bool
+}
+
+// IsSet returns true if OptBool was set.
+func (o OptBool) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBool) Reset() {
+	var v bool
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBool) SetTo(v bool) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBool) Get() (v bool, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDateTime returns new OptDateTime with value set to v.
 func NewOptDateTime(v time.Time) OptDateTime {
 	return OptDateTime{
@@ -685,6 +731,98 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInt64 returns new OptInt64 with value set to v.
+func NewOptInt64(v int64) OptInt64 {
+	return OptInt64{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt64 is optional int64.
+type OptInt64 struct {
+	Value int64
+	Set   bool
+}
+
+// IsSet returns true if OptInt64 was set.
+func (o OptInt64) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt64) Reset() {
+	var v int64
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt64) SetTo(v int64) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt64) Get() (v int64, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptRun returns new OptRun with value set to v.
+func NewOptRun(v Run) OptRun {
+	return OptRun{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRun is optional Run.
+type OptRun struct {
+	Value Run
+	Set   bool
+}
+
+// IsSet returns true if OptRun was set.
+func (o OptRun) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRun) Reset() {
+	var v Run
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRun) SetTo(v Run) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRun) Get() (v Run, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRun) Or(d Run) Run {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -977,6 +1115,146 @@ func (s *ProblemStatusCode) SetResponse(val Problem) {
 	s.Response = val
 }
 
+// Ref: #/components/schemas/QualityCheck
+type QualityCheck struct {
+	Code      string               `json:"code"`
+	Title     string               `json:"title"`
+	Severity  QualityCheckSeverity `json:"severity"`
+	Passed    bool                 `json:"passed"`
+	Observed  jx.Raw               `json:"observed"`
+	Expected  jx.Raw               `json:"expected"`
+	Message   OptString            `json:"message"`
+	CheckedAt time.Time            `json:"checkedAt"`
+}
+
+// GetCode returns the value of Code.
+func (s *QualityCheck) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *QualityCheck) GetTitle() string {
+	return s.Title
+}
+
+// GetSeverity returns the value of Severity.
+func (s *QualityCheck) GetSeverity() QualityCheckSeverity {
+	return s.Severity
+}
+
+// GetPassed returns the value of Passed.
+func (s *QualityCheck) GetPassed() bool {
+	return s.Passed
+}
+
+// GetObserved returns the value of Observed.
+func (s *QualityCheck) GetObserved() jx.Raw {
+	return s.Observed
+}
+
+// GetExpected returns the value of Expected.
+func (s *QualityCheck) GetExpected() jx.Raw {
+	return s.Expected
+}
+
+// GetMessage returns the value of Message.
+func (s *QualityCheck) GetMessage() OptString {
+	return s.Message
+}
+
+// GetCheckedAt returns the value of CheckedAt.
+func (s *QualityCheck) GetCheckedAt() time.Time {
+	return s.CheckedAt
+}
+
+// SetCode sets the value of Code.
+func (s *QualityCheck) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *QualityCheck) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetSeverity sets the value of Severity.
+func (s *QualityCheck) SetSeverity(val QualityCheckSeverity) {
+	s.Severity = val
+}
+
+// SetPassed sets the value of Passed.
+func (s *QualityCheck) SetPassed(val bool) {
+	s.Passed = val
+}
+
+// SetObserved sets the value of Observed.
+func (s *QualityCheck) SetObserved(val jx.Raw) {
+	s.Observed = val
+}
+
+// SetExpected sets the value of Expected.
+func (s *QualityCheck) SetExpected(val jx.Raw) {
+	s.Expected = val
+}
+
+// SetMessage sets the value of Message.
+func (s *QualityCheck) SetMessage(val OptString) {
+	s.Message = val
+}
+
+// SetCheckedAt sets the value of CheckedAt.
+func (s *QualityCheck) SetCheckedAt(val time.Time) {
+	s.CheckedAt = val
+}
+
+type QualityCheckSeverity string
+
+const (
+	QualityCheckSeverityInfo     QualityCheckSeverity = "info"
+	QualityCheckSeverityWarning  QualityCheckSeverity = "warning"
+	QualityCheckSeverityCritical QualityCheckSeverity = "critical"
+)
+
+// AllValues returns all QualityCheckSeverity values.
+func (QualityCheckSeverity) AllValues() []QualityCheckSeverity {
+	return []QualityCheckSeverity{
+		QualityCheckSeverityInfo,
+		QualityCheckSeverityWarning,
+		QualityCheckSeverityCritical,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s QualityCheckSeverity) MarshalText() ([]byte, error) {
+	switch s {
+	case QualityCheckSeverityInfo:
+		return []byte(s), nil
+	case QualityCheckSeverityWarning:
+		return []byte(s), nil
+	case QualityCheckSeverityCritical:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *QualityCheckSeverity) UnmarshalText(data []byte) error {
+	switch QualityCheckSeverity(data) {
+	case QualityCheckSeverityInfo:
+		*s = QualityCheckSeverityInfo
+		return nil
+	case QualityCheckSeverityWarning:
+		*s = QualityCheckSeverityWarning
+		return nil
+	case QualityCheckSeverityCritical:
+		*s = QualityCheckSeverityCritical
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/RecoveryCodes
 type RecoveryCodes struct {
 	Codes []string `json:"codes"`
@@ -1057,6 +1335,356 @@ func (s *Role) SetPermissions(val []string) {
 	s.Permissions = val
 }
 
+// Ref: #/components/schemas/Run
+type Run struct {
+	ID         uuid.UUID   `json:"id"`
+	Source     string      `json:"source"`
+	Status     RunStatus   `json:"status"`
+	Trigger    RunTrigger  `json:"trigger"`
+	Forced     bool        `json:"forced"`
+	QueuedAt   time.Time   `json:"queuedAt"`
+	StartedAt  OptDateTime `json:"startedAt"`
+	FinishedAt OptDateTime `json:"finishedAt"`
+	Stats      RunStats    `json:"stats"`
+	Error      OptString   `json:"error"`
+}
+
+// GetID returns the value of ID.
+func (s *Run) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetSource returns the value of Source.
+func (s *Run) GetSource() string {
+	return s.Source
+}
+
+// GetStatus returns the value of Status.
+func (s *Run) GetStatus() RunStatus {
+	return s.Status
+}
+
+// GetTrigger returns the value of Trigger.
+func (s *Run) GetTrigger() RunTrigger {
+	return s.Trigger
+}
+
+// GetForced returns the value of Forced.
+func (s *Run) GetForced() bool {
+	return s.Forced
+}
+
+// GetQueuedAt returns the value of QueuedAt.
+func (s *Run) GetQueuedAt() time.Time {
+	return s.QueuedAt
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *Run) GetStartedAt() OptDateTime {
+	return s.StartedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *Run) GetFinishedAt() OptDateTime {
+	return s.FinishedAt
+}
+
+// GetStats returns the value of Stats.
+func (s *Run) GetStats() RunStats {
+	return s.Stats
+}
+
+// GetError returns the value of Error.
+func (s *Run) GetError() OptString {
+	return s.Error
+}
+
+// SetID sets the value of ID.
+func (s *Run) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetSource sets the value of Source.
+func (s *Run) SetSource(val string) {
+	s.Source = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Run) SetStatus(val RunStatus) {
+	s.Status = val
+}
+
+// SetTrigger sets the value of Trigger.
+func (s *Run) SetTrigger(val RunTrigger) {
+	s.Trigger = val
+}
+
+// SetForced sets the value of Forced.
+func (s *Run) SetForced(val bool) {
+	s.Forced = val
+}
+
+// SetQueuedAt sets the value of QueuedAt.
+func (s *Run) SetQueuedAt(val time.Time) {
+	s.QueuedAt = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *Run) SetStartedAt(val OptDateTime) {
+	s.StartedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *Run) SetFinishedAt(val OptDateTime) {
+	s.FinishedAt = val
+}
+
+// SetStats sets the value of Stats.
+func (s *Run) SetStats(val RunStats) {
+	s.Stats = val
+}
+
+// SetError sets the value of Error.
+func (s *Run) SetError(val OptString) {
+	s.Error = val
+}
+
+// Ref: #/components/schemas/RunDetail
+type RunDetail struct {
+	Run    Run            `json:"run"`
+	Log    []RunLogEntry  `json:"log"`
+	Checks []QualityCheck `json:"checks"`
+}
+
+// GetRun returns the value of Run.
+func (s *RunDetail) GetRun() Run {
+	return s.Run
+}
+
+// GetLog returns the value of Log.
+func (s *RunDetail) GetLog() []RunLogEntry {
+	return s.Log
+}
+
+// GetChecks returns the value of Checks.
+func (s *RunDetail) GetChecks() []QualityCheck {
+	return s.Checks
+}
+
+// SetRun sets the value of Run.
+func (s *RunDetail) SetRun(val Run) {
+	s.Run = val
+}
+
+// SetLog sets the value of Log.
+func (s *RunDetail) SetLog(val []RunLogEntry) {
+	s.Log = val
+}
+
+// SetChecks sets the value of Checks.
+func (s *RunDetail) SetChecks(val []QualityCheck) {
+	s.Checks = val
+}
+
+// Ref: #/components/schemas/RunLogEntry
+type RunLogEntry struct {
+	At      time.Time        `json:"at"`
+	Level   RunLogEntryLevel `json:"level"`
+	Message string           `json:"message"`
+}
+
+// GetAt returns the value of At.
+func (s *RunLogEntry) GetAt() time.Time {
+	return s.At
+}
+
+// GetLevel returns the value of Level.
+func (s *RunLogEntry) GetLevel() RunLogEntryLevel {
+	return s.Level
+}
+
+// GetMessage returns the value of Message.
+func (s *RunLogEntry) GetMessage() string {
+	return s.Message
+}
+
+// SetAt sets the value of At.
+func (s *RunLogEntry) SetAt(val time.Time) {
+	s.At = val
+}
+
+// SetLevel sets the value of Level.
+func (s *RunLogEntry) SetLevel(val RunLogEntryLevel) {
+	s.Level = val
+}
+
+// SetMessage sets the value of Message.
+func (s *RunLogEntry) SetMessage(val string) {
+	s.Message = val
+}
+
+type RunLogEntryLevel string
+
+const (
+	RunLogEntryLevelInfo RunLogEntryLevel = "info"
+	RunLogEntryLevelWarn RunLogEntryLevel = "warn"
+)
+
+// AllValues returns all RunLogEntryLevel values.
+func (RunLogEntryLevel) AllValues() []RunLogEntryLevel {
+	return []RunLogEntryLevel{
+		RunLogEntryLevelInfo,
+		RunLogEntryLevelWarn,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RunLogEntryLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case RunLogEntryLevelInfo:
+		return []byte(s), nil
+	case RunLogEntryLevelWarn:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RunLogEntryLevel) UnmarshalText(data []byte) error {
+	switch RunLogEntryLevel(data) {
+	case RunLogEntryLevelInfo:
+		*s = RunLogEntryLevelInfo
+		return nil
+	case RunLogEntryLevelWarn:
+		*s = RunLogEntryLevelWarn
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type RunStats map[string]int64
+
+func (s *RunStats) init() RunStats {
+	m := *s
+	if m == nil {
+		m = map[string]int64{}
+		*s = m
+	}
+	return m
+}
+
+type RunStatus string
+
+const (
+	RunStatusQueued    RunStatus = "queued"
+	RunStatusRunning   RunStatus = "running"
+	RunStatusSucceeded RunStatus = "succeeded"
+	RunStatusUnchanged RunStatus = "unchanged"
+	RunStatusFailed    RunStatus = "failed"
+)
+
+// AllValues returns all RunStatus values.
+func (RunStatus) AllValues() []RunStatus {
+	return []RunStatus{
+		RunStatusQueued,
+		RunStatusRunning,
+		RunStatusSucceeded,
+		RunStatusUnchanged,
+		RunStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RunStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case RunStatusQueued:
+		return []byte(s), nil
+	case RunStatusRunning:
+		return []byte(s), nil
+	case RunStatusSucceeded:
+		return []byte(s), nil
+	case RunStatusUnchanged:
+		return []byte(s), nil
+	case RunStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RunStatus) UnmarshalText(data []byte) error {
+	switch RunStatus(data) {
+	case RunStatusQueued:
+		*s = RunStatusQueued
+		return nil
+	case RunStatusRunning:
+		*s = RunStatusRunning
+		return nil
+	case RunStatusSucceeded:
+		*s = RunStatusSucceeded
+		return nil
+	case RunStatusUnchanged:
+		*s = RunStatusUnchanged
+		return nil
+	case RunStatusFailed:
+		*s = RunStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type RunTrigger string
+
+const (
+	RunTriggerSchedule RunTrigger = "schedule"
+	RunTriggerManual   RunTrigger = "manual"
+	RunTriggerCli      RunTrigger = "cli"
+)
+
+// AllValues returns all RunTrigger values.
+func (RunTrigger) AllValues() []RunTrigger {
+	return []RunTrigger{
+		RunTriggerSchedule,
+		RunTriggerManual,
+		RunTriggerCli,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RunTrigger) MarshalText() ([]byte, error) {
+	switch s {
+	case RunTriggerSchedule:
+		return []byte(s), nil
+	case RunTriggerManual:
+		return []byte(s), nil
+	case RunTriggerCli:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RunTrigger) UnmarshalText(data []byte) error {
+	switch RunTrigger(data) {
+	case RunTriggerSchedule:
+		*s = RunTriggerSchedule
+		return nil
+	case RunTriggerManual:
+		*s = RunTriggerManual
+		return nil
+	case RunTriggerCli:
+		*s = RunTriggerCli
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/Settings
 type Settings struct {
 	Theme SettingsTheme `json:"theme"`
@@ -1120,6 +1748,234 @@ func (s *SettingsTheme) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/SourceInfo
+type SourceInfo struct {
+	Code        string   `json:"code"`
+	Title       string   `json:"title"`
+	Publisher   string   `json:"publisher"`
+	URL         string   `json:"url"`
+	License     string   `json:"license"`
+	Attribution string   `json:"attribution"`
+	Domains     []string `json:"domains"`
+	// Период загрузки по расписанию; нет — только вручную.
+	IntervalSeconds OptInt `json:"intervalSeconds"`
+	// Российский государственный ресурс (прямое соединение).
+	RuNetwork     bool        `json:"ruNetwork"`
+	Enabled       bool        `json:"enabled"`
+	LastRun       OptRun      `json:"lastRun"`
+	LastSuccessAt OptDateTime `json:"lastSuccessAt"`
+	RecordCount   OptInt64    `json:"recordCount"`
+	// Fresh — загружено в срок; stale — пропущено больше двух
+	// периодов; never — ни одной успешной загрузки.
+	Freshness SourceInfoFreshness `json:"freshness"`
+}
+
+// GetCode returns the value of Code.
+func (s *SourceInfo) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *SourceInfo) GetTitle() string {
+	return s.Title
+}
+
+// GetPublisher returns the value of Publisher.
+func (s *SourceInfo) GetPublisher() string {
+	return s.Publisher
+}
+
+// GetURL returns the value of URL.
+func (s *SourceInfo) GetURL() string {
+	return s.URL
+}
+
+// GetLicense returns the value of License.
+func (s *SourceInfo) GetLicense() string {
+	return s.License
+}
+
+// GetAttribution returns the value of Attribution.
+func (s *SourceInfo) GetAttribution() string {
+	return s.Attribution
+}
+
+// GetDomains returns the value of Domains.
+func (s *SourceInfo) GetDomains() []string {
+	return s.Domains
+}
+
+// GetIntervalSeconds returns the value of IntervalSeconds.
+func (s *SourceInfo) GetIntervalSeconds() OptInt {
+	return s.IntervalSeconds
+}
+
+// GetRuNetwork returns the value of RuNetwork.
+func (s *SourceInfo) GetRuNetwork() bool {
+	return s.RuNetwork
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *SourceInfo) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetLastRun returns the value of LastRun.
+func (s *SourceInfo) GetLastRun() OptRun {
+	return s.LastRun
+}
+
+// GetLastSuccessAt returns the value of LastSuccessAt.
+func (s *SourceInfo) GetLastSuccessAt() OptDateTime {
+	return s.LastSuccessAt
+}
+
+// GetRecordCount returns the value of RecordCount.
+func (s *SourceInfo) GetRecordCount() OptInt64 {
+	return s.RecordCount
+}
+
+// GetFreshness returns the value of Freshness.
+func (s *SourceInfo) GetFreshness() SourceInfoFreshness {
+	return s.Freshness
+}
+
+// SetCode sets the value of Code.
+func (s *SourceInfo) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *SourceInfo) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetPublisher sets the value of Publisher.
+func (s *SourceInfo) SetPublisher(val string) {
+	s.Publisher = val
+}
+
+// SetURL sets the value of URL.
+func (s *SourceInfo) SetURL(val string) {
+	s.URL = val
+}
+
+// SetLicense sets the value of License.
+func (s *SourceInfo) SetLicense(val string) {
+	s.License = val
+}
+
+// SetAttribution sets the value of Attribution.
+func (s *SourceInfo) SetAttribution(val string) {
+	s.Attribution = val
+}
+
+// SetDomains sets the value of Domains.
+func (s *SourceInfo) SetDomains(val []string) {
+	s.Domains = val
+}
+
+// SetIntervalSeconds sets the value of IntervalSeconds.
+func (s *SourceInfo) SetIntervalSeconds(val OptInt) {
+	s.IntervalSeconds = val
+}
+
+// SetRuNetwork sets the value of RuNetwork.
+func (s *SourceInfo) SetRuNetwork(val bool) {
+	s.RuNetwork = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *SourceInfo) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetLastRun sets the value of LastRun.
+func (s *SourceInfo) SetLastRun(val OptRun) {
+	s.LastRun = val
+}
+
+// SetLastSuccessAt sets the value of LastSuccessAt.
+func (s *SourceInfo) SetLastSuccessAt(val OptDateTime) {
+	s.LastSuccessAt = val
+}
+
+// SetRecordCount sets the value of RecordCount.
+func (s *SourceInfo) SetRecordCount(val OptInt64) {
+	s.RecordCount = val
+}
+
+// SetFreshness sets the value of Freshness.
+func (s *SourceInfo) SetFreshness(val SourceInfoFreshness) {
+	s.Freshness = val
+}
+
+// Fresh — загружено в срок; stale — пропущено больше двух
+// периодов; never — ни одной успешной загрузки.
+type SourceInfoFreshness string
+
+const (
+	SourceInfoFreshnessFresh SourceInfoFreshness = "fresh"
+	SourceInfoFreshnessStale SourceInfoFreshness = "stale"
+	SourceInfoFreshnessNever SourceInfoFreshness = "never"
+)
+
+// AllValues returns all SourceInfoFreshness values.
+func (SourceInfoFreshness) AllValues() []SourceInfoFreshness {
+	return []SourceInfoFreshness{
+		SourceInfoFreshnessFresh,
+		SourceInfoFreshnessStale,
+		SourceInfoFreshnessNever,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SourceInfoFreshness) MarshalText() ([]byte, error) {
+	switch s {
+	case SourceInfoFreshnessFresh:
+		return []byte(s), nil
+	case SourceInfoFreshnessStale:
+		return []byte(s), nil
+	case SourceInfoFreshnessNever:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SourceInfoFreshness) UnmarshalText(data []byte) error {
+	switch SourceInfoFreshness(data) {
+	case SourceInfoFreshnessFresh:
+		*s = SourceInfoFreshnessFresh
+		return nil
+	case SourceInfoFreshnessStale:
+		*s = SourceInfoFreshnessStale
+		return nil
+	case SourceInfoFreshnessNever:
+		*s = SourceInfoFreshnessNever
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/StartRun
+type StartRun struct {
+	// Загрузить, даже если снимок не изменился.
+	Force OptBool `json:"force"`
+}
+
+// GetForce returns the value of Force.
+func (s *StartRun) GetForce() OptBool {
+	return s.Force
+}
+
+// SetForce sets the value of Force.
+func (s *StartRun) SetForce(val OptBool) {
+	s.Force = val
+}
+
 // Ref: #/components/schemas/TotpCode
 type TotpCode struct {
 	Code string `json:"code"`
@@ -1174,6 +2030,21 @@ func (s *UpdateProfile) GetName() string {
 // SetName sets the value of Name.
 func (s *UpdateProfile) SetName(val string) {
 	s.Name = val
+}
+
+// Ref: #/components/schemas/UpdateSource
+type UpdateSource struct {
+	Enabled bool `json:"enabled"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *UpdateSource) GetEnabled() bool {
+	return s.Enabled
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *UpdateSource) SetEnabled(val bool) {
+	s.Enabled = val
 }
 
 // Ref: #/components/schemas/UpdateUser

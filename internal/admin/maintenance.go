@@ -67,5 +67,5 @@ func (w *CleanupWorker) Work(ctx context.Context, _ *river.Job[CleanupArgs]) err
 // RegisterMaintenance добавляет задачи обслуживания в реестр.
 func RegisterMaintenance(reg *jobs.Registry, pool *pgxpool.Pool, tokens TokenCleaner, log *slog.Logger) {
 	jobs.Register(reg, &CleanupWorker{Pool: pool, Tokens: tokens, Log: log})
-	reg.Every(time.Hour, CleanupArgs{}, nil, true)
+	reg.Every(CleanupArgs{}.Kind(), time.Hour, CleanupArgs{}, nil, true)
 }

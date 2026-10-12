@@ -56,6 +56,12 @@ type Handler interface {
 	//
 	// GET /me
 	GetMe(ctx context.Context) (*Me, error)
+	// GetRun implements getRun operation.
+	//
+	// Запуск с журналом и проверками качества.
+	//
+	// GET /data/runs/{runId}
+	GetRun(ctx context.Context, params GetRunParams) (*RunDetail, error)
 	// GetSettings implements getSettings operation.
 	//
 	// Личные настройки.
@@ -86,6 +92,18 @@ type Handler interface {
 	//
 	// GET /admin/roles
 	ListRoles(ctx context.Context) ([]Role, error)
+	// ListRuns implements listRuns operation.
+	//
+	// Запуски источника.
+	//
+	// GET /data/sources/{code}/runs
+	ListRuns(ctx context.Context, params ListRunsParams) ([]Run, error)
+	// ListSources implements listSources operation.
+	//
+	// Источники данных со свежестью и последним запуском.
+	//
+	// GET /data/sources
+	ListSources(ctx context.Context) ([]SourceInfo, error)
 	// ListTokens implements listTokens operation.
 	//
 	// Токены API пользователя.
@@ -110,6 +128,12 @@ type Handler interface {
 	//
 	// DELETE /me/tokens/{tokenId}
 	RevokeToken(ctx context.Context, params RevokeTokenParams) error
+	// StartRun implements startRun operation.
+	//
+	// Запустить загрузку.
+	//
+	// POST /data/sources/{code}/runs
+	StartRun(ctx context.Context, req *StartRun, params StartRunParams) (*Run, error)
 	// UpdateMe implements updateMe operation.
 	//
 	// Изменить имя.
@@ -122,6 +146,12 @@ type Handler interface {
 	//
 	// PUT /me/settings
 	UpdateSettings(ctx context.Context, req *Settings) (*Settings, error)
+	// UpdateSource implements updateSource operation.
+	//
+	// Включить или выключить загрузку по расписанию.
+	//
+	// PATCH /data/sources/{code}
+	UpdateSource(ctx context.Context, req *UpdateSource, params UpdateSourceParams) (*SourceInfo, error)
 	// UpdateUser implements updateUser operation.
 	//
 	// Изменить имя, роли или статус.

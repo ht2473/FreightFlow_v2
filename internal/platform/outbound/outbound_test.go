@@ -15,7 +15,7 @@ import (
 func newTestClient(t *testing.T, srv *httptest.Server, allowPrivate bool) (*Client, *[]time.Duration) {
 	t.Helper()
 	u, _ := url.Parse(srv.URL)
-	c, err := New(Config{Hosts: []string{u.Hostname()}, Direct: true, AllowPrivate: allowPrivate, Retries: 3})
+	c, err := New(t.Context(), Config{Hosts: []string{u.Hostname()}, Direct: true, AllowPrivate: allowPrivate, Retries: 3})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -13,6 +13,8 @@ import (
 
 	spec "freightflow/api"
 	"freightflow/internal/identity"
+	"freightflow/internal/ingest"
+	"freightflow/internal/platform/blob"
 	"freightflow/internal/platform/dbtest"
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/mail"
@@ -71,8 +73,17 @@ func newFixture(t *testing.T) *fixture {
 	}
 	mailer := &memoryMailer{}
 	sessions := session.New(pool, false)
+	blobs, err := blob.Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = blobs.Close() })
+	ing, err := ingest.NewService(ingest.Deps{Pool: pool, Blobs: blobs, Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	if err != nil {
+		t.Fatal(err)
+	}
 	h, err := New(Deps{
-		Identity: ids, Sessions: sessions, Mailer: mailer, BaseURL: "http://test.local",
+		Identity: ids, Ingest: ing, Sessions: sessions, Mailer: mailer, BaseURL: "http://test.local",
 		Log: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
 	if err != nil {
@@ -171,6 +182,7 @@ func TestAPIAuthorization(t *testing.T) {
 	analyst := f.token(t, "a@example.com", identity.RoleAnalyst)
 	admin := f.token(t, "root@example.com", identity.RoleAdmin)
 	narrow := f.token(t, "n@example.com", identity.RoleAdmin, identity.PermMapView)
+	steward := f.token(t, "s@example.com", identity.RoleDataSteward)
 
 	cases := []struct {
 		name   string
@@ -190,6 +202,11 @@ func TestAPIAuthorization(t *testing.T) {
 			`{"email":"bad","name":"X","password":"достаточно длинный","roles":["viewer"]}`, http.StatusUnprocessableEntity,
 		},
 		{"malformed body", http.MethodPost, "/api/v1/admin/users", admin, `{`, http.StatusBadRequest},
+		{"analyst cannot manage data", http.MethodGet, "/api/v1/data/sources", analyst, "", http.StatusForbidden},
+		{"steward lists sources", http.MethodGet, "/api/v1/data/sources", steward, "", http.StatusOK},
+		{"unknown source", http.MethodPost, "/api/v1/data/sources/nope/runs", steward, `{}`, http.StatusNotFound},
+		{"invalid source code", http.MethodGet, "/api/v1/data/sources/Bad-Code/runs", steward, "", http.StatusBadRequest},
+		{"unknown run", http.MethodGet, "/api/v1/data/runs/01a13230-0000-7000-8000-000000000000", steward, "", http.StatusNotFound},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

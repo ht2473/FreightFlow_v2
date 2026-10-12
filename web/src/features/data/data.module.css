@@ -1,0 +1,150 @@
+.pad {
+  padding: 16px 20px;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.runs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.run {
+  border-bottom: 1px solid var(--line);
+}
+
+.runHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.runHead:focus-visible {
+  outline: 2px solid var(--acc-ring);
+  border-radius: var(--r1);
+}
+
+.chevron {
+  flex: none;
+  color: var(--tx2);
+  transition: transform 0.15s;
+}
+
+.chevronOpen {
+  composes: chevron;
+  transform: rotate(90deg);
+}
+
+.runTime {
+  font-variant-numeric: tabular-nums;
+}
+
+.runBody {
+  padding: 0 0 14px 23px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+}
+
+.stats dt {
+  color: var(--tx2);
+  font-size: 12px;
+}
+
+.stats dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.subhead {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tx2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.checks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.log {
+  margin: 0;
+  padding: 8px 10px;
+  list-style: none;
+  border-radius: var(--r1);
+  background: var(--n2);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.logWarn {
+  color: var(--warn);
+}
+
+.logTime {
+  color: var(--tx2);
+  margin-right: 8px;
+}
+
+.about {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.about dt {
+  color: var(--tx2);
+}
+
+.about dd {
+  margin: 0;
+  min-width: 0;
+  word-break: break-word;
+}

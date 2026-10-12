@@ -9,6 +9,7 @@ import (
 
 	"freightflow/internal/api/gen"
 	"freightflow/internal/identity"
+	"freightflow/internal/ingest"
 	"freightflow/internal/platform/problem"
 )
 
@@ -64,6 +65,10 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 		return problem.New(http.StatusConflict, "email_taken", "Пользователь с таким адресом уже существует")
 	case errors.Is(err, identity.ErrLastAdmin):
 		return problem.New(http.StatusConflict, "last_admin", "Нельзя лишить прав последнего администратора")
+	case errors.Is(err, ingest.ErrUnknownSource), errors.Is(err, ingest.ErrRunNotFound):
+		return problem.NotFound
+	case errors.Is(err, ingest.ErrRunActive):
+		return problem.New(http.StatusConflict, "run_active", "Загрузка этого источника уже выполняется")
 	case errors.Is(err, identity.ErrTOTPEnabled):
 		return problem.New(http.StatusConflict, "totp_enabled", "Двухфакторная защита уже включена")
 	case errors.Is(err, identity.ErrInvalidCode):

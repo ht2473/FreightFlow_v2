@@ -28,6 +28,8 @@ const actionTitles: Record<string, string> = {
   "user.set_roles": "Изменение ролей",
   "user.set_status": "Изменение статуса",
   "user.update_profile": "Изменение профиля",
+  "data.run_started": "Запуск загрузки",
+  "data.source_updated": "Настройка источника",
 };
 
 export function actionTitle(code: string): string {

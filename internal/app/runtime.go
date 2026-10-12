@@ -12,6 +12,8 @@ import (
 
 	"freightflow/internal/admin"
 	"freightflow/internal/identity"
+	"freightflow/internal/ingest"
+	"freightflow/internal/platform/blob"
 	"freightflow/internal/platform/events"
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/jobs"
@@ -20,9 +22,10 @@ import (
 
 // runtime — общие службы долгоживущего процесса (app, worker).
 type runtime struct {
-	tel  *telemetry.Telemetry
-	pool *pgxpool.Pool
-	bus  *events.Bus
+	tel   *telemetry.Telemetry
+	pool  *pgxpool.Pool
+	bus   *events.Bus
+	blobs *blob.Store
 }
 
 // startRuntime готовит каталог данных, телеметрию и базу. Телеметрия создаётся до пула:
@@ -43,10 +46,17 @@ func startRuntime(ctx context.Context, env *Env, service string) (*runtime, erro
 		_ = tel.Shutdown(context.WithoutCancel(ctx))
 		return nil, err
 	}
-	return &runtime{tel: tel, pool: pool, bus: events.NewBus(env.Log)}, nil
+	blobs, err := openBlobs(env)
+	if err != nil {
+		pool.Close()
+		_ = tel.Shutdown(context.WithoutCancel(ctx))
+		return nil, err
+	}
+	return &runtime{tel: tel, pool: pool, bus: events.NewBus(env.Log), blobs: blobs}, nil
 }
 
 func (rt *runtime) close(ctx context.Context) {
+	_ = rt.blobs.Close()
 	rt.pool.Close()
 	sctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
@@ -60,10 +70,36 @@ func (rt *runtime) serveMetrics(ctx context.Context, env *Env, addr string) erro
 	return httpx.Serve(ctx, env.Log, "metrics", addr, mux)
 }
 
+// modules — сервисы модулей, общие для app и worker.
+type modules struct {
+	identity *identity.Service
+	ingest   *ingest.Service
+	inserter *jobs.Client
+}
+
+// newModules создаёт сервисы модулей. Постановка задач — через отдельный клиент очереди:
+// исполняющему клиенту нужен реестр, а реестру — сервисы.
+func newModules(ctx context.Context, env *Env, rt *runtime) (*modules, error) {
+	ids, err := newIdentity(ctx, env, rt.pool)
+	if err != nil {
+		return nil, err
+	}
+	inserter, err := jobs.NewInserter(rt.pool, env.Log)
+	if err != nil {
+		return nil, err
+	}
+	ing, err := newIngest(ctx, env, rt, inserter)
+	if err != nil {
+		return nil, err
+	}
+	return &modules{identity: ids, ingest: ing, inserter: inserter}, nil
+}
+
 // registry собирает фоновые задачи модулей.
-func registry(env *Env, pool *pgxpool.Pool, ids *identity.Service) *jobs.Registry {
+func (m *modules) registry(env *Env, pool *pgxpool.Pool) *jobs.Registry {
 	reg := jobs.NewRegistry()
-	admin.RegisterMaintenance(reg, pool, ids, env.Log)
+	admin.RegisterMaintenance(reg, pool, m.identity, env.Log)
+	ingest.Register(reg, m.ingest)
 	return reg
 }
 
@@ -94,7 +130,7 @@ func runWorker(ctx context.Context, env *Env, _ []string) error {
 		return err
 	}
 	defer rt.close(ctx)
-	ids, err := newIdentity(ctx, env, rt.pool)
+	mods, err := newModules(ctx, env, rt)
 	if err != nil {
 		return err
 	}
@@ -102,6 +138,6 @@ func runWorker(ctx context.Context, env *Env, _ []string) error {
 	g, gctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return rt.serveMetrics(gctx, env, env.Config.WorkerMetricsAddr) })
 	g.Go(func() error { return events.Listen(gctx, rt.pool, rt.bus, env.Log) })
-	g.Go(func() error { return rt.runWorkers(gctx, env, registry(env, rt.pool, ids)) })
+	g.Go(func() error { return rt.runWorkers(gctx, env, mods.registry(env, rt.pool)) })
 	return g.Wait()
 }

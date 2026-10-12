@@ -17,6 +17,7 @@ import (
 	spec "freightflow/api"
 	"freightflow/internal/api/gen"
 	"freightflow/internal/identity"
+	"freightflow/internal/ingest"
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/mail"
 	"freightflow/internal/platform/session"
@@ -30,6 +31,7 @@ type Mailer interface {
 // Deps — зависимости API.
 type Deps struct {
 	Identity *identity.Service
+	Ingest   *ingest.Service
 	Sessions *session.Manager
 	Mailer   Mailer
 	BaseURL  string
@@ -42,6 +44,7 @@ type Deps struct {
 // Server реализует обработчики и проверку безопасности ogen.
 type Server struct {
 	identity *identity.Service
+	ingest   *ingest.Service
 	sessions *session.Manager
 	mailer   Mailer
 	baseURL  string
@@ -58,7 +61,7 @@ func New(d Deps) (http.Handler, error) {
 		return nil, err
 	}
 	s := &Server{
-		identity: d.Identity, sessions: d.Sessions, mailer: d.Mailer,
+		identity: d.Identity, ingest: d.Ingest, sessions: d.Sessions, mailer: d.Mailer,
 		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops),
 	}
 	opts := []gen.ServerOption{
