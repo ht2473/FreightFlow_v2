@@ -76,9 +76,17 @@ tasks:
       - golangci-lint run ./...
 
   test:
-    desc: Тесты Go
+    desc: Тесты Go (интеграционные — на базе из `task up`)
+    env:
+      FF_TEST_REQUIRE_DB: "1"
     cmds:
       - go test ./...
+
+  gen:
+    desc: Генерация кода (sqlc)
+    dir: db
+    cmds:
+      - sqlc generate
 
   vuln:
     desc: Проверка уязвимостей в зависимостях
