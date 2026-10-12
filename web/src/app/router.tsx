@@ -1,4 +1,5 @@
 import { createRootRoute, createRoute, createRouter, lazyRouteComponent, redirect } from "@tanstack/react-router";
+import { ErrorPage, PendingPage } from "./ErrorPage";
 import { NotFound } from "./NotFound";
 import { SectionPage } from "./SectionPage";
 import { sections } from "./sections";
@@ -64,11 +65,24 @@ const routeTree = rootRoute.addChildren([
     path: "/admin/audit",
     component: lazyRouteComponent(() => import("@/features/admin/AuditPage"), "AuditPage"),
   }),
+  // Витрина компонентов — только в сборке для разработки.
+  ...(import.meta.env.DEV
+    ? [
+        createRoute({
+          getParentRoute: () => rootRoute,
+          path: "/dev/ui",
+          component: lazyRouteComponent(() => import("@/features/dev/UiGallery"), "UiGallery"),
+        }),
+      ]
+    : []),
 ]);
 
 export const router = createRouter({
   routeTree,
   defaultPreload: "intent",
+  defaultErrorComponent: ErrorPage,
+  defaultPendingComponent: PendingPage,
+  defaultPendingMs: 300,
   scrollRestoration: true,
 });
 

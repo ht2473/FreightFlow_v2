@@ -1,0 +1,118 @@
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(16, 20, 28, 0.18);
+}
+
+.drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(var(--drawer-w), 100vw);
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--sh2);
+  outline: none;
+}
+
+.drawer[data-entering] {
+  animation: drawerIn 0.2s ease-out;
+}
+
+.drawer[data-exiting] {
+  animation: drawerIn 0.15s ease-in reverse;
+}
+
+@keyframes drawerIn {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+.drawerDialog {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 16px 12px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.drawerTitles {
+  flex: 1;
+  min-width: 0;
+}
+
+.drawerTitle {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.3px;
+}
+
+.drawerSubtitle {
+  margin-top: 4px;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.drawerBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 20px 20px;
+}
+
+.drawerFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+}
+
+.tooltip {
+  max-width: 280px;
+  padding: 6px 9px;
+  border-radius: var(--r1);
+  background: var(--n12);
+  color: var(--n1);
+  font-size: 12.5px;
+  line-height: 1.4;
+  box-shadow: var(--sh2);
+}
+
+.tooltip[data-entering] {
+  animation: tooltipIn 0.12s ease-out;
+}
+
+@keyframes tooltipIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.tooltipArrow svg {
+  display: block;
+  fill: var(--n12);
+}
+
+.tooltip[data-placement="bottom"] .tooltipArrow svg {
+  transform: rotate(180deg);
+}
+
+.tooltip[data-placement="left"] .tooltipArrow svg {
+  transform: rotate(-90deg);
+}
+
+.tooltip[data-placement="right"] .tooltipArrow svg {
+  transform: rotate(90deg);
+}

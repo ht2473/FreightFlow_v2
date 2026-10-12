@@ -1,0 +1,83 @@
+.tile {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  color: var(--tx2);
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.info {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--tx2);
+  cursor: help;
+}
+
+.info[data-focus-visible] {
+  outline: 2px solid var(--acc-ring);
+}
+
+.value {
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -1px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  margin-left: 4px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--tx2);
+}
+
+.delta {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.better {
+  color: var(--ok);
+}
+
+.worse {
+  color: var(--crit);
+}
+
+.flat {
+  color: var(--tx2);
+}
+
+.source {
+  margin-top: 4px;
+  color: var(--tx2);
+  font-size: 11.5px;
+}

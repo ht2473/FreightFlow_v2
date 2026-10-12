@@ -17,7 +17,8 @@ body {
   background: var(--canvas);
   color: var(--tx);
   font: 14px / 1.5 var(--font);
-  font-feature-settings: "tnum", "cv11";
+  /* cv11 — однопалочная «а»; табличные цифры включаются там, где числа стоят в колонках. */
+  font-feature-settings: "cv11";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -102,4 +103,10 @@ h3 {
     /* biome-ignore lint/complexity/noImportantStyles: то же */
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Табличные цифры: числа в колонках и показателях выравниваются по разрядам. */
+table,
+.num {
+  font-variant-numeric: tabular-nums;
 }

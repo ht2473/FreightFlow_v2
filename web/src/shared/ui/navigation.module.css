@@ -1,0 +1,135 @@
+.tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.tabList {
+  display: flex;
+  gap: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  position: relative;
+  padding: 9px 0 10px;
+  color: var(--tx2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.tab[data-hovered] {
+  color: var(--tx);
+}
+
+.tab[data-selected] {
+  color: var(--tx);
+}
+
+.tab[data-selected]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--acc);
+}
+
+.tab[data-focus-visible] {
+  outline: 2px solid var(--acc-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.tabPanel {
+  padding-top: 16px;
+  outline: none;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  border-radius: var(--r2);
+  background: var(--n3);
+}
+
+.segment {
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r1);
+  background: none;
+  color: var(--tx2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.segment[data-hovered] {
+  color: var(--tx);
+}
+
+.segment[data-selected] {
+  background: var(--panel);
+  color: var(--tx);
+  box-shadow: var(--sh1);
+}
+
+.segment[data-focus-visible] {
+  outline: 2px solid var(--acc-ring);
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--tx2);
+  min-width: 0;
+}
+
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.crumb:not(:last-child)::after {
+  content: "/";
+  color: var(--n8);
+}
+
+.crumb:last-child {
+  color: var(--tx);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crumb a {
+  color: inherit;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+}
+
+.range {
+  margin-right: 8px;
+  color: var(--tx2);
+  font-size: 12.5px;
+}

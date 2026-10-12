@@ -1,0 +1,139 @@
+.numberGroup {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  border: 1px solid var(--line2);
+  border-radius: var(--r1);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.numberGroup[data-focus-within] {
+  outline: 2px solid var(--acc-ring);
+  border-color: var(--acc);
+}
+
+.numberGroup[data-invalid] {
+  border-color: var(--crit);
+}
+
+.numberInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 10px;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--tx);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  padding-right: 8px;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.stepper {
+  width: 28px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: none;
+  color: var(--tx2);
+  cursor: pointer;
+}
+
+.stepper[data-hovered] {
+  background: var(--hover);
+  color: var(--tx);
+}
+
+.stepper[data-disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.comboGroup {
+  position: relative;
+}
+
+.comboInput {
+  padding-right: 32px;
+}
+
+.comboButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--tx2);
+  cursor: pointer;
+}
+
+.empty {
+  padding: 8px 10px;
+  color: var(--tx2);
+}
+
+.radioGroup {
+  border: 0;
+}
+
+.radios {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radiosRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.radioDot {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border: 1px solid var(--n8);
+  border-radius: 50%;
+  background: var(--panel);
+}
+
+.radio[data-selected] .radioDot {
+  border: 5px solid var(--acc);
+}
+
+.radio[data-focus-visible] .radioDot {
+  outline: 2px solid var(--acc-ring);
+  outline-offset: 2px;
+}
+
+.radio[data-disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.radioHint {
+  display: block;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
