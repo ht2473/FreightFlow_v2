@@ -18,7 +18,9 @@ type Config struct {
 	HTTPAddr    string `env:"FF_HTTP_ADDR" envDefault:":8080"`
 	BaseURL     string `env:"FF_BASE_URL" envDefault:"http://localhost:8080"`
 	MetricsAddr string `env:"FF_METRICS_ADDR" envDefault:"127.0.0.1:9090"`
-	DevViteURL  string `env:"FF_DEV_VITE_URL" envDefault:"http://localhost:5173"`
+	// WorkerMetricsAddr — метрики отдельного процесса worker.
+	WorkerMetricsAddr string `env:"FF_WORKER_METRICS_ADDR" envDefault:"127.0.0.1:9091"`
+	DevViteURL        string `env:"FF_DEV_VITE_URL" envDefault:"http://localhost:5173"`
 
 	DatabaseURL string `env:"FF_DATABASE_URL,required"`
 	DataDir     string `env:"FF_DATA_DIR" envDefault:"./var"`
@@ -35,9 +37,10 @@ type Config struct {
 	ValhallaURL string `env:"FF_VALHALLA_URL" envDefault:"http://localhost:8002"`
 	PDFCDPURL   string `env:"FF_PDF_CDP_URL" envDefault:"ws://localhost:9222"`
 
-	LogLevel     string `env:"FF_LOG_LEVEL" envDefault:"info"`
-	LogFormat    string `env:"FF_LOG_FORMAT" envDefault:"text"`
-	OTLPEndpoint string `env:"FF_OTLP_ENDPOINT"`
+	LogLevel     string  `env:"FF_LOG_LEVEL" envDefault:"info"`
+	LogFormat    string  `env:"FF_LOG_FORMAT" envDefault:"text"`
+	OTLPEndpoint string  `env:"FF_OTLP_ENDPOINT"`
+	TraceRatio   float64 `env:"FF_TRACE_RATIO" envDefault:"1"`
 }
 
 // SMTP — параметры почтового сервера.

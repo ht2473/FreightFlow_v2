@@ -38,3 +38,6 @@ UPDATE core.one_time_token SET used_at = now() WHERE id = $1 AND used_at IS NULL
 SELECT * FROM core.one_time_token
 WHERE purpose = 'invite' AND used_at IS NULL AND expires_at > now()
 ORDER BY created_at DESC;
+
+-- name: DeleteStaleOneTimeTokens :execrows
+DELETE FROM core.one_time_token WHERE expires_at < now() - interval '30 days';

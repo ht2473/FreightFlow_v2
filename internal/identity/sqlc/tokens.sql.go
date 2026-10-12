@@ -98,6 +98,18 @@ func (q *Queries) CreateOneTimeToken(ctx context.Context, arg CreateOneTimeToken
 	return i, err
 }
 
+const deleteStaleOneTimeTokens = `-- name: DeleteStaleOneTimeTokens :execrows
+DELETE FROM core.one_time_token WHERE expires_at < now() - interval '30 days'
+`
+
+func (q *Queries) DeleteStaleOneTimeTokens(ctx context.Context) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteStaleOneTimeTokens)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getActiveAPITokenByHash = `-- name: GetActiveAPITokenByHash :one
 SELECT t.id, t.user_id, t.name, t.prefix, t.token_hash, t.scopes, t.created_at, t.expires_at, t.last_used_at, t.revoked_at, u.status AS user_status
 FROM core.api_token t

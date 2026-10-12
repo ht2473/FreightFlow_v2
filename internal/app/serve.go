@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"flag"
 	"net/http"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 
 	"freightflow/internal/api"
 	"freightflow/internal/identity"
+	"freightflow/internal/platform/events"
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/mail"
 	"freightflow/internal/platform/secret"
@@ -19,13 +21,22 @@ import (
 	"freightflow/internal/web"
 )
 
-func runServe(ctx context.Context, env *Env, _ []string) error {
+func runServe(ctx context.Context, env *Env, args []string) error {
 	cfg := env.Config
-	pool, err := openDatabase(ctx, env)
+	fs := flag.NewFlagSet("serve", flag.ContinueOnError)
+	fs.SetOutput(env.Stderr)
+	// В разработке задачи исполняются в том же процессе; в рабочем режиме — отдельным worker.
+	withWorker := fs.Bool("worker", cfg.IsDev(), "исполнять фоновые задачи в этом процессе")
+	if err := fs.Parse(args); err != nil {
+		return ErrUsage
+	}
+
+	rt, err := startRuntime(ctx, env, "app")
 	if err != nil {
 		return err
 	}
-	defer pool.Close()
+	defer rt.close(ctx)
+	pool := rt.pool
 
 	ids, err := newIdentity(ctx, env, pool)
 	if err != nil {
@@ -38,6 +49,7 @@ func runServe(ctx context.Context, env *Env, _ []string) error {
 
 	apiHandler, err := api.New(api.Deps{
 		Identity: ids, Sessions: sessions, Mailer: mailer, BaseURL: cfg.BaseURL, Log: env.Log,
+		Meters: rt.tel.Meters, Tracers: rt.tel.Tracers,
 	})
 	if err != nil {
 		return err
@@ -59,8 +71,13 @@ func runServe(ctx context.Context, env *Env, _ []string) error {
 	if err != nil {
 		return err
 	}
-	handler := httpx.Chain(mux,
+	observe, err := httpx.Observe(rt.tel.Meters, rt.tel.Tracers)
+	if err != nil {
+		return err
+	}
+	handler := httpx.Chain(httpx.Routes(mux),
 		httpx.WithRequestID(),
+		observe,
 		httpx.Recover(env.Log),
 		httpx.AccessLog(env.Log),
 		httpx.SecurityHeaders(!cfg.IsDev()),
@@ -71,6 +88,11 @@ func runServe(ctx context.Context, env *Env, _ []string) error {
 
 	g, gctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return httpx.Serve(gctx, env.Log, "app", cfg.HTTPAddr, handler) })
+	g.Go(func() error { return rt.serveMetrics(gctx, env, cfg.MetricsAddr) })
+	g.Go(func() error { return events.Listen(gctx, pool, rt.bus, env.Log) })
+	if *withWorker {
+		g.Go(func() error { return rt.runWorkers(gctx, env, registry(env, pool, ids)) })
+	}
 	return g.Wait()
 }
 

@@ -10,6 +10,8 @@ import (
 	"runtime/debug"
 	"time"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"freightflow/internal/platform/ids"
 	"freightflow/internal/platform/problem"
 )
@@ -124,14 +126,19 @@ func AccessLog(log *slog.Logger) Middleware {
 			case rec.status >= 400:
 				level = slog.LevelWarn
 			}
-			log.LogAttrs(r.Context(), level, "http request",
+			attrs := []slog.Attr{
 				slog.String("request_id", RequestID(r.Context())),
 				slog.String("method", r.Method),
 				slog.String("path", r.URL.Path),
+				slog.String("route", Route(r.Context())),
 				slog.Int("status", rec.status),
 				slog.Int("bytes", rec.bytes),
 				slog.Duration("duration", time.Since(start)),
-			)
+			}
+			if sc := trace.SpanContextFromContext(r.Context()); sc.IsValid() {
+				attrs = append(attrs, slog.String("trace_id", sc.TraceID().String()))
+			}
+			log.LogAttrs(r.Context(), level, "http request", attrs...)
 		})
 	}
 }

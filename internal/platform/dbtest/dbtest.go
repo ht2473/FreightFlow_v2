@@ -165,6 +165,8 @@ func migrationsHash() (string, error) {
 		h.Write([]byte(n))
 		h.Write(b)
 	}
+	// Схема очереди River меняется вместе с версией библиотеки.
+	fmt.Fprintf(h, "queue:%d", migrate.QueueVersion())
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 

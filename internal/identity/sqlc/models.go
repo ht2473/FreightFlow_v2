@@ -110,3 +110,10 @@ type CoreUserSetting struct {
 	Settings  json.RawMessage
 	UpdatedAt time.Time
 }
+
+type NotifyOutbox struct {
+	ID        int64
+	Type      string
+	Payload   json.RawMessage
+	CreatedAt time.Time
+}

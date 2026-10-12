@@ -5,8 +5,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -25,10 +27,20 @@ func Open(ctx context.Context, url string) (*pgxpool.Pool, error) {
 	cfg.MaxConnIdleTime = 5 * time.Minute
 	cfg.ConnConfig.RuntimeParams["application_name"] = "freightflow"
 	cfg.ConnConfig.RuntimeParams["timezone"] = "Europe/Moscow"
+	// Трассы и метрики запросов берут глобальные провайдеры OpenTelemetry (platform/telemetry).
+	cfg.ConnConfig.Tracer = otelpgx.NewTracer(
+		otelpgx.WithSpanNameCtxFunc(queryName),
+		otelpgx.WithMetricOperationName(queryName),
+		otelpgx.WithDisableSQLStatementInAttributes(),
+	)
 
 	pool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("create pool: %w", err)
+	}
+	if err := otelpgx.RecordStats(pool); err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("pool metrics: %w", err)
 	}
 	pingCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -37,6 +49,17 @@ func Open(ctx context.Context, url string) (*pgxpool.Pool, error) {
 		return nil, fmt.Errorf("ping database: %w", err)
 	}
 	return pool, nil
+}
+
+// queryName даёт короткое имя запроса для трасс и метрик: имя запроса sqlc
+// («-- name: GetUserByID :one») или вид операции (SELECT, UPDATE…).
+func queryName(ctx context.Context, sql string) string {
+	if rest, ok := strings.CutPrefix(sql, "-- name: "); ok {
+		if name, _, ok := strings.Cut(rest, " "); ok {
+			return name
+		}
+	}
+	return otelpgx.SQLOperationName(ctx, sql)
 }
 
 // MissingExtensions возвращает обязательные расширения, которые не установлены в базе.

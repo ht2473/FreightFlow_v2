@@ -41,7 +41,8 @@ type command struct {
 
 func commands() []command {
 	return []command{
-		{"serve", "веб-сервер, API и тайлы", runServe},
+		{"serve", "веб-сервер, API и тайлы [-worker]", runServe},
+		{"worker", "фоновые задачи: загрузки, расчёты, уведомления, обслуживание", runWorker},
 		{"migrate", "миграции базы данных: up | down | status", runMigrate},
 		{"admin", "администрирование: create-user | reset-2fa", runAdmin},
 		{"version", "версия сборки", runVersion},

@@ -135,3 +135,13 @@ func toAPIToken(r sqlc.CoreApiToken) APIToken {
 		CreatedAt: r.CreatedAt, ExpiresAt: r.ExpiresAt, LastUsedAt: r.LastUsedAt, RevokedAt: r.RevokedAt,
 	}
 }
+
+// DeleteStaleTokens удаляет одноразовые ссылки, истёкшие больше 30 дней назад
+// (задача обслуживания).
+func (s *Service) DeleteStaleTokens(ctx context.Context) (int64, error) {
+	n, err := s.q.DeleteStaleOneTimeTokens(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("delete stale tokens: %w", err)
+	}
+	return n, nil
+}

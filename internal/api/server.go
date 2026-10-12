@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/go-faster/jx"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 
 	spec "freightflow/api"
 	"freightflow/internal/api/gen"
@@ -32,6 +34,9 @@ type Deps struct {
 	Mailer   Mailer
 	BaseURL  string
 	Log      *slog.Logger
+	// Meters и Tracers — метрики и трассы операций; nil — глобальные провайдеры OpenTelemetry.
+	Meters  metric.MeterProvider
+	Tracers trace.TracerProvider
 }
 
 // Server реализует обработчики и проверку безопасности ogen.
@@ -56,11 +61,19 @@ func New(d Deps) (http.Handler, error) {
 		identity: d.Identity, sessions: d.Sessions, mailer: d.Mailer,
 		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops),
 	}
-	srv, err := gen.NewServer(s, s,
+	opts := []gen.ServerOption{
 		gen.WithPathPrefix("/api/v1"),
 		gen.WithErrorHandler(s.errorHandler),
 		gen.WithNotFound(s.notFound),
-		gen.WithMethodNotAllowed(s.methodNotAllowed))
+		gen.WithMethodNotAllowed(s.methodNotAllowed),
+	}
+	if d.Meters != nil {
+		opts = append(opts, gen.WithMeterProvider(d.Meters))
+	}
+	if d.Tracers != nil {
+		opts = append(opts, gen.WithTracerProvider(d.Tracers))
+	}
+	srv, err := gen.NewServer(s, s, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("create api server: %w", err)
 	}

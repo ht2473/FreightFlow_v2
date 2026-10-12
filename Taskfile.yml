@@ -36,10 +36,26 @@ tasks:
         sh: git describe --tags --always --dirty 2>/dev/null || echo dev
 
   serve:
-    desc: Запустить веб-сервер
+    desc: Запустить веб-сервер (в разработке — вместе с фоновыми задачами)
     deps: [build]
     cmds:
       - "{{.BIN}} serve"
+
+  worker:
+    desc: Запустить отдельный процесс фоновых задач
+    deps: [build]
+    cmds:
+      - "{{.BIN}} worker"
+
+  dev:
+    desc: "Разработка: службы Docker, сервер (8080) и Vite (5173) — открывать http://localhost:5173"
+    cmds:
+      - task: up
+      - task: dev:run
+
+  dev:run:
+    internal: true
+    deps: [serve, web:dev]
 
   db:migrate:
     desc: Применить миграции
