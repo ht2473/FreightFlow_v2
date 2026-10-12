@@ -1,0 +1,94 @@
+version: "3"
+
+vars:
+  COMPOSE: docker compose -f deploy/compose.dev.yaml
+  BIN: bin/freightflow{{exeExt}}
+
+dotenv: [".env"]
+
+# Загрузки модулей Go и пакетов идут напрямую: через системный прокси они в десятки раз медленнее.
+env:
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+
+tasks:
+  up:
+    desc: Запустить службы разработки (БД, почта)
+    cmds:
+      - "{{.COMPOSE}} up -d --build db mailpit"
+
+  down:
+    desc: Остановить службы разработки
+    cmds:
+      - "{{.COMPOSE}} down"
+
+  logs:
+    desc: Журналы служб разработки
+    cmds:
+      - "{{.COMPOSE}} logs -f --tail=100"
+
+  build:
+    desc: Собрать бинарник
+    cmds:
+      - go build -ldflags "-X freightflow/internal/app.Version={{.VERSION}}" -o {{.BIN}} ./cmd/freightflow
+    vars:
+      VERSION:
+        sh: git describe --tags --always --dirty 2>/dev/null || echo dev
+
+  serve:
+    desc: Запустить веб-сервер
+    deps: [build]
+    cmds:
+      - "{{.BIN}} serve"
+
+  db:migrate:
+    desc: Применить миграции
+    deps: [build]
+    cmds:
+      - "{{.BIN}} migrate up"
+
+  db:status:
+    desc: Состояние миграций
+    deps: [build]
+    cmds:
+      - "{{.BIN}} migrate status"
+
+  db:reset:
+    desc: Пересоздать базу разработки (данные будут удалены)
+    prompt: База разработки будет удалена. Продолжить?
+    cmds:
+      - "{{.COMPOSE}} down db"
+      - docker volume rm ffv2-dev_pgdata
+      - task: up
+
+  fmt:
+    desc: Форматирование кода
+    env:
+      GOLANGCI_LINT_CACHE: "{{.ROOT_DIR}}/tmp/golangci-cache"
+    cmds:
+      - golangci-lint fmt ./...
+
+  lint:
+    desc: Линтеры
+    env:
+      GOLANGCI_LINT_CACHE: "{{.ROOT_DIR}}/tmp/golangci-cache"
+    cmds:
+      - golangci-lint run ./...
+
+  test:
+    desc: Тесты Go
+    cmds:
+      - go test ./...
+
+  vuln:
+    desc: Проверка уязвимостей в зависимостях
+    cmds:
+      - govulncheck ./...
+
+  check:
+    desc: Полная проверка перед коммитом
+    cmds:
+      - task: lint
+      - task: test
+      - task: build
+      - task: vuln

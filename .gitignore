@@ -1,0 +1,30 @@
+# Окружение и секреты
+.env
+.env.*
+!.env.example
+
+# Данные приложения
+/var/
+
+# Сборка
+/bin/
+/dist/
+/tmp/
+*.exe
+*.test
+*.out
+coverage.*
+
+# Фронтенд
+/web/node_modules/
+/web/dist/
+/web/test-results/
+/web/playwright-report/
+/web/.vite/
+
+# Редакторы и ОС
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
