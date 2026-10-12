@@ -15,11 +15,24 @@
 
 ```sh
 cp .env.example .env    # заполнить ключи
-task up                 # PostgreSQL + PostGIS, Mailpit
-task serve              # веб-сервер на http://localhost:8080
+task dev                # БД и почта в Docker, сервер (8080) и Vite — http://localhost:5173
 ```
 
 Проверка перед коммитом: `task check`.
+
+## Загрузка данных
+
+Инструменты обработки (osm2pgsql, osmium, GDAL, pmtiles) работают в контейнере `worker`,
+данные хранятся в `var/`.
+
+```sh
+task etl:image              # образ worker (один раз и при смене Dockerfile)
+task etl:run SOURCE=osm     # OpenStreetMap: территории, объекты, сеть, ограничения
+task etl:run SOURCE=basemap # подложка карты
+task etl:up                 # worker в фоне: выполняет запуски из раздела «Источники данных»
+```
+
+Список источников и последних запусков — `task etl:list`.
 
 ## Данные
 
