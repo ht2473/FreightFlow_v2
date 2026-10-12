@@ -1,4 +1,5 @@
 import { createRootRoute, createRoute, createRouter, lazyRouteComponent, redirect } from "@tanstack/react-router";
+import { mapSearchSchema } from "@/features/map/state";
 import { ErrorPage, PendingPage } from "./ErrorPage";
 import { NotFound } from "./NotFound";
 import { SectionPage } from "./SectionPage";
@@ -34,7 +35,12 @@ function sectionRoute<P extends string>(path: P) {
 const routeTree = rootRoute.addChildren([
   indexRoute,
   sectionRoute("/dashboard"),
-  sectionRoute("/map"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/map",
+    validateSearch: (search: Record<string, unknown>) => mapSearchSchema.parse(search),
+    component: lazyRouteComponent(() => import("@/features/map/MapPage"), "MapPage"),
+  }),
   sectionRoute("/operations"),
   sectionRoute("/alerts"),
   sectionRoute("/facilities"),

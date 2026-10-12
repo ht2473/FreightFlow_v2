@@ -1,0 +1,389 @@
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Minus, Plus } from "lucide-react";
+import type { MapGeoJSONFeature, Map as MapLibreMap, StyleSpecification } from "maplibre-gl";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Guard } from "@/app/Guard";
+import { $api } from "@/shared/api/client";
+import { basemapStyle, type MapTheme } from "@/shared/map/basemap";
+import {
+  buildDataLayers,
+  codeOf,
+  color,
+  interactiveLayerIds,
+  layerId,
+  type MapLayer,
+  type Palette,
+  readPalette,
+} from "@/shared/map/dataLayers";
+import { DEFAULT_VIEW, mountMap, onStyleReady, unmountMap } from "@/shared/map/instance";
+import { IconButton } from "@/shared/ui";
+import { Tabs } from "@/shared/ui/navigation";
+import { useResolvedTheme } from "@/shared/useResolvedTheme";
+import { FeatureCard, type Selection } from "./FeatureCard";
+import { LayersPanel } from "./LayersPanel";
+import { Legend } from "./Legend";
+import s from "./map.module.css";
+import { m } from "./messages";
+import { type ObjectItem, ObjectsPanel } from "./ObjectsPanel";
+import { formatCenter, layerStates, type MapSearch, parseCenter, useOpacity, visibleLayers } from "./state";
+
+export function MapPage() {
+  return (
+    <Guard permission="map.view">
+      <MapWorkspace />
+    </Guard>
+  );
+}
+
+/** Подложка установлена: TileJSON отвечает 200. */
+function useBasemapAvailable() {
+  return useQuery({
+    queryKey: ["map", "basemap"],
+    queryFn: async () => (await fetch("/map/basemap.json", { credentials: "same-origin" })).ok,
+    staleTime: 60_000,
+  });
+}
+
+/** Стиль без подложки: фон темы, шрифты и значки — для слоёв данных. */
+function emptyStyle(theme: MapTheme, palette: Palette): StyleSpecification {
+  const base = basemapStyle(theme);
+  return {
+    version: 8,
+    glyphs: base.glyphs,
+    sources: {},
+    layers: [{ id: "background", type: "background", paint: { "background-color": color(palette, "panel") } }],
+  };
+}
+
+/**
+ * Полный стиль: подложка и слои данных. Линии и контуры — под подписями подложки, точки —
+ * поверх всего. Стиль строится заново при смене темы, слоёв или прозрачности; MapLibre
+ * применяет только разницу.
+ */
+function fullStyle(base: StyleSpecification, catalog: MapLayer[], data: ReturnType<typeof buildDataLayers>) {
+  const firstLabel = base.layers.findIndex((x) => x.type === "symbol");
+  const split = firstLabel < 0 ? base.layers.length : firstLabel;
+  const points = data.layers.filter((x) => x.type === "circle");
+  const shapes = data.layers.filter((x) => x.type !== "circle");
+  return {
+    ...base,
+    sources: { ...base.sources, ...data.sources },
+    layers: [...base.layers.slice(0, split), ...shapes, ...base.layers.slice(split), ...points],
+    // Каталог входит в зависимость стиля: смена версии данных меняет адреса тайлов.
+    metadata: { catalog: catalog.map((x) => x.version).join("|") },
+  } satisfies StyleSpecification;
+}
+
+function MapWorkspace() {
+  const search = useSearch({ from: "/map" });
+  const navigate = useNavigate({ from: "/map" });
+  const theme = useResolvedTheme();
+  const catalogQuery = $api.useQuery("get", "/layers", {}, { staleTime: 60_000 });
+  const basemap = useBasemapAvailable();
+  const opacity = useOpacity((st) => st.opacity);
+
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [map, setMap] = useState<MapLibreMap | null>(null);
+  const [zoom, setZoom] = useState(search.z ?? DEFAULT_VIEW.zoom);
+  const [tab, setTab] = useState("objects");
+  const [selection, setSelection] = useState<Selection | null>(null);
+  const [hover, setHover] = useState<{ x: number; y: number; title: string; subtitle: string } | null>(null);
+  const [objects, setObjects] = useState<ObjectItem[]>([]);
+
+  const catalog = useMemo(() => catalogQuery.data?.layers ?? [], [catalogQuery.data]);
+  const visible = useMemo(() => visibleLayers(catalog, search.l), [catalog, search.l]);
+  // Цвета — из токенов действующей темы: к моменту отрисовки тема уже применена к документу,
+  // поэтому палитра перечитывается при её смене.
+  const palette = useMemo(() => {
+    void theme;
+    return readPalette();
+  }, [theme]);
+
+  const data = useMemo(
+    () => buildDataLayers(catalog, layerStates(catalog, visible, opacity), palette),
+    [catalog, visible, opacity, palette],
+  );
+  const style = useMemo(() => {
+    if (basemap.data === undefined) {
+      return null;
+    }
+    const base = basemap.data ? basemapStyle(theme) : emptyStyle(theme, palette);
+    return fullStyle(base, catalog, data);
+  }, [basemap.data, theme, palette, catalog, data]);
+
+  const interactive = useRef<string[]>([]);
+  interactive.current = interactiveLayerIds(data.layers);
+  const catalogRef = useRef(catalog);
+  catalogRef.current = catalog;
+
+  // Создание карты при первом стиле; один экземпляр на рабочее пространство. Вид из адреса
+  // берётся один раз, дальнейшие изменения стиля и вида — в эффектах ниже.
+  const initialView = useRef({
+    center: parseCenter(search.c) ?? DEFAULT_VIEW.center,
+    zoom: search.z ?? DEFAULT_VIEW.zoom,
+  });
+  const latestStyle = useRef(style);
+  latestStyle.current = style;
+  const ready = style !== null;
+  useEffect(() => {
+    const st = latestStyle.current;
+    if (!ready || !hostRef.current || !st) {
+      return;
+    }
+    setMap(mountMap(hostRef.current, { ...initialView.current, style: st }));
+    return () => {
+      unmountMap();
+      setMap(null);
+    };
+  }, [ready]);
+
+  useEffect(() => {
+    if (!map || !style) {
+      return;
+    }
+    return onStyleReady(map, () => map.setStyle(style, { diff: true }));
+  }, [map, style]);
+
+  // Вид карты — в адрес (без записи в историю).
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+    const onMove = () => {
+      const c = map.getCenter();
+      const z = Math.round(map.getZoom() * 100) / 100;
+      setZoom(z);
+      void navigate({ search: (prev: MapSearch) => ({ ...prev, c: formatCenter(c.lng, c.lat), z }), replace: true });
+    };
+    map.on("moveend", onMove);
+    return () => {
+      map.off("moveend", onMove);
+    };
+  }, [map, navigate]);
+
+  // Список объектов видимой области.
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+    const collect = () => {
+      const id = layerId("facilities", "circle");
+      if (!map.getLayer(id)) {
+        setObjects([]);
+        return;
+      }
+      const seen = new Map<string, ObjectItem>();
+      for (const f of map.queryRenderedFeatures({ layers: [id] })) {
+        const key = String(f.id);
+        if (!seen.has(key)) {
+          seen.set(key, toObject(f));
+        }
+      }
+      setObjects([...seen.values()].sort((a, b) => (b.area ?? 0) - (a.area ?? 0)));
+    };
+    map.on("idle", collect);
+    return () => {
+      map.off("idle", collect);
+    };
+  }, [map]);
+
+  // Наведение и выбор.
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+    let hovered: MapGeoJSONFeature | null = null;
+    const setState = (f: MapGeoJSONFeature | null, state: Record<string, boolean>) => {
+      if (f?.id !== undefined && f.source && map.getSource(f.source)) {
+        map.setFeatureState({ source: f.source, sourceLayer: f.sourceLayer, id: f.id }, state);
+      }
+    };
+    const pick = (point: { x: number; y: number }, includeBoundaries: boolean) => {
+      const layers = interactive.current.filter((id) => map.getLayer(id));
+      if (layers.length === 0) {
+        return null;
+      }
+      const found = map.queryRenderedFeatures([point.x, point.y], { layers });
+      return found.find((f) => includeBoundaries || codeOf(f.layer.id) !== "boundaries") ?? null;
+    };
+    const onMove = (e: { point: { x: number; y: number } }) => {
+      const f = pick(e.point, false);
+      if (hovered && (!f || f.id !== hovered.id || f.source !== hovered.source)) {
+        setState(hovered, { hover: false });
+        hovered = null;
+      }
+      map.getCanvas().style.cursor = f ? "pointer" : "";
+      if (!f) {
+        setHover(null);
+        return;
+      }
+      hovered = f;
+      setState(f, { hover: true });
+      const layer = catalogRef.current.find((l) => l.code === codeOf(f.layer.id));
+      setHover({ x: e.point.x, y: e.point.y, ...describe(f, layer) });
+    };
+    const onLeave = () => {
+      setState(hovered, { hover: false });
+      hovered = null;
+      setHover(null);
+    };
+    const onClick = (e: { point: { x: number; y: number }; lngLat: { lng: number; lat: number } }) => {
+      const f = pick(e.point, true);
+      const layer = f ? catalogRef.current.find((l) => l.code === codeOf(f.layer.id)) : undefined;
+      if (!f || !layer) {
+        return;
+      }
+      setSelection({ layer, feature: f, lngLat: [e.lngLat.lng, e.lngLat.lat] });
+    };
+    map.on("mousemove", onMove);
+    map.on("mouseout", onLeave);
+    map.on("click", onClick);
+    return () => {
+      map.off("mousemove", onMove);
+      map.off("mouseout", onLeave);
+      map.off("click", onClick);
+    };
+  }, [map]);
+
+  // Подсветка выбранного объекта.
+  useEffect(() => {
+    const f = selection?.feature;
+    if (!map || !f || f.id === undefined || !map.getSource(f.source)) {
+      return;
+    }
+    const target = { source: f.source, sourceLayer: f.sourceLayer, id: f.id };
+    map.setFeatureState(target, { selected: true });
+    return () => {
+      if (map.getSource(f.source)) {
+        map.setFeatureState(target, { selected: false });
+      }
+    };
+  }, [map, selection]);
+
+  const toggleLayer = (code: string, on: boolean) => {
+    const next = new Set(visible);
+    if (on) {
+      next.add(code);
+    } else {
+      next.delete(code);
+    }
+    const l = catalog.filter((x) => next.has(x.code)).map((x) => x.code);
+    void navigate({ search: (prev: MapSearch) => ({ ...prev, l: l.join(",") }), replace: true });
+  };
+
+  const focusObject = (o: ObjectItem) => {
+    if (!map) {
+      return;
+    }
+    map.flyTo({ center: o.lngLat, zoom: Math.max(map.getZoom(), 14), duration: 600 });
+    const layer = catalog.find((l) => l.code === "facilities");
+    if (layer) {
+      setSelection({ layer, feature: o.feature, lngLat: o.lngLat });
+    }
+  };
+
+  return (
+    <div className={s.workspace}>
+      <aside className={s.panel} aria-label={m.panelTabs}>
+        <Tabs
+          label={m.panelTabs}
+          selected={tab}
+          onChange={setTab}
+          items={[
+            {
+              id: "objects",
+              title: m.tabObjects,
+              content: (
+                <ObjectsPanel
+                  items={objects}
+                  layerOn={visible.has("facilities")}
+                  zoom={zoom}
+                  selectedId={selection?.layer.code === "facilities" ? selection.feature.id : undefined}
+                  onSelect={focusObject}
+                />
+              ),
+            },
+            {
+              id: "layers",
+              title: m.tabLayers,
+              content: (
+                <LayersPanel
+                  catalog={catalogQuery.data}
+                  isError={catalogQuery.isError}
+                  visible={visible}
+                  zoom={zoom}
+                  onToggle={toggleLayer}
+                />
+              ),
+            },
+          ]}
+        />
+      </aside>
+      <section className={s.mapArea} aria-label={m.mapLabel}>
+        <div ref={hostRef} className={s.mapHost} />
+        {basemap.data === false && (
+          <div className={`${s.float} ${s.notice}`} role="status">
+            <b>{m.noBasemap}</b>
+            <span>{m.noBasemapHint}</span>
+          </div>
+        )}
+        <div className={`${s.float} ${s.zoom}`}>
+          <IconButton label={m.zoomIn} onPress={() => map?.zoomIn()}>
+            <Plus size={17} />
+          </IconButton>
+          <IconButton label={m.zoomOut} onPress={() => map?.zoomOut()}>
+            <Minus size={17} />
+          </IconButton>
+        </div>
+        <Legend catalog={catalog} visible={visible} palette={palette} />
+        <div className={s.attribution}>
+          {basemap.data && (
+            <>
+              <a href="https://protomaps.com" target="_blank" rel="noopener noreferrer">
+                Protomaps
+              </a>{" "}
+              ·{" "}
+            </>
+          )}
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
+            © участники OpenStreetMap
+          </a>
+          {" · "}
+          <a href="https://maplibre.org" target="_blank" rel="noopener noreferrer">
+            MapLibre
+          </a>
+        </div>
+        {hover && (
+          <div className={s.hoverTip} style={{ left: hover.x + 14, top: hover.y + 14 }} aria-hidden>
+            <b>{hover.title}</b>
+            <span>{hover.subtitle}</span>
+          </div>
+        )}
+      </section>
+      {selection && <FeatureCard selection={selection} onClose={() => setSelection(null)} />}
+    </div>
+  );
+}
+
+function toObject(f: MapGeoJSONFeature): ObjectItem {
+  const p = f.properties as Record<string, unknown>;
+  const coords = f.geometry.type === "Point" ? (f.geometry.coordinates as [number, number]) : DEFAULT_VIEW.center;
+  return {
+    id: f.id,
+    name: typeof p.name === "string" ? p.name : undefined,
+    type: String(p.type ?? ""),
+    area: typeof p.area === "number" ? p.area : undefined,
+    lngLat: coords,
+    feature: f,
+  };
+}
+
+/** Подпись объекта для подсказки: название или вид, ниже — слой. */
+function describe(f: MapGeoJSONFeature, layer: MapLayer | undefined): { title: string; subtitle: string } {
+  const p = f.properties as Record<string, unknown>;
+  const enumProp = layer?.properties.find((x) => x.kind === "enum" && p[x.name] !== undefined);
+  const enumLabel = enumProp ? enumProp.labels?.[String(p[enumProp.name])] : undefined;
+  const name = typeof p.name === "string" && p.name ? p.name : (enumLabel ?? layer?.title ?? "");
+  return { title: name, subtitle: layer?.title ?? "" };
+}

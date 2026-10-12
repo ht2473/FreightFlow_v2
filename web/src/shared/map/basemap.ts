@@ -1,0 +1,145 @@
+import { type Flavor, layers, namedFlavor } from "@protomaps/basemaps";
+import type { StyleSpecification } from "maplibre-gl";
+
+export type MapTheme = "light" | "dark";
+
+/** Источник подложки в стиле; слои данных добавляются поверх. */
+export const BASEMAP_SOURCE = "basemap";
+
+/**
+ * Цвета подложки: нейтральная холодная шкала, приглушённая, чтобы читались данные
+ * (DESIGN.md §7). Светлая тема — между #cdd2db и #f3f5f8, тёмная — между #14181f и #545e6e.
+ */
+const overrides: Record<MapTheme, Partial<Flavor>> = {
+  light: {
+    background: "#dde1e7",
+    earth: "#f1f3f6",
+    water: "#cdd3dc",
+    park_a: "#e5e9e7",
+    park_b: "#e5e9e7",
+    wood_a: "#e5e9e7",
+    wood_b: "#e5e9e7",
+    scrub_a: "#e8ebe9",
+    scrub_b: "#e8ebe9",
+    industrial: "#eceef2",
+    hospital: "#eef0f3",
+    school: "#eef0f3",
+    pedestrian: "#eceef2",
+    aerodrome: "#e9ebef",
+    military: "#e9ebef",
+    zoo: "#e9ebef",
+    buildings: "#e1e4e9",
+    railway: "#c9ced7",
+    boundaries: "#8b8d98",
+    highway: "#ffffff",
+    highway_casing_early: "#cdd2db",
+    highway_casing_late: "#cdd2db",
+    major: "#ffffff",
+    major_casing_early: "#d5d9e0",
+    major_casing_late: "#d5d9e0",
+    link: "#ffffff",
+    link_casing: "#d5d9e0",
+    minor_a: "#fbfbfc",
+    minor_b: "#f8f9fa",
+    minor_casing: "#dde1e7",
+    minor_service: "#f8f9fa",
+    minor_service_casing: "#dde1e7",
+    other: "#f6f7f9",
+    bridges_highway: "#ffffff",
+    bridges_major: "#ffffff",
+    bridges_minor: "#fbfbfc",
+    bridges_link: "#ffffff",
+    bridges_other: "#f6f7f9",
+    bridges_highway_casing: "#c4c9d2",
+    bridges_major_casing: "#c4c9d2",
+    bridges_minor_casing: "#d5d9e0",
+    bridges_link_casing: "#c4c9d2",
+    bridges_other_casing: "#d5d9e0",
+    roads_label_major: "#80838d",
+    roads_label_major_halo: "#ffffff",
+    roads_label_minor: "#8b8d98",
+    roads_label_minor_halo: "#fbfbfc",
+    city_label: "#60646c",
+    city_label_halo: "#f1f3f6",
+    subplace_label: "#8b8d98",
+    subplace_label_halo: "#f1f3f6",
+    state_label: "#8b8d98",
+    state_label_halo: "#f1f3f6",
+    country_label: "#80838d",
+    ocean_label: "#80838d",
+    address_label: "#9a9ca5",
+    address_label_halo: "#f1f3f6",
+  },
+  dark: {
+    background: "#111419",
+    earth: "#191c22",
+    water: "#14181f",
+    park_a: "#1b2124",
+    park_b: "#1b2124",
+    wood_a: "#1b2124",
+    wood_b: "#1b2124",
+    scrub_a: "#1c2023",
+    scrub_b: "#1c2023",
+    industrial: "#1d2027",
+    hospital: "#1d2027",
+    school: "#1d2027",
+    pedestrian: "#1d2027",
+    aerodrome: "#1d2027",
+    military: "#1d2027",
+    zoo: "#1d2027",
+    buildings: "#22262e",
+    railway: "#3a414d",
+    boundaries: "#545e6e",
+    highway: "#3a414d",
+    highway_casing_early: "#14181f",
+    highway_casing_late: "#14181f",
+    major: "#323844",
+    major_casing_early: "#14181f",
+    major_casing_late: "#14181f",
+    link: "#323844",
+    link_casing: "#14181f",
+    minor_a: "#2a2f39",
+    minor_b: "#262b34",
+    minor_casing: "#14181f",
+    minor_service: "#262b34",
+    minor_service_casing: "#14181f",
+    other: "#242830",
+    bridges_highway: "#3a414d",
+    bridges_major: "#323844",
+    bridges_minor: "#2a2f39",
+    bridges_link: "#323844",
+    bridges_other: "#242830",
+    roads_label_major: "#8b93a1",
+    roads_label_major_halo: "#14181f",
+    roads_label_minor: "#6f7784",
+    roads_label_minor_halo: "#14181f",
+    city_label: "#a3aab5",
+    city_label_halo: "#14181f",
+    subplace_label: "#6f7784",
+    subplace_label_halo: "#14181f",
+    state_label: "#545e6e",
+    state_label_halo: "#14181f",
+    country_label: "#6f7784",
+    ocean_label: "#6f7784",
+    address_label: "#6f7784",
+    address_label_halo: "#14181f",
+  },
+};
+
+export function basemapFlavor(theme: MapTheme): Flavor {
+  const base = namedFlavor(theme === "dark" ? "black" : "grayscale");
+  return { ...base, ...overrides[theme] };
+}
+
+/** Стиль карты с подложкой; адреса — с нашего сервера (MapLibre требует абсолютные). */
+export function basemapStyle(theme: MapTheme, origin = window.location.origin): StyleSpecification {
+  return {
+    version: 8,
+    glyphs: `${origin}/map/fonts/{fontstack}/{range}.pbf`,
+    sprite: `${origin}/map/sprites/${theme}`,
+    sources: {
+      [BASEMAP_SOURCE]: { type: "vector", url: `${origin}/map/basemap.json` },
+    },
+    layers: layers(BASEMAP_SOURCE, basemapFlavor(theme), { lang: "ru" }),
+  };
+}

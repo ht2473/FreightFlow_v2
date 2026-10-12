@@ -11,7 +11,8 @@ test("источники данных: список, карточка, опис�
   await expect(page).toHaveURL(/\/data$/);
   await expect(page.getByRole("heading", { name: "Источники данных" })).toBeVisible();
 
-  const row = page.getByRole("row", { name: /OpenStreetMap/ });
+  const row = page.getByRole("row", { name: /^OpenStreetMap/ });
+  await expect(page.getByRole("row", { name: /^Подложка карты/ })).toBeVisible();
   await expect(row).toBeVisible();
   await expect(row.getByRole("button", { name: "Загрузить" })).toBeVisible();
   await expect(row).toContainText("Раз в неделю");

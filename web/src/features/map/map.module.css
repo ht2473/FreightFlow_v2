@@ -1,0 +1,383 @@
+/* Раздел «Карта»: панель 320 px слева, карта на остальную область (DESIGN.md §5, §7). */
+
+.workspace {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.panel {
+  width: 320px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  z-index: 3;
+}
+
+.panel > div {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.panel [role="tablist"] {
+  padding: 0 12px;
+  flex: none;
+}
+
+.panel [role="tabpanel"] {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+}
+
+.sectionTitle {
+  margin: 14px 0 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--tx2);
+}
+
+/* Объекты */
+
+.objects {
+  display: flex;
+  flex-direction: column;
+}
+
+.objectList {
+  margin: 0 -8px;
+  padding: 0;
+  list-style: none;
+}
+
+.objectItem {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--r1);
+  background: none;
+  color: var(--tx);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.objectItem:hover {
+  background: var(--hover);
+}
+
+.objectItem:focus-visible {
+  outline: 2px solid var(--acc-ring);
+  outline-offset: -2px;
+}
+
+.objectSelected,
+.objectSelected:hover {
+  background: var(--acc-soft);
+}
+
+.objectName {
+  font-weight: 600;
+}
+
+.objectMeta {
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+/* Слои */
+
+.layers section:first-child .sectionTitle {
+  margin-top: 4px;
+}
+
+.layerRow {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.layerTitle {
+  font-weight: 500;
+}
+
+.layerMeta {
+  margin-top: 3px;
+  color: var(--tx2);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.layerHint {
+  color: var(--warn);
+}
+
+.opacity {
+  display: grid;
+  grid-template-columns: 1fr 44px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.opacityTrack {
+  position: relative;
+  height: 18px;
+}
+
+.opacityTrack::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: var(--line2);
+}
+
+.opacityThumb {
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 2px solid var(--acc);
+}
+
+.opacityThumb[data-focus-visible] {
+  outline: 2px solid var(--acc-ring);
+  outline-offset: 2px;
+}
+
+.opacityValue {
+  color: var(--tx2);
+  font-size: 12px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Карта */
+
+.mapArea {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.mapHost {
+  position: absolute;
+  inset: 0;
+}
+
+.mapHost :global(.ff-map) {
+  position: absolute;
+  inset: 0;
+}
+
+.float {
+  position: absolute;
+  z-index: 3;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  box-shadow: var(--sh2);
+}
+
+.zoom {
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  padding: 2px;
+}
+
+.notice {
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 2px;
+  max-width: 440px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.notice span {
+  color: var(--tx2);
+}
+
+.legend {
+  left: 14px;
+  bottom: 22px;
+  max-height: 45%;
+  overflow: auto;
+  padding: 6px 10px 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  min-width: 170px;
+  max-width: 260px;
+}
+
+.legendToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--tx2);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.legendToggle:focus-visible {
+  outline: 2px solid var(--acc-ring);
+  outline-offset: 2px;
+}
+
+.legendToggle svg {
+  transition: transform 0.15s;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legendToggle svg {
+    transition: none;
+  }
+}
+
+.legendItems {
+  margin-top: 4px;
+}
+
+.legendLayer + .legendLayer {
+  margin-top: 6px;
+}
+
+.legendTitle {
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 1px 0;
+}
+
+.legendNote {
+  color: var(--tx2);
+  font-size: 11.5px;
+}
+
+.swatchPoint {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1.5px var(--panel),
+    0 0 0 2.5px var(--line2);
+}
+
+.swatchLine {
+  flex: none;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.swatchArea {
+  flex: none;
+  width: 14px;
+  height: 10px;
+  border: 1.5px solid;
+  border-radius: 2px;
+}
+
+.attribution {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 1px 6px;
+  border-top-left-radius: var(--r1);
+  background: var(--panel);
+  color: var(--tx2);
+  font-size: 11px;
+  opacity: 0.92;
+}
+
+.attribution a {
+  color: inherit;
+}
+
+.hoverTip {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  max-width: 260px;
+  padding: 6px 9px;
+  border-radius: var(--r1);
+  background: var(--n12);
+  color: var(--n1);
+  font-size: 12.5px;
+  pointer-events: none;
+  box-shadow: var(--sh2);
+}
+
+.hoverTip span {
+  opacity: 0.75;
+  font-size: 12px;
+}
+
+/* Карточка объекта */
+
+.card {
+  display: grid;
+  margin: 0;
+}
+
+.cardRow {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.cardRow dt {
+  color: var(--tx2);
+}
+
+.cardRow dd {
+  margin: 0;
+}
+
+.cardNote {
+  margin: 14px 0 0;
+  color: var(--tx2);
+  font-size: 12.5px;
+}

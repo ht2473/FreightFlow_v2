@@ -47,6 +47,8 @@ export default defineConfig({
     manifest: true,
     sourcemap: true,
     target: "es2023",
+    // Чанк карты (MapLibre, около 1 МБ) загружается только на страницах с картой.
+    chunkSizeWarningLimit: 1200,
     rolldownOptions: {
       input: {
         app: fileURLToPath(new URL("./index.html", import.meta.url)),
@@ -62,6 +64,8 @@ export default defineConfig({
               test: /node_modules[/](react-aria|react-stately|@react-aria|@react-stately|@internationalized|react-aria-components)[/]/,
               priority: 20,
             },
+            // Карта — отдельный чанк: загружается только на страницах с картой.
+            { name: "map", test: /node_modules[/](maplibre-gl|@protomaps)[/]/, priority: 25 },
             { name: "vendor", test: /node_modules[/]/, priority: 10 },
           ],
         },
