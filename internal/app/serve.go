@@ -3,25 +3,57 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/sync/errgroup"
 
+	"freightflow/internal/api"
+	"freightflow/internal/identity"
 	"freightflow/internal/platform/httpx"
+	"freightflow/internal/platform/mail"
+	"freightflow/internal/platform/secret"
+	"freightflow/internal/platform/session"
+	"freightflow/internal/web"
 )
 
 func runServe(ctx context.Context, env *Env, _ []string) error {
+	cfg := env.Config
 	pool, err := openDatabase(ctx, env)
 	if err != nil {
 		return err
 	}
 	defer pool.Close()
 
+	ids, err := newIdentity(ctx, env, pool)
+	if err != nil {
+		return err
+	}
+	sessions := session.New(pool, !cfg.IsDev())
+	mailer := mail.NewSender(mail.Config{
+		Host: cfg.SMTP.Host, Port: cfg.SMTP.Port, User: cfg.SMTP.User, Password: cfg.SMTP.Password, From: cfg.SMTP.From,
+	})
+
+	apiHandler, err := api.New(api.Deps{
+		Identity: ids, Sessions: sessions, Mailer: mailer, BaseURL: cfg.BaseURL, Log: env.Log,
+	})
+	if err != nil {
+		return err
+	}
+	webHandler, err := web.New(web.Deps{
+		Identity: ids, Sessions: sessions, Mailer: mailer, BaseURL: cfg.BaseURL, Dev: cfg.IsDev(), DevVite: cfg.DevViteURL, Log: env.Log,
+	})
+	if err != nil {
+		return err
+	}
+
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthz", healthz())
 	mux.Handle("GET /readyz", readyz(pool))
+	mux.Handle("/api/v1/", apiHandler)
+	mux.Handle("/", webHandler)
 
 	crossOrigin, err := httpx.CrossOrigin()
 	if err != nil {
@@ -31,13 +63,31 @@ func runServe(ctx context.Context, env *Env, _ []string) error {
 		httpx.WithRequestID(),
 		httpx.Recover(env.Log),
 		httpx.AccessLog(env.Log),
-		httpx.SecurityHeaders(!env.Config.IsDev()),
+		httpx.SecurityHeaders(!cfg.IsDev()),
 		crossOrigin,
+		httpx.WithClient(),
+		sessions.LoadAndSave,
 	)
 
 	g, gctx := errgroup.WithContext(ctx)
-	g.Go(func() error { return httpx.Serve(gctx, env.Log, "app", env.Config.HTTPAddr, handler) })
+	g.Go(func() error { return httpx.Serve(gctx, env.Log, "app", cfg.HTTPAddr, handler) })
 	return g.Wait()
+}
+
+// newIdentity создаёт сервис доступа и синхронизирует встроенные роли.
+func newIdentity(ctx context.Context, env *Env, pool *pgxpool.Pool) (*identity.Service, error) {
+	if env.Config.EncryptionKey == "" {
+		return nil, errors.New("FF_ENCRYPTION_KEY is required (openssl rand -hex 32)")
+	}
+	box, err := secret.NewBox(env.Config.EncryptionKey)
+	if err != nil {
+		return nil, err
+	}
+	ids := identity.NewService(pool, box)
+	if err := ids.SyncBuiltinRoles(ctx); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 func healthz() http.Handler {

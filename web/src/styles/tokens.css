@@ -1,0 +1,157 @@
+/*
+ * Токены дизайн-системы. Обе темы строятся из одних ролей: светлая — по умолчанию,
+ * тёмная — по атрибуту data-theme="dark" или по системной настройке, если тема не задана явно.
+ */
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-cyrillic-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light;
+
+  --n1: #fcfcfd;
+  --n2: #f9f9fb;
+  --n3: #f0f0f3;
+  --n4: #e8e8ec;
+  --n5: #e0e1e6;
+  --n6: #d9d9e0;
+  --n7: #cdced6;
+  --n8: #b9bbc6;
+  --n9: #8b8d98;
+  --n10: #80838d;
+  --n11: #60646c;
+  --n12: #1c2024;
+
+  --canvas: var(--n2);
+  --panel: #ffffff;
+  --hover: var(--n3);
+  --active: var(--n4);
+  --line: var(--n5);
+  --line2: var(--n6);
+  --tx2: var(--n11);
+  --tx: var(--n12);
+
+  --acc: #5b5bd6;
+  --acc-h: #5151cd;
+  --acc-soft: #edeefc;
+  --acc-tx: #4747c2;
+  --acc-ring: rgba(91, 91, 214, 0.45);
+  --acc-on: #ffffff;
+
+  --ok: #218358;
+  --ok-bg: #e6f6eb;
+  --warn: #ab6400;
+  --warn-bg: #fff3d0;
+  --crit: #ce2c31;
+  --crit-bg: #feebec;
+  --info: #0d74ce;
+  --info-bg: #e6f4fe;
+
+  --sh1: 0 1px 2px rgba(28, 32, 36, 0.06);
+  --sh2: 0 1px 2px rgba(28, 32, 36, 0.06), 0 8px 24px rgba(28, 32, 36, 0.1);
+
+  --r1: 6px;
+  --r2: 8px;
+  --r3: 12px;
+
+  --font: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", "JetBrains Mono", Consolas, monospace;
+
+  --sidebar-w: 232px;
+  --topbar-h: 54px;
+  --drawer-w: 400px;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --n1: #111113;
+  --n2: #18191b;
+  --n3: #212225;
+  --n4: #272a2d;
+  --n5: #2e3135;
+  --n6: #363a3f;
+  --n7: #43484e;
+  --n8: #5a6169;
+  --n9: #696e77;
+  --n10: #777b84;
+  --n11: #b0b4ba;
+  --n12: #edeef0;
+
+  --canvas: var(--n1);
+  --panel: var(--n2);
+
+  --acc: #6e6ade;
+  --acc-h: #7c79e8;
+  --acc-soft: #1d2045;
+  --acc-tx: #b1a9ff;
+  --acc-ring: rgba(110, 106, 222, 0.55);
+
+  --ok: #3dd68c;
+  --ok-bg: #12261c;
+  --warn: #ffca16;
+  --warn-bg: #2a2008;
+  --crit: #ff6369;
+  --crit-bg: #2d1417;
+  --info: #70b8ff;
+  --info-bg: #0f2437;
+
+  --sh1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --sh2: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+
+    --n1: #111113;
+    --n2: #18191b;
+    --n3: #212225;
+    --n4: #272a2d;
+    --n5: #2e3135;
+    --n6: #363a3f;
+    --n7: #43484e;
+    --n8: #5a6169;
+    --n9: #696e77;
+    --n10: #777b84;
+    --n11: #b0b4ba;
+    --n12: #edeef0;
+
+    --canvas: var(--n1);
+    --panel: var(--n2);
+
+    --acc: #6e6ade;
+    --acc-h: #7c79e8;
+    --acc-soft: #1d2045;
+    --acc-tx: #b1a9ff;
+    --acc-ring: rgba(110, 106, 222, 0.55);
+
+    --ok: #3dd68c;
+    --ok-bg: #12261c;
+    --warn: #ffca16;
+    --warn-bg: #2a2008;
+    --crit: #ff6369;
+    --crit-bg: #2d1417;
+    --info: #70b8ff;
+    --info-bg: #0f2437;
+
+    --sh1: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --sh2: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 32px rgba(0, 0, 0, 0.45);
+  }
+}

@@ -1,0 +1,205 @@
+/* Общие классы компонентов: используются шаблонами сервера и SPA. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--r1);
+  border: 1px solid var(--line2);
+  background: var(--panel);
+  color: var(--tx);
+  font-weight: 500;
+  font-size: 13px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.btn:hover {
+  background: var(--hover);
+  text-decoration: none;
+}
+
+.btn:active {
+  background: var(--active);
+}
+
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.btn-primary {
+  background: var(--acc);
+  border-color: var(--acc);
+  color: var(--acc-on);
+}
+
+.btn-primary:hover {
+  background: var(--acc-h);
+}
+
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.btn-danger {
+  background: var(--crit);
+  border-color: var(--crit);
+  color: #fff;
+}
+
+.btn-sm {
+  height: 26px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field + .field {
+  margin-top: 14px;
+}
+
+.label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--tx2);
+}
+
+.input {
+  height: 34px;
+  width: 100%;
+  padding: 0 10px;
+  border: 1px solid var(--line2);
+  border-radius: var(--r1);
+  background: var(--panel);
+  font-size: 14px;
+}
+
+.input:hover {
+  border-color: var(--n8);
+}
+
+.input:focus {
+  outline: 2px solid var(--acc-ring);
+  outline-offset: -1px;
+  border-color: var(--acc);
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--crit);
+}
+
+.field-error {
+  font-size: 12.5px;
+  color: var(--crit);
+}
+
+.field-hint {
+  font-size: 12.5px;
+  color: var(--tx2);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r3);
+  box-shadow: var(--sh1);
+}
+
+.notice {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r2);
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+
+.notice-error {
+  background: var(--crit-bg);
+  color: var(--crit);
+}
+
+.notice-ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.notice-info {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 99px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge-plain::before {
+  display: none;
+}
+
+.badge-ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.badge-warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.badge-crit {
+  background: var(--crit-bg);
+  color: var(--crit);
+}
+
+.badge-info {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.badge-neutral {
+  background: var(--n3);
+  color: var(--tx2);
+}
+
+kbd {
+  font: 11px var(--font);
+  border: 1px solid var(--line2);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 0 5px;
+  background: var(--panel);
+  color: var(--tx2);
+}

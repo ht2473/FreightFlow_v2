@@ -37,9 +37,13 @@ linters:
     paths:
       - internal/api/gen
       - internal/.*/sqlc
+      - _templ\.go$
     rules:
       - path: _test\.go
-        linters: [gosec, unparam, noctx]
+        linters: [gosec, unparam, noctx, bodyclose]
+      # Компоненты templ получают контекст при отрисовке (Render(ctx, w)), а не при создании.
+      - path: internal/web/
+        linters: [contextcheck]
 
 formatters:
   enable:

@@ -1,0 +1,5 @@
+/* Точка входа стилей для страниц, которые формирует сервер (вход, справка, ошибки). */
+@import "./tokens.css";
+@import "./base.css";
+@import "./components.css";
+@import "./auth.css";

@@ -1,0 +1,197 @@
+package web
+
+// page — общие данные страницы.
+type page struct {
+	Title string
+	Theme string
+	CSS   string
+}
+
+// formState — значения и ошибки формы.
+type formState struct {
+	Values map[string]string
+	Errors map[string]string
+	Error  string
+	Info   string
+}
+
+func (f formState) value(name string) string { return f.Values[name] }
+
+func (f formState) fieldError(name string) string { return f.Errors[name] }
+
+templ authLayout(p page) {
+	<!DOCTYPE html>
+	<html lang="ru" if p.Theme != "" {
+		data-theme={ p.Theme }
+	}>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<meta name="color-scheme" content="light dark"/>
+			<title>{ p.Title } — FreightFlow</title>
+			<link rel="stylesheet" href={ p.CSS }/>
+			<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+		</head>
+		<body>
+			<main class="auth-page">
+				<div class="card auth-card">
+					<div class="auth-brand"><span class="auth-brand-mark" aria-hidden="true">FF</span>FreightFlow</div>
+					{ children... }
+				</div>
+			</main>
+		</body>
+	</html>
+}
+
+templ notices(f formState) {
+	if f.Error != "" {
+		<div class="notice notice-error" role="alert">{ f.Error }</div>
+	}
+	if f.Info != "" {
+		<div class="notice notice-info" role="status">{ f.Info }</div>
+	}
+}
+
+templ textField(id, label, typ, autocomplete string, f formState, required bool, hint string) {
+	<div class="field">
+		<label class="label" for={ id }>{ label }</label>
+		<input
+			class="input"
+			id={ id }
+			name={ id }
+			type={ typ }
+			autocomplete={ autocomplete }
+			value={ f.value(id) }
+			required?={ required }
+			if f.fieldError(id) != "" {
+				aria-invalid="true"
+				aria-describedby={ id + "-error" }
+			}
+		/>
+		if f.fieldError(id) != "" {
+			<div class="field-error" id={ id + "-error" }>{ f.fieldError(id) }</div>
+		} else if hint != "" {
+			<div class="field-hint">{ hint }</div>
+		}
+	</div>
+}
+
+templ loginPage(p page, f formState, next string) {
+	@authLayout(p) {
+		<h1>Вход</h1>
+		<p class="auth-lead">Система мониторинга логистической инфраструктуры Москвы</p>
+		@notices(f)
+		<form method="post" action="/login" novalidate>
+			<input type="hidden" name="next" value={ next }/>
+			@textField("email", "Электронная почта", "email", "username", f, true, "")
+			@textField("password", "Пароль", "password", "current-password", f, true, "")
+			<div class="auth-actions">
+				<button class="btn btn-primary btn-block" type="submit">Войти</button>
+				<div class="auth-links"><a href="/password/forgot">Забыли пароль?</a></div>
+			</div>
+		</form>
+	}
+}
+
+templ secondFactorPage(p page, f formState, next string) {
+	@authLayout(p) {
+		<h1>Подтверждение входа</h1>
+		<p class="auth-lead">Введите код из приложения-аутентификатора или резервный код</p>
+		@notices(f)
+		<form method="post" action="/login/2fa" novalidate>
+			<input type="hidden" name="next" value={ next }/>
+			@textField("code", "Код", "text", "one-time-code", f, true, "")
+			<div class="auth-actions">
+				<button class="btn btn-primary btn-block" type="submit">Подтвердить</button>
+				<div class="auth-links"><a href="/login">Войти под другой учётной записью</a></div>
+			</div>
+		</form>
+	}
+}
+
+templ setupTOTPPage(p page, f formState, qrDataURI, secret string) {
+	@authLayout(p) {
+		<h1>Двухфакторная защита</h1>
+		<p class="auth-lead">Для администраторов вход защищается вторым фактором. Отсканируйте код в приложении-аутентификаторе и введите шестизначный код.</p>
+		@notices(f)
+		<img class="qr" src={ templ.SafeURL(qrDataURI) } alt="QR-код для приложения-аутентификатора"/>
+		<p class="field-hint" style="text-align:center;margin-bottom:6px">Или введите ключ вручную:</p>
+		<div class="secret-code">{ secret }</div>
+		<form method="post" action="/setup-2fa" novalidate style="margin-top:18px">
+			@textField("code", "Код из приложения", "text", "one-time-code", f, true, "")
+			<div class="auth-actions">
+				<button class="btn btn-primary btn-block" type="submit">Включить защиту</button>
+			</div>
+		</form>
+	}
+}
+
+templ recoveryCodesPage(p page, codes []string, next string) {
+	@authLayout(p) {
+		<h1>Резервные коды</h1>
+		<p class="auth-lead">Сохраните коды в надёжном месте. Каждый код можно использовать один раз, если нет доступа к приложению-аутентификатору. Повторно они не показываются.</p>
+		<div class="recovery-codes">
+			for _, c := range codes {
+				<span>{ c }</span>
+			}
+		</div>
+		<div class="auth-actions">
+			<a class="btn btn-primary btn-block" href={ templ.SafeURL(next) }>Продолжить</a>
+		</div>
+	}
+}
+
+templ invitePage(p page, f formState, email string) {
+	@authLayout(p) {
+		<h1>Создание учётной записи</h1>
+		<p class="auth-lead">Приглашение для { email }</p>
+		@notices(f)
+		<form method="post" novalidate>
+			@textField("name", "Имя", "text", "name", f, true, "")
+			@textField("password", "Пароль", "password", "new-password", f, true, "Не менее 12 символов")
+			<div class="auth-actions">
+				<button class="btn btn-primary btn-block" type="submit">Создать и войти</button>
+			</div>
+		</form>
+	}
+}
+
+templ forgotPage(p page, f formState) {
+	@authLayout(p) {
+		<h1>Восстановление пароля</h1>
+		<p class="auth-lead">Укажите адрес, на который зарегистрирована учётная запись — пришлём ссылку для смены пароля.</p>
+		@notices(f)
+		<form method="post" action="/password/forgot" novalidate>
+			@textField("email", "Электронная почта", "email", "username", f, true, "")
+			<div class="auth-actions">
+				<button class="btn btn-primary btn-block" type="submit">Отправить ссылку</button>
+				<div class="auth-links"><a href="/login">Вернуться ко входу</a></div>
+			</div>
+		</form>
+	}
+}
+
+templ resetPage(p page, f formState) {
+	@authLayout(p) {
+		<h1>Новый пароль</h1>
+		@notices(f)
+		<form method="post" novalidate>
+			@textField("password", "Новый пароль", "password", "new-password", f, true, "Не менее 12 символов")
+			<div class="auth-actions">
+				<button class="btn btn-primary btn-block" type="submit">Сохранить пароль</button>
+			</div>
+		</form>
+	}
+}
+
+templ messagePage(p page, text, linkHref, linkText string) {
+	@authLayout(p) {
+		<h1>{ p.Title }</h1>
+		<p class="auth-lead">{ text }</p>
+		if linkHref != "" {
+			<div class="auth-actions">
+				<a class="btn btn-primary btn-block" href={ templ.SafeURL(linkHref) }>{ linkText }</a>
+			</div>
+		}
+	}
+}

@@ -17,7 +17,8 @@ coverage.*
 
 # Фронтенд
 /web/node_modules/
-/web/dist/
+/web/dist/*
+!/web/dist/.gitkeep
 /web/test-results/
 /web/playwright-report/
 /web/.vite/

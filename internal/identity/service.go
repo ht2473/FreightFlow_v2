@@ -359,6 +359,25 @@ func (s *Service) ChangePassword(ctx context.Context, userID uuid.UUID, current,
 	return s.audit(ctx, s.q, actor, AuditEntry{Action: "auth.password_changed", EntityType: "user", EntityID: u.ID.String()}, meta)
 }
 
+// CheckPassword подтверждает пароль пользователя перед чувствительным действием.
+func (s *Service) CheckPassword(ctx context.Context, userID uuid.UUID, password string) error {
+	u, err := s.q.GetUserByID(ctx, userID)
+	if err != nil {
+		return mapNotFound(err)
+	}
+	if u.PasswordHash == nil {
+		return ErrInvalidCredentials
+	}
+	ok, _, err := VerifyPassword(password, *u.PasswordHash)
+	if err != nil {
+		return fmt.Errorf("verify password: %w", err)
+	}
+	if !ok {
+		return ErrInvalidCredentials
+	}
+	return nil
+}
+
 // NormalizeEmail приводит адрес к нижнему регистру и проверяет формат.
 func NormalizeEmail(email string) (string, error) {
 	email = strings.ToLower(strings.TrimSpace(email))
