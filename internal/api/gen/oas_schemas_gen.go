@@ -529,6 +529,532 @@ func (s *InviteCreated) SetExpiresInHours(val int) {
 	s.ExpiresInHours = val
 }
 
+// Ref: #/components/schemas/LayerCatalog
+type LayerCatalog struct {
+	Groups []LayerGroup `json:"groups"`
+	Layers []MapLayer   `json:"layers"`
+}
+
+// GetGroups returns the value of Groups.
+func (s *LayerCatalog) GetGroups() []LayerGroup {
+	return s.Groups
+}
+
+// GetLayers returns the value of Layers.
+func (s *LayerCatalog) GetLayers() []MapLayer {
+	return s.Layers
+}
+
+// SetGroups sets the value of Groups.
+func (s *LayerCatalog) SetGroups(val []LayerGroup) {
+	s.Groups = val
+}
+
+// SetLayers sets the value of Layers.
+func (s *LayerCatalog) SetLayers(val []MapLayer) {
+	s.Layers = val
+}
+
+// Ref: #/components/schemas/LayerCategory
+type LayerCategory struct {
+	Values []string `json:"values"`
+	Label  string   `json:"label"`
+	Color  string   `json:"color"`
+}
+
+// GetValues returns the value of Values.
+func (s *LayerCategory) GetValues() []string {
+	return s.Values
+}
+
+// GetLabel returns the value of Label.
+func (s *LayerCategory) GetLabel() string {
+	return s.Label
+}
+
+// GetColor returns the value of Color.
+func (s *LayerCategory) GetColor() string {
+	return s.Color
+}
+
+// SetValues sets the value of Values.
+func (s *LayerCategory) SetValues(val []string) {
+	s.Values = val
+}
+
+// SetLabel sets the value of Label.
+func (s *LayerCategory) SetLabel(val string) {
+	s.Label = val
+}
+
+// SetColor sets the value of Color.
+func (s *LayerCategory) SetColor(val string) {
+	s.Color = val
+}
+
+// Ref: #/components/schemas/LayerGroup
+type LayerGroup struct {
+	Code  string `json:"code"`
+	Title string `json:"title"`
+}
+
+// GetCode returns the value of Code.
+func (s *LayerGroup) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *LayerGroup) GetTitle() string {
+	return s.Title
+}
+
+// SetCode sets the value of Code.
+func (s *LayerGroup) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *LayerGroup) SetTitle(val string) {
+	s.Title = val
+}
+
+// Ref: #/components/schemas/LayerProperty
+type LayerProperty struct {
+	Name   string                 `json:"name"`
+	Title  string                 `json:"title"`
+	Kind   LayerPropertyKind      `json:"kind"`
+	Unit   OptString              `json:"unit"`
+	Labels OptLayerPropertyLabels `json:"labels"`
+}
+
+// GetName returns the value of Name.
+func (s *LayerProperty) GetName() string {
+	return s.Name
+}
+
+// GetTitle returns the value of Title.
+func (s *LayerProperty) GetTitle() string {
+	return s.Title
+}
+
+// GetKind returns the value of Kind.
+func (s *LayerProperty) GetKind() LayerPropertyKind {
+	return s.Kind
+}
+
+// GetUnit returns the value of Unit.
+func (s *LayerProperty) GetUnit() OptString {
+	return s.Unit
+}
+
+// GetLabels returns the value of Labels.
+func (s *LayerProperty) GetLabels() OptLayerPropertyLabels {
+	return s.Labels
+}
+
+// SetName sets the value of Name.
+func (s *LayerProperty) SetName(val string) {
+	s.Name = val
+}
+
+// SetTitle sets the value of Title.
+func (s *LayerProperty) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetKind sets the value of Kind.
+func (s *LayerProperty) SetKind(val LayerPropertyKind) {
+	s.Kind = val
+}
+
+// SetUnit sets the value of Unit.
+func (s *LayerProperty) SetUnit(val OptString) {
+	s.Unit = val
+}
+
+// SetLabels sets the value of Labels.
+func (s *LayerProperty) SetLabels(val OptLayerPropertyLabels) {
+	s.Labels = val
+}
+
+type LayerPropertyKind string
+
+const (
+	LayerPropertyKindText   LayerPropertyKind = "text"
+	LayerPropertyKindNumber LayerPropertyKind = "number"
+	LayerPropertyKindBool   LayerPropertyKind = "bool"
+	LayerPropertyKindEnum   LayerPropertyKind = "enum"
+)
+
+// AllValues returns all LayerPropertyKind values.
+func (LayerPropertyKind) AllValues() []LayerPropertyKind {
+	return []LayerPropertyKind{
+		LayerPropertyKindText,
+		LayerPropertyKindNumber,
+		LayerPropertyKindBool,
+		LayerPropertyKindEnum,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LayerPropertyKind) MarshalText() ([]byte, error) {
+	switch s {
+	case LayerPropertyKindText:
+		return []byte(s), nil
+	case LayerPropertyKindNumber:
+		return []byte(s), nil
+	case LayerPropertyKindBool:
+		return []byte(s), nil
+	case LayerPropertyKindEnum:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LayerPropertyKind) UnmarshalText(data []byte) error {
+	switch LayerPropertyKind(data) {
+	case LayerPropertyKindText:
+		*s = LayerPropertyKindText
+		return nil
+	case LayerPropertyKindNumber:
+		*s = LayerPropertyKindNumber
+		return nil
+	case LayerPropertyKindBool:
+		*s = LayerPropertyKindBool
+		return nil
+	case LayerPropertyKindEnum:
+		*s = LayerPropertyKindEnum
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type LayerPropertyLabels map[string]string
+
+func (s *LayerPropertyLabels) init() LayerPropertyLabels {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/LayerStyle
+type LayerStyle struct {
+	Kind LayerStyleKind `json:"kind"`
+	// Роль токена цвета (acc, n9…n12, ok, warn, crit, info, cat1…cat8).
+	Color OptString `json:"color"`
+	// Свойство, по значению которого выбирается цвет.
+	Property OptString `json:"property"`
+	// Логическое свойство, при котором линия пунктирная.
+	DashedBy OptString `json:"dashedBy"`
+	// Пояснение к легенде.
+	Note       OptString       `json:"note"`
+	Categories []LayerCategory `json:"categories"`
+}
+
+// GetKind returns the value of Kind.
+func (s *LayerStyle) GetKind() LayerStyleKind {
+	return s.Kind
+}
+
+// GetColor returns the value of Color.
+func (s *LayerStyle) GetColor() OptString {
+	return s.Color
+}
+
+// GetProperty returns the value of Property.
+func (s *LayerStyle) GetProperty() OptString {
+	return s.Property
+}
+
+// GetDashedBy returns the value of DashedBy.
+func (s *LayerStyle) GetDashedBy() OptString {
+	return s.DashedBy
+}
+
+// GetNote returns the value of Note.
+func (s *LayerStyle) GetNote() OptString {
+	return s.Note
+}
+
+// GetCategories returns the value of Categories.
+func (s *LayerStyle) GetCategories() []LayerCategory {
+	return s.Categories
+}
+
+// SetKind sets the value of Kind.
+func (s *LayerStyle) SetKind(val LayerStyleKind) {
+	s.Kind = val
+}
+
+// SetColor sets the value of Color.
+func (s *LayerStyle) SetColor(val OptString) {
+	s.Color = val
+}
+
+// SetProperty sets the value of Property.
+func (s *LayerStyle) SetProperty(val OptString) {
+	s.Property = val
+}
+
+// SetDashedBy sets the value of DashedBy.
+func (s *LayerStyle) SetDashedBy(val OptString) {
+	s.DashedBy = val
+}
+
+// SetNote sets the value of Note.
+func (s *LayerStyle) SetNote(val OptString) {
+	s.Note = val
+}
+
+// SetCategories sets the value of Categories.
+func (s *LayerStyle) SetCategories(val []LayerCategory) {
+	s.Categories = val
+}
+
+type LayerStyleKind string
+
+const (
+	LayerStyleKindSingle   LayerStyleKind = "single"
+	LayerStyleKindCategory LayerStyleKind = "category"
+)
+
+// AllValues returns all LayerStyleKind values.
+func (LayerStyleKind) AllValues() []LayerStyleKind {
+	return []LayerStyleKind{
+		LayerStyleKindSingle,
+		LayerStyleKindCategory,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LayerStyleKind) MarshalText() ([]byte, error) {
+	switch s {
+	case LayerStyleKindSingle:
+		return []byte(s), nil
+	case LayerStyleKindCategory:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LayerStyleKind) UnmarshalText(data []byte) error {
+	switch LayerStyleKind(data) {
+	case LayerStyleKindSingle:
+		*s = LayerStyleKindSingle
+		return nil
+	case LayerStyleKindCategory:
+		*s = LayerStyleKindCategory
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/MapLayer
+type MapLayer struct {
+	Code        string           `json:"code"`
+	Group       string           `json:"group"`
+	Title       string           `json:"title"`
+	Description string           `json:"description"`
+	Geometry    MapLayerGeometry `json:"geometry"`
+	Minzoom     int              `json:"minzoom"`
+	Maxzoom     int              `json:"maxzoom"`
+	// Шаблон адреса тайлов с версией данных ({z}/{x}/{y}).
+	Tiles       string `json:"tiles"`
+	Version     string `json:"version"`
+	Attribution string `json:"attribution"`
+	// Включён по умолчанию.
+	Visible    bool            `json:"visible"`
+	Style      LayerStyle      `json:"style"`
+	Properties []LayerProperty `json:"properties"`
+}
+
+// GetCode returns the value of Code.
+func (s *MapLayer) GetCode() string {
+	return s.Code
+}
+
+// GetGroup returns the value of Group.
+func (s *MapLayer) GetGroup() string {
+	return s.Group
+}
+
+// GetTitle returns the value of Title.
+func (s *MapLayer) GetTitle() string {
+	return s.Title
+}
+
+// GetDescription returns the value of Description.
+func (s *MapLayer) GetDescription() string {
+	return s.Description
+}
+
+// GetGeometry returns the value of Geometry.
+func (s *MapLayer) GetGeometry() MapLayerGeometry {
+	return s.Geometry
+}
+
+// GetMinzoom returns the value of Minzoom.
+func (s *MapLayer) GetMinzoom() int {
+	return s.Minzoom
+}
+
+// GetMaxzoom returns the value of Maxzoom.
+func (s *MapLayer) GetMaxzoom() int {
+	return s.Maxzoom
+}
+
+// GetTiles returns the value of Tiles.
+func (s *MapLayer) GetTiles() string {
+	return s.Tiles
+}
+
+// GetVersion returns the value of Version.
+func (s *MapLayer) GetVersion() string {
+	return s.Version
+}
+
+// GetAttribution returns the value of Attribution.
+func (s *MapLayer) GetAttribution() string {
+	return s.Attribution
+}
+
+// GetVisible returns the value of Visible.
+func (s *MapLayer) GetVisible() bool {
+	return s.Visible
+}
+
+// GetStyle returns the value of Style.
+func (s *MapLayer) GetStyle() LayerStyle {
+	return s.Style
+}
+
+// GetProperties returns the value of Properties.
+func (s *MapLayer) GetProperties() []LayerProperty {
+	return s.Properties
+}
+
+// SetCode sets the value of Code.
+func (s *MapLayer) SetCode(val string) {
+	s.Code = val
+}
+
+// SetGroup sets the value of Group.
+func (s *MapLayer) SetGroup(val string) {
+	s.Group = val
+}
+
+// SetTitle sets the value of Title.
+func (s *MapLayer) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetDescription sets the value of Description.
+func (s *MapLayer) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetGeometry sets the value of Geometry.
+func (s *MapLayer) SetGeometry(val MapLayerGeometry) {
+	s.Geometry = val
+}
+
+// SetMinzoom sets the value of Minzoom.
+func (s *MapLayer) SetMinzoom(val int) {
+	s.Minzoom = val
+}
+
+// SetMaxzoom sets the value of Maxzoom.
+func (s *MapLayer) SetMaxzoom(val int) {
+	s.Maxzoom = val
+}
+
+// SetTiles sets the value of Tiles.
+func (s *MapLayer) SetTiles(val string) {
+	s.Tiles = val
+}
+
+// SetVersion sets the value of Version.
+func (s *MapLayer) SetVersion(val string) {
+	s.Version = val
+}
+
+// SetAttribution sets the value of Attribution.
+func (s *MapLayer) SetAttribution(val string) {
+	s.Attribution = val
+}
+
+// SetVisible sets the value of Visible.
+func (s *MapLayer) SetVisible(val bool) {
+	s.Visible = val
+}
+
+// SetStyle sets the value of Style.
+func (s *MapLayer) SetStyle(val LayerStyle) {
+	s.Style = val
+}
+
+// SetProperties sets the value of Properties.
+func (s *MapLayer) SetProperties(val []LayerProperty) {
+	s.Properties = val
+}
+
+type MapLayerGeometry string
+
+const (
+	MapLayerGeometryPoint   MapLayerGeometry = "point"
+	MapLayerGeometryLine    MapLayerGeometry = "line"
+	MapLayerGeometryPolygon MapLayerGeometry = "polygon"
+)
+
+// AllValues returns all MapLayerGeometry values.
+func (MapLayerGeometry) AllValues() []MapLayerGeometry {
+	return []MapLayerGeometry{
+		MapLayerGeometryPoint,
+		MapLayerGeometryLine,
+		MapLayerGeometryPolygon,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MapLayerGeometry) MarshalText() ([]byte, error) {
+	switch s {
+	case MapLayerGeometryPoint:
+		return []byte(s), nil
+	case MapLayerGeometryLine:
+		return []byte(s), nil
+	case MapLayerGeometryPolygon:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MapLayerGeometry) UnmarshalText(data []byte) error {
+	switch MapLayerGeometry(data) {
+	case MapLayerGeometryPoint:
+		*s = MapLayerGeometryPoint
+		return nil
+	case MapLayerGeometryLine:
+		*s = MapLayerGeometryLine
+		return nil
+	case MapLayerGeometryPolygon:
+		*s = MapLayerGeometryPolygon
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/Me
 type Me struct {
 	ID          uuid.UUID `json:"id"`
@@ -777,6 +1303,52 @@ func (o OptInt64) Get() (v int64, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptLayerPropertyLabels returns new OptLayerPropertyLabels with value set to v.
+func NewOptLayerPropertyLabels(v LayerPropertyLabels) OptLayerPropertyLabels {
+	return OptLayerPropertyLabels{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLayerPropertyLabels is optional LayerPropertyLabels.
+type OptLayerPropertyLabels struct {
+	Value LayerPropertyLabels
+	Set   bool
+}
+
+// IsSet returns true if OptLayerPropertyLabels was set.
+func (o OptLayerPropertyLabels) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLayerPropertyLabels) Reset() {
+	var v LayerPropertyLabels
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLayerPropertyLabels) SetTo(v LayerPropertyLabels) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLayerPropertyLabels) Get() (v LayerPropertyLabels, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLayerPropertyLabels) Or(d LayerPropertyLabels) LayerPropertyLabels {
 	if v, ok := o.Get(); ok {
 		return v
 	}

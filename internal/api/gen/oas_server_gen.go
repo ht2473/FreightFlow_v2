@@ -80,6 +80,14 @@ type Handler interface {
 	//
 	// GET /admin/audit
 	ListAudit(ctx context.Context, params ListAuditParams) (*AuditPage, error)
+	// ListLayers implements listLayers operation.
+	//
+	// Слои в порядке отрисовки снизу вверх с адресами тайлов
+	// текущей версии данных, правилами оформления (роли
+	// токенов дизайна) и описанием свойств объектов.
+	//
+	// GET /layers
+	ListLayers(ctx context.Context) (*LayerCatalog, error)
 	// ListPermissions implements listPermissions operation.
 	//
 	// Справочник прав.

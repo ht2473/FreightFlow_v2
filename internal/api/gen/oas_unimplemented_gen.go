@@ -121,6 +121,17 @@ func (UnimplementedHandler) ListAudit(ctx context.Context, params ListAuditParam
 	return r, ht.ErrNotImplemented
 }
 
+// ListLayers implements listLayers operation.
+//
+// Слои в порядке отрисовки снизу вверх с адресами тайлов
+// текущей версии данных, правилами оформления (роли
+// токенов дизайна) и описанием свойств объектов.
+//
+// GET /layers
+func (UnimplementedHandler) ListLayers(ctx context.Context) (r *LayerCatalog, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListPermissions implements listPermissions operation.
 //
 // Справочник прав.

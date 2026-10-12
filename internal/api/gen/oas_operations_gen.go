@@ -18,6 +18,7 @@ const (
 	GetSettingsOperation     OperationName = "GetSettings"
 	GetUserOperation         OperationName = "GetUser"
 	ListAuditOperation       OperationName = "ListAudit"
+	ListLayersOperation      OperationName = "ListLayers"
 	ListPermissionsOperation OperationName = "ListPermissions"
 	ListRolesOperation       OperationName = "ListRoles"
 	ListRunsOperation        OperationName = "ListRuns"

@@ -21,6 +21,7 @@ import (
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/mail"
 	"freightflow/internal/platform/session"
+	"freightflow/internal/tiles"
 )
 
 // Mailer отправляет письма.
@@ -32,6 +33,7 @@ type Mailer interface {
 type Deps struct {
 	Identity *identity.Service
 	Ingest   *ingest.Service
+	Layers   *tiles.Service
 	Sessions *session.Manager
 	Mailer   Mailer
 	BaseURL  string
@@ -45,6 +47,7 @@ type Deps struct {
 type Server struct {
 	identity *identity.Service
 	ingest   *ingest.Service
+	layers   *tiles.Service
 	sessions *session.Manager
 	mailer   Mailer
 	baseURL  string
@@ -61,7 +64,7 @@ func New(d Deps) (http.Handler, error) {
 		return nil, err
 	}
 	s := &Server{
-		identity: d.Identity, ingest: d.Ingest, sessions: d.Sessions, mailer: d.Mailer,
+		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, sessions: d.Sessions, mailer: d.Mailer,
 		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops),
 	}
 	opts := []gen.ServerOption{

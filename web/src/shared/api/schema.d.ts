@@ -248,6 +248,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/layers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Каталог слоёв карты, доступных пользователю
+         * @description Слои в порядке отрисовки снизу вверх с адресами тайлов текущей версии данных,
+         *     правилами оформления (роли токенов дизайна) и описанием свойств объектов.
+         */
+        get: operations["listLayers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/data/sources": {
         parameters: {
             query?: never;
@@ -533,6 +554,60 @@ export interface components {
             message?: string;
             /** Format: date-time */
             checkedAt: string;
+        };
+        LayerCatalog: {
+            groups: components["schemas"]["LayerGroup"][];
+            layers: components["schemas"]["MapLayer"][];
+        };
+        LayerGroup: {
+            code: string;
+            title: string;
+        };
+        MapLayer: {
+            code: string;
+            group: string;
+            title: string;
+            description: string;
+            /** @enum {string} */
+            geometry: "point" | "line" | "polygon";
+            minzoom: number;
+            maxzoom: number;
+            /** @description Шаблон адреса тайлов с версией данных ({z}/{x}/{y}) */
+            tiles: string;
+            version: string;
+            attribution: string;
+            /** @description Включён по умолчанию */
+            visible: boolean;
+            style: components["schemas"]["LayerStyle"];
+            properties: components["schemas"]["LayerProperty"][];
+        };
+        LayerStyle: {
+            /** @enum {string} */
+            kind: "single" | "category";
+            /** @description Роль токена цвета (acc, n9…n12, ok, warn, crit, info, cat1…cat8) */
+            color?: string;
+            /** @description Свойство, по значению которого выбирается цвет */
+            property?: string;
+            /** @description Логическое свойство, при котором линия пунктирная */
+            dashedBy?: string;
+            /** @description Пояснение к легенде */
+            note?: string;
+            categories: components["schemas"]["LayerCategory"][];
+        };
+        LayerCategory: {
+            values: string[];
+            label: string;
+            color: string;
+        };
+        LayerProperty: {
+            name: string;
+            title: string;
+            /** @enum {string} */
+            kind: "text" | "number" | "bool" | "enum";
+            unit?: string;
+            labels?: {
+                [key: string]: string;
+            };
         };
     };
     responses: {
@@ -1014,6 +1089,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditPage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listLayers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Каталог */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LayerCatalog"];
                 };
             };
             default: components["responses"]["Problem"];

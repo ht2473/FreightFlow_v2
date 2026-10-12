@@ -21,6 +21,7 @@ import (
 	"freightflow/internal/platform/problem"
 	"freightflow/internal/platform/secret"
 	"freightflow/internal/platform/session"
+	"freightflow/internal/tiles"
 )
 
 func TestEveryOperationHasKnownPermission(t *testing.T) {
@@ -82,8 +83,9 @@ func newFixture(t *testing.T) *fixture {
 	if err != nil {
 		t.Fatal(err)
 	}
+	layers := tiles.NewService(pool, ing, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	h, err := New(Deps{
-		Identity: ids, Ingest: ing, Sessions: sessions, Mailer: mailer, BaseURL: "http://test.local",
+		Identity: ids, Ingest: ing, Layers: layers, Sessions: sessions, Mailer: mailer, BaseURL: "http://test.local",
 		Log: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
 	if err != nil {
@@ -203,6 +205,8 @@ func TestAPIAuthorization(t *testing.T) {
 		},
 		{"malformed body", http.MethodPost, "/api/v1/admin/users", admin, `{`, http.StatusBadRequest},
 		{"analyst cannot manage data", http.MethodGet, "/api/v1/data/sources", analyst, "", http.StatusForbidden},
+		{"analyst lists layers", http.MethodGet, "/api/v1/layers", analyst, "", http.StatusOK},
+		{"map scope lists layers", http.MethodGet, "/api/v1/layers", narrow, "", http.StatusOK},
 		{"steward lists sources", http.MethodGet, "/api/v1/data/sources", steward, "", http.StatusOK},
 		{"unknown source", http.MethodPost, "/api/v1/data/sources/nope/runs", steward, `{}`, http.StatusNotFound},
 		{"invalid source code", http.MethodGet, "/api/v1/data/sources/Bad-Code/runs", steward, "", http.StatusBadRequest},

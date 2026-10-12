@@ -20,6 +20,8 @@ tags:
     description: Администрирование
   - name: data
     description: Источники данных и загрузки
+  - name: layers
+    description: Слои карты
 
 paths:
   /me:
@@ -347,6 +349,23 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/AuditPage" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /layers:
+    get:
+      tags: [layers]
+      operationId: listLayers
+      summary: Каталог слоёв карты, доступных пользователю
+      description: |
+        Слои в порядке отрисовки снизу вверх с адресами тайлов текущей версии данных,
+        правилами оформления (роли токенов дизайна) и описанием свойств объектов.
+      x-permission: map.view
+      responses:
+        "200":
+          description: Каталог
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LayerCatalog" }
         default: { $ref: "#/components/responses/Problem" }
 
   /data/sources:
@@ -799,3 +818,94 @@ components:
         expected: {}
         message: { type: string }
         checkedAt: { type: string, format: date-time }
+
+    LayerCatalog:
+      type: object
+      required: [groups, layers]
+      properties:
+        groups:
+          type: array
+          items: { $ref: "#/components/schemas/LayerGroup" }
+        layers:
+          type: array
+          items: { $ref: "#/components/schemas/MapLayer" }
+
+    LayerGroup:
+      type: object
+      required: [code, title]
+      properties:
+        code: { type: string }
+        title: { type: string }
+
+    MapLayer:
+      type: object
+      required: [code, group, title, description, geometry, minzoom, maxzoom, tiles, version, attribution, visible, style, properties]
+      properties:
+        code: { type: string }
+        group: { type: string }
+        title: { type: string }
+        description: { type: string }
+        geometry:
+          type: string
+          enum: [point, line, polygon]
+        minzoom: { type: integer }
+        maxzoom: { type: integer }
+        tiles:
+          type: string
+          description: Шаблон адреса тайлов с версией данных ({z}/{x}/{y})
+        version: { type: string }
+        attribution: { type: string }
+        visible:
+          type: boolean
+          description: Включён по умолчанию
+        style: { $ref: "#/components/schemas/LayerStyle" }
+        properties:
+          type: array
+          items: { $ref: "#/components/schemas/LayerProperty" }
+
+    LayerStyle:
+      type: object
+      required: [kind, categories]
+      properties:
+        kind:
+          type: string
+          enum: [single, category]
+        color:
+          type: string
+          description: Роль токена цвета (acc, n9…n12, ok, warn, crit, info, cat1…cat8)
+        property:
+          type: string
+          description: Свойство, по значению которого выбирается цвет
+        dashedBy:
+          type: string
+          description: Логическое свойство, при котором линия пунктирная
+        note:
+          type: string
+          description: Пояснение к легенде
+        categories:
+          type: array
+          items: { $ref: "#/components/schemas/LayerCategory" }
+
+    LayerCategory:
+      type: object
+      required: [values, label, color]
+      properties:
+        values:
+          type: array
+          items: { type: string }
+        label: { type: string }
+        color: { type: string }
+
+    LayerProperty:
+      type: object
+      required: [name, title, kind]
+      properties:
+        name: { type: string }
+        title: { type: string }
+        kind:
+          type: string
+          enum: [text, number, bool, enum]
+        unit: { type: string }
+        labels:
+          type: object
+          additionalProperties: { type: string }

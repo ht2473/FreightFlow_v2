@@ -3,9 +3,12 @@
 package tiles
 
 import (
+	"bytes"
+	"compress/gzip"
 	"embed"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -25,7 +28,10 @@ const BasemapAttribution = `<a href="https://protomaps.com" target="_blank" rel=
 // Deps — зависимости раздачи карты.
 type Deps struct {
 	Basemap *Basemap
-	Log     *slog.Logger
+	// Data и Auth — тайлы слоёв данных; без них раздаётся только подложка.
+	Data *Service
+	Auth *Auth
+	Log  *slog.Logger
 }
 
 // Handler — маршруты /map/...
@@ -45,6 +51,9 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /map/basemap/{version}/{z}/{x}/{y}", h.basemapTile)
 	mux.HandleFunc("GET /map/fonts/{stack}/{range}", h.glyphs)
 	mux.HandleFunc("GET /map/sprites/{file}", h.sprite)
+	if d.Data != nil && d.Auth != nil {
+		mux.HandleFunc("GET /tiles/{layer}/{z}/{x}/{y}", h.dataTile)
+	}
 	return mux
 }
 
@@ -109,6 +118,75 @@ func (h *Handler) basemapTile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeTile(w, data, arch.Header().TileCompression)
+}
+
+// dataTile отдаёт тайл слоя данных. Доступ — по праву слоя; адрес содержит версию данных
+// (параметр v из каталога), поэтому ответ кешируется браузером, но не общими кешами.
+func (h *Handler) dataTile(w http.ResponseWriter, r *http.Request) {
+	p, ok := h.d.Auth.Principal(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	l, ok := layerByCode(r.PathValue("layer"))
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	if !p.Has(l.Permission) {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+	z, x, y, ok := tileCoords(r)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	if int(z) < l.MinZoom || int(z) > l.MaxZoom {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	data, version, err := h.d.Data.Tile(r.Context(), l, z, x, y)
+	if err != nil {
+		h.d.Log.ErrorContext(r.Context(), "data tile", "layer", l.Code, "z", z, "x", x, "y", y, "error", err)
+		http.Error(w, "tile error", http.StatusInternalServerError)
+		return
+	}
+	etag := `"` + l.Code + "-" + version + `"`
+	w.Header().Set("ETag", etag)
+	w.Header().Set("Vary", "Accept-Encoding")
+	if r.URL.Query().Get("v") == version {
+		w.Header().Set("Cache-Control", "private, max-age=86400")
+	} else {
+		w.Header().Set("Cache-Control", "private, no-cache")
+	}
+	if r.Header.Get("If-None-Match") == etag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	if len(data) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		raw, err := gunzip(data)
+		if err != nil {
+			http.Error(w, "tile error", http.StatusInternalServerError)
+			return
+		}
+		writeTile(w, raw, pmtiles.CompressionNone)
+		return
+	}
+	writeTile(w, data, pmtiles.CompressionGzip)
+}
+
+func gunzip(b []byte) ([]byte, error) {
+	zr, err := gzip.NewReader(bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	defer zr.Close()
+	return io.ReadAll(zr)
 }
 
 // glyphs отдаёт диапазон глифов; диапазоны вне набора — пустой ответ, а не ошибка, чтобы

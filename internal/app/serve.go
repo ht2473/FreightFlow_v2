@@ -49,8 +49,14 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 		Host: cfg.SMTP.Host, Port: cfg.SMTP.Port, User: cfg.SMTP.User, Password: cfg.SMTP.Password, From: cfg.SMTP.From,
 	})
 
+	tileLog := env.Log.With("component", "tiles")
+	layers := tiles.NewService(pool, mods.ingest, tileLog)
+	bm := tiles.NewBasemap(cfg.DataDir, tileLog)
+	defer bm.Close()
+	mapHandler := tiles.New(tiles.Deps{Basemap: bm, Data: layers, Auth: tiles.NewAuth(ids, sessions), Log: tileLog})
+
 	apiHandler, err := api.New(api.Deps{
-		Identity: ids, Ingest: mods.ingest, Sessions: sessions, Mailer: mailer, BaseURL: cfg.BaseURL, Log: env.Log,
+		Identity: ids, Ingest: mods.ingest, Layers: layers, Sessions: sessions, Mailer: mailer, BaseURL: cfg.BaseURL, Log: env.Log,
 		Meters: rt.tel.Meters, Tracers: rt.tel.Tracers,
 	})
 	if err != nil {
@@ -63,15 +69,12 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 		return err
 	}
 
-	bm := tiles.NewBasemap(cfg.DataDir, env.Log.With("component", "tiles"))
-	defer bm.Close()
-	mapHandler := tiles.New(tiles.Deps{Basemap: bm, Log: env.Log})
-
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthz", healthz())
 	mux.Handle("GET /readyz", readyz(pool))
 	mux.Handle("/api/v1/", apiHandler)
 	mux.Handle("/map/", mapHandler)
+	mux.Handle("/tiles/", mapHandler)
 	mux.Handle("/", webHandler)
 
 	crossOrigin, err := httpx.CrossOrigin()
@@ -97,6 +100,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	g.Go(func() error { return httpx.Serve(gctx, env.Log, "app", cfg.HTTPAddr, handler) })
 	g.Go(func() error { return rt.serveMetrics(gctx, env, cfg.MetricsAddr) })
 	g.Go(func() error { return events.Listen(gctx, pool, rt.bus, env.Log) })
+	g.Go(func() error { return layers.Watch(gctx, rt.bus) })
 	if *withWorker {
 		g.Go(func() error { return rt.runWorkers(gctx, env, mods.registry(env, pool)) })
 	}
