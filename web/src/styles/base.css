@@ -16,7 +16,7 @@ body {
 body {
   background: var(--canvas);
   color: var(--tx);
-  font: 14px/1.5 var(--font);
+  font: 14px / 1.5 var(--font);
   font-feature-settings: "tnum", "cv11";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -97,7 +97,9 @@ h3 {
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: системная настройка «меньше движения» важнее стилей компонентов */
     animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: то же */
     transition-duration: 0.01ms !important;
   }
 }

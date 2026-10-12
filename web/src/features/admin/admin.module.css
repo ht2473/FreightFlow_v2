@@ -1,0 +1,169 @@
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 300px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line2);
+  border-radius: var(--r1);
+  background: var(--panel);
+  color: var(--tx2);
+}
+
+.search[data-focus-within] {
+  outline: 2px solid var(--acc-ring);
+  border-color: var(--acc);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--tx);
+  font: inherit;
+}
+
+.search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.filter {
+  width: 260px;
+}
+
+.count {
+  margin-left: auto;
+  color: var(--tx2);
+  font-size: 12px;
+}
+
+.pad {
+  padding: 16px 20px;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--tx2);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.fieldset {
+  border: 0;
+  padding: 0;
+  margin: 14px 0 0;
+}
+
+.roleList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.roleHint {
+  display: block;
+  color: var(--tx2);
+  font-size: 12px;
+}
+
+.roleCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.roleCard {
+  padding: 14px 16px;
+}
+
+.roleCount {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--acc-tx);
+}
+
+.scrollX {
+  overflow-x: auto;
+}
+
+.yes {
+  color: var(--ok);
+}
+
+.no {
+  color: var(--n7);
+}
+
+.details {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.details dt {
+  color: var(--tx2);
+}
+
+.details dd {
+  margin: 0;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.json {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--r1);
+  background: var(--n3);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+}

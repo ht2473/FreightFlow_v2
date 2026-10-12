@@ -1,0 +1,31 @@
+/* Точка входа стилей SPA. */
+@import "./tokens.css";
+@import "./base.css";
+@import "./components.css";
+
+#root {
+  height: 100%;
+}
+
+/* Поля React Aria: состояния задаются атрибутами data-*. */
+.input[data-invalid] {
+  border-color: var(--crit);
+}
+
+.btn[data-pressed] {
+  background: var(--active);
+}
+
+.btn-primary[data-pressed] {
+  background: var(--acc-h);
+}
+
+.btn[data-disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn[data-focus-visible] {
+  outline: 2px solid var(--acc-ring);
+  outline-offset: 2px;
+}

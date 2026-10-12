@@ -18,7 +18,8 @@
   font-weight: 100 900;
   font-display: swap;
   src: url("/fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
     U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
@@ -54,13 +55,14 @@
   --acc-ring: rgba(91, 91, 214, 0.45);
   --acc-on: #ffffff;
 
-  --ok: #218358;
+  --ok: #18794e;
   --ok-bg: #e6f6eb;
-  --warn: #ab6400;
+  --warn: #975a00;
   --warn-bg: #fff3d0;
-  --crit: #ce2c31;
+  --crit: #c4262c;
   --crit-bg: #feebec;
-  --info: #0d74ce;
+  --crit-solid: #ce2c31;
+  --info: #0b68b8;
   --info-bg: #e6f4fe;
 
   --sh1: 0 1px 2px rgba(28, 32, 36, 0.06);
@@ -97,11 +99,11 @@
   --canvas: var(--n1);
   --panel: var(--n2);
 
-  --acc: #6e6ade;
-  --acc-h: #7c79e8;
+  --acc: #5b5bd6;
+  --acc-h: #6666de;
   --acc-soft: #1d2045;
   --acc-tx: #b1a9ff;
-  --acc-ring: rgba(110, 106, 222, 0.55);
+  --acc-ring: rgba(124, 121, 232, 0.6);
 
   --ok: #3dd68c;
   --ok-bg: #12261c;
@@ -109,6 +111,7 @@
   --warn-bg: #2a2008;
   --crit: #ff6369;
   --crit-bg: #2d1417;
+  --crit-solid: #cc343a;
   --info: #70b8ff;
   --info-bg: #0f2437;
 
@@ -136,11 +139,11 @@
     --canvas: var(--n1);
     --panel: var(--n2);
 
-    --acc: #6e6ade;
-    --acc-h: #7c79e8;
+    --acc: #5b5bd6;
+    --acc-h: #6666de;
     --acc-soft: #1d2045;
     --acc-tx: #b1a9ff;
-    --acc-ring: rgba(110, 106, 222, 0.55);
+    --acc-ring: rgba(124, 121, 232, 0.6);
 
     --ok: #3dd68c;
     --ok-bg: #12261c;
@@ -148,6 +151,7 @@
     --warn-bg: #2a2008;
     --crit: #ff6369;
     --crit-bg: #2d1417;
+    --crit-solid: #cc343a;
     --info: #70b8ff;
     --info-bg: #0f2437;
 

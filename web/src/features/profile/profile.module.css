@@ -1,0 +1,85 @@
+.page {
+  max-width: 760px;
+}
+
+.form {
+  max-width: 420px;
+}
+
+.actions {
+  margin-top: 16px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+  align-items: center;
+}
+
+.twoFactor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.grow {
+  flex: 1;
+}
+
+.grow :global(.field-hint) {
+  margin-top: 4px;
+}
+
+.ok {
+  color: var(--ok);
+}
+
+.muted {
+  color: var(--tx2);
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.pad {
+  padding: 16px 20px;
+}
+
+.secret {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border-radius: var(--r2);
+  background: var(--n3);
+}
+
+.secret code {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.fieldset {
+  border: 0;
+  padding: 0;
+  margin: 14px 0 0;
+}
+
+.checks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  margin-top: 4px;
+}

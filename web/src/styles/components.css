@@ -15,7 +15,9 @@
   font-size: 13px;
   white-space: nowrap;
   text-decoration: none;
-  transition: background-color 0.12s, border-color 0.12s;
+  transition:
+    background-color 0.12s,
+    border-color 0.12s;
 }
 
 .btn:hover {
@@ -49,8 +51,8 @@
 }
 
 .btn-danger {
-  background: var(--crit);
-  border-color: var(--crit);
+  background: var(--crit-solid);
+  border-color: var(--crit-solid);
   color: #fff;
 }
 

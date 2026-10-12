@@ -83,10 +83,51 @@ tasks:
       - go test ./...
 
   gen:
-    desc: Генерация кода (sqlc)
-    dir: db
+    desc: "Генерация кода: запросы БД, сервер и клиент API, шаблоны страниц"
     cmds:
-      - sqlc generate
+      - cmd: sqlc generate
+        dir: db
+      - go tool ogen --target internal/api/gen --package gen --clean api/openapi.yaml
+      - go tool templ generate
+      - cmd: npm run gen:api
+        dir: web
+
+  web:install:
+    desc: Установить зависимости фронтенда
+    dir: web
+    cmds:
+      - npm ci
+
+  web:dev:
+    desc: Сервер разработки фронтенда (Vite, порт 5173; API — через `task serve`)
+    dir: web
+    cmds:
+      - npm run dev
+
+  web:build:
+    desc: Сборка фронтенда в web/dist (встраивается в бинарник)
+    dir: web
+    cmds:
+      - npm run build
+
+  web:lint:
+    desc: Проверка типов и линтер фронтенда
+    dir: web
+    cmds:
+      - npm run typecheck
+      - npm run lint
+
+  web:test:
+    desc: Тесты компонентов фронтенда
+    dir: web
+    cmds:
+      - npm test
+
+  e2e:
+    desc: Сквозные тесты в браузере (нужны `task serve` и `task web:dev`)
+    dir: web
+    cmds:
+      - npx playwright test
 
   vuln:
     desc: Проверка уязвимостей в зависимостях
@@ -97,6 +138,9 @@ tasks:
     desc: Полная проверка перед коммитом
     cmds:
       - task: lint
+      - task: web:lint
       - task: test
+      - task: web:test
+      - task: web:build
       - task: build
       - task: vuln
