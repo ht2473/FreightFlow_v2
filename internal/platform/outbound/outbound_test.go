@@ -211,3 +211,20 @@ func TestRedact(t *testing.T) {
 		t.Fatalf("redact: %s", got)
 	}
 }
+
+func TestTransportErrorHidesQuery(t *testing.T) {
+	t.Parallel()
+	srv := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	u, _ := url.Parse(srv.URL)
+	srv.Close()
+	c, err := New(t.Context(), Config{Hosts: []string{u.Hostname()}, Direct: true, AllowPrivate: true, Retries: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.sleep = func(context.Context, time.Duration) error { return nil }
+	// Сервер закрыт — ошибка соединения; ключ из адреса не должен попасть в текст ошибки.
+	_, err = c.Get(context.Background(), srv.URL+"/data?api_key=secret-key", Validators{})
+	if err == nil || strings.Contains(err.Error(), "secret-key") {
+		t.Fatalf("err = %v", err)
+	}
+}

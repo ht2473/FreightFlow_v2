@@ -204,6 +204,11 @@ func (c *Client) send(ctx context.Context, method, rawURL string, body []byte, h
 
 		resp, err := c.http.Do(req)
 		if err != nil {
+			// Ошибка транспорта содержит адрес запроса — без параметров (в них бывает ключ API).
+			var ue *url.Error
+			if errors.As(err, &ue) {
+				ue.URL = redact(ue.URL)
+			}
 			if !retryableErr(err) || ctx.Err() != nil {
 				return nil, err
 			}
