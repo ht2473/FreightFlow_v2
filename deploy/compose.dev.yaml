@@ -67,13 +67,22 @@ services:
       db:
         condition: service_healthy
 
+  # Маршрутизация: граф из var/routing/current (task routing:build), служба — task routing:up.
   routing:
     image: ghcr.io/valhalla/valhalla:3.9.1
     profiles: ["routing"]
+    entrypoint: ["valhalla_service", "/custom_files/current/valhalla.json", "4"]
     ports:
       - "8002:8002"
     volumes:
       - ../var/routing:/custom_files
+      - ./valhalla:/opt/valhalla:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8002/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
 
   pdf:
     image: chromedp/headless-shell:stable

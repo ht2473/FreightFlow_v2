@@ -59,6 +59,24 @@ tasks:
     cmds:
       - "{{.COMPOSE}} --profile etl up -d worker"
 
+  routing:prepare:
+    desc: Наложить ограничения из знаков на выгрузку маршрутизации (контейнер worker)
+    deps: [build:linux]
+    cmds:
+      - "{{.COMPOSE}} --profile etl run --rm worker routing prepare"
+
+  routing:build:
+    desc: Собрать граф Valhalla и переключить на него службу маршрутизации
+    deps: [routing:prepare]
+    cmds:
+      - "{{.COMPOSE}} --profile routing run --rm --no-deps --entrypoint /bin/bash routing /opt/valhalla/build.sh"
+      - "{{.COMPOSE}} --profile routing up -d --force-recreate routing"
+
+  routing:up:
+    desc: Запустить службу маршрутизации (граф — task routing:build)
+    cmds:
+      - "{{.COMPOSE}} --profile routing up -d routing"
+
   etl:run:
     desc: "Загрузить источник в контейнере worker: task etl:run SOURCE=osm [FORCE=1]"
     deps: [build:linux]
