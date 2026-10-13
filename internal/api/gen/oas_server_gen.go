@@ -56,6 +56,29 @@ type Handler interface {
 	//
 	// GET /me
 	GetMe(ctx context.Context) (*Me, error)
+	// GetPassStats implements getPassStats operation.
+	//
+	// Только агрегаты; номера пропусков и сведения о ТС не
+	// хранятся.
+	//
+	// GET /regulation/passes
+	GetPassStats(ctx context.Context) (*PassStats, error)
+	// GetPermitStats implements getPermitStats operation.
+	//
+	// Спецразрешения на тяжеловесные и крупногабаритные ТС
+	// по месяцам и видам.
+	//
+	// GET /regulation/permits
+	GetPermitStats(ctx context.Context) (*PermitStats, error)
+	// GetRegulation implements getRegulation operation.
+	//
+	// Правила зон СК, ТТК и МКАД сверены с правовыми актами и
+	// официальными страницами Дептранса; неподтверждённые
+	// правила отмечены `confirmed: false`. Страницы, изменившиеся
+	// после сверки, отмечены `changedSinceVerification`.
+	//
+	// GET /regulation
+	GetRegulation(ctx context.Context) (*RegulationOverview, error)
 	// GetRun implements getRun operation.
 	//
 	// Запуск с журналом и проверками качества.
@@ -68,6 +91,16 @@ type Handler interface {
 	//
 	// GET /me/settings
 	GetSettings(ctx context.Context) (*Settings, error)
+	// GetSignQuality implements getSignQuality operation.
+	//
+	// Знаки ограничений из реестра Москвы: сколько
+	// привязано к участкам сети, неоднозначно или не
+	// привязано, по видам знаков; ограничения, полученные из
+	// знаков; расхождения с разметкой OSM по видам
+	// ограничений.
+	//
+	// GET /regulation/signs
+	GetSignQuality(ctx context.Context) (*SignQuality, error)
 	// GetUser implements getUser operation.
 	//
 	// Пользователь.

@@ -283,6 +283,126 @@ func (s *BearerAuth) SetRoles(val []string) {
 	s.Roles = val
 }
 
+// Ref: #/components/schemas/CargoFrame
+type CargoFrame struct {
+	Streets int `json:"streets"`
+	// Улиц перечня, найденных в дорожной сети.
+	Matched int `json:"matched"`
+	// Строк перечня с участком улицы.
+	Partial   int               `json:"partial"`
+	LengthKm  float64           `json:"lengthKm"`
+	UpdatedAt OptDateTime       `json:"updatedAt"`
+	Okrugs    []CargoFrameOkrug `json:"okrugs"`
+}
+
+// GetStreets returns the value of Streets.
+func (s *CargoFrame) GetStreets() int {
+	return s.Streets
+}
+
+// GetMatched returns the value of Matched.
+func (s *CargoFrame) GetMatched() int {
+	return s.Matched
+}
+
+// GetPartial returns the value of Partial.
+func (s *CargoFrame) GetPartial() int {
+	return s.Partial
+}
+
+// GetLengthKm returns the value of LengthKm.
+func (s *CargoFrame) GetLengthKm() float64 {
+	return s.LengthKm
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *CargoFrame) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// GetOkrugs returns the value of Okrugs.
+func (s *CargoFrame) GetOkrugs() []CargoFrameOkrug {
+	return s.Okrugs
+}
+
+// SetStreets sets the value of Streets.
+func (s *CargoFrame) SetStreets(val int) {
+	s.Streets = val
+}
+
+// SetMatched sets the value of Matched.
+func (s *CargoFrame) SetMatched(val int) {
+	s.Matched = val
+}
+
+// SetPartial sets the value of Partial.
+func (s *CargoFrame) SetPartial(val int) {
+	s.Partial = val
+}
+
+// SetLengthKm sets the value of LengthKm.
+func (s *CargoFrame) SetLengthKm(val float64) {
+	s.LengthKm = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *CargoFrame) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// SetOkrugs sets the value of Okrugs.
+func (s *CargoFrame) SetOkrugs(val []CargoFrameOkrug) {
+	s.Okrugs = val
+}
+
+// Ref: #/components/schemas/CargoFrameOkrug
+type CargoFrameOkrug struct {
+	Okrug    string  `json:"okrug"`
+	Streets  int     `json:"streets"`
+	Matched  int     `json:"matched"`
+	LengthKm float64 `json:"lengthKm"`
+}
+
+// GetOkrug returns the value of Okrug.
+func (s *CargoFrameOkrug) GetOkrug() string {
+	return s.Okrug
+}
+
+// GetStreets returns the value of Streets.
+func (s *CargoFrameOkrug) GetStreets() int {
+	return s.Streets
+}
+
+// GetMatched returns the value of Matched.
+func (s *CargoFrameOkrug) GetMatched() int {
+	return s.Matched
+}
+
+// GetLengthKm returns the value of LengthKm.
+func (s *CargoFrameOkrug) GetLengthKm() float64 {
+	return s.LengthKm
+}
+
+// SetOkrug sets the value of Okrug.
+func (s *CargoFrameOkrug) SetOkrug(val string) {
+	s.Okrug = val
+}
+
+// SetStreets sets the value of Streets.
+func (s *CargoFrameOkrug) SetStreets(val int) {
+	s.Streets = val
+}
+
+// SetMatched sets the value of Matched.
+func (s *CargoFrameOkrug) SetMatched(val int) {
+	s.Matched = val
+}
+
+// SetLengthKm sets the value of LengthKm.
+func (s *CargoFrameOkrug) SetLengthKm(val float64) {
+	s.LengthKm = val
+}
+
 // Ref: #/components/schemas/ChangePassword
 type ChangePassword struct {
 	CurrentPassword string `json:"currentPassword"`
@@ -311,6 +431,88 @@ func (s *ChangePassword) SetNewPassword(val string) {
 
 // ChangePasswordNoContent is response for ChangePassword operation.
 type ChangePasswordNoContent struct{}
+
+// Ref: #/components/schemas/ConflictCount
+type ConflictCount struct {
+	// Sign_not_in_osm — знак есть, в OSM ограничения нет; osm_not_signed — в
+	// OSM есть, знака рядом нет.
+	Type     ConflictCountType `json:"type"`
+	Kind     string            `json:"kind"`
+	Segments int               `json:"segments"`
+}
+
+// GetType returns the value of Type.
+func (s *ConflictCount) GetType() ConflictCountType {
+	return s.Type
+}
+
+// GetKind returns the value of Kind.
+func (s *ConflictCount) GetKind() string {
+	return s.Kind
+}
+
+// GetSegments returns the value of Segments.
+func (s *ConflictCount) GetSegments() int {
+	return s.Segments
+}
+
+// SetType sets the value of Type.
+func (s *ConflictCount) SetType(val ConflictCountType) {
+	s.Type = val
+}
+
+// SetKind sets the value of Kind.
+func (s *ConflictCount) SetKind(val string) {
+	s.Kind = val
+}
+
+// SetSegments sets the value of Segments.
+func (s *ConflictCount) SetSegments(val int) {
+	s.Segments = val
+}
+
+// Sign_not_in_osm — знак есть, в OSM ограничения нет; osm_not_signed — в
+// OSM есть, знака рядом нет.
+type ConflictCountType string
+
+const (
+	ConflictCountTypeSignNotInOsm ConflictCountType = "sign_not_in_osm"
+	ConflictCountTypeOsmNotSigned ConflictCountType = "osm_not_signed"
+)
+
+// AllValues returns all ConflictCountType values.
+func (ConflictCountType) AllValues() []ConflictCountType {
+	return []ConflictCountType{
+		ConflictCountTypeSignNotInOsm,
+		ConflictCountTypeOsmNotSigned,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ConflictCountType) MarshalText() ([]byte, error) {
+	switch s {
+	case ConflictCountTypeSignNotInOsm:
+		return []byte(s), nil
+	case ConflictCountTypeOsmNotSigned:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ConflictCountType) UnmarshalText(data []byte) error {
+	switch ConflictCountType(data) {
+	case ConflictCountTypeSignNotInOsm:
+		*s = ConflictCountTypeSignNotInOsm
+		return nil
+	case ConflictCountTypeOsmNotSigned:
+		*s = ConflictCountTypeOsmNotSigned
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type CookieAuth struct {
 	APIKey string
@@ -858,6 +1060,238 @@ func (s *LayerStyleKind) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/LegalDocument
+type LegalDocument struct {
+	Code        string              `json:"code"`
+	Kind        LegalDocumentKind   `json:"kind"`
+	Title       string              `json:"title"`
+	Number      OptString           `json:"number"`
+	SignedOn    OptDate             `json:"signedOn"`
+	EffectiveOn OptDate             `json:"effectiveOn"`
+	Authority   string              `json:"authority"`
+	URL         OptString           `json:"url"`
+	Status      LegalDocumentStatus `json:"status"`
+	Amends      OptString           `json:"amends"`
+	Summary     OptString           `json:"summary"`
+	VerifiedOn  OptDate             `json:"verifiedOn"`
+}
+
+// GetCode returns the value of Code.
+func (s *LegalDocument) GetCode() string {
+	return s.Code
+}
+
+// GetKind returns the value of Kind.
+func (s *LegalDocument) GetKind() LegalDocumentKind {
+	return s.Kind
+}
+
+// GetTitle returns the value of Title.
+func (s *LegalDocument) GetTitle() string {
+	return s.Title
+}
+
+// GetNumber returns the value of Number.
+func (s *LegalDocument) GetNumber() OptString {
+	return s.Number
+}
+
+// GetSignedOn returns the value of SignedOn.
+func (s *LegalDocument) GetSignedOn() OptDate {
+	return s.SignedOn
+}
+
+// GetEffectiveOn returns the value of EffectiveOn.
+func (s *LegalDocument) GetEffectiveOn() OptDate {
+	return s.EffectiveOn
+}
+
+// GetAuthority returns the value of Authority.
+func (s *LegalDocument) GetAuthority() string {
+	return s.Authority
+}
+
+// GetURL returns the value of URL.
+func (s *LegalDocument) GetURL() OptString {
+	return s.URL
+}
+
+// GetStatus returns the value of Status.
+func (s *LegalDocument) GetStatus() LegalDocumentStatus {
+	return s.Status
+}
+
+// GetAmends returns the value of Amends.
+func (s *LegalDocument) GetAmends() OptString {
+	return s.Amends
+}
+
+// GetSummary returns the value of Summary.
+func (s *LegalDocument) GetSummary() OptString {
+	return s.Summary
+}
+
+// GetVerifiedOn returns the value of VerifiedOn.
+func (s *LegalDocument) GetVerifiedOn() OptDate {
+	return s.VerifiedOn
+}
+
+// SetCode sets the value of Code.
+func (s *LegalDocument) SetCode(val string) {
+	s.Code = val
+}
+
+// SetKind sets the value of Kind.
+func (s *LegalDocument) SetKind(val LegalDocumentKind) {
+	s.Kind = val
+}
+
+// SetTitle sets the value of Title.
+func (s *LegalDocument) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetNumber sets the value of Number.
+func (s *LegalDocument) SetNumber(val OptString) {
+	s.Number = val
+}
+
+// SetSignedOn sets the value of SignedOn.
+func (s *LegalDocument) SetSignedOn(val OptDate) {
+	s.SignedOn = val
+}
+
+// SetEffectiveOn sets the value of EffectiveOn.
+func (s *LegalDocument) SetEffectiveOn(val OptDate) {
+	s.EffectiveOn = val
+}
+
+// SetAuthority sets the value of Authority.
+func (s *LegalDocument) SetAuthority(val string) {
+	s.Authority = val
+}
+
+// SetURL sets the value of URL.
+func (s *LegalDocument) SetURL(val OptString) {
+	s.URL = val
+}
+
+// SetStatus sets the value of Status.
+func (s *LegalDocument) SetStatus(val LegalDocumentStatus) {
+	s.Status = val
+}
+
+// SetAmends sets the value of Amends.
+func (s *LegalDocument) SetAmends(val OptString) {
+	s.Amends = val
+}
+
+// SetSummary sets the value of Summary.
+func (s *LegalDocument) SetSummary(val OptString) {
+	s.Summary = val
+}
+
+// SetVerifiedOn sets the value of VerifiedOn.
+func (s *LegalDocument) SetVerifiedOn(val OptDate) {
+	s.VerifiedOn = val
+}
+
+type LegalDocumentKind string
+
+const (
+	LegalDocumentKindAct       LegalDocumentKind = "act"
+	LegalDocumentKindAmendment LegalDocumentKind = "amendment"
+	LegalDocumentKindPage      LegalDocumentKind = "page"
+)
+
+// AllValues returns all LegalDocumentKind values.
+func (LegalDocumentKind) AllValues() []LegalDocumentKind {
+	return []LegalDocumentKind{
+		LegalDocumentKindAct,
+		LegalDocumentKindAmendment,
+		LegalDocumentKindPage,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LegalDocumentKind) MarshalText() ([]byte, error) {
+	switch s {
+	case LegalDocumentKindAct:
+		return []byte(s), nil
+	case LegalDocumentKindAmendment:
+		return []byte(s), nil
+	case LegalDocumentKindPage:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LegalDocumentKind) UnmarshalText(data []byte) error {
+	switch LegalDocumentKind(data) {
+	case LegalDocumentKindAct:
+		*s = LegalDocumentKindAct
+		return nil
+	case LegalDocumentKindAmendment:
+		*s = LegalDocumentKindAmendment
+		return nil
+	case LegalDocumentKindPage:
+		*s = LegalDocumentKindPage
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type LegalDocumentStatus string
+
+const (
+	LegalDocumentStatusInForce  LegalDocumentStatus = "in_force"
+	LegalDocumentStatusRepealed LegalDocumentStatus = "repealed"
+	LegalDocumentStatusInfo     LegalDocumentStatus = "info"
+)
+
+// AllValues returns all LegalDocumentStatus values.
+func (LegalDocumentStatus) AllValues() []LegalDocumentStatus {
+	return []LegalDocumentStatus{
+		LegalDocumentStatusInForce,
+		LegalDocumentStatusRepealed,
+		LegalDocumentStatusInfo,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LegalDocumentStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case LegalDocumentStatusInForce:
+		return []byte(s), nil
+	case LegalDocumentStatusRepealed:
+		return []byte(s), nil
+	case LegalDocumentStatusInfo:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LegalDocumentStatus) UnmarshalText(data []byte) error {
+	switch LegalDocumentStatus(data) {
+	case LegalDocumentStatusInForce:
+		*s = LegalDocumentStatusInForce
+		return nil
+	case LegalDocumentStatusRepealed:
+		*s = LegalDocumentStatusRepealed
+		return nil
+	case LegalDocumentStatusInfo:
+		*s = LegalDocumentStatusInfo
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/MapLayer
 type MapLayer struct {
 	Code        string           `json:"code"`
@@ -1125,6 +1559,128 @@ func (s *Me) SetTotpEnabled(val bool) {
 	s.TotpEnabled = val
 }
 
+// Ref: #/components/schemas/MonthValue
+type MonthValue struct {
+	Month time.Time `json:"month"`
+	Value int       `json:"value"`
+}
+
+// GetMonth returns the value of Month.
+func (s *MonthValue) GetMonth() time.Time {
+	return s.Month
+}
+
+// GetValue returns the value of Value.
+func (s *MonthValue) GetValue() int {
+	return s.Value
+}
+
+// SetMonth sets the value of Month.
+func (s *MonthValue) SetMonth(val time.Time) {
+	s.Month = val
+}
+
+// SetValue sets the value of Value.
+func (s *MonthValue) SetValue(val int) {
+	s.Value = val
+}
+
+// Ref: #/components/schemas/NamedCount
+type NamedCount struct {
+	Name  string `json:"name"`
+	Count int    `json:"count"`
+}
+
+// GetName returns the value of Name.
+func (s *NamedCount) GetName() string {
+	return s.Name
+}
+
+// GetCount returns the value of Count.
+func (s *NamedCount) GetCount() int {
+	return s.Count
+}
+
+// SetName sets the value of Name.
+func (s *NamedCount) SetName(val string) {
+	s.Name = val
+}
+
+// SetCount sets the value of Count.
+func (s *NamedCount) SetCount(val int) {
+	s.Count = val
+}
+
+// Ref: #/components/schemas/OfficialPage
+type OfficialPage struct {
+	Code                     string    `json:"code"`
+	Title                    string    `json:"title"`
+	URL                      string    `json:"url"`
+	FetchedAt                time.Time `json:"fetchedAt"`
+	ChangedAt                time.Time `json:"changedAt"`
+	ChangedSinceVerification bool      `json:"changedSinceVerification"`
+}
+
+// GetCode returns the value of Code.
+func (s *OfficialPage) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *OfficialPage) GetTitle() string {
+	return s.Title
+}
+
+// GetURL returns the value of URL.
+func (s *OfficialPage) GetURL() string {
+	return s.URL
+}
+
+// GetFetchedAt returns the value of FetchedAt.
+func (s *OfficialPage) GetFetchedAt() time.Time {
+	return s.FetchedAt
+}
+
+// GetChangedAt returns the value of ChangedAt.
+func (s *OfficialPage) GetChangedAt() time.Time {
+	return s.ChangedAt
+}
+
+// GetChangedSinceVerification returns the value of ChangedSinceVerification.
+func (s *OfficialPage) GetChangedSinceVerification() bool {
+	return s.ChangedSinceVerification
+}
+
+// SetCode sets the value of Code.
+func (s *OfficialPage) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *OfficialPage) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetURL sets the value of URL.
+func (s *OfficialPage) SetURL(val string) {
+	s.URL = val
+}
+
+// SetFetchedAt sets the value of FetchedAt.
+func (s *OfficialPage) SetFetchedAt(val time.Time) {
+	s.FetchedAt = val
+}
+
+// SetChangedAt sets the value of ChangedAt.
+func (s *OfficialPage) SetChangedAt(val time.Time) {
+	s.ChangedAt = val
+}
+
+// SetChangedSinceVerification sets the value of ChangedSinceVerification.
+func (s *OfficialPage) SetChangedSinceVerification(val bool) {
+	s.ChangedSinceVerification = val
+}
+
 // NewOptBool returns new OptBool with value set to v.
 func NewOptBool(v bool) OptBool {
 	return OptBool{
@@ -1171,6 +1727,52 @@ func (o OptBool) Or(d bool) bool {
 	return d
 }
 
+// NewOptDate returns new OptDate with value set to v.
+func NewOptDate(v time.Time) OptDate {
+	return OptDate{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDate is optional time.Time.
+type OptDate struct {
+	Value time.Time
+	Set   bool
+}
+
+// IsSet returns true if OptDate was set.
+func (o OptDate) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDate) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDate) SetTo(v time.Time) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDate) Get() (v time.Time, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDate) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDateTime returns new OptDateTime with value set to v.
 func NewOptDateTime(v time.Time) OptDateTime {
 	return OptDateTime{
@@ -1211,6 +1813,52 @@ func (o OptDateTime) Get() (v time.Time, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDateTime) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFloat64 returns new OptFloat64 with value set to v.
+func NewOptFloat64(v float64) OptFloat64 {
+	return OptFloat64{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFloat64 is optional float64.
+type OptFloat64 struct {
+	Value float64
+	Set   bool
+}
+
+// IsSet returns true if OptFloat64 was set.
+func (o OptFloat64) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFloat64) Reset() {
+	var v float64
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFloat64) SetTo(v float64) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFloat64) Get() (v float64, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFloat64) Or(d float64) float64 {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -1539,6 +2187,224 @@ func (o OptUpdateUserStatus) Or(d UpdateUserStatus) UpdateUserStatus {
 	return d
 }
 
+// NewOptZoneRuleMassBasis returns new OptZoneRuleMassBasis with value set to v.
+func NewOptZoneRuleMassBasis(v ZoneRuleMassBasis) OptZoneRuleMassBasis {
+	return OptZoneRuleMassBasis{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptZoneRuleMassBasis is optional ZoneRuleMassBasis.
+type OptZoneRuleMassBasis struct {
+	Value ZoneRuleMassBasis
+	Set   bool
+}
+
+// IsSet returns true if OptZoneRuleMassBasis was set.
+func (o OptZoneRuleMassBasis) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptZoneRuleMassBasis) Reset() {
+	var v ZoneRuleMassBasis
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptZoneRuleMassBasis) SetTo(v ZoneRuleMassBasis) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptZoneRuleMassBasis) Get() (v ZoneRuleMassBasis, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptZoneRuleMassBasis) Or(d ZoneRuleMassBasis) ZoneRuleMassBasis {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptZoneRulePassKind returns new OptZoneRulePassKind with value set to v.
+func NewOptZoneRulePassKind(v ZoneRulePassKind) OptZoneRulePassKind {
+	return OptZoneRulePassKind{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptZoneRulePassKind is optional ZoneRulePassKind.
+type OptZoneRulePassKind struct {
+	Value ZoneRulePassKind
+	Set   bool
+}
+
+// IsSet returns true if OptZoneRulePassKind was set.
+func (o OptZoneRulePassKind) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptZoneRulePassKind) Reset() {
+	var v ZoneRulePassKind
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptZoneRulePassKind) SetTo(v ZoneRulePassKind) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptZoneRulePassKind) Get() (v ZoneRulePassKind, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptZoneRulePassKind) Or(d ZoneRulePassKind) ZoneRulePassKind {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// Ref: #/components/schemas/PassSeries
+type PassSeries struct {
+	Zone   string `json:"zone"`
+	Series string `json:"series"`
+	// Valid — действующих на первое число; issued — начавших
+	// действовать в месяце; cancelled — аннулированных.
+	Metric PassSeriesMetric `json:"metric"`
+	Points []MonthValue     `json:"points"`
+}
+
+// GetZone returns the value of Zone.
+func (s *PassSeries) GetZone() string {
+	return s.Zone
+}
+
+// GetSeries returns the value of Series.
+func (s *PassSeries) GetSeries() string {
+	return s.Series
+}
+
+// GetMetric returns the value of Metric.
+func (s *PassSeries) GetMetric() PassSeriesMetric {
+	return s.Metric
+}
+
+// GetPoints returns the value of Points.
+func (s *PassSeries) GetPoints() []MonthValue {
+	return s.Points
+}
+
+// SetZone sets the value of Zone.
+func (s *PassSeries) SetZone(val string) {
+	s.Zone = val
+}
+
+// SetSeries sets the value of Series.
+func (s *PassSeries) SetSeries(val string) {
+	s.Series = val
+}
+
+// SetMetric sets the value of Metric.
+func (s *PassSeries) SetMetric(val PassSeriesMetric) {
+	s.Metric = val
+}
+
+// SetPoints sets the value of Points.
+func (s *PassSeries) SetPoints(val []MonthValue) {
+	s.Points = val
+}
+
+// Valid — действующих на первое число; issued — начавших
+// действовать в месяце; cancelled — аннулированных.
+type PassSeriesMetric string
+
+const (
+	PassSeriesMetricValid     PassSeriesMetric = "valid"
+	PassSeriesMetricIssued    PassSeriesMetric = "issued"
+	PassSeriesMetricCancelled PassSeriesMetric = "cancelled"
+)
+
+// AllValues returns all PassSeriesMetric values.
+func (PassSeriesMetric) AllValues() []PassSeriesMetric {
+	return []PassSeriesMetric{
+		PassSeriesMetricValid,
+		PassSeriesMetricIssued,
+		PassSeriesMetricCancelled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PassSeriesMetric) MarshalText() ([]byte, error) {
+	switch s {
+	case PassSeriesMetricValid:
+		return []byte(s), nil
+	case PassSeriesMetricIssued:
+		return []byte(s), nil
+	case PassSeriesMetricCancelled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PassSeriesMetric) UnmarshalText(data []byte) error {
+	switch PassSeriesMetric(data) {
+	case PassSeriesMetricValid:
+		*s = PassSeriesMetricValid
+		return nil
+	case PassSeriesMetricIssued:
+		*s = PassSeriesMetricIssued
+		return nil
+	case PassSeriesMetricCancelled:
+		*s = PassSeriesMetricCancelled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/PassStats
+type PassStats struct {
+	UpdatedAt OptDateTime  `json:"updatedAt"`
+	Series    []PassSeries `json:"series"`
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *PassStats) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// GetSeries returns the value of Series.
+func (s *PassStats) GetSeries() []PassSeries {
+	return s.Series
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *PassStats) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// SetSeries sets the value of Series.
+func (s *PassStats) SetSeries(val []PassSeries) {
+	s.Series = val
+}
+
 // Ref: #/components/schemas/PasswordConfirmation
 type PasswordConfirmation struct {
 	Password string `json:"password"`
@@ -1578,6 +2444,58 @@ func (s *PermissionInfo) SetCode(val string) {
 // SetTitle sets the value of Title.
 func (s *PermissionInfo) SetTitle(val string) {
 	s.Title = val
+}
+
+// Ref: #/components/schemas/PermitStats
+type PermitStats struct {
+	UpdatedAt OptDateTime `json:"updatedAt"`
+	Total     int         `json:"total"`
+	// Выдано разрешений по месяцам.
+	Months []MonthValue `json:"months"`
+	// Разрешения по превышенному параметру (масса более 40 т,
+	// ширина более 2,55 м, высота более 4 м, длина более 20 м);
+	// одно разрешение может превышать несколько.
+	Exceeded []NamedCount `json:"exceeded"`
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *PermitStats) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// GetTotal returns the value of Total.
+func (s *PermitStats) GetTotal() int {
+	return s.Total
+}
+
+// GetMonths returns the value of Months.
+func (s *PermitStats) GetMonths() []MonthValue {
+	return s.Months
+}
+
+// GetExceeded returns the value of Exceeded.
+func (s *PermitStats) GetExceeded() []NamedCount {
+	return s.Exceeded
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *PermitStats) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// SetTotal sets the value of Total.
+func (s *PermitStats) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetMonths sets the value of Months.
+func (s *PermitStats) SetMonths(val []MonthValue) {
+	s.Months = val
+}
+
+// SetExceeded sets the value of Exceeded.
+func (s *PermitStats) SetExceeded(val []NamedCount) {
+	s.Exceeded = val
 }
 
 // Ref: #/components/schemas/Problem
@@ -1842,11 +2760,166 @@ func (s *RecoveryCodes) SetCodes(val []string) {
 	s.Codes = val
 }
 
+// Ref: #/components/schemas/RegulationOverview
+type RegulationOverview struct {
+	Zones      []RingZone      `json:"zones"`
+	Rules      []ZoneRule      `json:"rules"`
+	Documents  []LegalDocument `json:"documents"`
+	Pages      []OfficialPage  `json:"pages"`
+	CargoFrame CargoFrame      `json:"cargoFrame"`
+}
+
+// GetZones returns the value of Zones.
+func (s *RegulationOverview) GetZones() []RingZone {
+	return s.Zones
+}
+
+// GetRules returns the value of Rules.
+func (s *RegulationOverview) GetRules() []ZoneRule {
+	return s.Rules
+}
+
+// GetDocuments returns the value of Documents.
+func (s *RegulationOverview) GetDocuments() []LegalDocument {
+	return s.Documents
+}
+
+// GetPages returns the value of Pages.
+func (s *RegulationOverview) GetPages() []OfficialPage {
+	return s.Pages
+}
+
+// GetCargoFrame returns the value of CargoFrame.
+func (s *RegulationOverview) GetCargoFrame() CargoFrame {
+	return s.CargoFrame
+}
+
+// SetZones sets the value of Zones.
+func (s *RegulationOverview) SetZones(val []RingZone) {
+	s.Zones = val
+}
+
+// SetRules sets the value of Rules.
+func (s *RegulationOverview) SetRules(val []ZoneRule) {
+	s.Rules = val
+}
+
+// SetDocuments sets the value of Documents.
+func (s *RegulationOverview) SetDocuments(val []LegalDocument) {
+	s.Documents = val
+}
+
+// SetPages sets the value of Pages.
+func (s *RegulationOverview) SetPages(val []OfficialPage) {
+	s.Pages = val
+}
+
+// SetCargoFrame sets the value of CargoFrame.
+func (s *RegulationOverview) SetCargoFrame(val CargoFrame) {
+	s.CargoFrame = val
+}
+
 // ResetUserTotpNoContent is response for ResetUserTotp operation.
 type ResetUserTotpNoContent struct{}
 
 // RevokeTokenNoContent is response for RevokeToken operation.
 type RevokeTokenNoContent struct{}
+
+// Ref: #/components/schemas/RingZone
+type RingZone struct {
+	Code     RingZoneCode `json:"code"`
+	Name     string       `json:"name"`
+	LengthKm float64      `json:"lengthKm"`
+	AreaKm2  OptFloat64   `json:"areaKm2"`
+}
+
+// GetCode returns the value of Code.
+func (s *RingZone) GetCode() RingZoneCode {
+	return s.Code
+}
+
+// GetName returns the value of Name.
+func (s *RingZone) GetName() string {
+	return s.Name
+}
+
+// GetLengthKm returns the value of LengthKm.
+func (s *RingZone) GetLengthKm() float64 {
+	return s.LengthKm
+}
+
+// GetAreaKm2 returns the value of AreaKm2.
+func (s *RingZone) GetAreaKm2() OptFloat64 {
+	return s.AreaKm2
+}
+
+// SetCode sets the value of Code.
+func (s *RingZone) SetCode(val RingZoneCode) {
+	s.Code = val
+}
+
+// SetName sets the value of Name.
+func (s *RingZone) SetName(val string) {
+	s.Name = val
+}
+
+// SetLengthKm sets the value of LengthKm.
+func (s *RingZone) SetLengthKm(val float64) {
+	s.LengthKm = val
+}
+
+// SetAreaKm2 sets the value of AreaKm2.
+func (s *RingZone) SetAreaKm2(val OptFloat64) {
+	s.AreaKm2 = val
+}
+
+type RingZoneCode string
+
+const (
+	RingZoneCodeSk   RingZoneCode = "sk"
+	RingZoneCodeTtk  RingZoneCode = "ttk"
+	RingZoneCodeMkad RingZoneCode = "mkad"
+)
+
+// AllValues returns all RingZoneCode values.
+func (RingZoneCode) AllValues() []RingZoneCode {
+	return []RingZoneCode{
+		RingZoneCodeSk,
+		RingZoneCodeTtk,
+		RingZoneCodeMkad,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RingZoneCode) MarshalText() ([]byte, error) {
+	switch s {
+	case RingZoneCodeSk:
+		return []byte(s), nil
+	case RingZoneCodeTtk:
+		return []byte(s), nil
+	case RingZoneCodeMkad:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RingZoneCode) UnmarshalText(data []byte) error {
+	switch RingZoneCode(data) {
+	case RingZoneCodeSk:
+		*s = RingZoneCodeSk
+		return nil
+	case RingZoneCodeTtk:
+		*s = RingZoneCodeTtk
+		return nil
+	case RingZoneCodeMkad:
+		*s = RingZoneCodeMkad
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Ref: #/components/schemas/Role
 type Role struct {
@@ -2318,6 +3391,193 @@ func (s *SettingsTheme) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/SignQuality
+type SignQuality struct {
+	UpdatedAt OptDateTime `json:"updatedAt"`
+	// Знаков в реестре (действующих).
+	Active int `json:"active"`
+	// Знаков ограничений для грузового движения.
+	RestrictionSigns int `json:"restrictionSigns"`
+	Matched          int `json:"matched"`
+	Ambiguous        int `json:"ambiguous"`
+	Unmatched        int `json:"unmatched"`
+	// Ограничений на участках, полученных из знаков.
+	Restrictions int               `json:"restrictions"`
+	Types        []SignTypeQuality `json:"types"`
+	Conflicts    []ConflictCount   `json:"conflicts"`
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *SignQuality) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// GetActive returns the value of Active.
+func (s *SignQuality) GetActive() int {
+	return s.Active
+}
+
+// GetRestrictionSigns returns the value of RestrictionSigns.
+func (s *SignQuality) GetRestrictionSigns() int {
+	return s.RestrictionSigns
+}
+
+// GetMatched returns the value of Matched.
+func (s *SignQuality) GetMatched() int {
+	return s.Matched
+}
+
+// GetAmbiguous returns the value of Ambiguous.
+func (s *SignQuality) GetAmbiguous() int {
+	return s.Ambiguous
+}
+
+// GetUnmatched returns the value of Unmatched.
+func (s *SignQuality) GetUnmatched() int {
+	return s.Unmatched
+}
+
+// GetRestrictions returns the value of Restrictions.
+func (s *SignQuality) GetRestrictions() int {
+	return s.Restrictions
+}
+
+// GetTypes returns the value of Types.
+func (s *SignQuality) GetTypes() []SignTypeQuality {
+	return s.Types
+}
+
+// GetConflicts returns the value of Conflicts.
+func (s *SignQuality) GetConflicts() []ConflictCount {
+	return s.Conflicts
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *SignQuality) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// SetActive sets the value of Active.
+func (s *SignQuality) SetActive(val int) {
+	s.Active = val
+}
+
+// SetRestrictionSigns sets the value of RestrictionSigns.
+func (s *SignQuality) SetRestrictionSigns(val int) {
+	s.RestrictionSigns = val
+}
+
+// SetMatched sets the value of Matched.
+func (s *SignQuality) SetMatched(val int) {
+	s.Matched = val
+}
+
+// SetAmbiguous sets the value of Ambiguous.
+func (s *SignQuality) SetAmbiguous(val int) {
+	s.Ambiguous = val
+}
+
+// SetUnmatched sets the value of Unmatched.
+func (s *SignQuality) SetUnmatched(val int) {
+	s.Unmatched = val
+}
+
+// SetRestrictions sets the value of Restrictions.
+func (s *SignQuality) SetRestrictions(val int) {
+	s.Restrictions = val
+}
+
+// SetTypes sets the value of Types.
+func (s *SignQuality) SetTypes(val []SignTypeQuality) {
+	s.Types = val
+}
+
+// SetConflicts sets the value of Conflicts.
+func (s *SignQuality) SetConflicts(val []ConflictCount) {
+	s.Conflicts = val
+}
+
+// Ref: #/components/schemas/SignTypeQuality
+type SignTypeQuality struct {
+	Code      string `json:"code"`
+	Name      string `json:"name"`
+	Kind      string `json:"kind"`
+	Count     int    `json:"count"`
+	Matched   int    `json:"matched"`
+	Ambiguous int    `json:"ambiguous"`
+	Unmatched int    `json:"unmatched"`
+}
+
+// GetCode returns the value of Code.
+func (s *SignTypeQuality) GetCode() string {
+	return s.Code
+}
+
+// GetName returns the value of Name.
+func (s *SignTypeQuality) GetName() string {
+	return s.Name
+}
+
+// GetKind returns the value of Kind.
+func (s *SignTypeQuality) GetKind() string {
+	return s.Kind
+}
+
+// GetCount returns the value of Count.
+func (s *SignTypeQuality) GetCount() int {
+	return s.Count
+}
+
+// GetMatched returns the value of Matched.
+func (s *SignTypeQuality) GetMatched() int {
+	return s.Matched
+}
+
+// GetAmbiguous returns the value of Ambiguous.
+func (s *SignTypeQuality) GetAmbiguous() int {
+	return s.Ambiguous
+}
+
+// GetUnmatched returns the value of Unmatched.
+func (s *SignTypeQuality) GetUnmatched() int {
+	return s.Unmatched
+}
+
+// SetCode sets the value of Code.
+func (s *SignTypeQuality) SetCode(val string) {
+	s.Code = val
+}
+
+// SetName sets the value of Name.
+func (s *SignTypeQuality) SetName(val string) {
+	s.Name = val
+}
+
+// SetKind sets the value of Kind.
+func (s *SignTypeQuality) SetKind(val string) {
+	s.Kind = val
+}
+
+// SetCount sets the value of Count.
+func (s *SignTypeQuality) SetCount(val int) {
+	s.Count = val
+}
+
+// SetMatched sets the value of Matched.
+func (s *SignTypeQuality) SetMatched(val int) {
+	s.Matched = val
+}
+
+// SetAmbiguous sets the value of Ambiguous.
+func (s *SignTypeQuality) SetAmbiguous(val int) {
+	s.Ambiguous = val
+}
+
+// SetUnmatched sets the value of Unmatched.
+func (s *SignTypeQuality) SetUnmatched(val int) {
+	s.Unmatched = val
 }
 
 // Ref: #/components/schemas/SourceInfo
@@ -2824,6 +4084,406 @@ func (s *UserStatus) UnmarshalText(data []byte) error {
 		return nil
 	case UserStatusBlocked:
 		*s = UserStatusBlocked
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ZoneRule
+type ZoneRule struct {
+	Code string `json:"code"`
+	// Зона — территория внутри кольца вместе с самим
+	// кольцом.
+	Zone  ZoneRuleZone `json:"zone"`
+	Title string       `json:"title"`
+	// Prohibited — въезд запрещён; pass_required — нужен пропуск; frame_only
+	// — вне грузового каркаса только обслуживание района.
+	Effect ZoneRuleEffect `json:"effect"`
+	// Gross — разрешённая максимальная масса; payload —
+	// грузоподъёмность.
+	MassBasis OptZoneRuleMassBasis `json:"massBasis"`
+	// Правило касается ТС тяжелее порога, т.
+	MassOverT OptFloat64 `json:"massOverT"`
+	// Правило касается ТС с экологическим классом ниже
+	// указанного.
+	EcoClassMin OptInt `json:"ecoClassMin"`
+	// Начало действия (ЧЧ:ММ); интервал может переходить
+	// через полночь; нет — круглосуточно.
+	TimeFrom OptString           `json:"timeFrom"`
+	TimeTo   OptString           `json:"timeTo"`
+	PassKind OptZoneRulePassKind `json:"passKind"`
+	// Зоны пропусков, дающих право проезда.
+	PassZones []string `json:"passZones"`
+	ValidFrom OptDate  `json:"validFrom"`
+	ValidTo   OptDate  `json:"validTo"`
+	// Код правового основания (LegalDocument).
+	Document  string    `json:"document"`
+	Clause    OptString `json:"clause"`
+	Confirmed bool      `json:"confirmed"`
+	// Код документа, по которому правило подтверждено.
+	ConfirmedBy OptString `json:"confirmedBy"`
+	Note        OptString `json:"note"`
+}
+
+// GetCode returns the value of Code.
+func (s *ZoneRule) GetCode() string {
+	return s.Code
+}
+
+// GetZone returns the value of Zone.
+func (s *ZoneRule) GetZone() ZoneRuleZone {
+	return s.Zone
+}
+
+// GetTitle returns the value of Title.
+func (s *ZoneRule) GetTitle() string {
+	return s.Title
+}
+
+// GetEffect returns the value of Effect.
+func (s *ZoneRule) GetEffect() ZoneRuleEffect {
+	return s.Effect
+}
+
+// GetMassBasis returns the value of MassBasis.
+func (s *ZoneRule) GetMassBasis() OptZoneRuleMassBasis {
+	return s.MassBasis
+}
+
+// GetMassOverT returns the value of MassOverT.
+func (s *ZoneRule) GetMassOverT() OptFloat64 {
+	return s.MassOverT
+}
+
+// GetEcoClassMin returns the value of EcoClassMin.
+func (s *ZoneRule) GetEcoClassMin() OptInt {
+	return s.EcoClassMin
+}
+
+// GetTimeFrom returns the value of TimeFrom.
+func (s *ZoneRule) GetTimeFrom() OptString {
+	return s.TimeFrom
+}
+
+// GetTimeTo returns the value of TimeTo.
+func (s *ZoneRule) GetTimeTo() OptString {
+	return s.TimeTo
+}
+
+// GetPassKind returns the value of PassKind.
+func (s *ZoneRule) GetPassKind() OptZoneRulePassKind {
+	return s.PassKind
+}
+
+// GetPassZones returns the value of PassZones.
+func (s *ZoneRule) GetPassZones() []string {
+	return s.PassZones
+}
+
+// GetValidFrom returns the value of ValidFrom.
+func (s *ZoneRule) GetValidFrom() OptDate {
+	return s.ValidFrom
+}
+
+// GetValidTo returns the value of ValidTo.
+func (s *ZoneRule) GetValidTo() OptDate {
+	return s.ValidTo
+}
+
+// GetDocument returns the value of Document.
+func (s *ZoneRule) GetDocument() string {
+	return s.Document
+}
+
+// GetClause returns the value of Clause.
+func (s *ZoneRule) GetClause() OptString {
+	return s.Clause
+}
+
+// GetConfirmed returns the value of Confirmed.
+func (s *ZoneRule) GetConfirmed() bool {
+	return s.Confirmed
+}
+
+// GetConfirmedBy returns the value of ConfirmedBy.
+func (s *ZoneRule) GetConfirmedBy() OptString {
+	return s.ConfirmedBy
+}
+
+// GetNote returns the value of Note.
+func (s *ZoneRule) GetNote() OptString {
+	return s.Note
+}
+
+// SetCode sets the value of Code.
+func (s *ZoneRule) SetCode(val string) {
+	s.Code = val
+}
+
+// SetZone sets the value of Zone.
+func (s *ZoneRule) SetZone(val ZoneRuleZone) {
+	s.Zone = val
+}
+
+// SetTitle sets the value of Title.
+func (s *ZoneRule) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetEffect sets the value of Effect.
+func (s *ZoneRule) SetEffect(val ZoneRuleEffect) {
+	s.Effect = val
+}
+
+// SetMassBasis sets the value of MassBasis.
+func (s *ZoneRule) SetMassBasis(val OptZoneRuleMassBasis) {
+	s.MassBasis = val
+}
+
+// SetMassOverT sets the value of MassOverT.
+func (s *ZoneRule) SetMassOverT(val OptFloat64) {
+	s.MassOverT = val
+}
+
+// SetEcoClassMin sets the value of EcoClassMin.
+func (s *ZoneRule) SetEcoClassMin(val OptInt) {
+	s.EcoClassMin = val
+}
+
+// SetTimeFrom sets the value of TimeFrom.
+func (s *ZoneRule) SetTimeFrom(val OptString) {
+	s.TimeFrom = val
+}
+
+// SetTimeTo sets the value of TimeTo.
+func (s *ZoneRule) SetTimeTo(val OptString) {
+	s.TimeTo = val
+}
+
+// SetPassKind sets the value of PassKind.
+func (s *ZoneRule) SetPassKind(val OptZoneRulePassKind) {
+	s.PassKind = val
+}
+
+// SetPassZones sets the value of PassZones.
+func (s *ZoneRule) SetPassZones(val []string) {
+	s.PassZones = val
+}
+
+// SetValidFrom sets the value of ValidFrom.
+func (s *ZoneRule) SetValidFrom(val OptDate) {
+	s.ValidFrom = val
+}
+
+// SetValidTo sets the value of ValidTo.
+func (s *ZoneRule) SetValidTo(val OptDate) {
+	s.ValidTo = val
+}
+
+// SetDocument sets the value of Document.
+func (s *ZoneRule) SetDocument(val string) {
+	s.Document = val
+}
+
+// SetClause sets the value of Clause.
+func (s *ZoneRule) SetClause(val OptString) {
+	s.Clause = val
+}
+
+// SetConfirmed sets the value of Confirmed.
+func (s *ZoneRule) SetConfirmed(val bool) {
+	s.Confirmed = val
+}
+
+// SetConfirmedBy sets the value of ConfirmedBy.
+func (s *ZoneRule) SetConfirmedBy(val OptString) {
+	s.ConfirmedBy = val
+}
+
+// SetNote sets the value of Note.
+func (s *ZoneRule) SetNote(val OptString) {
+	s.Note = val
+}
+
+// Prohibited — въезд запрещён; pass_required — нужен пропуск; frame_only
+// — вне грузового каркаса только обслуживание района.
+type ZoneRuleEffect string
+
+const (
+	ZoneRuleEffectProhibited   ZoneRuleEffect = "prohibited"
+	ZoneRuleEffectPassRequired ZoneRuleEffect = "pass_required"
+	ZoneRuleEffectFrameOnly    ZoneRuleEffect = "frame_only"
+)
+
+// AllValues returns all ZoneRuleEffect values.
+func (ZoneRuleEffect) AllValues() []ZoneRuleEffect {
+	return []ZoneRuleEffect{
+		ZoneRuleEffectProhibited,
+		ZoneRuleEffectPassRequired,
+		ZoneRuleEffectFrameOnly,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ZoneRuleEffect) MarshalText() ([]byte, error) {
+	switch s {
+	case ZoneRuleEffectProhibited:
+		return []byte(s), nil
+	case ZoneRuleEffectPassRequired:
+		return []byte(s), nil
+	case ZoneRuleEffectFrameOnly:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ZoneRuleEffect) UnmarshalText(data []byte) error {
+	switch ZoneRuleEffect(data) {
+	case ZoneRuleEffectProhibited:
+		*s = ZoneRuleEffectProhibited
+		return nil
+	case ZoneRuleEffectPassRequired:
+		*s = ZoneRuleEffectPassRequired
+		return nil
+	case ZoneRuleEffectFrameOnly:
+		*s = ZoneRuleEffectFrameOnly
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Gross — разрешённая максимальная масса; payload —
+// грузоподъёмность.
+type ZoneRuleMassBasis string
+
+const (
+	ZoneRuleMassBasisGross   ZoneRuleMassBasis = "gross"
+	ZoneRuleMassBasisPayload ZoneRuleMassBasis = "payload"
+)
+
+// AllValues returns all ZoneRuleMassBasis values.
+func (ZoneRuleMassBasis) AllValues() []ZoneRuleMassBasis {
+	return []ZoneRuleMassBasis{
+		ZoneRuleMassBasisGross,
+		ZoneRuleMassBasisPayload,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ZoneRuleMassBasis) MarshalText() ([]byte, error) {
+	switch s {
+	case ZoneRuleMassBasisGross:
+		return []byte(s), nil
+	case ZoneRuleMassBasisPayload:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ZoneRuleMassBasis) UnmarshalText(data []byte) error {
+	switch ZoneRuleMassBasis(data) {
+	case ZoneRuleMassBasisGross:
+		*s = ZoneRuleMassBasisGross
+		return nil
+	case ZoneRuleMassBasisPayload:
+		*s = ZoneRuleMassBasisPayload
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ZoneRulePassKind string
+
+const (
+	ZoneRulePassKindDay   ZoneRulePassKind = "day"
+	ZoneRulePassKindNight ZoneRulePassKind = "night"
+)
+
+// AllValues returns all ZoneRulePassKind values.
+func (ZoneRulePassKind) AllValues() []ZoneRulePassKind {
+	return []ZoneRulePassKind{
+		ZoneRulePassKindDay,
+		ZoneRulePassKindNight,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ZoneRulePassKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ZoneRulePassKindDay:
+		return []byte(s), nil
+	case ZoneRulePassKindNight:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ZoneRulePassKind) UnmarshalText(data []byte) error {
+	switch ZoneRulePassKind(data) {
+	case ZoneRulePassKindDay:
+		*s = ZoneRulePassKindDay
+		return nil
+	case ZoneRulePassKindNight:
+		*s = ZoneRulePassKindNight
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Зона — территория внутри кольца вместе с самим
+// кольцом.
+type ZoneRuleZone string
+
+const (
+	ZoneRuleZoneSk   ZoneRuleZone = "sk"
+	ZoneRuleZoneTtk  ZoneRuleZone = "ttk"
+	ZoneRuleZoneMkad ZoneRuleZone = "mkad"
+)
+
+// AllValues returns all ZoneRuleZone values.
+func (ZoneRuleZone) AllValues() []ZoneRuleZone {
+	return []ZoneRuleZone{
+		ZoneRuleZoneSk,
+		ZoneRuleZoneTtk,
+		ZoneRuleZoneMkad,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ZoneRuleZone) MarshalText() ([]byte, error) {
+	switch s {
+	case ZoneRuleZoneSk:
+		return []byte(s), nil
+	case ZoneRuleZoneTtk:
+		return []byte(s), nil
+	case ZoneRuleZoneMkad:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ZoneRuleZone) UnmarshalText(data []byte) error {
+	switch ZoneRuleZone(data) {
+	case ZoneRuleZoneSk:
+		*s = ZoneRuleZoneSk
+		return nil
+	case ZoneRuleZoneTtk:
+		*s = ZoneRuleZoneTtk
+		return nil
+	case ZoneRuleZoneMkad:
+		*s = ZoneRuleZoneMkad
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

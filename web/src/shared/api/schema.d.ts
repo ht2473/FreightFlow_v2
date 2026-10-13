@@ -338,6 +338,87 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/regulation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Зоны ограничения, правила с правовыми основаниями, документы, грузовой каркас
+         * @description Правила зон СК, ТТК и МКАД сверены с правовыми актами и официальными страницами
+         *     Дептранса; неподтверждённые правила отмечены `confirmed: false`. Страницы, изменившиеся
+         *     после сверки, отмечены `changedSinceVerification`.
+         */
+        get: operations["getRegulation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/regulation/passes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Пропуска грузового транспорта по месяцам, зонам и сериям
+         * @description Только агрегаты; номера пропусков и сведения о ТС не хранятся.
+         */
+        get: operations["getPassStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/regulation/permits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Спецразрешения на тяжеловесные и крупногабаритные ТС по месяцам и видам */
+        get: operations["getPermitStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/regulation/signs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Отчёт качества дорожных знаков ограничений и расхождений с OSM
+         * @description Знаки ограничений из реестра Москвы: сколько привязано к участкам сети, неоднозначно
+         *     или не привязано, по видам знаков; ограничения, полученные из знаков; расхождения с
+         *     разметкой OSM по видам ограничений.
+         */
+        get: operations["getSignQuality"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -608,6 +689,173 @@ export interface components {
             labels?: {
                 [key: string]: string;
             };
+        };
+        RegulationOverview: {
+            zones: components["schemas"]["RingZone"][];
+            rules: components["schemas"]["ZoneRule"][];
+            documents: components["schemas"]["LegalDocument"][];
+            pages: components["schemas"]["OfficialPage"][];
+            cargoFrame: components["schemas"]["CargoFrame"];
+        };
+        RingZone: {
+            /** @enum {string} */
+            code: "sk" | "ttk" | "mkad";
+            name: string;
+            lengthKm: number;
+            areaKm2?: number;
+        };
+        ZoneRule: {
+            code: string;
+            /**
+             * @description Зона — территория внутри кольца вместе с самим кольцом
+             * @enum {string}
+             */
+            zone: "sk" | "ttk" | "mkad";
+            title: string;
+            /**
+             * @description prohibited — въезд запрещён; pass_required — нужен пропуск; frame_only — вне грузового каркаса только обслуживание района
+             * @enum {string}
+             */
+            effect: "prohibited" | "pass_required" | "frame_only";
+            /**
+             * @description gross — разрешённая максимальная масса; payload — грузоподъёмность
+             * @enum {string}
+             */
+            massBasis?: "gross" | "payload";
+            /** @description Правило касается ТС тяжелее порога, т */
+            massOverT?: number;
+            /** @description Правило касается ТС с экологическим классом ниже указанного */
+            ecoClassMin?: number;
+            /** @description Начало действия (ЧЧ:ММ); интервал может переходить через полночь; нет — круглосуточно */
+            timeFrom?: string;
+            timeTo?: string;
+            /** @enum {string} */
+            passKind?: "day" | "night";
+            /** @description Зоны пропусков, дающих право проезда */
+            passZones: string[];
+            /** Format: date */
+            validFrom?: string;
+            /** Format: date */
+            validTo?: string;
+            /** @description Код правового основания (LegalDocument) */
+            document: string;
+            clause?: string;
+            confirmed: boolean;
+            /** @description Код документа, по которому правило подтверждено */
+            confirmedBy?: string;
+            note?: string;
+        };
+        LegalDocument: {
+            code: string;
+            /** @enum {string} */
+            kind: "act" | "amendment" | "page";
+            title: string;
+            number?: string;
+            /** Format: date */
+            signedOn?: string;
+            /** Format: date */
+            effectiveOn?: string;
+            authority: string;
+            url?: string;
+            /** @enum {string} */
+            status: "in_force" | "repealed" | "info";
+            amends?: string;
+            summary?: string;
+            /** Format: date */
+            verifiedOn?: string;
+        };
+        OfficialPage: {
+            code: string;
+            title: string;
+            url: string;
+            /** Format: date-time */
+            fetchedAt: string;
+            /** Format: date-time */
+            changedAt: string;
+            changedSinceVerification: boolean;
+        };
+        CargoFrame: {
+            streets: number;
+            /** @description Улиц перечня, найденных в дорожной сети */
+            matched: number;
+            /** @description Строк перечня с участком улицы */
+            partial: number;
+            lengthKm: number;
+            /** Format: date-time */
+            updatedAt?: string;
+            okrugs: components["schemas"]["CargoFrameOkrug"][];
+        };
+        CargoFrameOkrug: {
+            okrug: string;
+            streets: number;
+            matched: number;
+            lengthKm: number;
+        };
+        PassStats: {
+            /** Format: date-time */
+            updatedAt?: string;
+            series: components["schemas"]["PassSeries"][];
+        };
+        PassSeries: {
+            zone: string;
+            series: string;
+            /**
+             * @description valid — действующих на первое число; issued — начавших действовать в месяце; cancelled — аннулированных
+             * @enum {string}
+             */
+            metric: "valid" | "issued" | "cancelled";
+            points: components["schemas"]["MonthValue"][];
+        };
+        MonthValue: {
+            /** Format: date */
+            month: string;
+            value: number;
+        };
+        PermitStats: {
+            /** Format: date-time */
+            updatedAt?: string;
+            total: number;
+            /** @description Выдано разрешений по месяцам */
+            months: components["schemas"]["MonthValue"][];
+            /** @description Разрешения по превышенному параметру (масса более 40 т, ширина более 2,55 м, высота более 4 м, длина более 20 м); одно разрешение может превышать несколько */
+            exceeded: components["schemas"]["NamedCount"][];
+        };
+        NamedCount: {
+            name: string;
+            count: number;
+        };
+        SignQuality: {
+            /** Format: date-time */
+            updatedAt?: string;
+            /** @description Знаков в реестре (действующих) */
+            active: number;
+            /** @description Знаков ограничений для грузового движения */
+            restrictionSigns: number;
+            matched: number;
+            ambiguous: number;
+            unmatched: number;
+            /** @description Ограничений на участках, полученных из знаков */
+            restrictions: number;
+            types: components["schemas"]["SignTypeQuality"][];
+            conflicts: components["schemas"]["ConflictCount"][];
+        };
+        SignTypeQuality: {
+            code: string;
+            name: string;
+            kind: string;
+            count: number;
+            matched: number;
+            ambiguous: number;
+            unmatched: number;
+        };
+        ConflictCount: {
+            /**
+             * @description sign_not_in_osm — знак есть, в OSM ограничения нет; osm_not_signed — в OSM есть, знака рядом нет
+             * @enum {string}
+             */
+            type: "sign_not_in_osm" | "osm_not_signed";
+            kind: string;
+            segments: number;
         };
     };
     responses: {
@@ -1235,6 +1483,90 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunDetail"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getRegulation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сводка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegulationOverview"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getPassStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ряды по месяцам */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PassStats"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getPermitStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ряды по месяцам */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PermitStats"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getSignQuality: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Отчёт */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignQuality"];
                 };
             };
             default: components["responses"]["Problem"];

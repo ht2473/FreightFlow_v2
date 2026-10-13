@@ -85,6 +85,38 @@ func (UnimplementedHandler) GetMe(ctx context.Context) (r *Me, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// GetPassStats implements getPassStats operation.
+//
+// Только агрегаты; номера пропусков и сведения о ТС не
+// хранятся.
+//
+// GET /regulation/passes
+func (UnimplementedHandler) GetPassStats(ctx context.Context) (r *PassStats, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetPermitStats implements getPermitStats operation.
+//
+// Спецразрешения на тяжеловесные и крупногабаритные ТС
+// по месяцам и видам.
+//
+// GET /regulation/permits
+func (UnimplementedHandler) GetPermitStats(ctx context.Context) (r *PermitStats, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRegulation implements getRegulation operation.
+//
+// Правила зон СК, ТТК и МКАД сверены с правовыми актами и
+// официальными страницами Дептранса; неподтверждённые
+// правила отмечены `confirmed: false`. Страницы, изменившиеся
+// после сверки, отмечены `changedSinceVerification`.
+//
+// GET /regulation
+func (UnimplementedHandler) GetRegulation(ctx context.Context) (r *RegulationOverview, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRun implements getRun operation.
 //
 // Запуск с журналом и проверками качества.
@@ -100,6 +132,19 @@ func (UnimplementedHandler) GetRun(ctx context.Context, params GetRunParams) (r 
 //
 // GET /me/settings
 func (UnimplementedHandler) GetSettings(ctx context.Context) (r *Settings, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetSignQuality implements getSignQuality operation.
+//
+// Знаки ограничений из реестра Москвы: сколько
+// привязано к участкам сети, неоднозначно или не
+// привязано, по видам знаков; ограничения, полученные из
+// знаков; расхождения с разметкой OSM по видам
+// ограничений.
+//
+// GET /regulation/signs
+func (UnimplementedHandler) GetSignQuality(ctx context.Context) (r *SignQuality, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

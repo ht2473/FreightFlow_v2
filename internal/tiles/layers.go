@@ -71,6 +71,8 @@ const (
 	// mixedAttribution — слои, где официальные записи дополнены записями OSM.
 	mixedAttribution = mosAttribution + "; " + osmAttribution
 	// dtpAttribution — ДТП по данным ГИБДД в обработке «Карты ДТП».
+	// cargoFrameAttribution — перечень улиц Дептранса, сопоставленный с участками OSM.
+	cargoFrameAttribution = "Дептранс Москвы, transport.mos.ru; " + osmAttribution
 )
 
 // facilityTypes — подписи типов объектов (справочник ref.facility_type).
@@ -272,6 +274,22 @@ var Registry = []Layer{
 			{Name: "conditions", Title: "Условия", Kind: "text"},
 			{Name: "signed", Title: "Подтверждено знаком", Kind: "bool"},
 			{Name: "origins", Title: "Источники", Kind: "text"},
+		},
+	},
+	{
+		Code: "cargo_frame", Group: "network", Title: "Грузовой каркас",
+		Description: "Улицы, по которым грузовикам более 2,5 т разрешено движение внутри МКАД, — по перечню Дептранса", Geometry: "line",
+		MinZoom: 10, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"regulation", "network"},
+		Attribution: cargoFrameAttribution,
+		Style: Style{
+			Kind: "single", Color: "cat3", DashedBy: "partial",
+			Note: "Пунктир — в перечне указан участок улицы, отмечена вся улица в округе",
+		},
+		Properties: []Property{
+			{Name: "entry", Title: "Строка перечня", Kind: "text"},
+			{Name: "name", Title: "Улица в OSM", Kind: "text"},
+			{Name: "okrug", Title: "Округ", Kind: "text"},
+			{Name: "partial", Title: "Участок улицы", Kind: "bool"},
 		},
 	},
 	{

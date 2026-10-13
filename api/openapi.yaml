@@ -22,6 +22,8 @@ tags:
     description: Источники данных и загрузки
   - name: layers
     description: Слои карты
+  - name: regulation
+    description: Регулирование грузового движения
 
 paths:
   /me:
@@ -468,6 +470,71 @@ paths:
               schema: { $ref: "#/components/schemas/RunDetail" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /regulation:
+    get:
+      tags: [regulation]
+      operationId: getRegulation
+      summary: Зоны ограничения, правила с правовыми основаниями, документы, грузовой каркас
+      description: |
+        Правила зон СК, ТТК и МКАД сверены с правовыми актами и официальными страницами
+        Дептранса; неподтверждённые правила отмечены `confirmed: false`. Страницы, изменившиеся
+        после сверки, отмечены `changedSinceVerification`.
+      x-permission: map.view
+      responses:
+        "200":
+          description: Сводка
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegulationOverview" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /regulation/passes:
+    get:
+      tags: [regulation]
+      operationId: getPassStats
+      summary: Пропуска грузового транспорта по месяцам, зонам и сериям
+      description: Только агрегаты; номера пропусков и сведения о ТС не хранятся.
+      x-permission: map.view
+      responses:
+        "200":
+          description: Ряды по месяцам
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PassStats" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /regulation/permits:
+    get:
+      tags: [regulation]
+      operationId: getPermitStats
+      summary: Спецразрешения на тяжеловесные и крупногабаритные ТС по месяцам и видам
+      x-permission: map.view
+      responses:
+        "200":
+          description: Ряды по месяцам
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PermitStats" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /regulation/signs:
+    get:
+      tags: [regulation]
+      operationId: getSignQuality
+      summary: Отчёт качества дорожных знаков ограничений и расхождений с OSM
+      description: |
+        Знаки ограничений из реестра Москвы: сколько привязано к участкам сети, неоднозначно
+        или не привязано, по видам знаков; ограничения, полученные из знаков; расхождения с
+        разметкой OSM по видам ограничений.
+      x-permission: map.view
+      responses:
+        "200":
+          description: Отчёт
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SignQuality" }
+        default: { $ref: "#/components/responses/Problem" }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -909,3 +976,236 @@ components:
         labels:
           type: object
           additionalProperties: { type: string }
+
+    RegulationOverview:
+      type: object
+      required: [zones, rules, documents, pages, cargoFrame]
+      properties:
+        zones:
+          type: array
+          items: { $ref: "#/components/schemas/RingZone" }
+        rules:
+          type: array
+          items: { $ref: "#/components/schemas/ZoneRule" }
+        documents:
+          type: array
+          items: { $ref: "#/components/schemas/LegalDocument" }
+        pages:
+          type: array
+          items: { $ref: "#/components/schemas/OfficialPage" }
+        cargoFrame: { $ref: "#/components/schemas/CargoFrame" }
+
+    RingZone:
+      type: object
+      required: [code, name, lengthKm]
+      properties:
+        code:
+          type: string
+          enum: [sk, ttk, mkad]
+        name: { type: string }
+        lengthKm: { type: number }
+        areaKm2: { type: number }
+
+    ZoneRule:
+      type: object
+      required: [code, zone, title, effect, passZones, document, confirmed]
+      properties:
+        code: { type: string }
+        zone:
+          type: string
+          enum: [sk, ttk, mkad]
+          description: Зона — территория внутри кольца вместе с самим кольцом
+        title: { type: string }
+        effect:
+          type: string
+          enum: [prohibited, pass_required, frame_only]
+          description: prohibited — въезд запрещён; pass_required — нужен пропуск; frame_only — вне грузового каркаса только обслуживание района
+        massBasis:
+          type: string
+          enum: [gross, payload]
+          description: gross — разрешённая максимальная масса; payload — грузоподъёмность
+        massOverT:
+          type: number
+          description: Правило касается ТС тяжелее порога, т
+        ecoClassMin:
+          type: integer
+          description: Правило касается ТС с экологическим классом ниже указанного
+        timeFrom:
+          type: string
+          description: Начало действия (ЧЧ:ММ); интервал может переходить через полночь; нет — круглосуточно
+        timeTo: { type: string }
+        passKind:
+          type: string
+          enum: [day, night]
+        passZones:
+          type: array
+          description: Зоны пропусков, дающих право проезда
+          items: { type: string }
+        validFrom: { type: string, format: date }
+        validTo: { type: string, format: date }
+        document:
+          type: string
+          description: Код правового основания (LegalDocument)
+        clause: { type: string }
+        confirmed: { type: boolean }
+        confirmedBy:
+          type: string
+          description: Код документа, по которому правило подтверждено
+        note: { type: string }
+
+    LegalDocument:
+      type: object
+      required: [code, kind, title, authority, status]
+      properties:
+        code: { type: string }
+        kind:
+          type: string
+          enum: [act, amendment, page]
+        title: { type: string }
+        number: { type: string }
+        signedOn: { type: string, format: date }
+        effectiveOn: { type: string, format: date }
+        authority: { type: string }
+        url: { type: string }
+        status:
+          type: string
+          enum: [in_force, repealed, info]
+        amends: { type: string }
+        summary: { type: string }
+        verifiedOn: { type: string, format: date }
+
+    OfficialPage:
+      type: object
+      required: [code, title, url, fetchedAt, changedAt, changedSinceVerification]
+      properties:
+        code: { type: string }
+        title: { type: string }
+        url: { type: string }
+        fetchedAt: { type: string, format: date-time }
+        changedAt: { type: string, format: date-time }
+        changedSinceVerification: { type: boolean }
+
+    CargoFrame:
+      type: object
+      required: [streets, matched, partial, lengthKm, okrugs]
+      properties:
+        streets: { type: integer }
+        matched:
+          type: integer
+          description: Улиц перечня, найденных в дорожной сети
+        partial:
+          type: integer
+          description: Строк перечня с участком улицы
+        lengthKm: { type: number }
+        updatedAt: { type: string, format: date-time }
+        okrugs:
+          type: array
+          items: { $ref: "#/components/schemas/CargoFrameOkrug" }
+
+    CargoFrameOkrug:
+      type: object
+      required: [okrug, streets, matched, lengthKm]
+      properties:
+        okrug: { type: string }
+        streets: { type: integer }
+        matched: { type: integer }
+        lengthKm: { type: number }
+
+    PassStats:
+      type: object
+      required: [series]
+      properties:
+        updatedAt: { type: string, format: date-time }
+        series:
+          type: array
+          items: { $ref: "#/components/schemas/PassSeries" }
+
+    PassSeries:
+      type: object
+      required: [zone, series, metric, points]
+      properties:
+        zone: { type: string }
+        series: { type: string }
+        metric:
+          type: string
+          enum: [valid, issued, cancelled]
+          description: valid — действующих на первое число; issued — начавших действовать в месяце; cancelled — аннулированных
+        points:
+          type: array
+          items: { $ref: "#/components/schemas/MonthValue" }
+
+    MonthValue:
+      type: object
+      required: [month, value]
+      properties:
+        month: { type: string, format: date }
+        value: { type: integer }
+
+    PermitStats:
+      type: object
+      required: [total, months, exceeded]
+      properties:
+        updatedAt: { type: string, format: date-time }
+        total: { type: integer }
+        months:
+          type: array
+          description: Выдано разрешений по месяцам
+          items: { $ref: "#/components/schemas/MonthValue" }
+        exceeded:
+          type: array
+          description: Разрешения по превышенному параметру (масса более 40 т, ширина более 2,55 м, высота более 4 м, длина более 20 м); одно разрешение может превышать несколько
+          items: { $ref: "#/components/schemas/NamedCount" }
+
+    NamedCount:
+      type: object
+      required: [name, count]
+      properties:
+        name: { type: string }
+        count: { type: integer }
+
+    SignQuality:
+      type: object
+      required: [active, restrictionSigns, matched, ambiguous, unmatched, restrictions, types, conflicts]
+      properties:
+        updatedAt: { type: string, format: date-time }
+        active:
+          type: integer
+          description: Знаков в реестре (действующих)
+        restrictionSigns:
+          type: integer
+          description: Знаков ограничений для грузового движения
+        matched: { type: integer }
+        ambiguous: { type: integer }
+        unmatched: { type: integer }
+        restrictions:
+          type: integer
+          description: Ограничений на участках, полученных из знаков
+        types:
+          type: array
+          items: { $ref: "#/components/schemas/SignTypeQuality" }
+        conflicts:
+          type: array
+          items: { $ref: "#/components/schemas/ConflictCount" }
+
+    SignTypeQuality:
+      type: object
+      required: [code, name, kind, count, matched, ambiguous, unmatched]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        kind: { type: string }
+        count: { type: integer }
+        matched: { type: integer }
+        ambiguous: { type: integer }
+        unmatched: { type: integer }
+
+    ConflictCount:
+      type: object
+      required: [type, kind, segments]
+      properties:
+        type:
+          type: string
+          enum: [sign_not_in_osm, osm_not_signed]
+          description: sign_not_in_osm — знак есть, в OSM ограничения нет; osm_not_signed — в OSM есть, знака рядом нет
+        kind: { type: string }
+        segments: { type: integer }

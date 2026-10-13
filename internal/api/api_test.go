@@ -21,6 +21,7 @@ import (
 	"freightflow/internal/platform/problem"
 	"freightflow/internal/platform/secret"
 	"freightflow/internal/platform/session"
+	"freightflow/internal/regulation"
 	"freightflow/internal/tiles"
 )
 
@@ -85,8 +86,9 @@ func newFixture(t *testing.T) *fixture {
 	}
 	layers := tiles.NewService(pool, ing, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	h, err := New(Deps{
-		Identity: ids, Ingest: ing, Layers: layers, Sessions: sessions, Mailer: mailer, BaseURL: "http://test.local",
-		Log: slog.New(slog.NewTextHandler(io.Discard, nil)),
+		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool), Sessions: sessions, Mailer: mailer,
+		BaseURL: "http://test.local",
+		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -253,5 +255,55 @@ func TestAPIAdminCreatesUserAndInvites(t *testing.T) {
 	}
 	if len(f.mailer.sent) != 1 || !strings.Contains(f.mailer.sent[0].Text, "http://test.local/invite/") {
 		t.Fatalf("invite mail not sent: %+v", f.mailer.sent)
+	}
+}
+
+func TestAPIRegulation(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	viewer := f.token(t, "v@example.com", identity.RoleAdmin, identity.PermMapView)
+
+	resp, body := f.do(t, http.MethodGet, "/api/v1/regulation", viewer, "")
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d: %s", resp.StatusCode, body)
+	}
+	var o struct {
+		Rules []struct {
+			Code, Zone, Effect, Document string
+			Confirmed                    bool
+			ConfirmedBy                  string
+			PassZones                    []string
+			TimeFrom, TimeTo             string
+		}
+		Documents []struct{ Code, Kind, Status string }
+		Zones     []any
+	}
+	if err := json.Unmarshal(body, &o); err != nil {
+		t.Fatal(err)
+	}
+	// Правила и документы — справочные данные миграции; зоны появляются после загрузки OSM.
+	docs := map[string]string{}
+	for _, d := range o.Documents {
+		docs[d.Code] = d.Kind
+	}
+	if len(o.Rules) == 0 || docs["pp-379-2011"] != "act" || len(o.Zones) != 0 {
+		t.Fatalf("overview: %s", body)
+	}
+	for _, r := range o.Rules {
+		if docs[r.Document] == "" || (r.Confirmed && docs[r.ConfirmedBy] == "") {
+			t.Errorf("rule %s: unknown document %q / %q", r.Code, r.Document, r.ConfirmedBy)
+		}
+		if r.Effect == "pass_required" && len(r.PassZones) == 0 {
+			t.Errorf("rule %s: no pass zones", r.Code)
+		}
+		if r.Code == "mkad_gross_night" && (r.TimeFrom != "23:00" || r.TimeTo != "07:00") {
+			t.Errorf("night rule time %s–%s", r.TimeFrom, r.TimeTo)
+		}
+	}
+
+	for _, path := range []string{"/api/v1/regulation/passes", "/api/v1/regulation/permits", "/api/v1/regulation/signs"} {
+		if resp, body := f.do(t, http.MethodGet, path, viewer, ""); resp.StatusCode != http.StatusOK {
+			t.Errorf("%s: status %d: %s", path, resp.StatusCode, body)
+		}
 	}
 }

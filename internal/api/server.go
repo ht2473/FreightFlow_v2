@@ -21,6 +21,7 @@ import (
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/mail"
 	"freightflow/internal/platform/session"
+	"freightflow/internal/regulation"
 	"freightflow/internal/tiles"
 )
 
@@ -34,10 +35,12 @@ type Deps struct {
 	Identity *identity.Service
 	Ingest   *ingest.Service
 	Layers   *tiles.Service
-	Sessions *session.Manager
-	Mailer   Mailer
-	BaseURL  string
-	Log      *slog.Logger
+	// Regulation — зоны, правила и статистика регулирования.
+	Regulation *regulation.Service
+	Sessions   *session.Manager
+	Mailer     Mailer
+	BaseURL    string
+	Log        *slog.Logger
 	// Meters и Tracers — метрики и трассы операций; nil — глобальные провайдеры OpenTelemetry.
 	Meters  metric.MeterProvider
 	Tracers trace.TracerProvider
@@ -45,14 +48,15 @@ type Deps struct {
 
 // Server реализует обработчики и проверку безопасности ogen.
 type Server struct {
-	identity *identity.Service
-	ingest   *ingest.Service
-	layers   *tiles.Service
-	sessions *session.Manager
-	mailer   Mailer
-	baseURL  string
-	log      *slog.Logger
-	perms    map[string]string
+	identity   *identity.Service
+	ingest     *ingest.Service
+	layers     *tiles.Service
+	regulation *regulation.Service
+	sessions   *session.Manager
+	mailer     Mailer
+	baseURL    string
+	log        *slog.Logger
+	perms      map[string]string
 }
 
 var _ gen.Handler = (*Server)(nil)
@@ -64,7 +68,7 @@ func New(d Deps) (http.Handler, error) {
 		return nil, err
 	}
 	s := &Server{
-		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, sessions: d.Sessions, mailer: d.Mailer,
+		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, sessions: d.Sessions, mailer: d.Mailer,
 		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops),
 	}
 	opts := []gen.ServerOption{
