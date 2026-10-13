@@ -176,7 +176,7 @@ func (c *Cargo) Load(ctx context.Context, env ingest.LoadEnv) (ingest.LoadStats,
 }
 
 func loadStats(ctx context.Context, tx pgx.Tx) (ingest.LoadStats, error) {
-	rows, err := tx.Query(ctx, `SELECT key, coalesce(value, 0) FROM load_stats`)
+	rows, err := tx.Query(ctx, ingest.LoadStatsQuery)
 	if err != nil {
 		return nil, err
 	}

@@ -132,6 +132,11 @@ type LoadEnv struct {
 // LoadStats — итоговые счётчики загрузки (записей добавлено, обновлено и т. п.).
 type LoadStats map[string]int64
 
+// LoadStatsQuery читает итог преобразования из временной таблицы load_stats (код → число). Типы
+// приведены явно: подготовленный запрос кешируется на соединении, а у разных источников столбцы
+// load_stats разных типов — без приведения повторный запрос на том же соединении падает.
+const LoadStatsQuery = `SELECT key::text, coalesce(round(value::numeric), 0)::bigint FROM load_stats`
+
 // Severity — важность проверки качества.
 type Severity string
 

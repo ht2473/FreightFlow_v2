@@ -372,7 +372,7 @@ func transform(ctx context.Context, tx pgx.Tx, ds Dataset, snapshot uuid.UUID, s
 	}
 	// Итог преобразования скрипт оставляет во временной таблице load_stats (код → число).
 	stats := ingest.LoadStats{}
-	rows, err := tx.Query(ctx, `SELECT key, value FROM load_stats`)
+	rows, err := tx.Query(ctx, ingest.LoadStatsQuery)
 	if err != nil {
 		return nil, fmt.Errorf("transform %s: load_stats: %w", ds.Transform, err)
 	}
