@@ -14,6 +14,18 @@ type Handler interface {
 	//
 	// POST /me/totp
 	BeginTotpSetup(ctx context.Context) (*TotpSetup, error)
+	// BuildRoute implements buildRoute operation.
+	//
+	// Зоны, закрытые для ТС (масса, экологический класс,
+	// пропуска, время отправления), исключаются из маршрута.
+	// Для сравнения строится путь легкового автомобиля без
+	// ограничений; ответ перечисляет ограничения и зоны на
+	// нём, которых маршрут избегает. Если точка маршрута
+	// лежит в закрытой зоне, маршрут не строится — `blocked` не
+	// пуст.
+	//
+	// POST /routing/route
+	BuildRoute(ctx context.Context, req *RouteRequest) (*RouteResult, error)
 	// ChangePassword implements changePassword operation.
 	//
 	// Сменить пароль.
@@ -79,6 +91,12 @@ type Handler interface {
 	//
 	// GET /regulation
 	GetRegulation(ctx context.Context) (*RegulationOverview, error)
+	// GetRoutingStatus implements getRoutingStatus operation.
+	//
+	// Состояние службы маршрутизации и графа.
+	//
+	// GET /routing/status
+	GetRoutingStatus(ctx context.Context) (*RoutingStatus, error)
 	// GetRun implements getRun operation.
 	//
 	// Запуск с журналом и проверками качества.
@@ -157,6 +175,12 @@ type Handler interface {
 	//
 	// GET /admin/users
 	ListUsers(ctx context.Context) ([]User, error)
+	// ListVehicleProfiles implements listVehicleProfiles operation.
+	//
+	// Типовые профили ТС.
+	//
+	// GET /routing/profiles
+	ListVehicleProfiles(ctx context.Context) ([]VehicleProfile, error)
 	// ResetUserTotp implements resetUserTotp operation.
 	//
 	// Сбросить двухфакторную защиту пользователя.

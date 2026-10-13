@@ -24,6 +24,8 @@ tags:
     description: Слои карты
   - name: regulation
     description: Регулирование грузового движения
+  - name: routing
+    description: Маршруты грузовиков с учётом ограничений и зон
 
 paths:
   /me:
@@ -533,6 +535,60 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/SignQuality" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /routing/profiles:
+    get:
+      tags: [routing]
+      operationId: listVehicleProfiles
+      summary: Типовые профили ТС
+      x-permission: routing.use
+      responses:
+        "200":
+          description: Профили
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VehicleProfile" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /routing/route:
+    post:
+      tags: [routing]
+      operationId: buildRoute
+      summary: Маршрут грузовика с политикой зон и объяснением обходов
+      description: |
+        Зоны, закрытые для ТС (масса, экологический класс, пропуска, время отправления),
+        исключаются из маршрута. Для сравнения строится путь легкового автомобиля без
+        ограничений; ответ перечисляет ограничения и зоны на нём, которых маршрут избегает. Если
+        точка маршрута лежит в закрытой зоне, маршрут не строится — `blocked` не пуст.
+      x-permission: routing.use
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RouteRequest" }
+      responses:
+        "200":
+          description: Маршрут и объяснение
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RouteResult" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /routing/status:
+    get:
+      tags: [routing]
+      operationId: getRoutingStatus
+      summary: Состояние службы маршрутизации и графа
+      x-permission: routing.use
+      responses:
+        "200":
+          description: Состояние
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RoutingStatus" }
         default: { $ref: "#/components/responses/Problem" }
 
 components:
@@ -1209,3 +1265,172 @@ components:
           description: sign_not_in_osm — знак есть, в OSM ограничения нет; osm_not_signed — в OSM есть, знака рядом нет
         kind: { type: string }
         segments: { type: integer }
+
+    VehicleProfile:
+      type: object
+      required: [code, name, grossT, payloadT, axleLoadT, heightM, widthM, lengthM, ecoClass, hazmat]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        grossT:
+          type: number
+          description: Разрешённая максимальная масса, т
+        payloadT:
+          type: number
+          description: Грузоподъёмность, т
+        axleLoadT: { type: number }
+        heightM: { type: number }
+        widthM: { type: number }
+        lengthM: { type: number }
+        ecoClass:
+          type: integer
+          description: Экологический класс (0 — не указан)
+        hazmat: { type: boolean }
+
+    VehicleParams:
+      type: object
+      required: [grossT, heightM, widthM, lengthM]
+      properties:
+        grossT: { type: number, minimum: 0.5, maximum: 100 }
+        payloadT: { type: number, minimum: 0, maximum: 80 }
+        axleLoadT: { type: number, minimum: 0, maximum: 20 }
+        heightM: { type: number, minimum: 1, maximum: 6 }
+        widthM: { type: number, minimum: 1, maximum: 4 }
+        lengthM: { type: number, minimum: 2, maximum: 30 }
+        ecoClass: { type: integer, minimum: 0, maximum: 6 }
+        hazmat: { type: boolean }
+
+    LngLat:
+      type: object
+      required: [lon, lat]
+      properties:
+        lon: { type: number, minimum: -180, maximum: 180 }
+        lat: { type: number, minimum: -85, maximum: 85 }
+
+    VehiclePass:
+      type: object
+      required: [zone, kind]
+      properties:
+        zone:
+          type: string
+          enum: [sk, ttk, mkad]
+        kind:
+          type: string
+          enum: [day, night]
+
+    RouteRequest:
+      type: object
+      required: [points, vehicle]
+      properties:
+        points:
+          type: array
+          minItems: 2
+          maxItems: 25
+          items: { $ref: "#/components/schemas/LngLat" }
+        vehicle: { $ref: "#/components/schemas/VehicleParams" }
+        passes:
+          type: array
+          maxItems: 6
+          items: { $ref: "#/components/schemas/VehiclePass" }
+        depart:
+          type: string
+          format: date-time
+          description: Время отправления; нет — сейчас
+        alternates: { type: integer, minimum: 0, maximum: 2 }
+
+    RouteLine:
+      type: object
+      required: [timeS, lengthKm, coordinates]
+      properties:
+        timeS: { type: number }
+        lengthKm: { type: number }
+        coordinates:
+          type: array
+          description: Линия маршрута [долгота, широта]
+          items:
+            type: array
+            items: { type: number }
+
+    ZoneRuleUse:
+      type: object
+      required: [code, title, blocking, confirmed]
+      properties:
+        code: { type: string }
+        title: { type: string }
+        blocking:
+          type: boolean
+          description: Правило закрывает зону для этого ТС
+        confirmed: { type: boolean }
+        basis: { type: string }
+        note:
+          type: string
+          enum: [eco_unknown, payload_unknown]
+          description: eco_unknown — экологический класс не указан (зону не закрывает); payload_unknown — грузоподъёмность не указана, считается выше порога
+
+    ZoneVerdict:
+      type: object
+      required: [zone, forbidden, unconfirmed, rules]
+      properties:
+        zone:
+          type: string
+          enum: [sk, ttk, mkad]
+        forbidden: { type: boolean }
+        unconfirmed:
+          type: boolean
+          description: Решение опирается на неподтверждённое правило
+        rules:
+          type: array
+          items: { $ref: "#/components/schemas/ZoneRuleUse" }
+
+    AvoidedRestriction:
+      type: object
+      required: [kind, street, origins, segments, lengthM]
+      properties:
+        kind: { type: string }
+        street: { type: string }
+        value: { type: number }
+        origins:
+          type: array
+          items: { type: string }
+        segments: { type: integer }
+        lengthM: { type: number }
+
+    BlockedPoint:
+      type: object
+      required: [index, zone]
+      properties:
+        index: { type: integer }
+        zone:
+          type: string
+          enum: [sk, ttk, mkad]
+
+    RouteResult:
+      type: object
+      required: [routes, zones, blocked, avoided, avoidedZones]
+      properties:
+        routes:
+          type: array
+          items: { $ref: "#/components/schemas/RouteLine" }
+        baseline: { $ref: "#/components/schemas/RouteLine" }
+        zones:
+          type: array
+          items: { $ref: "#/components/schemas/ZoneVerdict" }
+        blocked:
+          type: array
+          items: { $ref: "#/components/schemas/BlockedPoint" }
+        avoided:
+          type: array
+          items: { $ref: "#/components/schemas/AvoidedRestriction" }
+        avoidedZones:
+          type: array
+          items:
+            type: string
+            enum: [sk, ttk, mkad]
+
+    RoutingStatus:
+      type: object
+      required: [available]
+      properties:
+        available: { type: boolean }
+        version: { type: string }
+        graphBuiltAt: { type: string, format: date-time }

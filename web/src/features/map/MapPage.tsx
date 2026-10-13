@@ -1,24 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Minus, Plus } from "lucide-react";
-import type { MapGeoJSONFeature, Map as MapLibreMap, StyleSpecification } from "maplibre-gl";
+import type { MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Guard } from "@/app/Guard";
 import { $api } from "@/shared/api/client";
-import { basemapStyle, type MapTheme } from "@/shared/map/basemap";
+import { basemapStyle } from "@/shared/map/basemap";
 import {
   buildDataLayers,
   codeOf,
-  color,
   dayNumber,
   interactiveLayerIds,
   layerId,
   type MapLayer,
-  type Palette,
   readPalette,
   workDayFilter,
 } from "@/shared/map/dataLayers";
 import { DEFAULT_VIEW, mountMap, onStyleReady, unmountMap } from "@/shared/map/instance";
+import { emptyStyle, fullStyle, useBasemapAvailable } from "@/shared/map/style";
 import { IconButton } from "@/shared/ui";
 import { Tabs } from "@/shared/ui/navigation";
 import { useResolvedTheme } from "@/shared/useResolvedTheme";
@@ -37,45 +35,6 @@ export function MapPage() {
       <MapWorkspace />
     </Guard>
   );
-}
-
-/** Подложка установлена: TileJSON отвечает 200. */
-function useBasemapAvailable() {
-  return useQuery({
-    queryKey: ["map", "basemap"],
-    queryFn: async () => (await fetch("/map/basemap.json", { credentials: "same-origin" })).ok,
-    staleTime: 60_000,
-  });
-}
-
-/** Стиль без подложки: фон темы, шрифты и значки — для слоёв данных. */
-function emptyStyle(theme: MapTheme, palette: Palette): StyleSpecification {
-  const base = basemapStyle(theme);
-  return {
-    version: 8,
-    glyphs: base.glyphs,
-    sources: {},
-    layers: [{ id: "background", type: "background", paint: { "background-color": color(palette, "panel") } }],
-  };
-}
-
-/**
- * Полный стиль: подложка и слои данных. Линии и контуры — под подписями подложки, точки —
- * поверх всего. Стиль строится заново при смене темы, слоёв или прозрачности; MapLibre
- * применяет только разницу.
- */
-function fullStyle(base: StyleSpecification, catalog: MapLayer[], data: ReturnType<typeof buildDataLayers>) {
-  const firstLabel = base.layers.findIndex((x) => x.type === "symbol");
-  const split = firstLabel < 0 ? base.layers.length : firstLabel;
-  const points = data.layers.filter((x) => x.type === "circle");
-  const shapes = data.layers.filter((x) => x.type !== "circle");
-  return {
-    ...base,
-    sources: { ...base.sources, ...data.sources },
-    layers: [...base.layers.slice(0, split), ...shapes, ...base.layers.slice(split), ...points],
-    // Каталог входит в зависимость стиля: смена версии данных меняет адреса тайлов.
-    metadata: { catalog: catalog.map((x) => x.version).join("|") },
-  } satisfies StyleSpecification;
 }
 
 function MapWorkspace() {

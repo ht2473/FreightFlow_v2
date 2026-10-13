@@ -11,6 +11,7 @@ import (
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
 	"freightflow/internal/platform/problem"
+	"freightflow/internal/routing"
 )
 
 // NewError переводит ошибку обработчика в ответ RFC 9457.
@@ -65,6 +66,13 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 		return problem.New(http.StatusConflict, "email_taken", "Пользователь с таким адресом уже существует")
 	case errors.Is(err, identity.ErrLastAdmin):
 		return problem.New(http.StatusConflict, "last_admin", "Нельзя лишить прав последнего администратора")
+	case errors.Is(err, routing.ErrNoRoute):
+		return problem.New(http.StatusUnprocessableEntity, "no_route", "Маршрут для этого ТС не найден").
+			WithDetail("Между точками нет пути с учётом ограничений и закрытых зон")
+	case errors.Is(err, routing.ErrUnavailable):
+		return problem.New(http.StatusServiceUnavailable, "routing_unavailable", "Служба маршрутизации недоступна")
+	case errors.As(err, new(*routing.Error)):
+		return problem.New(http.StatusBadGateway, "routing_error", "Служба маршрутизации отклонила запрос").WithDetail(err.Error())
 	case errors.Is(err, ingest.ErrUnknownSource), errors.Is(err, ingest.ErrRunNotFound):
 		return problem.NotFound
 	case errors.Is(err, ingest.ErrRunActive):

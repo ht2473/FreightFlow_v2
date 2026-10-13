@@ -55,17 +55,6 @@ export const sections: Section[] = [
     ],
   },
   {
-    path: "/network",
-    title: "Транспортная сеть",
-    permission: "routing.use",
-    summary: "Проезд грузового транспорта с учётом габаритов, массы и зон ограничений.",
-    points: [
-      "Маршрут с профилем ТС и объяснением обходов",
-      "Изохроны и матрица времени",
-      "Значимость участков и критичные мосты",
-    ],
-  },
-  {
     path: "/analytics",
     title: "Аналитика",
     permission: "analytics.view",

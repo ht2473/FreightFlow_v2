@@ -25,6 +25,7 @@ export const color = (p: Palette, role: string): string => p[role] ?? "#888888";
 const roles = [
   "acc",
   "acc-ring",
+  "acc-on",
   "panel",
   "tx",
   "tx2",

@@ -19,6 +19,7 @@ import (
 	"freightflow/internal/platform/secret"
 	"freightflow/internal/platform/session"
 	"freightflow/internal/regulation"
+	"freightflow/internal/routing"
 	"freightflow/internal/tiles"
 	"freightflow/internal/web"
 )
@@ -57,7 +58,8 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	mapHandler := tiles.New(tiles.Deps{Basemap: bm, Data: layers, Auth: tiles.NewAuth(ids, sessions), Log: tileLog})
 
 	apiHandler, err := api.New(api.Deps{
-		Identity: ids, Ingest: mods.ingest, Layers: layers, Regulation: regulation.New(pool), Sessions: sessions, Mailer: mailer,
+		Identity: ids, Ingest: mods.ingest, Layers: layers, Regulation: regulation.New(pool),
+		Routing: routing.NewService(pool, routing.NewClient(cfg.ValhallaURL)), Sessions: sessions, Mailer: mailer,
 		BaseURL: cfg.BaseURL, Log: env.Log, Meters: rt.tel.Meters, Tracers: rt.tel.Tracers,
 	})
 	if err != nil {

@@ -258,6 +258,76 @@ func (s *AuditRecordDetails) init() AuditRecordDetails {
 	return m
 }
 
+// Ref: #/components/schemas/AvoidedRestriction
+type AvoidedRestriction struct {
+	Kind     string     `json:"kind"`
+	Street   string     `json:"street"`
+	Value    OptFloat64 `json:"value"`
+	Origins  []string   `json:"origins"`
+	Segments int        `json:"segments"`
+	LengthM  float64    `json:"lengthM"`
+}
+
+// GetKind returns the value of Kind.
+func (s *AvoidedRestriction) GetKind() string {
+	return s.Kind
+}
+
+// GetStreet returns the value of Street.
+func (s *AvoidedRestriction) GetStreet() string {
+	return s.Street
+}
+
+// GetValue returns the value of Value.
+func (s *AvoidedRestriction) GetValue() OptFloat64 {
+	return s.Value
+}
+
+// GetOrigins returns the value of Origins.
+func (s *AvoidedRestriction) GetOrigins() []string {
+	return s.Origins
+}
+
+// GetSegments returns the value of Segments.
+func (s *AvoidedRestriction) GetSegments() int {
+	return s.Segments
+}
+
+// GetLengthM returns the value of LengthM.
+func (s *AvoidedRestriction) GetLengthM() float64 {
+	return s.LengthM
+}
+
+// SetKind sets the value of Kind.
+func (s *AvoidedRestriction) SetKind(val string) {
+	s.Kind = val
+}
+
+// SetStreet sets the value of Street.
+func (s *AvoidedRestriction) SetStreet(val string) {
+	s.Street = val
+}
+
+// SetValue sets the value of Value.
+func (s *AvoidedRestriction) SetValue(val OptFloat64) {
+	s.Value = val
+}
+
+// SetOrigins sets the value of Origins.
+func (s *AvoidedRestriction) SetOrigins(val []string) {
+	s.Origins = val
+}
+
+// SetSegments sets the value of Segments.
+func (s *AvoidedRestriction) SetSegments(val int) {
+	s.Segments = val
+}
+
+// SetLengthM sets the value of LengthM.
+func (s *AvoidedRestriction) SetLengthM(val float64) {
+	s.LengthM = val
+}
+
 type BearerAuth struct {
 	Token string
 	Roles []string
@@ -281,6 +351,80 @@ func (s *BearerAuth) SetToken(val string) {
 // SetRoles sets the value of Roles.
 func (s *BearerAuth) SetRoles(val []string) {
 	s.Roles = val
+}
+
+// Ref: #/components/schemas/BlockedPoint
+type BlockedPoint struct {
+	Index int              `json:"index"`
+	Zone  BlockedPointZone `json:"zone"`
+}
+
+// GetIndex returns the value of Index.
+func (s *BlockedPoint) GetIndex() int {
+	return s.Index
+}
+
+// GetZone returns the value of Zone.
+func (s *BlockedPoint) GetZone() BlockedPointZone {
+	return s.Zone
+}
+
+// SetIndex sets the value of Index.
+func (s *BlockedPoint) SetIndex(val int) {
+	s.Index = val
+}
+
+// SetZone sets the value of Zone.
+func (s *BlockedPoint) SetZone(val BlockedPointZone) {
+	s.Zone = val
+}
+
+type BlockedPointZone string
+
+const (
+	BlockedPointZoneSk   BlockedPointZone = "sk"
+	BlockedPointZoneTtk  BlockedPointZone = "ttk"
+	BlockedPointZoneMkad BlockedPointZone = "mkad"
+)
+
+// AllValues returns all BlockedPointZone values.
+func (BlockedPointZone) AllValues() []BlockedPointZone {
+	return []BlockedPointZone{
+		BlockedPointZoneSk,
+		BlockedPointZoneTtk,
+		BlockedPointZoneMkad,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BlockedPointZone) MarshalText() ([]byte, error) {
+	switch s {
+	case BlockedPointZoneSk:
+		return []byte(s), nil
+	case BlockedPointZoneTtk:
+		return []byte(s), nil
+	case BlockedPointZoneMkad:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BlockedPointZone) UnmarshalText(data []byte) error {
+	switch BlockedPointZone(data) {
+	case BlockedPointZoneSk:
+		*s = BlockedPointZoneSk
+		return nil
+	case BlockedPointZoneTtk:
+		*s = BlockedPointZoneTtk
+		return nil
+	case BlockedPointZoneMkad:
+		*s = BlockedPointZoneMkad
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/CargoFrame
@@ -1292,6 +1436,32 @@ func (s *LegalDocumentStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/LngLat
+type LngLat struct {
+	Lon float64 `json:"lon"`
+	Lat float64 `json:"lat"`
+}
+
+// GetLon returns the value of Lon.
+func (s *LngLat) GetLon() float64 {
+	return s.Lon
+}
+
+// GetLat returns the value of Lat.
+func (s *LngLat) GetLat() float64 {
+	return s.Lat
+}
+
+// SetLon sets the value of Lon.
+func (s *LngLat) SetLon(val float64) {
+	s.Lon = val
+}
+
+// SetLat sets the value of Lat.
+func (s *LngLat) SetLat(val float64) {
+	s.Lat = val
+}
+
 // Ref: #/components/schemas/MapLayer
 type MapLayer struct {
 	Code        string           `json:"code"`
@@ -2003,6 +2173,52 @@ func (o OptLayerPropertyLabels) Or(d LayerPropertyLabels) LayerPropertyLabels {
 	return d
 }
 
+// NewOptRouteLine returns new OptRouteLine with value set to v.
+func NewOptRouteLine(v RouteLine) OptRouteLine {
+	return OptRouteLine{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRouteLine is optional RouteLine.
+type OptRouteLine struct {
+	Value RouteLine
+	Set   bool
+}
+
+// IsSet returns true if OptRouteLine was set.
+func (o OptRouteLine) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRouteLine) Reset() {
+	var v RouteLine
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRouteLine) SetTo(v RouteLine) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRouteLine) Get() (v RouteLine, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRouteLine) Or(d RouteLine) RouteLine {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptRun returns new OptRun with value set to v.
 func NewOptRun(v Run) OptRun {
 	return OptRun{
@@ -2273,6 +2489,52 @@ func (o OptZoneRulePassKind) Get() (v ZoneRulePassKind, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptZoneRulePassKind) Or(d ZoneRulePassKind) ZoneRulePassKind {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptZoneRuleUseNote returns new OptZoneRuleUseNote with value set to v.
+func NewOptZoneRuleUseNote(v ZoneRuleUseNote) OptZoneRuleUseNote {
+	return OptZoneRuleUseNote{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptZoneRuleUseNote is optional ZoneRuleUseNote.
+type OptZoneRuleUseNote struct {
+	Value ZoneRuleUseNote
+	Set   bool
+}
+
+// IsSet returns true if OptZoneRuleUseNote was set.
+func (o OptZoneRuleUseNote) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptZoneRuleUseNote) Reset() {
+	var v ZoneRuleUseNote
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptZoneRuleUseNote) SetTo(v ZoneRuleUseNote) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptZoneRuleUseNote) Get() (v ZoneRuleUseNote, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptZoneRuleUseNote) Or(d ZoneRuleUseNote) ZoneRuleUseNote {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -2978,6 +3240,259 @@ func (s *Role) SetBuiltin(val bool) {
 // SetPermissions sets the value of Permissions.
 func (s *Role) SetPermissions(val []string) {
 	s.Permissions = val
+}
+
+// Ref: #/components/schemas/RouteLine
+type RouteLine struct {
+	TimeS    float64 `json:"timeS"`
+	LengthKm float64 `json:"lengthKm"`
+	// Линия маршрута [долгота, широта].
+	Coordinates [][]float64 `json:"coordinates"`
+}
+
+// GetTimeS returns the value of TimeS.
+func (s *RouteLine) GetTimeS() float64 {
+	return s.TimeS
+}
+
+// GetLengthKm returns the value of LengthKm.
+func (s *RouteLine) GetLengthKm() float64 {
+	return s.LengthKm
+}
+
+// GetCoordinates returns the value of Coordinates.
+func (s *RouteLine) GetCoordinates() [][]float64 {
+	return s.Coordinates
+}
+
+// SetTimeS sets the value of TimeS.
+func (s *RouteLine) SetTimeS(val float64) {
+	s.TimeS = val
+}
+
+// SetLengthKm sets the value of LengthKm.
+func (s *RouteLine) SetLengthKm(val float64) {
+	s.LengthKm = val
+}
+
+// SetCoordinates sets the value of Coordinates.
+func (s *RouteLine) SetCoordinates(val [][]float64) {
+	s.Coordinates = val
+}
+
+// Ref: #/components/schemas/RouteRequest
+type RouteRequest struct {
+	Points  []LngLat      `json:"points"`
+	Vehicle VehicleParams `json:"vehicle"`
+	Passes  []VehiclePass `json:"passes"`
+	// Время отправления; нет — сейчас.
+	Depart     OptDateTime `json:"depart"`
+	Alternates OptInt      `json:"alternates"`
+}
+
+// GetPoints returns the value of Points.
+func (s *RouteRequest) GetPoints() []LngLat {
+	return s.Points
+}
+
+// GetVehicle returns the value of Vehicle.
+func (s *RouteRequest) GetVehicle() VehicleParams {
+	return s.Vehicle
+}
+
+// GetPasses returns the value of Passes.
+func (s *RouteRequest) GetPasses() []VehiclePass {
+	return s.Passes
+}
+
+// GetDepart returns the value of Depart.
+func (s *RouteRequest) GetDepart() OptDateTime {
+	return s.Depart
+}
+
+// GetAlternates returns the value of Alternates.
+func (s *RouteRequest) GetAlternates() OptInt {
+	return s.Alternates
+}
+
+// SetPoints sets the value of Points.
+func (s *RouteRequest) SetPoints(val []LngLat) {
+	s.Points = val
+}
+
+// SetVehicle sets the value of Vehicle.
+func (s *RouteRequest) SetVehicle(val VehicleParams) {
+	s.Vehicle = val
+}
+
+// SetPasses sets the value of Passes.
+func (s *RouteRequest) SetPasses(val []VehiclePass) {
+	s.Passes = val
+}
+
+// SetDepart sets the value of Depart.
+func (s *RouteRequest) SetDepart(val OptDateTime) {
+	s.Depart = val
+}
+
+// SetAlternates sets the value of Alternates.
+func (s *RouteRequest) SetAlternates(val OptInt) {
+	s.Alternates = val
+}
+
+// Ref: #/components/schemas/RouteResult
+type RouteResult struct {
+	Routes       []RouteLine                   `json:"routes"`
+	Baseline     OptRouteLine                  `json:"baseline"`
+	Zones        []ZoneVerdict                 `json:"zones"`
+	Blocked      []BlockedPoint                `json:"blocked"`
+	Avoided      []AvoidedRestriction          `json:"avoided"`
+	AvoidedZones []RouteResultAvoidedZonesItem `json:"avoidedZones"`
+}
+
+// GetRoutes returns the value of Routes.
+func (s *RouteResult) GetRoutes() []RouteLine {
+	return s.Routes
+}
+
+// GetBaseline returns the value of Baseline.
+func (s *RouteResult) GetBaseline() OptRouteLine {
+	return s.Baseline
+}
+
+// GetZones returns the value of Zones.
+func (s *RouteResult) GetZones() []ZoneVerdict {
+	return s.Zones
+}
+
+// GetBlocked returns the value of Blocked.
+func (s *RouteResult) GetBlocked() []BlockedPoint {
+	return s.Blocked
+}
+
+// GetAvoided returns the value of Avoided.
+func (s *RouteResult) GetAvoided() []AvoidedRestriction {
+	return s.Avoided
+}
+
+// GetAvoidedZones returns the value of AvoidedZones.
+func (s *RouteResult) GetAvoidedZones() []RouteResultAvoidedZonesItem {
+	return s.AvoidedZones
+}
+
+// SetRoutes sets the value of Routes.
+func (s *RouteResult) SetRoutes(val []RouteLine) {
+	s.Routes = val
+}
+
+// SetBaseline sets the value of Baseline.
+func (s *RouteResult) SetBaseline(val OptRouteLine) {
+	s.Baseline = val
+}
+
+// SetZones sets the value of Zones.
+func (s *RouteResult) SetZones(val []ZoneVerdict) {
+	s.Zones = val
+}
+
+// SetBlocked sets the value of Blocked.
+func (s *RouteResult) SetBlocked(val []BlockedPoint) {
+	s.Blocked = val
+}
+
+// SetAvoided sets the value of Avoided.
+func (s *RouteResult) SetAvoided(val []AvoidedRestriction) {
+	s.Avoided = val
+}
+
+// SetAvoidedZones sets the value of AvoidedZones.
+func (s *RouteResult) SetAvoidedZones(val []RouteResultAvoidedZonesItem) {
+	s.AvoidedZones = val
+}
+
+type RouteResultAvoidedZonesItem string
+
+const (
+	RouteResultAvoidedZonesItemSk   RouteResultAvoidedZonesItem = "sk"
+	RouteResultAvoidedZonesItemTtk  RouteResultAvoidedZonesItem = "ttk"
+	RouteResultAvoidedZonesItemMkad RouteResultAvoidedZonesItem = "mkad"
+)
+
+// AllValues returns all RouteResultAvoidedZonesItem values.
+func (RouteResultAvoidedZonesItem) AllValues() []RouteResultAvoidedZonesItem {
+	return []RouteResultAvoidedZonesItem{
+		RouteResultAvoidedZonesItemSk,
+		RouteResultAvoidedZonesItemTtk,
+		RouteResultAvoidedZonesItemMkad,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RouteResultAvoidedZonesItem) MarshalText() ([]byte, error) {
+	switch s {
+	case RouteResultAvoidedZonesItemSk:
+		return []byte(s), nil
+	case RouteResultAvoidedZonesItemTtk:
+		return []byte(s), nil
+	case RouteResultAvoidedZonesItemMkad:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RouteResultAvoidedZonesItem) UnmarshalText(data []byte) error {
+	switch RouteResultAvoidedZonesItem(data) {
+	case RouteResultAvoidedZonesItemSk:
+		*s = RouteResultAvoidedZonesItemSk
+		return nil
+	case RouteResultAvoidedZonesItemTtk:
+		*s = RouteResultAvoidedZonesItemTtk
+		return nil
+	case RouteResultAvoidedZonesItemMkad:
+		*s = RouteResultAvoidedZonesItemMkad
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/RoutingStatus
+type RoutingStatus struct {
+	Available    bool        `json:"available"`
+	Version      OptString   `json:"version"`
+	GraphBuiltAt OptDateTime `json:"graphBuiltAt"`
+}
+
+// GetAvailable returns the value of Available.
+func (s *RoutingStatus) GetAvailable() bool {
+	return s.Available
+}
+
+// GetVersion returns the value of Version.
+func (s *RoutingStatus) GetVersion() OptString {
+	return s.Version
+}
+
+// GetGraphBuiltAt returns the value of GraphBuiltAt.
+func (s *RoutingStatus) GetGraphBuiltAt() OptDateTime {
+	return s.GraphBuiltAt
+}
+
+// SetAvailable sets the value of Available.
+func (s *RoutingStatus) SetAvailable(val bool) {
+	s.Available = val
+}
+
+// SetVersion sets the value of Version.
+func (s *RoutingStatus) SetVersion(val OptString) {
+	s.Version = val
+}
+
+// SetGraphBuiltAt sets the value of GraphBuiltAt.
+func (s *RoutingStatus) SetGraphBuiltAt(val OptDateTime) {
+	s.GraphBuiltAt = val
 }
 
 // Ref: #/components/schemas/Run
@@ -4090,6 +4605,330 @@ func (s *UserStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/VehicleParams
+type VehicleParams struct {
+	GrossT    float64    `json:"grossT"`
+	PayloadT  OptFloat64 `json:"payloadT"`
+	AxleLoadT OptFloat64 `json:"axleLoadT"`
+	HeightM   float64    `json:"heightM"`
+	WidthM    float64    `json:"widthM"`
+	LengthM   float64    `json:"lengthM"`
+	EcoClass  OptInt     `json:"ecoClass"`
+	Hazmat    OptBool    `json:"hazmat"`
+}
+
+// GetGrossT returns the value of GrossT.
+func (s *VehicleParams) GetGrossT() float64 {
+	return s.GrossT
+}
+
+// GetPayloadT returns the value of PayloadT.
+func (s *VehicleParams) GetPayloadT() OptFloat64 {
+	return s.PayloadT
+}
+
+// GetAxleLoadT returns the value of AxleLoadT.
+func (s *VehicleParams) GetAxleLoadT() OptFloat64 {
+	return s.AxleLoadT
+}
+
+// GetHeightM returns the value of HeightM.
+func (s *VehicleParams) GetHeightM() float64 {
+	return s.HeightM
+}
+
+// GetWidthM returns the value of WidthM.
+func (s *VehicleParams) GetWidthM() float64 {
+	return s.WidthM
+}
+
+// GetLengthM returns the value of LengthM.
+func (s *VehicleParams) GetLengthM() float64 {
+	return s.LengthM
+}
+
+// GetEcoClass returns the value of EcoClass.
+func (s *VehicleParams) GetEcoClass() OptInt {
+	return s.EcoClass
+}
+
+// GetHazmat returns the value of Hazmat.
+func (s *VehicleParams) GetHazmat() OptBool {
+	return s.Hazmat
+}
+
+// SetGrossT sets the value of GrossT.
+func (s *VehicleParams) SetGrossT(val float64) {
+	s.GrossT = val
+}
+
+// SetPayloadT sets the value of PayloadT.
+func (s *VehicleParams) SetPayloadT(val OptFloat64) {
+	s.PayloadT = val
+}
+
+// SetAxleLoadT sets the value of AxleLoadT.
+func (s *VehicleParams) SetAxleLoadT(val OptFloat64) {
+	s.AxleLoadT = val
+}
+
+// SetHeightM sets the value of HeightM.
+func (s *VehicleParams) SetHeightM(val float64) {
+	s.HeightM = val
+}
+
+// SetWidthM sets the value of WidthM.
+func (s *VehicleParams) SetWidthM(val float64) {
+	s.WidthM = val
+}
+
+// SetLengthM sets the value of LengthM.
+func (s *VehicleParams) SetLengthM(val float64) {
+	s.LengthM = val
+}
+
+// SetEcoClass sets the value of EcoClass.
+func (s *VehicleParams) SetEcoClass(val OptInt) {
+	s.EcoClass = val
+}
+
+// SetHazmat sets the value of Hazmat.
+func (s *VehicleParams) SetHazmat(val OptBool) {
+	s.Hazmat = val
+}
+
+// Ref: #/components/schemas/VehiclePass
+type VehiclePass struct {
+	Zone VehiclePassZone `json:"zone"`
+	Kind VehiclePassKind `json:"kind"`
+}
+
+// GetZone returns the value of Zone.
+func (s *VehiclePass) GetZone() VehiclePassZone {
+	return s.Zone
+}
+
+// GetKind returns the value of Kind.
+func (s *VehiclePass) GetKind() VehiclePassKind {
+	return s.Kind
+}
+
+// SetZone sets the value of Zone.
+func (s *VehiclePass) SetZone(val VehiclePassZone) {
+	s.Zone = val
+}
+
+// SetKind sets the value of Kind.
+func (s *VehiclePass) SetKind(val VehiclePassKind) {
+	s.Kind = val
+}
+
+type VehiclePassKind string
+
+const (
+	VehiclePassKindDay   VehiclePassKind = "day"
+	VehiclePassKindNight VehiclePassKind = "night"
+)
+
+// AllValues returns all VehiclePassKind values.
+func (VehiclePassKind) AllValues() []VehiclePassKind {
+	return []VehiclePassKind{
+		VehiclePassKindDay,
+		VehiclePassKindNight,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s VehiclePassKind) MarshalText() ([]byte, error) {
+	switch s {
+	case VehiclePassKindDay:
+		return []byte(s), nil
+	case VehiclePassKindNight:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *VehiclePassKind) UnmarshalText(data []byte) error {
+	switch VehiclePassKind(data) {
+	case VehiclePassKindDay:
+		*s = VehiclePassKindDay
+		return nil
+	case VehiclePassKindNight:
+		*s = VehiclePassKindNight
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type VehiclePassZone string
+
+const (
+	VehiclePassZoneSk   VehiclePassZone = "sk"
+	VehiclePassZoneTtk  VehiclePassZone = "ttk"
+	VehiclePassZoneMkad VehiclePassZone = "mkad"
+)
+
+// AllValues returns all VehiclePassZone values.
+func (VehiclePassZone) AllValues() []VehiclePassZone {
+	return []VehiclePassZone{
+		VehiclePassZoneSk,
+		VehiclePassZoneTtk,
+		VehiclePassZoneMkad,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s VehiclePassZone) MarshalText() ([]byte, error) {
+	switch s {
+	case VehiclePassZoneSk:
+		return []byte(s), nil
+	case VehiclePassZoneTtk:
+		return []byte(s), nil
+	case VehiclePassZoneMkad:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *VehiclePassZone) UnmarshalText(data []byte) error {
+	switch VehiclePassZone(data) {
+	case VehiclePassZoneSk:
+		*s = VehiclePassZoneSk
+		return nil
+	case VehiclePassZoneTtk:
+		*s = VehiclePassZoneTtk
+		return nil
+	case VehiclePassZoneMkad:
+		*s = VehiclePassZoneMkad
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/VehicleProfile
+type VehicleProfile struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+	// Разрешённая максимальная масса, т.
+	GrossT float64 `json:"grossT"`
+	// Грузоподъёмность, т.
+	PayloadT  float64 `json:"payloadT"`
+	AxleLoadT float64 `json:"axleLoadT"`
+	HeightM   float64 `json:"heightM"`
+	WidthM    float64 `json:"widthM"`
+	LengthM   float64 `json:"lengthM"`
+	// Экологический класс (0 — не указан).
+	EcoClass int  `json:"ecoClass"`
+	Hazmat   bool `json:"hazmat"`
+}
+
+// GetCode returns the value of Code.
+func (s *VehicleProfile) GetCode() string {
+	return s.Code
+}
+
+// GetName returns the value of Name.
+func (s *VehicleProfile) GetName() string {
+	return s.Name
+}
+
+// GetGrossT returns the value of GrossT.
+func (s *VehicleProfile) GetGrossT() float64 {
+	return s.GrossT
+}
+
+// GetPayloadT returns the value of PayloadT.
+func (s *VehicleProfile) GetPayloadT() float64 {
+	return s.PayloadT
+}
+
+// GetAxleLoadT returns the value of AxleLoadT.
+func (s *VehicleProfile) GetAxleLoadT() float64 {
+	return s.AxleLoadT
+}
+
+// GetHeightM returns the value of HeightM.
+func (s *VehicleProfile) GetHeightM() float64 {
+	return s.HeightM
+}
+
+// GetWidthM returns the value of WidthM.
+func (s *VehicleProfile) GetWidthM() float64 {
+	return s.WidthM
+}
+
+// GetLengthM returns the value of LengthM.
+func (s *VehicleProfile) GetLengthM() float64 {
+	return s.LengthM
+}
+
+// GetEcoClass returns the value of EcoClass.
+func (s *VehicleProfile) GetEcoClass() int {
+	return s.EcoClass
+}
+
+// GetHazmat returns the value of Hazmat.
+func (s *VehicleProfile) GetHazmat() bool {
+	return s.Hazmat
+}
+
+// SetCode sets the value of Code.
+func (s *VehicleProfile) SetCode(val string) {
+	s.Code = val
+}
+
+// SetName sets the value of Name.
+func (s *VehicleProfile) SetName(val string) {
+	s.Name = val
+}
+
+// SetGrossT sets the value of GrossT.
+func (s *VehicleProfile) SetGrossT(val float64) {
+	s.GrossT = val
+}
+
+// SetPayloadT sets the value of PayloadT.
+func (s *VehicleProfile) SetPayloadT(val float64) {
+	s.PayloadT = val
+}
+
+// SetAxleLoadT sets the value of AxleLoadT.
+func (s *VehicleProfile) SetAxleLoadT(val float64) {
+	s.AxleLoadT = val
+}
+
+// SetHeightM sets the value of HeightM.
+func (s *VehicleProfile) SetHeightM(val float64) {
+	s.HeightM = val
+}
+
+// SetWidthM sets the value of WidthM.
+func (s *VehicleProfile) SetWidthM(val float64) {
+	s.WidthM = val
+}
+
+// SetLengthM sets the value of LengthM.
+func (s *VehicleProfile) SetLengthM(val float64) {
+	s.LengthM = val
+}
+
+// SetEcoClass sets the value of EcoClass.
+func (s *VehicleProfile) SetEcoClass(val int) {
+	s.EcoClass = val
+}
+
+// SetHazmat sets the value of Hazmat.
+func (s *VehicleProfile) SetHazmat(val bool) {
+	s.Hazmat = val
+}
+
 // Ref: #/components/schemas/ZoneRule
 type ZoneRule struct {
 	Code string `json:"code"`
@@ -4440,6 +5279,124 @@ func (s *ZoneRulePassKind) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/ZoneRuleUse
+type ZoneRuleUse struct {
+	Code  string `json:"code"`
+	Title string `json:"title"`
+	// Правило закрывает зону для этого ТС.
+	Blocking  bool      `json:"blocking"`
+	Confirmed bool      `json:"confirmed"`
+	Basis     OptString `json:"basis"`
+	// Eco_unknown — экологический класс не указан (зону не
+	// закрывает); payload_unknown — грузоподъёмность не указана,
+	// считается выше порога.
+	Note OptZoneRuleUseNote `json:"note"`
+}
+
+// GetCode returns the value of Code.
+func (s *ZoneRuleUse) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *ZoneRuleUse) GetTitle() string {
+	return s.Title
+}
+
+// GetBlocking returns the value of Blocking.
+func (s *ZoneRuleUse) GetBlocking() bool {
+	return s.Blocking
+}
+
+// GetConfirmed returns the value of Confirmed.
+func (s *ZoneRuleUse) GetConfirmed() bool {
+	return s.Confirmed
+}
+
+// GetBasis returns the value of Basis.
+func (s *ZoneRuleUse) GetBasis() OptString {
+	return s.Basis
+}
+
+// GetNote returns the value of Note.
+func (s *ZoneRuleUse) GetNote() OptZoneRuleUseNote {
+	return s.Note
+}
+
+// SetCode sets the value of Code.
+func (s *ZoneRuleUse) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *ZoneRuleUse) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetBlocking sets the value of Blocking.
+func (s *ZoneRuleUse) SetBlocking(val bool) {
+	s.Blocking = val
+}
+
+// SetConfirmed sets the value of Confirmed.
+func (s *ZoneRuleUse) SetConfirmed(val bool) {
+	s.Confirmed = val
+}
+
+// SetBasis sets the value of Basis.
+func (s *ZoneRuleUse) SetBasis(val OptString) {
+	s.Basis = val
+}
+
+// SetNote sets the value of Note.
+func (s *ZoneRuleUse) SetNote(val OptZoneRuleUseNote) {
+	s.Note = val
+}
+
+// Eco_unknown — экологический класс не указан (зону не
+// закрывает); payload_unknown — грузоподъёмность не указана,
+// считается выше порога.
+type ZoneRuleUseNote string
+
+const (
+	ZoneRuleUseNoteEcoUnknown     ZoneRuleUseNote = "eco_unknown"
+	ZoneRuleUseNotePayloadUnknown ZoneRuleUseNote = "payload_unknown"
+)
+
+// AllValues returns all ZoneRuleUseNote values.
+func (ZoneRuleUseNote) AllValues() []ZoneRuleUseNote {
+	return []ZoneRuleUseNote{
+		ZoneRuleUseNoteEcoUnknown,
+		ZoneRuleUseNotePayloadUnknown,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ZoneRuleUseNote) MarshalText() ([]byte, error) {
+	switch s {
+	case ZoneRuleUseNoteEcoUnknown:
+		return []byte(s), nil
+	case ZoneRuleUseNotePayloadUnknown:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ZoneRuleUseNote) UnmarshalText(data []byte) error {
+	switch ZoneRuleUseNote(data) {
+	case ZoneRuleUseNoteEcoUnknown:
+		*s = ZoneRuleUseNoteEcoUnknown
+		return nil
+	case ZoneRuleUseNotePayloadUnknown:
+		*s = ZoneRuleUseNotePayloadUnknown
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Зона — территория внутри кольца вместе с самим
 // кольцом.
 type ZoneRuleZone string
@@ -4484,6 +5441,103 @@ func (s *ZoneRuleZone) UnmarshalText(data []byte) error {
 		return nil
 	case ZoneRuleZoneMkad:
 		*s = ZoneRuleZoneMkad
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ZoneVerdict
+type ZoneVerdict struct {
+	Zone      ZoneVerdictZone `json:"zone"`
+	Forbidden bool            `json:"forbidden"`
+	// Решение опирается на неподтверждённое правило.
+	Unconfirmed bool          `json:"unconfirmed"`
+	Rules       []ZoneRuleUse `json:"rules"`
+}
+
+// GetZone returns the value of Zone.
+func (s *ZoneVerdict) GetZone() ZoneVerdictZone {
+	return s.Zone
+}
+
+// GetForbidden returns the value of Forbidden.
+func (s *ZoneVerdict) GetForbidden() bool {
+	return s.Forbidden
+}
+
+// GetUnconfirmed returns the value of Unconfirmed.
+func (s *ZoneVerdict) GetUnconfirmed() bool {
+	return s.Unconfirmed
+}
+
+// GetRules returns the value of Rules.
+func (s *ZoneVerdict) GetRules() []ZoneRuleUse {
+	return s.Rules
+}
+
+// SetZone sets the value of Zone.
+func (s *ZoneVerdict) SetZone(val ZoneVerdictZone) {
+	s.Zone = val
+}
+
+// SetForbidden sets the value of Forbidden.
+func (s *ZoneVerdict) SetForbidden(val bool) {
+	s.Forbidden = val
+}
+
+// SetUnconfirmed sets the value of Unconfirmed.
+func (s *ZoneVerdict) SetUnconfirmed(val bool) {
+	s.Unconfirmed = val
+}
+
+// SetRules sets the value of Rules.
+func (s *ZoneVerdict) SetRules(val []ZoneRuleUse) {
+	s.Rules = val
+}
+
+type ZoneVerdictZone string
+
+const (
+	ZoneVerdictZoneSk   ZoneVerdictZone = "sk"
+	ZoneVerdictZoneTtk  ZoneVerdictZone = "ttk"
+	ZoneVerdictZoneMkad ZoneVerdictZone = "mkad"
+)
+
+// AllValues returns all ZoneVerdictZone values.
+func (ZoneVerdictZone) AllValues() []ZoneVerdictZone {
+	return []ZoneVerdictZone{
+		ZoneVerdictZoneSk,
+		ZoneVerdictZoneTtk,
+		ZoneVerdictZoneMkad,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ZoneVerdictZone) MarshalText() ([]byte, error) {
+	switch s {
+	case ZoneVerdictZoneSk:
+		return []byte(s), nil
+	case ZoneVerdictZoneTtk:
+		return []byte(s), nil
+	case ZoneVerdictZoneMkad:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ZoneVerdictZone) UnmarshalText(data []byte) error {
+	switch ZoneVerdictZone(data) {
+	case ZoneVerdictZoneSk:
+		*s = ZoneVerdictZoneSk
+		return nil
+	case ZoneVerdictZoneTtk:
+		*s = ZoneVerdictZoneTtk
+		return nil
+	case ZoneVerdictZoneMkad:
+		*s = ZoneVerdictZoneMkad
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

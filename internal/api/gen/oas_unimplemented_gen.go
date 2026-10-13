@@ -22,6 +22,21 @@ func (UnimplementedHandler) BeginTotpSetup(ctx context.Context) (r *TotpSetup, _
 	return r, ht.ErrNotImplemented
 }
 
+// BuildRoute implements buildRoute operation.
+//
+// Зоны, закрытые для ТС (масса, экологический класс,
+// пропуска, время отправления), исключаются из маршрута.
+// Для сравнения строится путь легкового автомобиля без
+// ограничений; ответ перечисляет ограничения и зоны на
+// нём, которых маршрут избегает. Если точка маршрута
+// лежит в закрытой зоне, маршрут не строится — `blocked` не
+// пуст.
+//
+// POST /routing/route
+func (UnimplementedHandler) BuildRoute(ctx context.Context, req *RouteRequest) (r *RouteResult, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ChangePassword implements changePassword operation.
 //
 // Сменить пароль.
@@ -114,6 +129,15 @@ func (UnimplementedHandler) GetPermitStats(ctx context.Context) (r *PermitStats,
 //
 // GET /regulation
 func (UnimplementedHandler) GetRegulation(ctx context.Context) (r *RegulationOverview, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRoutingStatus implements getRoutingStatus operation.
+//
+// Состояние службы маршрутизации и графа.
+//
+// GET /routing/status
+func (UnimplementedHandler) GetRoutingStatus(ctx context.Context) (r *RoutingStatus, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -228,6 +252,15 @@ func (UnimplementedHandler) ListTokens(ctx context.Context) (r []ApiToken, _ err
 //
 // GET /admin/users
 func (UnimplementedHandler) ListUsers(ctx context.Context) (r []User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListVehicleProfiles implements listVehicleProfiles operation.
+//
+// Типовые профили ТС.
+//
+// GET /routing/profiles
+func (UnimplementedHandler) ListVehicleProfiles(ctx context.Context) (r []VehicleProfile, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

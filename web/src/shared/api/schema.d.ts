@@ -419,6 +419,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/routing/profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Типовые профили ТС */
+        get: operations["listVehicleProfiles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/routing/route": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Маршрут грузовика с политикой зон и объяснением обходов
+         * @description Зоны, закрытые для ТС (масса, экологический класс, пропуска, время отправления),
+         *     исключаются из маршрута. Для сравнения строится путь легкового автомобиля без
+         *     ограничений; ответ перечисляет ограничения и зоны на нём, которых маршрут избегает. Если
+         *     точка маршрута лежит в закрытой зоне, маршрут не строится — `blocked` не пуст.
+         */
+        post: operations["buildRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/routing/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Состояние службы маршрутизации и графа */
+        get: operations["getRoutingStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -856,6 +913,106 @@ export interface components {
             type: "sign_not_in_osm" | "osm_not_signed";
             kind: string;
             segments: number;
+        };
+        VehicleProfile: {
+            code: string;
+            name: string;
+            /** @description Разрешённая максимальная масса, т */
+            grossT: number;
+            /** @description Грузоподъёмность, т */
+            payloadT: number;
+            axleLoadT: number;
+            heightM: number;
+            widthM: number;
+            lengthM: number;
+            /** @description Экологический класс (0 — не указан) */
+            ecoClass: number;
+            hazmat: boolean;
+        };
+        VehicleParams: {
+            grossT: number;
+            payloadT?: number;
+            axleLoadT?: number;
+            heightM: number;
+            widthM: number;
+            lengthM: number;
+            ecoClass?: number;
+            hazmat?: boolean;
+        };
+        LngLat: {
+            lon: number;
+            lat: number;
+        };
+        VehiclePass: {
+            /** @enum {string} */
+            zone: "sk" | "ttk" | "mkad";
+            /** @enum {string} */
+            kind: "day" | "night";
+        };
+        RouteRequest: {
+            points: components["schemas"]["LngLat"][];
+            vehicle: components["schemas"]["VehicleParams"];
+            passes?: components["schemas"]["VehiclePass"][];
+            /**
+             * Format: date-time
+             * @description Время отправления; нет — сейчас
+             */
+            depart?: string;
+            alternates?: number;
+        };
+        RouteLine: {
+            timeS: number;
+            lengthKm: number;
+            /** @description Линия маршрута [долгота, широта] */
+            coordinates: number[][];
+        };
+        ZoneRuleUse: {
+            code: string;
+            title: string;
+            /** @description Правило закрывает зону для этого ТС */
+            blocking: boolean;
+            confirmed: boolean;
+            basis?: string;
+            /**
+             * @description eco_unknown — экологический класс не указан (зону не закрывает); payload_unknown — грузоподъёмность не указана, считается выше порога
+             * @enum {string}
+             */
+            note?: "eco_unknown" | "payload_unknown";
+        };
+        ZoneVerdict: {
+            /** @enum {string} */
+            zone: "sk" | "ttk" | "mkad";
+            forbidden: boolean;
+            /** @description Решение опирается на неподтверждённое правило */
+            unconfirmed: boolean;
+            rules: components["schemas"]["ZoneRuleUse"][];
+        };
+        AvoidedRestriction: {
+            kind: string;
+            street: string;
+            value?: number;
+            origins: string[];
+            segments: number;
+            lengthM: number;
+        };
+        BlockedPoint: {
+            index: number;
+            /** @enum {string} */
+            zone: "sk" | "ttk" | "mkad";
+        };
+        RouteResult: {
+            routes: components["schemas"]["RouteLine"][];
+            baseline?: components["schemas"]["RouteLine"];
+            zones: components["schemas"]["ZoneVerdict"][];
+            blocked: components["schemas"]["BlockedPoint"][];
+            avoided: components["schemas"]["AvoidedRestriction"][];
+            avoidedZones: ("sk" | "ttk" | "mkad")[];
+        };
+        RoutingStatus: {
+            available: boolean;
+            version?: string;
+            /** Format: date-time */
+            graphBuiltAt?: string;
         };
     };
     responses: {
@@ -1567,6 +1724,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SignQuality"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listVehicleProfiles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Профили */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VehicleProfile"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    buildRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RouteRequest"];
+            };
+        };
+        responses: {
+            /** @description Маршрут и объяснение */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RouteResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getRoutingStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Состояние */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutingStatus"];
                 };
             };
             default: components["responses"]["Problem"];

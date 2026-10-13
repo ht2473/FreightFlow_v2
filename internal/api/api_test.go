@@ -22,6 +22,7 @@ import (
 	"freightflow/internal/platform/secret"
 	"freightflow/internal/platform/session"
 	"freightflow/internal/regulation"
+	"freightflow/internal/routing"
 	"freightflow/internal/tiles"
 )
 
@@ -86,7 +87,8 @@ func newFixture(t *testing.T) *fixture {
 	}
 	layers := tiles.NewService(pool, ing, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	h, err := New(Deps{
-		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool), Sessions: sessions, Mailer: mailer,
+		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
+		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
@@ -305,5 +307,35 @@ func TestAPIRegulation(t *testing.T) {
 		if resp, body := f.do(t, http.MethodGet, path, viewer, ""); resp.StatusCode != http.StatusOK {
 			t.Errorf("%s: status %d: %s", path, resp.StatusCode, body)
 		}
+	}
+}
+
+func TestAPIRouting(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	analyst := f.token(t, "r@example.com", identity.RoleAnalyst)
+
+	resp, body := f.do(t, http.MethodGet, "/api/v1/routing/profiles", analyst, "")
+	var profiles []struct {
+		Code   string
+		GrossT float64
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &profiles) != nil || len(profiles) < 3 {
+		t.Fatalf("profiles: %d %s", resp.StatusCode, body)
+	}
+	// Служба маршрутизации в тесте недоступна: состояние — «недоступна», маршрут — 503.
+	if resp, body := f.do(t, http.MethodGet, "/api/v1/routing/status", analyst, ""); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(body), `"available":false`) {
+		t.Errorf("status: %d %s", resp.StatusCode, body)
+	}
+	req := `{"points":[{"lon":37.6,"lat":55.7},{"lon":37.7,"lat":55.8}],"vehicle":{"grossT":20,"heightM":4,"widthM":2.55,"lengthM":10}}`
+	if resp, body := f.do(t, http.MethodPost, "/api/v1/routing/route", analyst, req); resp.StatusCode != http.StatusServiceUnavailable {
+		t.Errorf("route: %d %s", resp.StatusCode, body)
+	}
+	// Одна точка — ошибка запроса.
+	if resp, _ := f.do(t, http.MethodPost, "/api/v1/routing/route", analyst,
+		`{"points":[{"lon":37.6,"lat":55.7}],"vehicle":{"grossT":20,"heightM":4,"widthM":2.55,"lengthM":10}}`); resp.StatusCode != http.StatusBadRequest &&
+		resp.StatusCode != http.StatusUnprocessableEntity {
+		t.Errorf("one point: %d", resp.StatusCode)
 	}
 }
