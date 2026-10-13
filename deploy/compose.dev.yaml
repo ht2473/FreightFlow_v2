@@ -40,12 +40,17 @@ services:
 
   # Фоновые задачи с инструментами OSM (osm2pgsql, osmium, gdal): task etl:up / task etl:run.
   # Бинарник подключается из bin/linux — после изменений кода достаточно task build:linux.
+  # Запускается копия: Docker Desktop кеширует исполняемые страницы файла по пути, и
+  # пересобранный бинарник, запущенный напрямую из общего каталога, может падать.
   worker:
     build:
       context: ..
       dockerfile: deploy/docker/worker.Dockerfile
     image: freightflow/worker:dev
     profiles: ["etl"]
+    entrypoint: ["/bin/sh", "-c", "cp /opt/freightflow/freightflow /tmp/freightflow && exec /tmp/freightflow \"$$@\"", "--"]
+    # entrypoint сбрасывает CMD образа.
+    command: ["worker"]
     env_file: ../.env
     environment:
       FF_DATABASE_URL: postgres://freightflow:freightflow@db:5432/freightflow?sslmode=disable
@@ -57,7 +62,7 @@ services:
       NO_PROXY: db,localhost,127.0.0.1
     volumes:
       - ../var:/data
-      - ../bin/linux/freightflow:/usr/local/bin/freightflow:ro
+      - ../bin/linux:/opt/freightflow:ro
     depends_on:
       db:
         condition: service_healthy
