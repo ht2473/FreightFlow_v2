@@ -190,8 +190,20 @@ func TestRunLifecycle(t *testing.T) {
 	if run, _ = e.svc.RunNow(ctx, "test_feed", false); run.Status != ingest.StatusSucceeded {
 		t.Fatalf("new data: %+v", run)
 	}
+	latest := run.SnapshotID
 	if run, _ = e.svc.RunNow(ctx, "test_feed", false); run.Status != ingest.StatusUnchanged {
 		t.Fatalf("not modified: %+v", run)
+	}
+
+	// Принудительный запуск при ответе 304 загружает последний снимок заново.
+	loads := e.src.loads.Load()
+	run, err = e.svc.RunNow(ctx, "test_feed", true)
+	if err != nil || run.Status != ingest.StatusSucceeded || e.src.loads.Load() != loads+1 ||
+		run.SnapshotID == nil || latest == nil || *run.SnapshotID != *latest {
+		t.Fatalf("forced not modified run: %+v err=%v", run, err)
+	}
+	if run, _ = e.svc.RunNow(ctx, "test_feed", false); run.Status != ingest.StatusUnchanged {
+		t.Fatalf("not modified after forced: %+v", run)
 	}
 
 	st, err := e.svc.Source(ctx, "test_feed")
@@ -200,7 +212,7 @@ func TestRunLifecycle(t *testing.T) {
 		t.Fatalf("source status: %+v err=%v", st, err)
 	}
 	runs, err := e.svc.ListRuns(ctx, "test_feed", nil, 10)
-	if err != nil || len(runs) != 5 {
+	if err != nil || len(runs) != 7 {
 		t.Fatalf("runs: %d err=%v", len(runs), err)
 	}
 	if len(runs[0].Log) == 0 {

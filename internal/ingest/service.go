@@ -283,34 +283,40 @@ func (s *Service) execute(ctx context.Context, run sqlc.IngestRun, src Source, d
 	if err != nil {
 		return "", nil, nil, fmt.Errorf("получение данных: %w", err)
 	}
-	if fetched.NotModified {
+	if fetched.NotModified && (!run.Forced || prev == nil) {
 		rl.Info(ctx, "источник сообщает, что данные не изменились")
 		return StatusUnchanged, nil, nil, nil
 	}
-	if prev != nil && fetched.Object.SHA256 == prev.SHA256 && !run.Forced {
-		rl.Info(ctx, "снимок совпадает с последним загруженным")
-		return StatusUnchanged, nil, &prev.ID, nil
-	}
-
-	validators, _ := json.Marshal(fetched.Validators)
-	snap, err := s.q.SaveSnapshot(ctx, sqlc.SaveSnapshotParams{
-		ID: ids.New(), SourceCode: desc.Code, Path: fetched.Object.Path, Sha256: fetched.Object.SHA256,
-		SizeBytes: fetched.Object.Size, Format: fetched.Format, SourceVersion: nonEmpty(fetched.Version),
-		RecordCount: fetched.RecordCount, Validators: validators,
-	})
-	if err != nil {
-		return "", nil, nil, fmt.Errorf("save snapshot: %w", err)
-	}
-	rl.Info(ctx, fmt.Sprintf("снимок сохранён: %s, %d байт", snap.Sha256[:12], snap.SizeBytes))
-
 	check := func(ctx context.Context, c Check) { s.saveCheck(ctx, run.ID, c, rl) }
-	if fetched.Schema != nil {
-		if err := s.trackSchema(ctx, desc.Code, snap.ID, fetched.Schema, check); err != nil {
-			return "", nil, &snap.ID, err
+	var snapshot Snapshot
+	if fetched.NotModified {
+		// Принудительный запуск без новых данных — последний снимок загружается заново
+		// (например, после изменения преобразования или связанных данных).
+		rl.Info(ctx, "источник сообщает, что данные не изменились: загружается последний снимок")
+		snapshot = *prev
+	} else {
+		if prev != nil && fetched.Object.SHA256 == prev.SHA256 && !run.Forced {
+			rl.Info(ctx, "снимок совпадает с последним загруженным")
+			return StatusUnchanged, nil, &prev.ID, nil
 		}
+		validators, _ := json.Marshal(fetched.Validators)
+		snap, err := s.q.SaveSnapshot(ctx, sqlc.SaveSnapshotParams{
+			ID: ids.New(), SourceCode: desc.Code, Path: fetched.Object.Path, Sha256: fetched.Object.SHA256,
+			SizeBytes: fetched.Object.Size, Format: fetched.Format, SourceVersion: nonEmpty(fetched.Version),
+			RecordCount: fetched.RecordCount, Validators: validators,
+		})
+		if err != nil {
+			return "", nil, nil, fmt.Errorf("save snapshot: %w", err)
+		}
+		rl.Info(ctx, fmt.Sprintf("снимок сохранён: %s, %d байт", snap.Sha256[:12], snap.SizeBytes))
+		if fetched.Schema != nil {
+			if err := s.trackSchema(ctx, desc.Code, snap.ID, fetched.Schema, check); err != nil {
+				return "", nil, &snap.ID, err
+			}
+		}
+		snapshot = toSnapshot(snap)
 	}
 
-	snapshot := toSnapshot(snap)
 	rl.Info(ctx, "загрузка")
 	failed := false
 	stats, err := src.Load(ctx, LoadEnv{
@@ -323,17 +329,17 @@ func (s *Service) execute(ctx context.Context, run sqlc.IngestRun, src Source, d
 		},
 	})
 	if err != nil {
-		return "", stats, &snap.ID, fmt.Errorf("загрузка: %w", err)
+		return "", stats, &snapshot.ID, fmt.Errorf("загрузка: %w", err)
 	}
 	if failed {
-		return "", stats, &snap.ID, ErrQualityFailed
+		return "", stats, &snapshot.ID, ErrQualityFailed
 	}
 
-	if err := s.publish(ctx, run, desc, snap.ID, stats); err != nil {
-		return "", stats, &snap.ID, err
+	if err := s.publish(ctx, run, desc, snapshot.ID, stats); err != nil {
+		return "", stats, &snapshot.ID, err
 	}
 	rl.Info(ctx, "данные опубликованы: "+strings.Join(desc.Domains, ", "))
-	return StatusSucceeded, stats, &snap.ID, nil
+	return StatusSucceeded, stats, &snapshot.ID, nil
 }
 
 // publish отмечает снимок загруженным, повышает версии доменов и сообщает об этом.
