@@ -67,7 +67,9 @@ func mosdataClient(ctx context.Context, env *Env) (*mosdata.Client, error) {
 	if env.Config.MosDataAPIKey == "" {
 		return nil, fmt.Errorf("%w: FF_MOSDATA_API_KEY", ingest.ErrMissingSecret)
 	}
-	hc, err := outbound.New(ctx, outbound.Config{Hosts: []string{mosdata.Host}, UserAgent: "FreightFlow/" + Version})
+	hc, err := outbound.New(ctx, outbound.Config{
+		Hosts: []string{mosdata.Host}, Direct: true, RootCAFile: env.Config.RuCAFile, UserAgent: "FreightFlow/" + Version,
+	})
 	if err != nil {
 		return nil, err
 	}

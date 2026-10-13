@@ -107,8 +107,10 @@ func (s *Source) Descriptor() ingest.Descriptor {
 		Domains:     s.ds.Domains,
 		Interval:    s.ds.Interval,
 		Hosts:       []string{Host},
-		Secrets:     []string{SecretKey},
-		Timeout:     3 * time.Hour,
+		// Портал правительства Москвы: напрямую, без системного прокси (VPN рвёт многочасовые выгрузки).
+		RuNetwork: true,
+		Secrets:   []string{SecretKey},
+		Timeout:   3 * time.Hour,
 		// Страница до 1000 записей с геометрией — несколько мегабайт.
 		RequestTimeout: 5 * time.Minute,
 	}
