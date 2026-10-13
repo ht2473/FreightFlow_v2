@@ -54,5 +54,14 @@ test("маршрут грузовика: точки на карте, пропу�
     expect(await axeViolations(page)).toEqual([]);
     await page.screenshot({ path: info.outputPath(`route-${scheme}.png`) });
   }
+
+  // Изохроны от точки A: контуры по выбранному времени.
+  await page.getByRole("tab", { name: "Изохроны" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Изохроны доступности" })).toBeVisible();
+  await page.getByRole("button", { name: "Построить изохроны" }).click();
+  await expect(page.getByText("до 15 мин")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText("до 60 мин")).toBeVisible();
+  await page.waitForTimeout(1000);
+  await page.screenshot({ path: info.outputPath("isochrones.png") });
   expect(errors).toEqual([]);
 });

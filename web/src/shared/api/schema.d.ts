@@ -459,6 +459,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/routing/isochrone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Изохроны доступности для грузовика
+         * @description Контуры территории, достижимой за заданное время, с исключением зон, закрытых для ТС.
+         *     Если точка отправления в закрытой зоне, контуры не строятся — `blocked` заполнен.
+         */
+        post: operations["buildIsochrone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/routing/status": {
         parameters: {
             query?: never;
@@ -1013,6 +1034,26 @@ export interface components {
             version?: string;
             /** Format: date-time */
             graphBuiltAt?: string;
+        };
+        IsochroneRequest: {
+            origin: components["schemas"]["LngLat"];
+            vehicle: components["schemas"]["VehicleParams"];
+            passes?: components["schemas"]["VehiclePass"][];
+            /** Format: date-time */
+            depart?: string;
+            minutes: number[];
+        };
+        IsochroneContour: {
+            minutes: number;
+            /** @description Многоугольник GeoJSON */
+            geometry: {
+                [key: string]: unknown;
+            };
+        };
+        IsochroneResult: {
+            contours: components["schemas"]["IsochroneContour"][];
+            zones: components["schemas"]["ZoneVerdict"][];
+            blocked?: components["schemas"]["BlockedPoint"];
         };
     };
     responses: {
@@ -1770,6 +1811,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RouteResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    buildIsochrone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IsochroneRequest"];
+            };
+        };
+        responses: {
+            /** @description Контуры и решения по зонам */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IsochroneResult"];
                 };
             };
             default: components["responses"]["Problem"];

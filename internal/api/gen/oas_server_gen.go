@@ -14,6 +14,15 @@ type Handler interface {
 	//
 	// POST /me/totp
 	BeginTotpSetup(ctx context.Context) (*TotpSetup, error)
+	// BuildIsochrone implements buildIsochrone operation.
+	//
+	// Контуры территории, достижимой за заданное время, с
+	// исключением зон, закрытых для ТС. Если точка
+	// отправления в закрытой зоне, контуры не строятся —
+	// `blocked` заполнен.
+	//
+	// POST /routing/isochrone
+	BuildIsochrone(ctx context.Context, req *IsochroneRequest) (*IsochroneResult, error)
 	// BuildRoute implements buildRoute operation.
 	//
 	// Зоны, закрытые для ТС (масса, экологический класс,

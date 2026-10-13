@@ -25,6 +25,19 @@ func encodeBeginTotpSetupResponse(response *TotpSetup, w http.ResponseWriter, sp
 	return nil
 }
 
+func encodeBuildIsochroneResponse(response *IsochroneResult, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeBuildRouteResponse(response *RouteResult, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)

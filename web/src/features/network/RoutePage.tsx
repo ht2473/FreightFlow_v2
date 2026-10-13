@@ -1,3 +1,4 @@
+import type { Geometry } from "geojson";
 import { Download, Minus, Plus, Route, Trash2, X } from "lucide-react";
 import type { GeoJSONSourceSpecification, LayerSpecification, Map as MapLibreMap } from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,6 +10,7 @@ import { buildDataLayers, color, readPalette } from "@/shared/map/dataLayers";
 import { DEFAULT_VIEW, mountMap, onStyleReady, unmountMap } from "@/shared/map/instance";
 import { emptyStyle, fullStyle, useBasemapAvailable } from "@/shared/map/style";
 import { Badge, Button, Checkbox, IconButton, Select, TextField } from "@/shared/ui";
+import { Tabs } from "@/shared/ui/navigation";
 import { useResolvedTheme } from "@/shared/useResolvedTheme";
 import { layerStates } from "../map/state";
 import {
@@ -24,6 +26,11 @@ import {
 import s from "./route.module.css";
 
 type Result = Schemas["RouteResult"];
+type IsoResult = Schemas["IsochroneResult"];
+type Mode = "route" | "isochrone";
+
+/** Время изохрон на выбор, минуты. */
+const isoMinutes = [15, 30, 45, 60];
 type Vehicle = Schemas["VehicleParams"];
 
 /** Слои каталога под маршрутом: кольца зон и ограничения для грузовиков. */
@@ -57,6 +64,10 @@ function RouteWorkspace() {
   const profiles = $api.useQuery("get", "/routing/profiles");
   const status = $api.useQuery("get", "/routing/status", {}, { staleTime: 30_000 });
   const build = $api.useMutation("post", "/routing/route");
+  const iso = $api.useMutation("post", "/routing/isochrone");
+  const [mode, setMode] = useState<Mode>("route");
+  const [minutes, setMinutes] = useState<Set<number>>(new Set([15, 30, 60]));
+  const [isoResult, setIsoResult] = useState<IsoResult | null>(null);
 
   const [points, setPoints] = useState<[number, number][]>([]);
   const [profileCode, setProfileCode] = useState<string | null>(null);
@@ -120,8 +131,31 @@ function RouteWorkspace() {
     };
   }, [fields]);
 
+  const passList = () =>
+    [...passes].map((p) => {
+      const [zone, kind] = p.split(":") as [Schemas["VehiclePass"]["zone"], Schemas["VehiclePass"]["kind"]];
+      return { zone, kind };
+    });
+  const needed = mode === "route" ? 2 : 1;
+
   const run = () => {
-    if (!vehicle || points.length < 2) {
+    const first = points[0];
+    if (!vehicle || !first || points.length < needed) {
+      return;
+    }
+    if (mode === "isochrone") {
+      iso.mutate(
+        {
+          body: {
+            origin: { lon: first[0], lat: first[1] },
+            vehicle,
+            passes: passList(),
+            depart: new Date(depart).toISOString(),
+            minutes: [...minutes].sort((a, b) => a - b),
+          },
+        },
+        { onSuccess: setIsoResult, onError: () => setIsoResult(null) },
+      );
       return;
     }
     build.mutate(
@@ -129,10 +163,7 @@ function RouteWorkspace() {
         body: {
           points: points.map(([lon, lat]) => ({ lon, lat })),
           vehicle,
-          passes: [...passes].map((p) => {
-            const [zone, kind] = p.split(":") as [Schemas["VehiclePass"]["zone"], Schemas["VehiclePass"]["kind"]];
-            return { zone, kind };
-          }),
+          passes: passList(),
           depart: new Date(depart).toISOString(),
           alternates: 1,
         },
@@ -144,13 +175,28 @@ function RouteWorkspace() {
   // Новая точка или профиль — прежний результат больше не соответствует запросу.
   const reset = () => {
     setResult(null);
+    setIsoResult(null);
     build.reset();
+    iso.reset();
   };
 
   return (
     <div className={s.workspace}>
       <aside className={s.panel} aria-label="Построение маршрута">
-        <h1 className={s.title}>Маршрут грузовика</h1>
+        <h1 className={s.title}>{mode === "route" ? "Маршрут грузовика" : "Изохроны доступности"}</h1>
+        <Tabs
+          label="Режим"
+          selected={mode}
+          onChange={(id) => {
+            setMode(id as Mode);
+            setPoints((ps) => (id === "isochrone" ? ps.slice(0, 1) : ps));
+            reset();
+          }}
+          items={[
+            { id: "route", title: "Маршрут", content: null },
+            { id: "isochrone", title: "Изохроны", content: null },
+          ]}
+        />
         {status.data && !status.data.available && (
           <div className="notice notice-error" role="status">
             Служба маршрутизации не запущена: граф собирается командой task routing:build, служба — task routing:up.
@@ -160,7 +206,9 @@ function RouteWorkspace() {
           <h2>Точки</h2>
           {points.length === 0 ? (
             <p className={s.muted}>
-              Щёлкните на карте: первая точка — отправление, следующие — промежуточные и назначение.
+              {mode === "route"
+                ? "Щёлкните на карте: первая точка — отправление, следующие — промежуточные и назначение."
+                : "Щёлкните на карте — точка отправления."}
             </p>
           ) : (
             <ol className={s.points}>
@@ -279,24 +327,63 @@ function RouteWorkspace() {
           <TextField label="Отправление" type="datetime-local" value={depart} onChange={setDepart} />
         </section>
 
-        <Button variant="primary" block isDisabled={!vehicle || points.length < 2 || build.isPending} onPress={run}>
-          <Route size={15} aria-hidden /> {build.isPending ? "Строится…" : "Построить маршрут"}
+        {mode === "isochrone" && (
+          <section className={s.block}>
+            <h2>Время в пути</h2>
+            <fieldset className={s.minutes}>
+              <legend className="visually-hidden">Контуры, минут</legend>
+              {isoMinutes.map((mn) => (
+                <Checkbox
+                  key={mn}
+                  isSelected={minutes.has(mn)}
+                  onChange={(on) => {
+                    const next = new Set(minutes);
+                    if (on) {
+                      next.add(mn);
+                    } else if (next.size > 1) {
+                      next.delete(mn);
+                    }
+                    setMinutes(next);
+                    setIsoResult(null);
+                  }}
+                >
+                  {mn} мин
+                </Checkbox>
+              ))}
+            </fieldset>
+          </section>
+        )}
+
+        <Button
+          variant="primary"
+          block
+          isDisabled={!vehicle || points.length < needed || build.isPending || iso.isPending}
+          onPress={run}
+        >
+          <Route size={15} aria-hidden />{" "}
+          {build.isPending || iso.isPending
+            ? "Строится…"
+            : mode === "route"
+              ? "Построить маршрут"
+              : "Построить изохроны"}
         </Button>
-        {build.error && (
+        {(build.error || iso.error) && (
           <div className="notice notice-error" role="alert">
-            {problemMessage(build.error)}
+            {problemMessage(build.error ?? iso.error)}
           </div>
         )}
-        {result && <Explanation result={result} points={points.length} />}
+        {mode === "route" && result && <Explanation result={result} points={points.length} />}
+        {mode === "isochrone" && isoResult && <IsochroneExplanation result={isoResult} />}
       </aside>
       <RouteMap
         theme={theme}
         basemap={basemap.data}
         catalog={catalogQuery.data?.layers ?? []}
         points={points}
-        result={result}
+        result={mode === "route" ? result : null}
+        isochrones={mode === "isochrone" ? isoResult : null}
         onAdd={(p) => {
-          setPoints((ps) => (ps.length >= maxPoints ? ps : [...ps, p]));
+          setPoints((ps) => (mode === "isochrone" ? [p] : ps.length >= maxPoints ? ps : [...ps, p]));
           reset();
         }}
       />
@@ -405,6 +492,64 @@ function Explanation({ result, points }: { result: Result; points: number }) {
   );
 }
 
+function IsochroneExplanation({ result }: { result: IsoResult }) {
+  const closed = result.zones.filter((z) => z.forbidden);
+  return (
+    <section className={s.result} aria-label="Результат">
+      {result.blocked ? (
+        <div className="notice notice-error" role="alert">
+          Точка отправления в зоне «{zoneName[result.blocked.zone]}», закрытой для этого ТС.
+        </div>
+      ) : (
+        <ul className={s.isoLegend}>
+          {result.contours
+            .slice()
+            .sort((a, b) => a.minutes - b.minutes)
+            .map((c) => (
+              <li key={c.minutes}>
+                <span className={s.isoSwatch} style={{ opacity: swatchOpacity(c.minutes, result.contours) }} /> до{" "}
+                {c.minutes} мин
+              </li>
+            ))}
+        </ul>
+      )}
+      <p className={s.muted}>
+        {closed.length > 0
+          ? `Закрытые зоны исключены: ${closed.map((z) => `«${zoneName[z.zone]}»`).join(", ")}.`
+          : "Закрытых зон для этого ТС нет."}
+      </p>
+    </section>
+  );
+}
+
+/** Плотность образца в легенде: сколько контуров накрывает зону этого контура. */
+function swatchOpacity(minutes: number, all: IsoResult["contours"]): number {
+  const layers = all.filter((c) => c.minutes >= minutes).length;
+  return 1 - (1 - isoOpacity(minutes)) ** layers;
+}
+
+/** Прозрачность контура: ближние — плотнее. */
+function isoOpacity(minutes: number): number {
+  // Контуры вложены: у каждого одинаковая прозрачность, ближние зоны темнее за счёт наложения.
+  void minutes;
+  return 0.12;
+}
+
+/** Охват координат линии или многоугольника: [запад, юг, восток, север]. */
+function extent(coords: number[][]): [number, number, number, number] | null {
+  if (coords.length < 2) {
+    return null;
+  }
+  let [w, sth, e, n] = [180, 90, -180, -90];
+  for (const [lon = 0, lat = 0] of coords) {
+    w = Math.min(w, lon);
+    e = Math.max(e, lon);
+    sth = Math.min(sth, lat);
+    n = Math.max(n, lat);
+  }
+  return [w, sth, e, n];
+}
+
 /** Выгрузка маршрутов в GeoJSON. */
 function download(result: Result) {
   const features = result.routes.map((r, i) => ({
@@ -427,6 +572,7 @@ function RouteMap({
   catalog,
   points,
   result,
+  isochrones,
   onAdd,
 }: {
   theme: "light" | "dark";
@@ -434,6 +580,7 @@ function RouteMap({
   catalog: Schemas["MapLayer"][];
   points: [number, number][];
   result: Result | null;
+  isochrones: IsoResult | null;
   onAdd: (p: [number, number]) => void;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -449,8 +596,8 @@ function RouteMap({
     }
     const base = basemap ? basemapStyle(theme) : emptyStyle(theme, palette);
     const data = buildDataLayers(catalog, layerStates(catalog, contextLayers, {}, {}), palette);
-    return fullStyle(base, catalog, data, overlay(points, result, palette));
-  }, [basemap, theme, palette, catalog, points, result]);
+    return fullStyle(base, catalog, data, overlay(points, result, isochrones, palette));
+  }, [basemap, theme, palette, catalog, points, result, isochrones]);
 
   const latest = useRef(style);
   latest.current = style;
@@ -489,27 +636,25 @@ function RouteMap({
     };
   }, [map]);
 
-  // Новый маршрут — в видимую область.
+  // Новый маршрут или изохроны — в видимую область (изохроны — по самому дальнему контуру).
   useEffect(() => {
-    const coords = result?.routes[0]?.coordinates ?? [];
-    if (!map || coords.length < 2) {
+    const far = isochrones?.contours.reduce<IsoResult["contours"][number] | undefined>(
+      (a, c) => (!a || c.minutes > a.minutes ? c : a),
+      undefined,
+    );
+    const ring = (far?.geometry as unknown as { coordinates?: number[][][] } | undefined)?.coordinates?.[0];
+    const box = extent(ring ?? result?.routes[0]?.coordinates ?? []);
+    if (!map || !box) {
       return;
-    }
-    let [w, sth, e, n] = [180, 90, -180, -90];
-    for (const [lon = 0, lat = 0] of coords) {
-      w = Math.min(w, lon);
-      e = Math.max(e, lon);
-      sth = Math.min(sth, lat);
-      n = Math.max(n, lat);
     }
     map.fitBounds(
       [
-        [w, sth],
-        [e, n],
+        [box[0], box[1]],
+        [box[2], box[3]],
       ],
       { padding: 60, duration: 0 },
     );
-  }, [map, result]);
+  }, [map, result, isochrones]);
 
   return (
     <section className={s.mapArea} aria-label="Карта маршрута">
@@ -522,15 +667,39 @@ function RouteMap({
           <Minus size={17} />
         </IconButton>
       </div>
-      <div className={s.legend} aria-hidden>
-        <span className={s.legendTruck} /> грузовик <span className={s.legendBase} /> без ограничений
-      </div>
+      {isochrones ? (
+        <div className={s.legend} aria-hidden>
+          <span className={s.isoSwatch} style={{ opacity: 0.4 }} /> ближе{" "}
+          <span className={s.isoSwatch} style={{ opacity: 0.15 }} /> дальше
+        </div>
+      ) : (
+        <div className={s.legend} aria-hidden>
+          <span className={s.legendTruck} /> грузовик <span className={s.legendBase} /> без ограничений
+        </div>
+      )}
     </section>
   );
 }
 
-/** Источники и слои маршрута: путь без ограничений, альтернативы, маршрут грузовика, точки. */
-function overlay(points: [number, number][], result: Result | null, p: ReturnType<typeof readPalette>) {
+/** Источники и слои: изохроны, путь без ограничений, альтернативы, маршрут грузовика, точки. */
+function overlay(
+  points: [number, number][],
+  result: Result | null,
+  isochrones: IsoResult | null,
+  p: ReturnType<typeof readPalette>,
+) {
+  const contours = {
+    type: "FeatureCollection" as const,
+    // Дальние контуры снизу, ближние поверх.
+    features: (isochrones?.contours ?? [])
+      .slice()
+      .sort((a, b) => b.minutes - a.minutes)
+      .map((c) => ({
+        type: "Feature" as const,
+        properties: { minutes: c.minutes, opacity: isoOpacity(c.minutes) },
+        geometry: c.geometry as unknown as Geometry,
+      })),
+  };
   const lines = {
     type: "FeatureCollection" as const,
     features: [
@@ -559,10 +728,23 @@ function overlay(points: [number, number][], result: Result | null, p: ReturnTyp
     })),
   };
   const sources: Record<string, GeoJSONSourceSpecification> = {
+    "route:iso": { type: "geojson", data: contours },
     "route:lines": { type: "geojson", data: lines },
     "route:points": { type: "geojson", data: marks },
   };
   const layers: LayerSpecification[] = [
+    {
+      id: "route:iso-fill",
+      type: "fill",
+      source: "route:iso",
+      paint: { "fill-color": color(p, "acc"), "fill-opacity": ["get", "opacity"] },
+    },
+    {
+      id: "route:iso-line",
+      type: "line",
+      source: "route:iso",
+      paint: { "line-color": color(p, "acc"), "line-width": 1.2, "line-opacity": 0.8 },
+    },
     {
       id: "route:baseline",
       type: "line",

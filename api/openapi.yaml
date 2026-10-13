@@ -577,6 +577,28 @@ paths:
               schema: { $ref: "#/components/schemas/RouteResult" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /routing/isochrone:
+    post:
+      tags: [routing]
+      operationId: buildIsochrone
+      summary: Изохроны доступности для грузовика
+      description: |
+        Контуры территории, достижимой за заданное время, с исключением зон, закрытых для ТС.
+        Если точка отправления в закрытой зоне, контуры не строятся — `blocked` заполнен.
+      x-permission: routing.use
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IsochroneRequest" }
+      responses:
+        "200":
+          description: Контуры и решения по зонам
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IsochroneResult" }
+        default: { $ref: "#/components/responses/Problem" }
+
   /routing/status:
     get:
       tags: [routing]
@@ -1434,3 +1456,42 @@ components:
         available: { type: boolean }
         version: { type: string }
         graphBuiltAt: { type: string, format: date-time }
+
+    IsochroneRequest:
+      type: object
+      required: [origin, vehicle, minutes]
+      properties:
+        origin: { $ref: "#/components/schemas/LngLat" }
+        vehicle: { $ref: "#/components/schemas/VehicleParams" }
+        passes:
+          type: array
+          maxItems: 6
+          items: { $ref: "#/components/schemas/VehiclePass" }
+        depart: { type: string, format: date-time }
+        minutes:
+          type: array
+          minItems: 1
+          maxItems: 4
+          items: { type: integer, minimum: 5, maximum: 120 }
+
+    IsochroneContour:
+      type: object
+      required: [minutes, geometry]
+      properties:
+        minutes: { type: integer }
+        geometry:
+          type: object
+          description: Многоугольник GeoJSON
+          additionalProperties: {}
+
+    IsochroneResult:
+      type: object
+      required: [contours, zones]
+      properties:
+        contours:
+          type: array
+          items: { $ref: "#/components/schemas/IsochroneContour" }
+        zones:
+          type: array
+          items: { $ref: "#/components/schemas/ZoneVerdict" }
+        blocked: { $ref: "#/components/schemas/BlockedPoint" }

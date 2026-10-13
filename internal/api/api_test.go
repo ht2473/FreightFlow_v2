@@ -332,6 +332,10 @@ func TestAPIRouting(t *testing.T) {
 	if resp, body := f.do(t, http.MethodPost, "/api/v1/routing/route", analyst, req); resp.StatusCode != http.StatusServiceUnavailable {
 		t.Errorf("route: %d %s", resp.StatusCode, body)
 	}
+	iso := `{"origin":{"lon":37.6,"lat":55.7},"vehicle":{"grossT":20,"heightM":4,"widthM":2.55,"lengthM":10},"minutes":[15,30]}`
+	if resp, body := f.do(t, http.MethodPost, "/api/v1/routing/isochrone", analyst, iso); resp.StatusCode != http.StatusServiceUnavailable {
+		t.Errorf("isochrone: %d %s", resp.StatusCode, body)
+	}
 	// Одна точка — ошибка запроса.
 	if resp, _ := f.do(t, http.MethodPost, "/api/v1/routing/route", analyst,
 		`{"points":[{"lon":37.6,"lat":55.7}],"vehicle":{"grossT":20,"heightM":4,"widthM":2.55,"lengthM":10}}`); resp.StatusCode != http.StatusBadRequest &&

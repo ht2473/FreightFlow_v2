@@ -22,6 +22,18 @@ func (UnimplementedHandler) BeginTotpSetup(ctx context.Context) (r *TotpSetup, _
 	return r, ht.ErrNotImplemented
 }
 
+// BuildIsochrone implements buildIsochrone operation.
+//
+// Контуры территории, достижимой за заданное время, с
+// исключением зон, закрытых для ТС. Если точка
+// отправления в закрытой зоне, контуры не строятся —
+// `blocked` заполнен.
+//
+// POST /routing/isochrone
+func (UnimplementedHandler) BuildIsochrone(ctx context.Context, req *IsochroneRequest) (r *IsochroneResult, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // BuildRoute implements buildRoute operation.
 //
 // Зоны, закрытые для ТС (масса, экологический класс,

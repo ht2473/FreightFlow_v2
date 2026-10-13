@@ -7,6 +7,7 @@ type OperationName = string
 
 const (
 	BeginTotpSetupOperation      OperationName = "BeginTotpSetup"
+	BuildIsochroneOperation      OperationName = "BuildIsochrone"
 	BuildRouteOperation          OperationName = "BuildRoute"
 	ChangePasswordOperation      OperationName = "ChangePassword"
 	ConfirmTotpOperation         OperationName = "ConfirmTotp"

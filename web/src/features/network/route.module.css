@@ -99,6 +99,40 @@
   gap: 6px;
 }
 
+.minutes {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.isoLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.isoLegend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.isoSwatch {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  border: 1px solid var(--acc);
+  border-radius: 2px;
+  background: var(--acc);
+}
+
 .passRow {
   display: grid;
   grid-template-columns: 64px 1fr 1fr;

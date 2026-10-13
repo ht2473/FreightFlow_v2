@@ -268,3 +268,55 @@ func (s *Service) zonesCrossed(ctx context.Context, baseline Route, ds []ZoneDec
 
 // Status — состояние службы маршрутизации.
 func (s *Service) Status(ctx context.Context) (Status, error) { return s.vh.Status(ctx) }
+
+// IsochroneInput — запрос изохрон: точка отправления, ТС, пропуска, время, минуты контуров.
+type IsochroneInput struct {
+	Origin  Point
+	Profile Profile
+	Passes  []Pass
+	Depart  time.Time
+	Minutes []int
+}
+
+// IsochroneOutput — контуры доступности (GeoJSON) и решения по зонам; Blocked — точка в
+// закрытой зоне.
+type IsochroneOutput struct {
+	GeoJSON json.RawMessage
+	Zones   []ZoneDecision
+	Blocked *BlockedPoint
+}
+
+// Isochrone строит контуры доступности грузовика за заданное время с исключением закрытых зон.
+func (s *Service) Isochrone(ctx context.Context, in IsochroneInput) (IsochroneOutput, error) {
+	var out IsochroneOutput
+	rules, err := LoadRules(ctx, s.pool)
+	if err != nil {
+		return out, fmt.Errorf("zone rules: %w", err)
+	}
+	depart := in.Depart
+	if depart.IsZero() {
+		depart = time.Now()
+	}
+	out.Zones = Decide(rules, in.Profile.vehicle(), in.Passes, depart)
+	var exclude []Ring
+	if closed := outermostClosed(out.Zones); closed != "" {
+		blocked, err := s.blocked(ctx, []Point{in.Origin}, out.Zones)
+		if err != nil {
+			return out, err
+		}
+		if len(blocked) > 0 {
+			out.Blocked = &blocked[0]
+			return out, ErrBlocked
+		}
+		rings, err := ZoneRings(ctx, s.pool, []string{closed})
+		if err != nil {
+			return out, err
+		}
+		exclude = rings[closed]
+	}
+	out.GeoJSON, err = s.vh.Isochrone(ctx, IsochroneRequest{
+		Origin: in.Origin, Costing: "truck", Truck: in.Profile.truck(), Exclude: exclude, Minutes: in.Minutes,
+		Depart: in.Depart,
+	})
+	return out, err
+}

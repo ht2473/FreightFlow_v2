@@ -875,6 +875,141 @@ func (s *InviteCreated) SetExpiresInHours(val int) {
 	s.ExpiresInHours = val
 }
 
+// Ref: #/components/schemas/IsochroneContour
+type IsochroneContour struct {
+	Minutes int `json:"minutes"`
+	// Многоугольник GeoJSON.
+	Geometry IsochroneContourGeometry `json:"geometry"`
+}
+
+// GetMinutes returns the value of Minutes.
+func (s *IsochroneContour) GetMinutes() int {
+	return s.Minutes
+}
+
+// GetGeometry returns the value of Geometry.
+func (s *IsochroneContour) GetGeometry() IsochroneContourGeometry {
+	return s.Geometry
+}
+
+// SetMinutes sets the value of Minutes.
+func (s *IsochroneContour) SetMinutes(val int) {
+	s.Minutes = val
+}
+
+// SetGeometry sets the value of Geometry.
+func (s *IsochroneContour) SetGeometry(val IsochroneContourGeometry) {
+	s.Geometry = val
+}
+
+// Многоугольник GeoJSON.
+type IsochroneContourGeometry map[string]jx.Raw
+
+func (s *IsochroneContourGeometry) init() IsochroneContourGeometry {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/IsochroneRequest
+type IsochroneRequest struct {
+	Origin  LngLat        `json:"origin"`
+	Vehicle VehicleParams `json:"vehicle"`
+	Passes  []VehiclePass `json:"passes"`
+	Depart  OptDateTime   `json:"depart"`
+	Minutes []int         `json:"minutes"`
+}
+
+// GetOrigin returns the value of Origin.
+func (s *IsochroneRequest) GetOrigin() LngLat {
+	return s.Origin
+}
+
+// GetVehicle returns the value of Vehicle.
+func (s *IsochroneRequest) GetVehicle() VehicleParams {
+	return s.Vehicle
+}
+
+// GetPasses returns the value of Passes.
+func (s *IsochroneRequest) GetPasses() []VehiclePass {
+	return s.Passes
+}
+
+// GetDepart returns the value of Depart.
+func (s *IsochroneRequest) GetDepart() OptDateTime {
+	return s.Depart
+}
+
+// GetMinutes returns the value of Minutes.
+func (s *IsochroneRequest) GetMinutes() []int {
+	return s.Minutes
+}
+
+// SetOrigin sets the value of Origin.
+func (s *IsochroneRequest) SetOrigin(val LngLat) {
+	s.Origin = val
+}
+
+// SetVehicle sets the value of Vehicle.
+func (s *IsochroneRequest) SetVehicle(val VehicleParams) {
+	s.Vehicle = val
+}
+
+// SetPasses sets the value of Passes.
+func (s *IsochroneRequest) SetPasses(val []VehiclePass) {
+	s.Passes = val
+}
+
+// SetDepart sets the value of Depart.
+func (s *IsochroneRequest) SetDepart(val OptDateTime) {
+	s.Depart = val
+}
+
+// SetMinutes sets the value of Minutes.
+func (s *IsochroneRequest) SetMinutes(val []int) {
+	s.Minutes = val
+}
+
+// Ref: #/components/schemas/IsochroneResult
+type IsochroneResult struct {
+	Contours []IsochroneContour `json:"contours"`
+	Zones    []ZoneVerdict      `json:"zones"`
+	Blocked  OptBlockedPoint    `json:"blocked"`
+}
+
+// GetContours returns the value of Contours.
+func (s *IsochroneResult) GetContours() []IsochroneContour {
+	return s.Contours
+}
+
+// GetZones returns the value of Zones.
+func (s *IsochroneResult) GetZones() []ZoneVerdict {
+	return s.Zones
+}
+
+// GetBlocked returns the value of Blocked.
+func (s *IsochroneResult) GetBlocked() OptBlockedPoint {
+	return s.Blocked
+}
+
+// SetContours sets the value of Contours.
+func (s *IsochroneResult) SetContours(val []IsochroneContour) {
+	s.Contours = val
+}
+
+// SetZones sets the value of Zones.
+func (s *IsochroneResult) SetZones(val []ZoneVerdict) {
+	s.Zones = val
+}
+
+// SetBlocked sets the value of Blocked.
+func (s *IsochroneResult) SetBlocked(val OptBlockedPoint) {
+	s.Blocked = val
+}
+
 // Ref: #/components/schemas/LayerCatalog
 type LayerCatalog struct {
 	Groups []LayerGroup `json:"groups"`
@@ -1849,6 +1984,52 @@ func (s *OfficialPage) SetChangedAt(val time.Time) {
 // SetChangedSinceVerification sets the value of ChangedSinceVerification.
 func (s *OfficialPage) SetChangedSinceVerification(val bool) {
 	s.ChangedSinceVerification = val
+}
+
+// NewOptBlockedPoint returns new OptBlockedPoint with value set to v.
+func NewOptBlockedPoint(v BlockedPoint) OptBlockedPoint {
+	return OptBlockedPoint{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockedPoint is optional BlockedPoint.
+type OptBlockedPoint struct {
+	Value BlockedPoint
+	Set   bool
+}
+
+// IsSet returns true if OptBlockedPoint was set.
+func (o OptBlockedPoint) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockedPoint) Reset() {
+	var v BlockedPoint
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockedPoint) SetTo(v BlockedPoint) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockedPoint) Get() (v BlockedPoint, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockedPoint) Or(d BlockedPoint) BlockedPoint {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
 }
 
 // NewOptBool returns new OptBool with value set to v.
