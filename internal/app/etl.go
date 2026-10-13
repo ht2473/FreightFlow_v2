@@ -13,6 +13,7 @@ import (
 
 	"freightflow/internal/ingest"
 	"freightflow/internal/ingest/sources/basemap"
+	"freightflow/internal/ingest/sources/calendar"
 	"freightflow/internal/ingest/sources/mosdata"
 	"freightflow/internal/ingest/sources/osm"
 	"freightflow/internal/ingest/sources/rosstat"
@@ -56,7 +57,7 @@ func dataSources(env *Env) []ingest.Source {
 	for _, ds := range mosdata.Datasets {
 		out = append(out, mosdata.New(ds))
 	}
-	out = append(out, rosstat.NewPopulation(), rosstat.NewFreight(), transport.NewCargo())
+	out = append(out, rosstat.NewPopulation(), rosstat.NewFreight(), transport.NewCargo(), calendar.New())
 	return out
 }
 
