@@ -76,6 +76,59 @@ func TestClientErrorIsNotRetried(t *testing.T) {
 	}
 }
 
+func TestDefaultHeaders(t *testing.T) {
+	t.Parallel()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Как transport.mos.ru: без Accept — отказ.
+		if r.Header.Get("Accept") == "" || r.Header.Get("User-Agent") != "FreightFlow" {
+			w.WriteHeader(477)
+			return
+		}
+		_, _ = io.WriteString(w, "ok")
+	}))
+	defer srv.Close()
+	c, _ := newTestClient(t, srv, true)
+
+	resp, err := c.Get(context.Background(), srv.URL, Validators{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = resp.Body.Close()
+}
+
+func TestCookiesKeptWhenEnabled(t *testing.T) {
+	t.Parallel()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/page" {
+			http.SetCookie(w, &http.Cookie{Name: "session", Value: "s1", Path: "/"})
+			return
+		}
+		if c, err := r.Cookie("session"); err != nil || c.Value != "s1" {
+			w.WriteHeader(http.StatusForbidden)
+		}
+	}))
+	defer srv.Close()
+	u, _ := url.Parse(srv.URL)
+	for _, cookies := range []bool{true, false} {
+		c, err := New(t.Context(), Config{Hosts: []string{u.Hostname()}, Direct: true, AllowPrivate: true, Retries: 1, Cookies: cookies})
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp, err := c.Get(context.Background(), srv.URL+"/page", Validators{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = resp.Body.Close()
+		resp, err = c.Post(context.Background(), srv.URL+"/data", "application/x-www-form-urlencoded", []byte("a=1"))
+		if cookies != (err == nil) {
+			t.Fatalf("cookies=%v: err=%v", cookies, err)
+		}
+		if err == nil {
+			_ = resp.Body.Close()
+		}
+	}
+}
+
 func TestConditionalRequest(t *testing.T) {
 	t.Parallel()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

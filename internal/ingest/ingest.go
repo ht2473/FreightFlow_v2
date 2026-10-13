@@ -48,6 +48,8 @@ type Descriptor struct {
 	// RequestTimeout — предел одного HTTP-запроса вместе с телом; 0 — 60 секунд.
 	// Источникам с большими файлами нужен запас на всю загрузку.
 	RequestTimeout time.Duration
+	// Cookies — сохранять cookie между запросами запуска (выгрузка требует сессии сайта).
+	Cookies bool
 }
 
 var codeRe = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)

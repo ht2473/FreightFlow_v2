@@ -5,6 +5,7 @@
 package outbound
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -13,6 +14,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"net/netip"
 	"net/url"
 	"os"
@@ -46,6 +48,8 @@ type Config struct {
 	UserAgent string
 	// AllowPrivate разрешает адреса локальной сети (только для своих служб и тестов).
 	AllowPrivate bool
+	// Cookies — хранить cookie между запросами клиента (сайты, где выгрузка требует сессии).
+	Cookies bool
 }
 
 // Client — HTTP-клиент источника.
@@ -101,8 +105,17 @@ func New(ctx context.Context, cfg Config) (*Client, error) {
 	if ua == "" {
 		ua = "FreightFlow"
 	}
+	var jar http.CookieJar
+	if cfg.Cookies {
+		j, err := cookiejar.New(nil)
+		if err != nil {
+			return nil, err
+		}
+		jar = j
+	}
 	return &Client{
 		http: &http.Client{
+			Jar:       jar,
 			Transport: allowlist{hosts: cfg.Hosts, next: transport},
 			Timeout:   timeout,
 			CheckRedirect: func(_ *http.Request, via []*http.Request) error {
@@ -152,7 +165,23 @@ func (c *Client) GetFrom(ctx context.Context, rawURL string, offset int64) (*Res
 	})
 }
 
+// PostJSON выполняет POST с телом JSON (запросы с параметрами в теле) с теми же повторами.
+func (c *Client) PostJSON(ctx context.Context, rawURL string, body []byte) (*Response, error) {
+	return c.Post(ctx, rawURL, "application/json", body)
+}
+
+// Post выполняет POST с телом заданного типа (например, форма application/x-www-form-urlencoded).
+func (c *Client) Post(ctx context.Context, rawURL, contentType string, body []byte) (*Response, error) {
+	return c.send(ctx, http.MethodPost, rawURL, body, func(h http.Header) {
+		h.Set("Content-Type", contentType)
+	})
+}
+
 func (c *Client) do(ctx context.Context, rawURL string, header func(http.Header)) (*Response, error) {
+	return c.send(ctx, http.MethodGet, rawURL, nil, header)
+}
+
+func (c *Client) send(ctx context.Context, method, rawURL string, body []byte, header func(http.Header)) (*Response, error) {
 	var last error
 	for attempt := 0; attempt <= c.retries; attempt++ {
 		if attempt > 0 {
@@ -160,11 +189,17 @@ func (c *Client) do(ctx context.Context, rawURL string, header func(http.Header)
 				return nil, err
 			}
 		}
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
+		var rd io.Reader
+		if body != nil {
+			rd = bytes.NewReader(body)
+		}
+		req, err := http.NewRequestWithContext(ctx, method, rawURL, rd)
 		if err != nil {
 			return nil, fmt.Errorf("outbound: %w", err)
 		}
 		req.Header.Set("User-Agent", c.userAgent)
+		// Без Accept часть сайтов (transport.mos.ru) отвечает отказом.
+		req.Header.Set("Accept", "*/*")
 		header(req.Header)
 
 		resp, err := c.http.Do(req)

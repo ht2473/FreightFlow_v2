@@ -250,7 +250,7 @@ func (s *Service) execute(ctx context.Context, run sqlc.IngestRun, src Source, d
 	if len(desc.Hosts) > 0 {
 		cfg := outbound.Config{
 			Hosts: desc.Hosts, Direct: desc.RuNetwork, UserAgent: s.d.UserAgent, AllowPrivate: s.d.AllowPrivateNetwork,
-			Timeout: desc.RequestTimeout,
+			Timeout: desc.RequestTimeout, Cookies: desc.Cookies,
 		}
 		if desc.RuNetwork {
 			cfg.RootCAFile = s.d.RuCAFile
