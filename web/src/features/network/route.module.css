@@ -6,6 +6,8 @@
 }
 
 .panel {
+  /* Скрытые поля флажков и переключателей позиционируются внутри панели, а не страницы. */
+  position: relative;
   width: 360px;
   flex: none;
   display: flex;

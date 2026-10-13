@@ -1,6 +1,11 @@
 import type { Geometry } from "geojson";
 import { Download, Minus, Plus, Route, Trash2, X } from "lucide-react";
-import type { GeoJSONSourceSpecification, LayerSpecification, Map as MapLibreMap } from "maplibre-gl";
+import type {
+  ExpressionSpecification,
+  GeoJSONSourceSpecification,
+  LayerSpecification,
+  Map as MapLibreMap,
+} from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Guard } from "@/app/Guard";
 import { $api, problemMessage, type Schemas } from "@/shared/api/client";
@@ -9,10 +14,11 @@ import { basemapStyle } from "@/shared/map/basemap";
 import { buildDataLayers, color, readPalette } from "@/shared/map/dataLayers";
 import { DEFAULT_VIEW, mountMap, onStyleReady, unmountMap } from "@/shared/map/instance";
 import { emptyStyle, fullStyle, useBasemapAvailable } from "@/shared/map/style";
-import { Badge, Button, Checkbox, IconButton, Select, TextField } from "@/shared/ui";
+import { Badge, Button, Checkbox, IconButton, Select, Switch, TextField } from "@/shared/ui";
 import { Tabs } from "@/shared/ui/navigation";
 import { useResolvedTheme } from "@/shared/useResolvedTheme";
 import { layerStates } from "../map/state";
+import { passabilityFilter } from "./filters";
 import {
   difference,
   duration,
@@ -68,6 +74,7 @@ function RouteWorkspace() {
   const [mode, setMode] = useState<Mode>("route");
   const [minutes, setMinutes] = useState<Set<number>>(new Set([15, 30, 60]));
   const [isoResult, setIsoResult] = useState<IsoResult | null>(null);
+  const [onlyBlocking, setOnlyBlocking] = useState(true);
 
   const [points, setPoints] = useState<[number, number][]>([]);
   const [profileCode, setProfileCode] = useState<string | null>(null);
@@ -291,6 +298,9 @@ function RouteWorkspace() {
           <Checkbox isSelected={fields.hazmat === "1"} onChange={(v) => setFields({ ...fields, hazmat: v ? "1" : "" })}>
             Опасный груз
           </Checkbox>
+          <Switch isSelected={onlyBlocking} onChange={setOnlyBlocking}>
+            На карте — только ограничения, непроходимые для этого ТС
+          </Switch>
         </section>
 
         <section className={s.block}>
@@ -382,6 +392,7 @@ function RouteWorkspace() {
         points={points}
         result={mode === "route" ? result : null}
         isochrones={mode === "isochrone" ? isoResult : null}
+        restrictionFilter={onlyBlocking && vehicle ? passabilityFilter(vehicle) : undefined}
         onAdd={(p) => {
           setPoints((ps) => (mode === "isochrone" ? [p] : ps.length >= maxPoints ? ps : [...ps, p]));
           reset();
@@ -573,6 +584,7 @@ function RouteMap({
   points,
   result,
   isochrones,
+  restrictionFilter,
   onAdd,
 }: {
   theme: "light" | "dark";
@@ -581,6 +593,7 @@ function RouteMap({
   points: [number, number][];
   result: Result | null;
   isochrones: IsoResult | null;
+  restrictionFilter: ExpressionSpecification | undefined;
   onAdd: (p: [number, number]) => void;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -595,9 +608,12 @@ function RouteMap({
       return null;
     }
     const base = basemap ? basemapStyle(theme) : emptyStyle(theme, palette);
-    const data = buildDataLayers(catalog, layerStates(catalog, contextLayers, {}, {}), palette);
+    const filters: Record<string, ExpressionSpecification> = restrictionFilter
+      ? { restrictions: restrictionFilter }
+      : {};
+    const data = buildDataLayers(catalog, layerStates(catalog, contextLayers, {}, filters), palette);
     return fullStyle(base, catalog, data, overlay(points, result, isochrones, palette));
-  }, [basemap, theme, palette, catalog, points, result, isochrones]);
+  }, [basemap, theme, palette, catalog, points, result, isochrones, restrictionFilter]);
 
   const latest = useRef(style);
   latest.current = style;
