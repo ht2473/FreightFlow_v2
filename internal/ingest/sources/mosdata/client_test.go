@@ -254,3 +254,26 @@ func TestDownloadResumesAfterFailure(t *testing.T) {
 		t.Errorf("stale files: %v", files)
 	}
 }
+
+func TestTruncatedPageRetried(t *testing.T) {
+	t.Parallel()
+	page := featurePage(t, readRecords(t, "testdata/works.jsonl.gz"), []int64{1, 2, 3})
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		// Первый ответ обрывается посреди страницы.
+		if calls.Add(1) == 1 {
+			_, _ = w.Write(page[:len(page)/2])
+			return
+		}
+		_, _ = w.Write(page)
+	}))
+	defer srv.Close()
+	var got []Record
+	err := testClient(t, srv).EachFeaturePage(t.Context(), 62101, 3, 0, func(recs []Record, _ int) error {
+		got = append(got, recs...)
+		return nil
+	})
+	if err != nil || len(got) != 3 || calls.Load() != 2 {
+		t.Fatalf("records %d, calls %d, err %v", len(got), calls.Load(), err)
+	}
+}

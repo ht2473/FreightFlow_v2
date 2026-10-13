@@ -6,8 +6,10 @@ package mosdata
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -266,12 +268,12 @@ func (c *Client) paginate(ctx context.Context, total int64, start int, page func
 // отдельные страницы больших наборов (сверх повторов самого клиента).
 var pageRetries = []time.Duration{10 * time.Second, 30 * time.Second, time.Minute}
 
-// retryPage запрашивает страницу, повторяя её при ответах 5xx. Ошибки обработчика страницы не
-// повторяются: он вызывается только после успешного разбора ответа.
+// retryPage запрашивает страницу, повторяя её при ответах 5xx и обрыве ответа. Ошибки
+// обработчика страницы не повторяются: он вызывается только после успешного разбора ответа.
 func (c *Client) retryPage(ctx context.Context, page func(skip int) (int, error), skip int) (int, error) {
 	for attempt := 0; ; attempt++ {
 		n, err := page(skip)
-		if err == nil || attempt >= len(c.retryPauses) || outbound.StatusCode(err) < http.StatusInternalServerError {
+		if err == nil || attempt >= len(c.retryPauses) || !transient(ctx, err) {
 			return n, err
 		}
 		select {
@@ -280,6 +282,17 @@ func (c *Client) retryPage(ctx context.Context, page func(skip int) (int, error)
 		case <-time.After(c.retryPauses[attempt]):
 		}
 	}
+}
+
+// transient — сбой, после которого страницу стоит запросить снова: ответ 5xx, оборванное тело
+// ответа (портал закрывает соединение посреди страницы), сетевая ошибка.
+func transient(ctx context.Context, err error) bool {
+	if ctx.Err() != nil {
+		return false
+	}
+	var ne net.Error
+	return outbound.StatusCode(err) >= http.StatusInternalServerError || errors.Is(err, io.ErrUnexpectedEOF) ||
+		errors.As(err, &ne)
 }
 
 // FeaturesRaw возвращает страницу записей в GeoJSON (FeatureCollection) без разбора.
