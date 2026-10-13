@@ -89,14 +89,17 @@ var ErrNoRoute = errors.New("valhalla: no route")
 func (e *Error) Is(target error) bool { return target == ErrNoRoute && e.Code == 442 }
 
 type location struct {
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
+	Lat    float64 `json:"lat"`
+	Lon    float64 `json:"lon"`
+	Radius int     `json:"radius,omitempty"`
 }
 
-func locations(ps []Point) []location {
+// locations — точки запроса; radius — в каком радиусе (м) искать участки для привязки, кроме
+// ближайшего: точка объекта (центр контура) бывает на внутреннем проезде, недоступном извне.
+func locations(ps []Point, radius int) []location {
 	out := make([]location, len(ps))
 	for i, p := range ps {
-		out[i] = location{Lat: p.Lat, Lon: p.Lon}
+		out[i] = location{Lat: p.Lat, Lon: p.Lon, Radius: radius}
 	}
 	return out
 }
@@ -122,7 +125,7 @@ func excludePolygons(rings []Ring) [][][2]float64 {
 // Route строит маршрут; при Alternates > 0 — ещё и альтернативные.
 func (c *Client) Route(ctx context.Context, req RouteRequest) ([]Route, error) {
 	body := map[string]any{
-		"locations":        locations(req.Locations),
+		"locations":        locations(req.Locations, 0),
 		"costing":          req.Costing,
 		"costing_options":  costingOptions(req.Costing, req.Truck),
 		"exclude_polygons": excludePolygons(req.Exclude),
@@ -188,7 +191,7 @@ func (c *Client) Isochrone(ctx context.Context, req IsochroneRequest) (json.RawM
 		contours[i] = map[string]int{"time": m}
 	}
 	body := map[string]any{
-		"locations":        locations([]Point{req.Origin}),
+		"locations":        locations([]Point{req.Origin}, 0),
 		"costing":          req.Costing,
 		"costing_options":  costingOptions(req.Costing, req.Truck),
 		"exclude_polygons": excludePolygons(req.Exclude),
@@ -211,6 +214,8 @@ type MatrixRequest struct {
 	Costing          string
 	Truck            *Truck
 	Exclude          []Ring
+	// SourceRadius — радиус привязки источников, м (0 — ближайший участок).
+	SourceRadius int
 }
 
 // Cell — время (секунды) и расстояние (километры) между источником и целью; Reachable = false,
@@ -223,8 +228,8 @@ type Cell struct {
 // Matrix возвращает матрицу «источники × цели».
 func (c *Client) Matrix(ctx context.Context, req MatrixRequest) ([][]Cell, error) {
 	body := map[string]any{
-		"sources":          locations(req.Sources),
-		"targets":          locations(req.Targets),
+		"sources":          locations(req.Sources, req.SourceRadius),
+		"targets":          locations(req.Targets, 0),
 		"costing":          req.Costing,
 		"costing_options":  costingOptions(req.Costing, req.Truck),
 		"exclude_polygons": excludePolygons(req.Exclude),

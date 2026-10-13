@@ -451,7 +451,7 @@ var Registry = []Layer{
 	{
 		Code: "facilities", Group: "objects", Title: "Объекты логистики",
 		Description: "Склады, логистические и распределительные центры, терминалы", Geometry: "point",
-		MinZoom: 8, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"facility"},
+		MinZoom: 8, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"facility", "accessibility"},
 		Attribution: osmAttribution, Visible: true,
 		Style: Style{
 			Kind: "single", Color: "acc",
@@ -464,6 +464,10 @@ var Registry = []Layer{
 			{Name: "area", Title: "Площадь застройки", Kind: "number", Unit: "м²"},
 			{Name: "buildings", Title: "Зданий", Kind: "number"},
 			{Name: "confidence", Title: "Достоверность", Kind: "number"},
+			{Name: "mkad_min", Title: "До МКАД (грузовик 20 т)", Kind: "number", Unit: "мин"},
+			{Name: "ttk_min", Title: "До ТТК (грузовик 20 т)", Kind: "number", Unit: "мин"},
+			{Name: "center_min", Title: "До центра (грузовик 20 т)", Kind: "number", Unit: "мин"},
+			{Name: "rail_min", Title: "До ж/д грузового пункта (грузовик 20 т)", Kind: "number", Unit: "мин"},
 		},
 	},
 }

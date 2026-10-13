@@ -72,7 +72,8 @@ func TestDataTiles(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if version != "3" {
+	// Версии доменов слоя через точку: объекты и доступность (ещё не рассчитана — 0).
+	if version != "3.0" {
 		t.Fatalf("version %q", version)
 	}
 	layers := decode(t, data)
@@ -175,7 +176,7 @@ func TestDataTileAccess(t *testing.T) {
 		h.ServeHTTP(rec, req)
 		return rec.Result()
 	}
-	tile := "/tiles/facilities/14/9904/5121.mvt?v=3"
+	tile := "/tiles/facilities/14/9904/5121.mvt?v=3.0"
 	cases := []struct {
 		name   string
 		h      http.Handler
@@ -188,7 +189,7 @@ func TestDataTileAccess(t *testing.T) {
 		{"bad token", h, tile, "bad", "", http.StatusUnauthorized},
 		{"no permission", blind, tile, "good", "", http.StatusForbidden},
 		{"tile", h, tile, "good", "", http.StatusOK},
-		{"not modified", h, tile, "good", `"facilities-3"`, http.StatusNotModified},
+		{"not modified", h, tile, "good", `"facilities-3.0"`, http.StatusNotModified},
 		{"below min zoom", h, "/tiles/facilities/6/38/20.mvt", "good", "", http.StatusNoContent},
 		{"unknown layer", h, "/tiles/nope/14/9904/5121.mvt", "good", "", http.StatusNotFound},
 		{"empty", h, "/tiles/facilities/10/0/0.mvt", "good", "", http.StatusNoContent},
