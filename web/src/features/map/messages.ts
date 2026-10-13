@@ -4,7 +4,7 @@ export const m = {
   tabObjects: "Объекты",
   tabLayers: "Слои",
   search: "Поиск объекта",
-  searchPlaceholder: "Название объекта",
+  searchPlaceholder: "Название или адрес",
   objectsInView: "В видимой области",
   objectsHidden: "Слой «Объекты логистики» выключен",
   objectsHiddenHint: "Включите его на вкладке «Слои».",

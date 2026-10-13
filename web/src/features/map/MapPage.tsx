@@ -380,6 +380,7 @@ function toObject(f: MapGeoJSONFeature): ObjectItem {
   return {
     id: f.id,
     name: typeof p.name === "string" ? p.name : undefined,
+    address: typeof p.address === "string" ? p.address : undefined,
     type: String(p.type ?? ""),
     area: typeof p.area === "number" ? p.area : undefined,
     lngLat: coords,
@@ -392,6 +393,7 @@ function describe(f: MapGeoJSONFeature, layer: MapLayer | undefined): { title: s
   const p = f.properties as Record<string, unknown>;
   const enumProp = layer?.properties.find((x) => x.kind === "enum" && p[x.name] !== undefined);
   const enumLabel = enumProp ? enumProp.labels?.[String(p[enumProp.name])] : undefined;
-  const name = typeof p.name === "string" && p.name ? p.name : (enumLabel ?? layer?.title ?? "");
+  const label = typeof p.name === "string" && p.name ? p.name : typeof p.address === "string" ? p.address : undefined;
+  const name = label ?? enumLabel ?? layer?.title ?? "";
   return { title: name, subtitle: layer?.title ?? "" };
 }

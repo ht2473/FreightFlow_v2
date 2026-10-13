@@ -52,8 +52,12 @@ UPDATE infra.commissioning c SET facility_id = (
     ORDER BY f.point <-> c.point LIMIT 1)
 WHERE c.point IS NOT NULL;
 
+-- Связи объектов реестра с разрешениями и достоверность.
+CREATE TEMP TABLE enriched ON COMMIT DROP AS SELECT * FROM infra.enrich_facilities();
+
 CREATE TEMP TABLE load_stats ON COMMIT DROP AS
 SELECT 'permits' AS key, count(*) AS value FROM infra.commissioning
+UNION ALL SELECT 'facilities_with_permits', permitted FROM enriched
 UNION ALL SELECT 'permits_located', count(*) FROM infra.commissioning WHERE point IS NOT NULL
 UNION ALL SELECT 'permits_logistics', count(*) FROM infra.commissioning WHERE logistics
 UNION ALL SELECT 'permits_logistics_located', count(*) FROM infra.commissioning WHERE logistics AND point IS NOT NULL

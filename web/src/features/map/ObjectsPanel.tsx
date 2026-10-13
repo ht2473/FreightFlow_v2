@@ -8,6 +8,7 @@ import { m } from "./messages";
 export interface ObjectItem {
   id: string | number | undefined;
   name?: string;
+  address?: string;
   type: string;
   area?: number;
   lngLat: [number, number];
@@ -50,7 +51,9 @@ export function ObjectsPanel({
     return <EmptyState title={m.objectsZoomIn}>{m.objectsZoomInHint}</EmptyState>;
   }
   const q = query.trim().toLocaleLowerCase("ru");
-  const list = q ? items.filter((o) => (o.name ?? "").toLocaleLowerCase("ru").includes(q)) : items;
+  const list = q
+    ? items.filter((o) => `${o.name ?? ""} ${o.address ?? ""}`.toLocaleLowerCase("ru").includes(q))
+    : items;
   return (
     <div className={s.objects}>
       <TextField label={m.search} placeholder={m.searchPlaceholder} value={query} onChange={setQuery} type="search" />
@@ -68,7 +71,8 @@ export function ObjectsPanel({
                 className={o.id === selectedId ? `${s.objectItem} ${s.objectSelected}` : s.objectItem}
                 onClick={() => onSelect(o)}
               >
-                <span className={s.objectName}>{o.name ?? m.noName}</span>
+                {/* Без названия — адрес по адресному реестру или OSM. */}
+                <span className={s.objectName}>{o.name ?? o.address ?? m.noName}</span>
                 <span className={s.objectMeta}>
                   {typeTitles[o.type] ?? o.type}
                   {o.area ? (

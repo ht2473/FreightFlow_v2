@@ -47,6 +47,12 @@ func loadNetwork(t *testing.T, pool *pgxpool.Pool) {
 	if _, err := pool.Exec(t.Context(), string(gunzip(t, "../osm/testdata/stage.sql.gz"))); err != nil {
 		t.Fatal(err)
 	}
+	transformOSM(t, pool)
+}
+
+// transformOSM переносит загруженную стадию OSM в домен.
+func transformOSM(t *testing.T, pool *pgxpool.Pool) {
+	t.Helper()
 	script, err := etl.FS.ReadFile("osm/transform.sql")
 	if err != nil {
 		t.Fatal(err)
@@ -266,5 +272,53 @@ func TestRoadWorksLifecycle(t *testing.T) {
 		SELECT count(*) FROM operations.road_work w JOIN operations.road_work_event e ON e.work_id = w.id AND e.type = 'finished'
 		WHERE w.mos_global_id = $1 AND w.state = 'finished'`, changed.ID); c != 1 {
 		t.Error("work past its period is not finished")
+	}
+}
+
+func TestFacilityEnrichment(t *testing.T) {
+	t.Parallel()
+	pool := dbtest.New(t)
+	loadNetwork(t, pool)
+	facilities := count(t, pool, `SELECT count(*) FROM infra.facility WHERE status = 'active'`)
+
+	st := load(t, pool, dataset(t, "mos_addresses"), readRecords(t, "testdata/addresses.jsonl.gz"))
+	addressed := st["facilities_addressed"]
+	if addressed == 0 || addressed > facilities {
+		t.Fatalf("facilities_addressed = %d of %d", addressed, facilities)
+	}
+	// У объекта с адресом реестра — связь, адрес и причина достоверности; адрес OSM не затёрт.
+	if n := count(t, pool, `
+		SELECT count(*) FROM infra.facility f
+		WHERE f.address_unom IS NOT NULL AND (f.official_address IS NULL
+		   OR NOT EXISTS (SELECT 1 FROM infra.facility_source s WHERE s.facility_id = f.id AND s.relation = 'address')
+		   OR NOT f.confidence_reasons @> '[{"code": "registry"}]')`); n != 0 {
+		t.Errorf("%d addressed facilities without link, address or reason", n)
+	}
+	before := count(t, pool, `SELECT sum(jsonb_array_length(confidence_reasons)) FROM infra.facility`)
+
+	// Разрешения на ввод района: место по адресному реестру, связь с объектом — если рядом.
+	st = load(t, pool, dataset(t, "mos_commissioning"), readRecords(t, "testdata/permits.jsonl.gz"))
+	if st["permits_located"] == 0 {
+		t.Errorf("no permits located by the address registry: %v", st)
+	}
+	if n := count(t, pool, `
+		SELECT count(*) FROM infra.commissioning c
+		WHERE c.facility_id IS NOT NULL AND NOT EXISTS (
+		    SELECT 1 FROM infra.facility_source s WHERE s.facility_id = c.facility_id AND s.relation = 'permit'
+		      AND s.ref = c.mos_global_id::text)`); n != 0 {
+		t.Errorf("%d permits linked to facilities without source rows", n)
+	}
+
+	// Повторное обогащение ничего не меняет: причины не дублируются.
+	if _, err := pool.Exec(t.Context(), `SELECT infra.enrich_facilities()`); err != nil {
+		t.Fatal(err)
+	}
+	if after := count(t, pool, `SELECT sum(jsonb_array_length(confidence_reasons)) FROM infra.facility`); after != before {
+		t.Errorf("reasons %d → %d after repeated enrichment", before, after)
+	}
+	// Повторный перенос OSM сохраняет официальный адрес.
+	transformOSM(t, pool)
+	if n := count(t, pool, `SELECT count(*) FROM infra.facility WHERE address_unom IS NOT NULL`); n != addressed {
+		t.Errorf("after OSM reload: %d addressed, want %d", n, addressed)
 	}
 }

@@ -3,6 +3,7 @@
 -- загрузки набора; формат — JSON Lines снимка (id, cells, geometry). Запуск на базе разработки:
 --   docker exec -i ffv2-dev-db-1 psql -U freightflow -d freightflow -At -v dataset=62681 -f - < make_records.sql | gzip -9 > signs.jsonl.gz
 --   docker exec -i ffv2-dev-db-1 psql -U freightflow -d freightflow -At -v dataset=62101 -f - < make_records.sql | gzip -9 > works.jsonl.gz
+--   docker exec -i ffv2-dev-db-1 psql -U freightflow -d freightflow -At -v dataset=60562 -f - < make_records.sql | gzip -9 > addresses.jsonl.gz
 -- Данные: Портал открытых данных Правительства Москвы, data.mos.ru (CC BY 4.0).
 
 WITH d AS (

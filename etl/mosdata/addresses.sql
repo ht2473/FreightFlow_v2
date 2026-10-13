@@ -38,8 +38,12 @@ ON CONFLICT (unom) DO UPDATE SET
 
 DELETE FROM territory.address WHERE source_code = current_setting('ff.source') AND last_seen_at < now();
 
+-- Адреса объектов реестра по новому адресному реестру.
+CREATE TEMP TABLE enriched ON COMMIT DROP AS SELECT * FROM infra.enrich_facilities();
+
 CREATE TEMP TABLE load_stats ON COMMIT DROP AS
 SELECT 'addresses' AS key, count(*) AS value FROM territory.address
+UNION ALL SELECT 'facilities_addressed', addressed FROM enriched
 UNION ALL SELECT 'addresses_new', count(*) FROM territory.address WHERE first_seen_at = now()
 UNION ALL SELECT 'addresses_without_geometry', count(*) FROM territory.address WHERE geom IS NULL
 UNION ALL SELECT 'addresses_without_geometry_pct', coalesce(round(100.0 * count(*) FILTER (WHERE geom IS NULL) / nullif(count(*), 0)), 0)

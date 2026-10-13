@@ -66,6 +66,8 @@ export const statLabel: Record<string, string> = {
   addresses: "Адресов",
   addresses_new: "Новых адресов",
   addresses_with_key: "Адресов с ключом для поиска",
+  facilities_addressed: "Объектов с адресом из реестра",
+  facilities_with_permits: "Объектов с разрешением на ввод",
   addresses_without_geometry: "Адресов без координат",
   addresses_without_geometry_pct: "Адресов без координат, %",
   assets_active: "Объектов инфраструктуры",

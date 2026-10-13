@@ -95,6 +95,16 @@ func TestTransformDistrict(t *testing.T) {
 	if n := count(t, pool, `SELECT count(*) FROM infra.facility WHERE floor_area_m2 < building_area_m2`); n != 0 {
 		t.Fatalf("floor area below footprint: %d", n)
 	}
+	// Объект, лежащий в контуре большего объекта больше чем наполовину, — его часть, не отдельный объект.
+	if n := count(t, pool, `
+		SELECT count(*) FROM infra.facility c JOIN infra.facility o ON o.id <> c.id
+		WHERE ST_Intersects(coalesce(o.territory, o.footprint), c.point)
+		  AND ST_Area(coalesce(o.territory, o.footprint)) > coalesce(ST_Area(coalesce(c.territory, c.footprint)), 0)
+		  AND (coalesce(c.territory, c.footprint) IS NULL
+		       OR ST_Area(ST_Intersection(coalesce(o.territory, o.footprint), coalesce(c.territory, c.footprint)))
+		          > 0.5 * ST_Area(coalesce(c.territory, c.footprint)))`); n != 0 {
+		t.Fatalf("nested facilities: %d", n)
+	}
 
 	// Сеть: участки, ограничения из тегов, мосты; промзоны.
 	if st["roads"] < 500 || st["restrictions"] == 0 || st["industrial_zones"] == 0 {

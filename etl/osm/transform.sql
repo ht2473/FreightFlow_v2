@@ -232,6 +232,18 @@ UPDATE fac_candidate c SET point = coalesce(
     (SELECT p.geom FROM osm_stage.points p WHERE c.osm_type = 'N' AND p.osm_id = c.osm_id LIMIT 1));
 DELETE FROM fac_candidate WHERE point IS NULL;
 
+-- Вложенные и перекрывающиеся контуры — один объект: остаётся больший, если меньший лежит в нём
+-- больше чем наполовину (территория внутри территории, корпус с отдельной разметкой).
+DELETE FROM fac_candidate c
+USING fac_candidate o
+WHERE (o.osm_type, o.osm_id) <> (c.osm_type, c.osm_id)
+  AND coalesce(o.territory, o.footprint) IS NOT NULL
+  AND ST_Intersects(coalesce(o.territory, o.footprint), c.point)
+  AND ST_Area(coalesce(o.territory, o.footprint)) > coalesce(ST_Area(coalesce(c.territory, c.footprint)), 0)
+  AND (coalesce(c.territory, c.footprint) IS NULL
+       OR ST_Area(ST_Intersection(coalesce(o.territory, o.footprint), coalesce(c.territory, c.footprint)))
+          > 0.5 * ST_Area(coalesce(c.territory, c.footprint)));
+
 -- Тип, достоверность и её причины.
 CREATE TEMP TABLE fac_scored ON COMMIT DROP AS
 WITH x AS (
@@ -299,6 +311,10 @@ ON CONFLICT (osm_type, osm_id) DO UPDATE SET
 
 UPDATE infra.facility SET status = 'missing', updated_at = now()
 WHERE source_code = current_setting('ff.source') AND last_seen_at < now() AND status = 'active';
+
+-- Официальные записи (адресный реестр, разрешения на ввод): достоверность из OSM пересчитана
+-- заново, причины по официальным совпадениям добавляются снова.
+SELECT infra.enrich_facilities();
 
 -- Привязка к территориям и кольцам.
 UPDATE infra.facility f SET

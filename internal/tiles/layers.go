@@ -460,6 +460,7 @@ var Registry = []Layer{
 		Properties: []Property{
 			{Name: "name", Title: "Название", Kind: "text"},
 			{Name: "type", Title: "Тип", Kind: "enum", Labels: facilityTypes},
+			{Name: "address", Title: "Адрес", Kind: "text"},
 			{Name: "area", Title: "Площадь застройки", Kind: "number", Unit: "м²"},
 			{Name: "buildings", Title: "Зданий", Kind: "number"},
 			{Name: "confidence", Title: "Достоверность", Kind: "number"},
