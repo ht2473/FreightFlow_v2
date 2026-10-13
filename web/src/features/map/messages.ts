@@ -30,4 +30,6 @@ export const m = {
   yes: "да",
   no: "нет",
   attributionMap: "Карта",
+  workDate: "Работы на дату",
+  today: "Сегодня",
 } as const;

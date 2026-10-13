@@ -203,6 +203,33 @@
   padding: 2px;
 }
 
+.workDate {
+  top: 14px;
+  left: 14px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  width: 300px;
+  padding: 8px 10px 6px 12px;
+}
+
+.workDateSlider {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+}
+
+.workDateHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.workDateLabel {
+  color: var(--tx2);
+}
+
 .notice {
   top: 14px;
   left: 50%;

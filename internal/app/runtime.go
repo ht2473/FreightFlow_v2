@@ -13,6 +13,7 @@ import (
 	"freightflow/internal/admin"
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
+	"freightflow/internal/operations"
 	"freightflow/internal/platform/blob"
 	"freightflow/internal/platform/events"
 	"freightflow/internal/platform/httpx"
@@ -100,6 +101,7 @@ func (m *modules) registry(env *Env, pool *pgxpool.Pool) *jobs.Registry {
 	reg := jobs.NewRegistry()
 	admin.RegisterMaintenance(reg, pool, m.identity, env.Log)
 	ingest.Register(reg, m.ingest)
+	operations.Register(reg, pool, env.Log.With("component", "operations"))
 	return reg
 }
 

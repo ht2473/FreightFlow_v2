@@ -83,7 +83,13 @@ describe("buildDataLayers", () => {
     }
     const line = layers.find((l) => l.id === "data:restrictions:line");
     if (line?.type === "line") {
-      expect(line.paint?.["line-color"]).toEqual(["match", ["get", "severity"], ["ban"], "#c4262c", "#8b8d98"]);
+      expect(line.paint?.["line-color"]).toEqual([
+        "match",
+        ["to-string", ["get", "severity"]],
+        ["ban"],
+        "#c4262c",
+        "#8b8d98",
+      ]);
     }
   });
 

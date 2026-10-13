@@ -12,6 +12,8 @@ export type MapLayer = Schemas["MapLayer"];
 export interface LayerState {
   visible: boolean;
   opacity: number;
+  /** Дополнительный отбор объектов слоя (например, работы на дату шкалы времени). */
+  filter?: ExpressionSpecification;
 }
 
 /** Значения ролей цвета из токенов текущей темы. */
@@ -67,7 +69,7 @@ export function codeOf(id: string): string | undefined {
 function colorExpr(l: MapLayer, p: Palette): DataDrivenPropertyValueSpecification<string> {
   const st = l.style;
   if (st.kind === "category" && st.property && st.categories.length > 0) {
-    const expr: unknown[] = ["match", ["get", st.property]];
+    const expr: unknown[] = ["match", ["to-string", ["get", st.property]]];
     for (const c of st.categories) {
       expr.push(c.values, color(p, c.color));
     }
@@ -141,6 +143,8 @@ function lineWidth(code: string): DataDrivenPropertyValueSpecification<number> {
       return ["interpolate", ["linear"], ["zoom"], 12, 2, 16, 6];
     case "rings":
       return ["interpolate", ["linear"], ["zoom"], 7, 1, 12, 2];
+    case "road_works":
+      return ["interpolate", ["linear"], ["zoom"], 10, 2, 14, 4.5, 16, 7];
     default:
       return 1.5;
   }
@@ -278,10 +282,29 @@ export function buildDataLayers(
           ? lineLayers(l, palette, op)
           : polygonLayers(l, palette, op);
     for (const x of ls) {
-      layers.push({ ...x, minzoom: l.minzoom } as LayerSpecification);
+      layers.push(withFilter({ ...x, minzoom: l.minzoom } as LayerSpecification, st.filter));
     }
   }
   return { sources, layers };
+}
+
+/** Добавляет отбор слоя каталога к собственному фильтру слоя оформления. */
+function withFilter(layer: LayerSpecification, extra: ExpressionSpecification | undefined): LayerSpecification {
+  if (!extra || layer.type === "background" || layer.type === "raster" || layer.type === "hillshade") {
+    return layer;
+  }
+  const own = "filter" in layer ? layer.filter : undefined;
+  return { ...layer, filter: own ? ["all", own as ExpressionSpecification, extra] : extra } as LayerSpecification;
+}
+
+/** Работы, действующие в день с номером day (дней от 1970-01-01): начало ≤ day < окончание. */
+export function workDayFilter(day: number): ExpressionSpecification {
+  return ["all", ["<=", ["get", "start_day"], day], [">", ["get", "end_day"], day]];
+}
+
+/** Номер дня от 1970-01-01 для даты по местному времени. */
+export function dayNumber(d: Date): number {
+  return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86_400_000);
 }
 
 /** Слои, по которым работают наведение и выбор: точки, контуры и широкие линии. */

@@ -1,3 +1,4 @@
+import type { ExpressionSpecification } from "maplibre-gl";
 import { z } from "zod";
 import { create } from "zustand";
 import type { LayerState, MapLayer } from "@/shared/map/dataLayers";
@@ -53,10 +54,11 @@ export function layerStates(
   catalog: MapLayer[],
   visible: Set<string>,
   opacity: Record<string, number>,
+  filters: Record<string, ExpressionSpecification> = {},
 ): Record<string, LayerState> {
   const out: Record<string, LayerState> = {};
   for (const l of catalog) {
-    out[l.code] = { visible: visible.has(l.code), opacity: opacity[l.code] ?? 1 };
+    out[l.code] = { visible: visible.has(l.code), opacity: opacity[l.code] ?? 1, filter: filters[l.code] };
   }
   return out;
 }

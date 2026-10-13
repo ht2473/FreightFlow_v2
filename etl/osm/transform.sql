@@ -400,6 +400,10 @@ WHERE s.last_seen_at = now() AND c.cond <> ''
   AND (c.base = 'hgv' AND trim(c.val) IN ('no', 'destination', 'delivery')
        OR c.base <> 'hgv' AND network.parse_measure(c.val) IS NOT NULL);
 
+-- Знаки портала Москвы заново привязываются к обновлённой сети (до первой загрузки знаков
+-- функция ничего не делает).
+SELECT network.match_signs();
+
 -- Мосты и путепроводы.
 DELETE FROM network.bridge WHERE source_code = current_setting('ff.source');
 

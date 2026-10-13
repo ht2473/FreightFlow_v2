@@ -61,10 +61,17 @@ var Groups = []struct{ Code, Title string }{
 	{"objects", "Объекты"},
 	{"infra", "Инфраструктура"},
 	{"network", "Сеть и ограничения"},
+	{"operations", "Оперативная обстановка"},
 	{"territory", "Территории"},
 }
 
-const osmAttribution = "© участники OpenStreetMap"
+const (
+	osmAttribution = "© участники OpenStreetMap"
+	mosAttribution = "Портал открытых данных Правительства Москвы, data.mos.ru (CC BY 4.0)"
+	// mixedAttribution — слои, где официальные записи дополнены записями OSM.
+	mixedAttribution = mosAttribution + "; " + osmAttribution
+	// dtpAttribution — ДТП по данным ГИБДД в обработке «Карты ДТП».
+)
 
 // facilityTypes — подписи типов объектов (справочник ref.facility_type).
 var facilityTypes = map[string]string{
@@ -82,18 +89,26 @@ var poiKinds = map[string]string{
 	"fuel":          "АЗС",
 	"truck_parking": "Стоянка грузовиков",
 	"rest_area":     "Площадка отдыха",
-	"marketplace":   "Рынок, ярмарка",
+	"marketplace":   "Рынок",
+	"fair":          "Ярмарка",
 	"rail_station":  "Вокзал",
 	"rail_freight":  "Ж/д грузовой пункт",
 	"customs":       "Таможня",
 	"port":          "Порт",
+	"tpu":           "Транспортно-пересадочный узел",
+	"technopark":    "Технопарк",
 }
 
 var poiProps = []Property{
 	{Name: "name", Title: "Название", Kind: "text"},
 	{Name: "kind", Title: "Вид", Kind: "enum", Labels: poiKinds},
+	{Name: "address", Title: "Адрес", Kind: "text"},
 	{Name: "operator", Title: "Оператор", Kind: "text"},
 	{Name: "opening_hours", Title: "Часы работы", Kind: "text"},
+	{Name: "capacity", Title: "Мест", Kind: "number"},
+	{Name: "source", Title: "Источник записи", Kind: "enum", Labels: map[string]string{
+		"mos": "Портал открытых данных Москвы", "osm": "OpenStreetMap",
+	}},
 }
 
 // Registry — слои карты в порядке отрисовки снизу вверх.
@@ -120,6 +135,26 @@ var Registry = []Layer{
 		Style:       Style{Kind: "single", Color: "n9"},
 		Properties: []Property{
 			{Name: "name", Title: "Название", Kind: "text"},
+			{Name: "area_ha", Title: "Площадь", Kind: "number", Unit: "га"},
+		},
+	},
+	{
+		Code: "constraint_zones", Group: "territory", Title: "Ограничения для размещения",
+		Description: "Зоны охраны и территории объектов культурного наследия, парковые территории", Geometry: "polygon",
+		MinZoom: 10, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"territory"},
+		Attribution: mosAttribution,
+		Style: Style{Kind: "category", Property: "kind", Categories: []Category{
+			{Values: []string{"heritage_protection"}, Label: "Зона охраны ОКН", Color: "cat4"},
+			{Values: []string{"heritage_territory"}, Label: "Территория ОКН", Color: "cat2"},
+			{Values: []string{"park"}, Label: "Парк", Color: "cat3"},
+		}},
+		Properties: []Property{
+			{Name: "name", Title: "Название", Kind: "text"},
+			{Name: "kind", Title: "Вид", Kind: "enum", Labels: map[string]string{
+				"heritage_protection": "Зона охраны объекта культурного наследия",
+				"heritage_territory":  "Территория объекта культурного наследия",
+				"park":                "Парковая территория",
+			}},
 			{Name: "area_ha", Title: "Площадь", Kind: "number", Unit: "га"},
 		},
 	},
@@ -173,10 +208,52 @@ var Registry = []Layer{
 		},
 	},
 	{
+		Code: "road_assets", Group: "network", Title: "Инфраструктура УДС",
+		Description: "Светофоры, камеры фотовидеофиксации, искусственные неровности, выделенные полосы, табло", Geometry: "point",
+		MinZoom: 13, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"network"},
+		Attribution: mosAttribution,
+		Style: Style{Kind: "category", Property: "kind", Categories: []Category{
+			{Values: []string{"traffic_light"}, Label: "Светофор", Color: "cat3"},
+			{Values: []string{"camera"}, Label: "Камера фотовидеофиксации", Color: "cat2"},
+			{Values: []string{"speed_bump"}, Label: "Искусственная неровность", Color: "cat5"},
+			{Values: []string{"dedicated_lane"}, Label: "Выделенная полоса", Color: "cat1"},
+			{Values: []string{"info_board"}, Label: "Табло", Color: "cat6"},
+		}},
+		Properties: []Property{
+			{Name: "name", Title: "Название", Kind: "text"},
+			{Name: "kind", Title: "Вид", Kind: "enum", Labels: map[string]string{
+				"traffic_light": "Светофорный объект", "camera": "Камера фотовидеофиксации",
+				"speed_bump": "Искусственная неровность", "dedicated_lane": "Выделенная полоса", "info_board": "Табло",
+			}},
+			{Name: "address", Title: "Адрес", Kind: "text"},
+		},
+	},
+	{
+		Code: "road_signs", Group: "network", Title: "Дорожные знаки",
+		Description: "Реестр знаков Москвы; до 15-го масштаба — только знаки ограничений для грузовиков", Geometry: "point",
+		MinZoom: 12, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"network"},
+		Attribution: mosAttribution,
+		Style: Style{
+			Kind: "category", Property: "kind", Note: "Серым — прочие знаки (с 15-го масштаба)",
+			Categories: []Category{
+				{Values: []string{"hgv_ban", "motor_vehicle_ban", "hazmat_ban"}, Label: "Запрещающий движение", Color: "crit"},
+				{Values: []string{"maxweight", "maxaxleload", "maxheight", "maxwidth", "maxlength"}, Label: "Ограничение массы или габарита", Color: "warn"},
+			},
+		},
+		Properties: []Property{
+			{Name: "name", Title: "Знак", Kind: "text"},
+			{Name: "match_status", Title: "Привязка к сети", Kind: "enum", Labels: map[string]string{
+				"matched": "привязан", "ambiguous": "неоднозначно", "unmatched": "не привязан", "pending": "ожидает",
+			}},
+			{Name: "temporary", Title: "Временный", Kind: "bool"},
+			{Name: "location", Title: "Адресный ориентир", Kind: "text"},
+		},
+	},
+	{
 		Code: "restrictions", Group: "network", Title: "Ограничения для грузовиков",
-		Description: "Запреты и пределы массы и габаритов по тегам OSM", Geometry: "line",
+		Description: "Запреты и пределы массы и габаритов: знаки Москвы и разметка OSM", Geometry: "line",
 		MinZoom: 10, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"network"},
-		Attribution: osmAttribution, Visible: true,
+		Attribution: mixedAttribution, Visible: true,
 		Style: Style{
 			Kind: "category", Property: "severity", DashedBy: "conditional",
 			Note: "Пунктир — ограничение действует по времени",
@@ -192,7 +269,74 @@ var Registry = []Layer{
 			{Name: "maxaxleload", Title: "Нагрузка на ось", Kind: "number", Unit: "т"},
 			{Name: "maxheight", Title: "Высота", Kind: "number", Unit: "м"},
 			{Name: "maxwidth", Title: "Ширина", Kind: "number", Unit: "м"},
-			{Name: "conditions", Title: "Когда действует", Kind: "text"},
+			{Name: "conditions", Title: "Условия", Kind: "text"},
+			{Name: "signed", Title: "Подтверждено знаком", Kind: "bool"},
+			{Name: "origins", Title: "Источники", Kind: "text"},
+		},
+	},
+	{
+		Code: "restriction_conflicts", Group: "network", Title: "Расхождения знаков и OSM",
+		Description: "Участки, где знак Москвы и разметка OSM расходятся", Geometry: "line",
+		MinZoom: 11, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"network"},
+		Attribution: mixedAttribution,
+		Style: Style{Kind: "category", Property: "type", Categories: []Category{
+			{Values: []string{"sign_not_in_osm"}, Label: "Знак есть, в OSM нет", Color: "cat4"},
+			{Values: []string{"osm_not_signed"}, Label: "В OSM есть, знака рядом нет", Color: "cat1"},
+		}},
+		Properties: []Property{
+			{Name: "name", Title: "Улица", Kind: "text"},
+			{Name: "type", Title: "Расхождение", Kind: "enum", Labels: map[string]string{
+				"sign_not_in_osm": "знак Москвы без разметки OSM", "osm_not_signed": "разметка OSM без знака рядом",
+			}},
+			{Name: "kinds", Title: "Виды ограничений", Kind: "text"},
+		},
+	},
+	{
+		Code: "road_works", Group: "operations", Title: "Дорожные работы",
+		Description: "Плановый и аварийный ремонт, ограничения движения на период работ — на дату шкалы", Geometry: "line",
+		MinZoom: 10, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"operations"},
+		Attribution: mosAttribution, Visible: true,
+		Style: Style{
+			Kind: "category", Property: "significance",
+			Note: "Значимость — по классам затронутых улиц, мостам и перекрытию",
+			Categories: []Category{
+				{Values: []string{"high"}, Label: "Высокая значимость", Color: "crit"},
+				{Values: []string{"medium"}, Label: "Средняя", Color: "warn"},
+				{Values: []string{"low"}, Label: "Низкая", Color: "info"},
+			},
+		},
+		Properties: []Property{
+			{Name: "title", Title: "Работы", Kind: "text"},
+			{Name: "kind", Title: "Вид", Kind: "enum", Labels: map[string]string{
+				"repair": "Плановый ремонт", "emergency": "Аварийный ремонт", "closure": "Ограничение движения",
+			}},
+			{Name: "place", Title: "Место", Kind: "text"},
+			{Name: "state", Title: "Состояние сегодня", Kind: "enum", Labels: map[string]string{
+				"planned": "запланированы", "active": "идут", "finished": "завершены",
+			}},
+			{Name: "starts", Title: "Начало", Kind: "text"},
+			{Name: "ends", Title: "Окончание", Kind: "text"},
+			{Name: "closure", Title: "Перекрытие проезжей части", Kind: "bool"},
+			{Name: "source_status", Title: "Статус по данным источника", Kind: "text"},
+			{Name: "customer", Title: "Заказчик", Kind: "text"},
+			{Name: "contractor", Title: "Исполнитель", Kind: "text"},
+		},
+	},
+	{
+		Code: "commissioning", Group: "objects", Title: "Ввод объектов в эксплуатацию",
+		Description: "Разрешения на ввод (место — по адресному реестру); выделены склады и логистика", Geometry: "point",
+		MinZoom: 10, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"facility"},
+		Attribution: mosAttribution,
+		Style: Style{Kind: "category", Property: "logistics", Categories: []Category{
+			{Values: []string{"true"}, Label: "Склад, логистика", Color: "cat2"},
+			{Values: []string{"false"}, Label: "Прочие объекты", Color: "n9"},
+		}},
+		Properties: []Property{
+			{Name: "name", Title: "Объект", Kind: "text"},
+			{Name: "purpose", Title: "Назначение", Kind: "text"},
+			{Name: "address", Title: "Адрес", Kind: "text"},
+			{Name: "permit_date", Title: "Дата разрешения", Kind: "text"},
+			{Name: "area", Title: "Общая площадь", Kind: "number", Unit: "м²"},
 		},
 	},
 	{
@@ -220,9 +364,9 @@ var Registry = []Layer{
 	},
 	{
 		Code: "truck_parking", Group: "infra", Title: "Стоянки грузовиков",
-		Description: "Стоянки для грузовых автомобилей и площадки отдыха", Geometry: "point",
+		Description: "Стоянки для большегрузов и площадки отдыха водителей: реестры Москвы и OSM", Geometry: "point",
 		MinZoom: 9, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"infra"},
-		Attribution: osmAttribution,
+		Attribution: mixedAttribution,
 		Style: Style{Kind: "category", Property: "kind", Categories: []Category{
 			{Values: []string{"truck_parking"}, Label: "Стоянка грузовиков", Color: "cat2"},
 			{Values: []string{"rest_area"}, Label: "Площадка отдыха", Color: "cat6"},
@@ -231,20 +375,22 @@ var Registry = []Layer{
 	},
 	{
 		Code: "fuel_stations", Group: "infra", Title: "АЗС",
-		Description: "Автозаправочные станции", Geometry: "point",
+		Description: "Автозаправочные станции: реестр Москвы и OSM", Geometry: "point",
 		MinZoom: 11, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"infra"},
-		Attribution: osmAttribution,
+		Attribution: mixedAttribution,
 		Style:       Style{Kind: "single", Color: "cat1"},
 		Properties:  poiProps,
 	},
 	{
-		Code: "attractors", Group: "infra", Title: "Рынки и вокзалы",
-		Description: "Точки притяжения грузопотоков: рынки, ярмарки, вокзалы", Geometry: "point",
+		Code: "attractors", Group: "infra", Title: "Точки притяжения",
+		Description: "Рынки, ярмарки, вокзалы, ТПУ, технопарки — места притяжения грузопотоков", Geometry: "point",
 		MinZoom: 10, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"infra"},
-		Attribution: osmAttribution,
+		Attribution: mixedAttribution,
 		Style: Style{Kind: "category", Property: "kind", Categories: []Category{
-			{Values: []string{"marketplace"}, Label: "Рынок, ярмарка", Color: "cat5"},
+			{Values: []string{"marketplace", "fair"}, Label: "Рынок, ярмарка", Color: "cat5"},
 			{Values: []string{"rail_station"}, Label: "Вокзал", Color: "cat8"},
+			{Values: []string{"tpu"}, Label: "ТПУ", Color: "cat6"},
+			{Values: []string{"technopark"}, Label: "Технопарк", Color: "cat4"},
 		}},
 		Properties: poiProps,
 	},

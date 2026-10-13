@@ -10,11 +10,13 @@ import {
   buildDataLayers,
   codeOf,
   color,
+  dayNumber,
   interactiveLayerIds,
   layerId,
   type MapLayer,
   type Palette,
   readPalette,
+  workDayFilter,
 } from "@/shared/map/dataLayers";
 import { DEFAULT_VIEW, mountMap, onStyleReady, unmountMap } from "@/shared/map/instance";
 import { IconButton } from "@/shared/ui";
@@ -27,6 +29,7 @@ import s from "./map.module.css";
 import { m } from "./messages";
 import { type ObjectItem, ObjectsPanel } from "./ObjectsPanel";
 import { formatCenter, layerStates, type MapSearch, parseCenter, useOpacity, visibleLayers } from "./state";
+import { WorkDate } from "./WorkDate";
 
 export function MapPage() {
   return (
@@ -90,6 +93,8 @@ function MapWorkspace() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number; title: string; subtitle: string } | null>(null);
   const [objects, setObjects] = useState<ObjectItem[]>([]);
+  // Шкала времени работ: смещение в днях от сегодняшнего дня.
+  const [workOffset, setWorkOffset] = useState(0);
 
   const catalog = useMemo(() => catalogQuery.data?.layers ?? [], [catalogQuery.data]);
   const visible = useMemo(() => visibleLayers(catalog, search.l), [catalog, search.l]);
@@ -100,10 +105,12 @@ function MapWorkspace() {
     return readPalette();
   }, [theme]);
 
-  const data = useMemo(
-    () => buildDataLayers(catalog, layerStates(catalog, visible, opacity), palette),
-    [catalog, visible, opacity, palette],
-  );
+  const data = useMemo(() => {
+    const day = new Date();
+    day.setDate(day.getDate() + workOffset);
+    const filters = { road_works: workDayFilter(dayNumber(day)) };
+    return buildDataLayers(catalog, layerStates(catalog, visible, opacity, filters), palette);
+  }, [catalog, visible, opacity, palette, workOffset]);
   const style = useMemo(() => {
     if (basemap.data === undefined) {
       return null;
@@ -328,6 +335,7 @@ function MapWorkspace() {
             <span>{m.noBasemapHint}</span>
           </div>
         )}
+        {visible.has("road_works") && <WorkDate offset={workOffset} onChange={setWorkOffset} />}
         <div className={`${s.float} ${s.zoom}`}>
           <IconButton label={m.zoomIn} onPress={() => map?.zoomIn()}>
             <Plus size={17} />
