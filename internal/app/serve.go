@@ -57,9 +57,10 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	defer bm.Close()
 	mapHandler := tiles.New(tiles.Deps{Basemap: bm, Data: layers, Auth: tiles.NewAuth(ids, sessions), Log: tileLog})
 
+	routingClient := routing.NewClient(cfg.ValhallaURL)
 	apiHandler, err := api.New(api.Deps{
 		Identity: ids, Ingest: mods.ingest, Layers: layers, Regulation: regulation.New(pool),
-		Routing: routing.NewService(pool, routing.NewClient(cfg.ValhallaURL)), Sessions: sessions, Mailer: mailer,
+		Routing: routing.NewService(pool, routingClient), Sessions: sessions, Mailer: mailer,
 		BaseURL: cfg.BaseURL, Log: env.Log, Meters: rt.tel.Meters, Tracers: rt.tel.Tracers,
 	})
 	if err != nil {
@@ -74,7 +75,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthz", healthz())
-	mux.Handle("GET /readyz", readyz(pool))
+	mux.Handle("GET /readyz", readyz(pool, routingClient))
 	mux.Handle("/api/v1/", apiHandler)
 	mux.Handle("/map/", mapHandler)
 	mux.Handle("/tiles/", mapHandler)
@@ -138,14 +139,22 @@ type readiness struct {
 	Checks map[string]string `json:"checks"`
 }
 
-// readyz проверяет зависимости, без которых сервер не может обслуживать запросы.
-func readyz(pool *pgxpool.Pool) http.Handler {
+// readyz проверяет зависимости, без которых сервер не может обслуживать запросы (база), и
+// службу маршрутизации: без неё работают все разделы, кроме маршрутов, поэтому её отказ —
+// «degraded» с кодом 200; при готовности указывается время сборки графа.
+func readyz(pool *pgxpool.Pool, rc *routing.Client) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 
 		res := readiness{Status: "ok", Checks: map[string]string{"database": "ok"}}
 		code := http.StatusOK
+		if st, err := rc.Status(ctx); err != nil {
+			res.Status = "degraded"
+			res.Checks["routing"] = "unavailable"
+		} else {
+			res.Checks["routing"] = "ok, graph " + time.Unix(st.Tileset, 0).UTC().Format(time.RFC3339)
+		}
 		if err := pool.Ping(ctx); err != nil {
 			res.Status = "unavailable"
 			res.Checks["database"] = "unavailable"
