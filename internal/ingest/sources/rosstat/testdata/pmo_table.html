@@ -1,0 +1,287 @@
+<HTML>
+<HEAD>
+<META content="text/html; charset=windows-1251" http-equiv=Content-Type>
+<TITLE>Результат запроса к Базе данных показателей муниципальных образований</TITLE>
+<style type=text/css>@import url(/db/1CDBSS.css);</style>
+</HEAD><BODY  onLoad="focus();return(true);">
+
+<p><img border="0" src="/dbscripts/munst/Banner.jpg" width="800" height="113"><br>
+<div STYLE="font-family:Arial; color:darkblue; font-size:12; font-weight:bold; position:absolute; top:60; left:120;">
+ФЕДЕРАЛЬНАЯ СЛУЖБА ГОСУДАРСТВЕННОЙ СТАТИСТИКИ</div>
+<img border="0" src="region.gif" width="559" height="17"><img border="0" src="/dbscripts/munst/Regionright.jpg" width="241" height="17"></p>
+<div align="left">
+<SCRIPT language="JavaScript">
+<!--
+ 
+function TestPeriod()
+{
+  i1 = document.forms.ToolBarForm.YearFrom.selectedIndex;
+  i2 = document.forms.ToolBarForm.YearTo.selectedIndex;
+  i3 = document.forms.ToolBarForm.Format.selectedIndex;
+  if (document.forms.ToolBarForm.YearFrom.options[i1].text>document.forms.ToolBarForm.YearTo.options[i2].text)
+  {
+    alert("Начало периода больше даты окончания. Исправьте даты." );
+  }
+  else
+  {
+    document.forms.DateFilter.YearFrom.value = document.forms.ToolBarForm.YearFrom.options[i1].text;
+    document.forms.DateFilter.YearTo.value = document.forms.ToolBarForm.YearTo.options[i2].text;
+    document.forms.DateFilter.Format.value = document.forms.ToolBarForm.Format.options[i3].text;
+    document.forms.DateFilter.tbl.click();
+  }
+}
+ 
+function TestFormat()
+{
+  if (document.forms.ToolBarForm.Format.selectedIndex > 0)
+  {
+  	document.forms.ToolBarForm.showtbl0.disabled=false;
+  }
+  else
+  {
+    document.forms.ToolBarForm.showtbl0.disabled=true;
+  }
+}
+ 
+function ShowMetodol(KodPok)
+{
+  window.open("/munst45/" + KodPok + ".htm","","Scrollbars=1,Resizable=1,Width=500,Height=400");
+}
+ 
+-->
+</SCRIPT>
+<FORM action=/dbscripts/munst/munst45/DBInet.cgi method="POST" name="ToolBarForm">
+<TABLE><TR>
+<TD><SPAN class="SelectFormat">Выберите формат документа</SPAN></TD>
+<TD><SELECT name="Format" size="1" class="Select" style="font-size:8pt;" onchange="TestFormat()">
+<OPTION>
+<OPTION>Excel
+<OPTION>CSV
+</SELECT></TD>
+<TD><INPUT type="button" name="showtbl0" disabled value="Выполнить" style="font-size:8pt;" onclick="TestPeriod();"></TD>
+<TD>&nbsp;</TD>
+<TD><SPAN class="SelectFormat">Период</SPAN></TD>
+<TD><SELECT name="YearFrom" size="1" class="Select" style="font-size:8pt;">
+<OPTION SELECTED>2009
+<OPTION>2010
+<OPTION>2011
+<OPTION>2012
+<OPTION>2013
+<OPTION>2014
+<OPTION>2015
+<OPTION>2016
+<OPTION>2017
+<OPTION>2018
+<OPTION>2019
+<OPTION>2020
+<OPTION>2021
+<OPTION>2022
+<OPTION>2023
+<OPTION>2024
+<OPTION>2025
+</SELECT></TD>
+<TD><SPAN class="SelectFormat">по</SPAN></TD>
+<TD><SELECT name="YearTo" size="1" class="Select" style="font-size:8pt;">
+<OPTION SELECTED>2025
+<OPTION>2024
+<OPTION>2023
+<OPTION>2022
+<OPTION>2021
+<OPTION>2020
+<OPTION>2019
+<OPTION>2018
+<OPTION>2017
+<OPTION>2016
+<OPTION>2015
+<OPTION>2014
+<OPTION>2013
+<OPTION>2012
+<OPTION>2011
+<OPTION>2010
+<OPTION>2009
+</SELECT></TD>
+<TD><INPUT type="button" name="showtbl" value="Выполнить" style="font-size:8pt;" onclick="TestPeriod();"></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR><td height="10"></td></TR>
+</TABLE>
+</FORM>
+<TABLE  style="display:none"><TR><TD>
+<FORM action=/dbscripts/munst/munst45/DBInet.cgi method="POST" name="DateFilter">
+<INPUT type="hidden" name="Format" value="">
+<INPUT type="hidden" name="YearTo" value="">
+<INPUT type="hidden" name="YearFrom" value="">
+<INPUT type="hidden" name="DiagSz" value="800x600">
+<INPUT type="hidden" name="Qry" value="Pokazateli:8112027;munr:45000000;tippos:3;oktmo:45301000,45000000,45302000,45303000,45304000,45305000,45306000,45307000,45308000,45309000,45310000,45311000,45312000,45313000,45314000,45315000,45316000,45317000,45318000,45319000,45320000,45321000,45322000,45323000,45324000,45325000,45326000,45327000,45328000,45329000,45330000,45331000,45332000,45333000,45334000,45335000,45336000,45337000,45338000,45339000,45340000,45341000,45342000,45343000,45344000,45345000,45346000,45347000,45348000,45349000,45350000,45351000,45352000,45353000,45354000,45355000,45356000,45357000,45358000,45359000,45360000,45361000,45362000,45363000,45364000,45365000,45366000,45367000,45368000,45369000,45370000,45371000,45372000,45373000,45374000,45375000,45376000,45377000,45378000,45379000,45380000,45381000,45382000,45383000,45384000,45385000,45386000,45387000,45388000,45389000,45390000,45391000,45392000,45393000,45394000,45395000,45396000,45397000,45398000,45901000,45902000,45903000,45904000,45905000,45906000,45907000,45908000,45909000,45910000,45911000,45912000,45913000,45914000,45915000,45916000,45917000,45918000,45919000,45920000,45921000,45922000,45923000,45924000,45925000,45926000,45927000,45931000,45932000,45941000,45942000,45943000,45944000,45945000,45946000,45947000,45948000,45949000,45951000,45952000,45953000,45954000,45955000,45956000,45957000,45958000,45959000,45961000,45963000,45966000;mest:11;god:2020,2021,2022,2023,2024,2025;period:208;">
+<INPUT type="hidden" name="QryGm" value="Pokazateli_z:1;munr_z:2;tippos_z:3;mest_z:4;period_z:5;god_s:1;oktmo_b:1;">
+<INPUT type="hidden" name="QryFootNotes" value=";">
+<INPUT type="hidden" name="YearsList" value="2009;2010;2011;2012;2013;2014;2015;2016;2017;2018;2019;2020;2021;2022;2023;2024;2025;">
+<INPUT type="submit" style="visibility:hidden" name="tbl" value="Показать таблицу" >
+</FORM>
+</TD>
+</TR>
+</TABLE>
+</div>
+<div align="left">
+<font face="verdana" size=6>
+<TABLE class=OutTbl  bordercolor=darkgray cellspacing=0 border=1>
+<CAPTION><div class=ZagTbl>Оценка численности населения на 1 января текущего года (до 2010 года единица измерения тыс. человек), человек,<br>Муниципальные образования города Москвы (столицы Российской Федерации города федерального значения),<br>Внутригородская территория
+(внутригородское муниципальное образование) города федерального значения,<br>Все население,<br>на 1 января</div></CAPTION>
+<TR><TD class=TblShap width=30% rowspan=1 border=0></TD><TD class=TblShap colspan=0>2020</TD><TD class=TblShap colspan=0>2021</TD><TD class=TblShap colspan=0>2022</TD><TD class=TblShap colspan=0>2023</TD><TD class=TblShap colspan=0>2024</TD><TD class=TblShap colspan=0>2025</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Богородское</p></TD><TD align=right>110137</TD><TD align=right>110044</TD><TD align=right>110049</TD><TD align=right>108657</TD><TD align=right>107571</TD><TD align=right>108907</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Москва</p></TD><TD align=right>&nbsp;</TD><TD align=right>&nbsp;</TD><TD align=right>12635466</TD><TD align=right>13104177</TD><TD align=right>13149803</TD><TD align=right>13274285</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Вешняки</p></TD><TD align=right>122419</TD><TD align=right>121972</TD><TD align=right>120953</TD><TD align=right>119927</TD><TD align=right>119585</TD><TD align=right>121088</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Восточное Измайлово</p></TD><TD align=right>78206</TD><TD align=right>77931</TD><TD align=right>77314</TD><TD align=right>73929</TD><TD align=right>73857</TD><TD align=right>74200</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Восточное</p></TD><TD align=right>13752</TD><TD align=right>13698</TD><TD align=right>13503</TD><TD align=right>12906</TD><TD align=right>12454</TD><TD align=right>12611</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Гольяново</p></TD><TD align=right>163197</TD><TD align=right>162886</TD><TD align=right>161126</TD><TD align=right>165243</TD><TD align=right>164715</TD><TD align=right>164305</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Ивановское</p></TD><TD align=right>128514</TD><TD align=right>128085</TD><TD align=right>125737</TD><TD align=right>125042</TD><TD align=right>125062</TD><TD align=right>125211</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Измайлово</p></TD><TD align=right>107883</TD><TD align=right>107768</TD><TD align=right>107379</TD><TD align=right>107953</TD><TD align=right>108666</TD><TD align=right>110331</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Косино-Ухтомское</p></TD><TD align=right>82413</TD><TD align=right>81973</TD><TD align=right>82250</TD><TD align=right>89113</TD><TD align=right>89438</TD><TD align=right>90207</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Новогиреево</p></TD><TD align=right>98634</TD><TD align=right>100107</TD><TD align=right>99823</TD><TD align=right>99961</TD><TD align=right>99348</TD><TD align=right>99906</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Новокосино</p></TD><TD align=right>108204</TD><TD align=right>107839</TD><TD align=right>107246</TD><TD align=right>106320</TD><TD align=right>107461</TD><TD align=right>108479</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Метрогородок</p></TD><TD align=right>39121</TD><TD align=right>38872</TD><TD align=right>38310</TD><TD align=right>39623</TD><TD align=right>40122</TD><TD align=right>40798</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Перово</p></TD><TD align=right>141269</TD><TD align=right>140865</TD><TD align=right>140243</TD><TD align=right>135315</TD><TD align=right>134308</TD><TD align=right>133481</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Северное Измайлово</p></TD><TD align=right>88007</TD><TD align=right>87814</TD><TD align=right>87853</TD><TD align=right>84986</TD><TD align=right>84957</TD><TD align=right>85448</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Соколиная Гора</p></TD><TD align=right>92337</TD><TD align=right>92015</TD><TD align=right>91484</TD><TD align=right>93183</TD><TD align=right>92805</TD><TD align=right>93960</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Сокольники</p></TD><TD align=right>61649</TD><TD align=right>61245</TD><TD align=right>60756</TD><TD align=right>59914</TD><TD align=right>60396</TD><TD align=right>60852</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Преображенское</p></TD><TD align=right>91574</TD><TD align=right>91151</TD><TD align=right>90394</TD><TD align=right>87630</TD><TD align=right>87933</TD><TD align=right>89475</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Внуково</p></TD><TD align=right>25783</TD><TD align=right>25764</TD><TD align=right>24687</TD><TD align=right>26182</TD><TD align=right>25182</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Дорогомилово</p></TD><TD align=right>76218</TD><TD align=right>76159</TD><TD align=right>75105</TD><TD align=right>76926</TD><TD align=right>75669</TD><TD align=right>76571</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Крылатское</p></TD><TD align=right>83007</TD><TD align=right>82771</TD><TD align=right>81677</TD><TD align=right>82923</TD><TD align=right>82363</TD><TD align=right>83465</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Кунцево</p></TD><TD align=right>152467</TD><TD align=right>152004</TD><TD align=right>150344</TD><TD align=right>153316</TD><TD align=right>151447</TD><TD align=right>152171</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Можайское</p></TD><TD align=right>139081</TD><TD align=right>139154</TD><TD align=right>137634</TD><TD align=right>147606</TD><TD align=right>145961</TD><TD align=right>146666</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Ново-Переделкино</p></TD><TD align=right>121718</TD><TD align=right>121561</TD><TD align=right>122202</TD><TD align=right>123219</TD><TD align=right>122058</TD><TD align=right>121741</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Очаково-Матвеевское</p></TD><TD align=right>130975</TD><TD align=right>130714</TD><TD align=right>129002</TD><TD align=right>127680</TD><TD align=right>126535</TD><TD align=right>127231</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Проспект Вернадского</p></TD><TD align=right>64228</TD><TD align=right>64431</TD><TD align=right>64436</TD><TD align=right>65529</TD><TD align=right>65316</TD><TD align=right>65913</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Раменки</p></TD><TD align=right>142389</TD><TD align=right>142538</TD><TD align=right>141754</TD><TD align=right>152594</TD><TD align=right>151931</TD><TD align=right>154283</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Солнцево</p></TD><TD align=right>126901</TD><TD align=right>126958</TD><TD align=right>126081</TD><TD align=right>127304</TD><TD align=right>126309</TD><TD align=right>137612</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Тропарево-Никулино</p></TD><TD align=right>124287</TD><TD align=right>123873</TD><TD align=right>122663</TD><TD align=right>128359</TD><TD align=right>128029</TD><TD align=right>129268</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Филевский Парк</p></TD><TD align=right>94787</TD><TD align=right>95106</TD><TD align=right>94450</TD><TD align=right>113015</TD><TD align=right>112388</TD><TD align=right>112403</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Фили-Давыдково</p></TD><TD align=right>115273</TD><TD align=right>114953</TD><TD align=right>113818</TD><TD align=right>112246</TD><TD align=right>111926</TD><TD align=right>112759</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Крюково</p></TD><TD align=right>103046</TD><TD align=right>102996</TD><TD align=right>107266</TD><TD align=right>108426</TD><TD align=right>110660</TD><TD align=right>115081</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Матушкино</p></TD><TD align=right>40913</TD><TD align=right>40822</TD><TD align=right>39546</TD><TD align=right>41877</TD><TD align=right>43049</TD><TD align=right>40220</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Силино</p></TD><TD align=right>40341</TD><TD align=right>40266</TD><TD align=right>40425</TD><TD align=right>41586</TD><TD align=right>42047</TD><TD align=right>41971</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Аэропорт</p></TD><TD align=right>79541</TD><TD align=right>79413</TD><TD align=right>79283</TD><TD align=right>81964</TD><TD align=right>81833</TD><TD align=right>82804</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Беговое</p></TD><TD align=right>42908</TD><TD align=right>42634</TD><TD align=right>41991</TD><TD align=right>42729</TD><TD align=right>43190</TD><TD align=right>43662</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Бескудниковское</p></TD><TD align=right>79732</TD><TD align=right>79607</TD><TD align=right>78567</TD><TD align=right>78556</TD><TD align=right>79896</TD><TD align=right>81647</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Войковское</p></TD><TD align=right>70899</TD><TD align=right>70623</TD><TD align=right>70499</TD><TD align=right>72033</TD><TD align=right>72173</TD><TD align=right>72588</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Восточное Дегунино</p></TD><TD align=right>99112</TD><TD align=right>98923</TD><TD align=right>98046</TD><TD align=right>101601</TD><TD align=right>101167</TD><TD align=right>101126</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Головинское</p></TD><TD align=right>103573</TD><TD align=right>103508</TD><TD align=right>102722</TD><TD align=right>104554</TD><TD align=right>106612</TD><TD align=right>109389</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Дмитровское</p></TD><TD align=right>93545</TD><TD align=right>93321</TD><TD align=right>92656</TD><TD align=right>103271</TD><TD align=right>103496</TD><TD align=right>104847</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Западное Дегунино</p></TD><TD align=right>84381</TD><TD align=right>84273</TD><TD align=right>83251</TD><TD align=right>85514</TD><TD align=right>84743</TD><TD align=right>85448</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Коптево</p></TD><TD align=right>102238</TD><TD align=right>101885</TD><TD align=right>103693</TD><TD align=right>102809</TD><TD align=right>103676</TD><TD align=right>104775</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Левобережное</p></TD><TD align=right>54712</TD><TD align=right>54648</TD><TD align=right>53007</TD><TD align=right>55355</TD><TD align=right>55420</TD><TD align=right>56573</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Молжаниновское</p></TD><TD align=right>12264</TD><TD align=right>12208</TD><TD align=right>11974</TD><TD align=right>12487</TD><TD align=right>13337</TD><TD align=right>14907</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Савеловское</p></TD><TD align=right>59586</TD><TD align=right>59611</TD><TD align=right>60079</TD><TD align=right>60070</TD><TD align=right>60149</TD><TD align=right>61147</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Сокол</p></TD><TD align=right>60171</TD><TD align=right>60324</TD><TD align=right>58270</TD><TD align=right>58000</TD><TD align=right>57677</TD><TD align=right>58217</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Тимирязевское</p></TD><TD align=right>83824</TD><TD align=right>83641</TD><TD align=right>82510</TD><TD align=right>81940</TD><TD align=right>82774</TD><TD align=right>84168</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Ховрино</p></TD><TD align=right>89094</TD><TD align=right>88915</TD><TD align=right>87711</TD><TD align=right>93029</TD><TD align=right>96233</TD><TD align=right>102047</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Хорошевское</p></TD><TD align=right>72732</TD><TD align=right>72594</TD><TD align=right>70970</TD><TD align=right>74927</TD><TD align=right>75533</TD><TD align=right>76407</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Алексеевское</p></TD><TD align=right>80634</TD><TD align=right>80449</TD><TD align=right>79193</TD><TD align=right>78502</TD><TD align=right>77681</TD><TD align=right>79377</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Алтуфьевское</p></TD><TD align=right>57697</TD><TD align=right>57601</TD><TD align=right>57361</TD><TD align=right>55753</TD><TD align=right>55741</TD><TD align=right>56008</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Бабушкинское</p></TD><TD align=right>88691</TD><TD align=right>88607</TD><TD align=right>88092</TD><TD align=right>68075</TD><TD align=right>88627</TD><TD align=right>90087</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Бибирево</p></TD><TD align=right>160447</TD><TD align=right>160248</TD><TD align=right>158939</TD><TD align=right>159344</TD><TD align=right>158797</TD><TD align=right>159377</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Бутырское</p></TD><TD align=right>71798</TD><TD align=right>71721</TD><TD align=right>70957</TD><TD align=right>72472</TD><TD align=right>71703</TD><TD align=right>72177</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Лианозово</p></TD><TD align=right>86035</TD><TD align=right>85867</TD><TD align=right>85475</TD><TD align=right>84811</TD><TD align=right>84105</TD><TD align=right>83759</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Лосиноостровское</p></TD><TD align=right>83046</TD><TD align=right>82937</TD><TD align=right>83221</TD><TD align=right>82683</TD><TD align=right>83136</TD><TD align=right>83779</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Марфино</p></TD><TD align=right>35579</TD><TD align=right>35488</TD><TD align=right>35413</TD><TD align=right>36566</TD><TD align=right>36742</TD><TD align=right>37549</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Марьина Роща</p></TD><TD align=right>67538</TD><TD align=right>67456</TD><TD align=right>66787</TD><TD align=right>63095</TD><TD align=right>62191</TD><TD align=right>62551</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Останкинское</p></TD><TD align=right>63697</TD><TD align=right>63611</TD><TD align=right>63628</TD><TD align=right>65296</TD><TD align=right>64840</TD><TD align=right>65211</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Отрадное</p></TD><TD align=right>185745</TD><TD align=right>185459</TD><TD align=right>185218</TD><TD align=right>187728</TD><TD align=right>187737</TD><TD align=right>188431</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Ростокино</p></TD><TD align=right>40196</TD><TD align=right>40108</TD><TD align=right>39961</TD><TD align=right>52059</TD><TD align=right>52115</TD><TD align=right>52503</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Свиблово</p></TD><TD align=right>62981</TD><TD align=right>62899</TD><TD align=right>62401</TD><TD align=right>60984</TD><TD align=right>60013</TD><TD align=right>60437</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Северное Медведково</p></TD><TD align=right>127986</TD><TD align=right>127718</TD><TD align=right>128028</TD><TD align=right>128989</TD><TD align=right>129632</TD><TD align=right>130718</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Северное</p></TD><TD align=right>38633</TD><TD align=right>38529</TD><TD align=right>39030</TD><TD align=right>55129</TD><TD align=right>55740</TD><TD align=right>56537</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Южное Медведково</p></TD><TD align=right>85867</TD><TD align=right>85739</TD><TD align=right>86391</TD><TD align=right>86996</TD><TD align=right>88150</TD><TD align=right>88821</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Ярославское</p></TD><TD align=right>98272</TD><TD align=right>98134</TD><TD align=right>97502</TD><TD align=right>99656</TD><TD align=right>98861</TD><TD align=right>99398</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Куркино</p></TD><TD align=right>34231</TD><TD align=right>34187</TD><TD align=right>34153</TD><TD align=right>32326</TD><TD align=right>33298</TD><TD align=right>33676</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Митино</p></TD><TD align=right>195476</TD><TD align=right>195013</TD><TD align=right>197386</TD><TD align=right>197840</TD><TD align=right>198194</TD><TD align=right>198911</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Покровское-Стрешнево</p></TD><TD align=right>59512</TD><TD align=right>&nbsp;</TD><TD align=right>58975</TD><TD align=right>66564</TD><TD align=right>67364</TD><TD align=right>68688</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Северное Тушино</p></TD><TD align=right>166217</TD><TD align=right>165736</TD><TD align=right>164120</TD><TD align=right>171805</TD><TD align=right>172055</TD><TD align=right>172664</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Строгино</p></TD><TD align=right>161298</TD><TD align=right>161048</TD><TD align=right>159134</TD><TD align=right>161980</TD><TD align=right>163074</TD><TD align=right>162885</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Хорошево-Мневники</p></TD><TD align=right>174834</TD><TD align=right>175123</TD><TD align=right>175924</TD><TD align=right>181520</TD><TD align=right>182497</TD><TD align=right>183677</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Щукино</p></TD><TD align=right>111673</TD><TD align=right>111207</TD><TD align=right>110653</TD><TD align=right>109248</TD><TD align=right>110486</TD><TD align=right>112002</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Южное Тушино</p></TD><TD align=right>109708</TD><TD align=right>109684</TD><TD align=right>108872</TD><TD align=right>111492</TD><TD align=right>112628</TD><TD align=right>113999</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Арбат</p></TD><TD align=right>36308</TD><TD align=right>36107</TD><TD align=right>35796</TD><TD align=right>35962</TD><TD align=right>36246</TD><TD align=right>36942</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Басманное</p></TD><TD align=right>110897</TD><TD align=right>110329</TD><TD align=right>110928</TD><TD align=right>109051</TD><TD align=right>111289</TD><TD align=right>112320</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Замоскворечье</p></TD><TD align=right>59305</TD><TD align=right>58891</TD><TD align=right>58665</TD><TD align=right>54521</TD><TD align=right>55293</TD><TD align=right>56230</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Савелки</p></TD><TD align=right>34726</TD><TD align=right>34683</TD><TD align=right>34647</TD><TD align=right>36840</TD><TD align=right>36947</TD><TD align=right>37862</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Красносельское</p></TD><TD align=right>48769</TD><TD align=right>48509</TD><TD align=right>47865</TD><TD align=right>45691</TD><TD align=right>45851</TD><TD align=right>46340</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Мещанское</p></TD><TD align=right>61452</TD><TD align=right>61037</TD><TD align=right>60044</TD><TD align=right>56620</TD><TD align=right>55635</TD><TD align=right>55669</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Пресненское</p></TD><TD align=right>128314</TD><TD align=right>127694</TD><TD align=right>128784</TD><TD align=right>126433</TD><TD align=right>127506</TD><TD align=right>129041</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Таганское</p></TD><TD align=right>123532</TD><TD align=right>122898</TD><TD align=right>123382</TD><TD align=right>135106</TD><TD align=right>134759</TD><TD align=right>134535</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Тверское</p></TD><TD align=right>77947</TD><TD align=right>77360</TD><TD align=right>77091</TD><TD align=right>75593</TD><TD align=right>75735</TD><TD align=right>76889</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Хамовники</p></TD><TD align=right>109451</TD><TD align=right>108773</TD><TD align=right>108740</TD><TD align=right>105275</TD><TD align=right>105094</TD><TD align=right>108015</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Якиманка</p></TD><TD align=right>27911</TD><TD align=right>27754</TD><TD align=right>27791</TD><TD align=right>27481</TD><TD align=right>27022</TD><TD align=right>27416</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Выхино-Жулебино</p></TD><TD align=right>225493</TD><TD align=right>224783</TD><TD align=right>225043</TD><TD align=right>241783</TD><TD align=right>241326</TD><TD align=right>242376</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Капотня</p></TD><TD align=right>33714</TD><TD align=right>33709</TD><TD align=right>33761</TD><TD align=right>32717</TD><TD align=right>32161</TD><TD align=right>32128</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Кузьминки</p></TD><TD align=right>146208</TD><TD align=right>145812</TD><TD align=right>144246</TD><TD align=right>140670</TD><TD align=right>139880</TD><TD align=right>140738</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Лефортово</p></TD><TD align=right>95467</TD><TD align=right>95070</TD><TD align=right>95397</TD><TD align=right>106078</TD><TD align=right>109711</TD><TD align=right>113163</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Люблино</p></TD><TD align=right>172523</TD><TD align=right>172409</TD><TD align=right>173201</TD><TD align=right>181447</TD><TD align=right>184071</TD><TD align=right>185286</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Марьино</p></TD><TD align=right>254142</TD><TD align=right>253774</TD><TD align=right>252623</TD><TD align=right>271915</TD><TD align=right>272278</TD><TD align=right>273463</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Некрасовка</p></TD><TD align=right>83525</TD><TD align=right>84217</TD><TD align=right>87867</TD><TD align=right>108388</TD><TD align=right>112860</TD><TD align=right>115849</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Нижегородское</p></TD><TD align=right>45738</TD><TD align=right>45798</TD><TD align=right>45486</TD><TD align=right>49563</TD><TD align=right>50637</TD><TD align=right>52114</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Печатники</p></TD><TD align=right>86706</TD><TD align=right>86313</TD><TD align=right>85219</TD><TD align=right>90252</TD><TD align=right>89544</TD><TD align=right>90529</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Рязанское</p></TD><TD align=right>110073</TD><TD align=right>110184</TD><TD align=right>110533</TD><TD align=right>107857</TD><TD align=right>108657</TD><TD align=right>109884</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Текстильщики</p></TD><TD align=right>105398</TD><TD align=right>104921</TD><TD align=right>104955</TD><TD align=right>102752</TD><TD align=right>101550</TD><TD align=right>102030</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Южнопортовое</p></TD><TD align=right>74841</TD><TD align=right>74756</TD><TD align=right>74508</TD><TD align=right>72414</TD><TD align=right>73112</TD><TD align=right>73321</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Академическое</p></TD><TD align=right>110038</TD><TD align=right>110459</TD><TD align=right>110161</TD><TD align=right>113198</TD><TD align=right>114228</TD><TD align=right>114932</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Гагаринское</p></TD><TD align=right>81967</TD><TD align=right>81739</TD><TD align=right>81420</TD><TD align=right>80987</TD><TD align=right>80493</TD><TD align=right>80211</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Зюзино</p></TD><TD align=right>127301</TD><TD align=right>127696</TD><TD align=right>126776</TD><TD align=right>124527</TD><TD align=right>123288</TD><TD align=right>124371</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Коньково</p></TD><TD align=right>156473</TD><TD align=right>155862</TD><TD align=right>154850</TD><TD align=right>151790</TD><TD align=right>152544</TD><TD align=right>154105</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Котловка</p></TD><TD align=right>65992</TD><TD align=right>65724</TD><TD align=right>66619</TD><TD align=right>64976</TD><TD align=right>65708</TD><TD align=right>66304</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Ломоносовское</p></TD><TD align=right>88407</TD><TD align=right>88031</TD><TD align=right>88037</TD><TD align=right>87923</TD><TD align=right>87044</TD><TD align=right>86867</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Обручевское</p></TD><TD align=right>87458</TD><TD align=right>87986</TD><TD align=right>87015</TD><TD align=right>87447</TD><TD align=right>87258</TD><TD align=right>91308</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Северное Бутово</p></TD><TD align=right>95937</TD><TD align=right>95642</TD><TD align=right>96753</TD><TD align=right>97658</TD><TD align=right>97516</TD><TD align=right>97376</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Теплый Стан</p></TD><TD align=right>134562</TD><TD align=right>134073</TD><TD align=right>133368</TD><TD align=right>132338</TD><TD align=right>131899</TD><TD align=right>133400</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Черемушки</p></TD><TD align=right>110948</TD><TD align=right>110659</TD><TD align=right>110448</TD><TD align=right>107799</TD><TD align=right>107951</TD><TD align=right>108619</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Южное Бутово</p></TD><TD align=right>210783</TD><TD align=right>210472</TD><TD align=right>208355</TD><TD align=right>208783</TD><TD align=right>211116</TD><TD align=right>182030</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Ясенево</p></TD><TD align=right>178264</TD><TD align=right>178089</TD><TD align=right>179169</TD><TD align=right>175253</TD><TD align=right>176505</TD><TD align=right>176629</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Бирюлево Восточное</p></TD><TD align=right>155937</TD><TD align=right>155196</TD><TD align=right>152843</TD><TD align=right>157292</TD><TD align=right>156160</TD><TD align=right>155760</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Бирюлево Западное</p></TD><TD align=right>88796</TD><TD align=right>88573</TD><TD align=right>87787</TD><TD align=right>86038</TD><TD align=right>85308</TD><TD align=right>84910</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Братеево</p></TD><TD align=right>110185</TD><TD align=right>109732</TD><TD align=right>108582</TD><TD align=right>102572</TD><TD align=right>101271</TD><TD align=right>100282</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Даниловское</p></TD><TD align=right>95013</TD><TD align=right>95236</TD><TD align=right>94232</TD><TD align=right>105140</TD><TD align=right>104272</TD><TD align=right>104718</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Донское</p></TD><TD align=right>52037</TD><TD align=right>51941</TD><TD align=right>50460</TD><TD align=right>51967</TD><TD align=right>51291</TD><TD align=right>51202</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Зябликово</p></TD><TD align=right>133501</TD><TD align=right>132973</TD><TD align=right>133536</TD><TD align=right>133651</TD><TD align=right>133658</TD><TD align=right>133650</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Москворечье-Сабурово</p></TD><TD align=right>80934</TD><TD align=right>80983</TD><TD align=right>80631</TD><TD align=right>88095</TD><TD align=right>86969</TD><TD align=right>87843</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Нагатино-Садовники</p></TD><TD align=right>83607</TD><TD align=right>83462</TD><TD align=right>82172</TD><TD align=right>83658</TD><TD align=right>83390</TD><TD align=right>83794</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Нагатинский Затон</p></TD><TD align=right>121143</TD><TD align=right>120586</TD><TD align=right>120899</TD><TD align=right>120618</TD><TD align=right>120779</TD><TD align=right>121411</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Нагорное</p></TD><TD align=right>81794</TD><TD align=right>81668</TD><TD align=right>80724</TD><TD align=right>77938</TD><TD align=right>77073</TD><TD align=right>76015</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Орехово-Борисово Северное</p></TD><TD align=right>132307</TD><TD align=right>131577</TD><TD align=right>129768</TD><TD align=right>126387</TD><TD align=right>124886</TD><TD align=right>124071</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Орехово-Борисово Южное</p></TD><TD align=right>147835</TD><TD align=right>147429</TD><TD align=right>146385</TD><TD align=right>148059</TD><TD align=right>146959</TD><TD align=right>146515</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Царицыно</p></TD><TD align=right>129318</TD><TD align=right>128969</TD><TD align=right>128286</TD><TD align=right>120748</TD><TD align=right>119021</TD><TD align=right>117967</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Чертаново Северное</p></TD><TD align=right>114653</TD><TD align=right>114348</TD><TD align=right>112716</TD><TD align=right>110895</TD><TD align=right>109640</TD><TD align=right>109627</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Чертаново Центральное</p></TD><TD align=right>117308</TD><TD align=right>116913</TD><TD align=right>115194</TD><TD align=right>113208</TD><TD align=right>111983</TD><TD align=right>111581</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Чертаново Южное</p></TD><TD align=right>151899</TD><TD align=right>151601</TD><TD align=right>149210</TD><TD align=right>158304</TD><TD align=right>156092</TD><TD align=right>156178</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Старое Крюково</p></TD><TD align=right>31427</TD><TD align=right>31406</TD><TD align=right>31803</TD><TD align=right>33776</TD><TD align=right>37824</TD><TD align=right>41028</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>городской округ Троицк</p></TD><TD align=right>61284</TD><TD align=right>61097</TD><TD align=right>65991</TD><TD align=right>71089</TD><TD align=right>71615</TD><TD align=right>127378</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>городской округ Щербинка</p></TD><TD align=right>54008</TD><TD align=right>53974</TD><TD align=right>58050</TD><TD align=right>64132</TD><TD align=right>62771</TD><TD align=right>136323</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Внуковское</p></TD><TD align=right>12816</TD><TD align=right>14431</TD><TD align=right>16304</TD><TD align=right>63312</TD><TD align=right>64390</TD><TD align=right>128383</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Воскресенское</p></TD><TD align=right>10037</TD><TD align=right>10104</TD><TD align=right>10410</TD><TD align=right>20317</TD><TD align=right>19919</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Вороновское</p></TD><TD align=right>9634</TD><TD align=right>9641</TD><TD align=right>9848</TD><TD align=right>14592</TD><TD align=right>14565</TD><TD align=right>27777</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Десеновское</p></TD><TD align=right>23519</TD><TD align=right>23524</TD><TD align=right>24839</TD><TD align=right>45606</TD><TD align=right>47195</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Киевский</p></TD><TD align=right>14215</TD><TD align=right>13843</TD><TD align=right>14789</TD><TD align=right>12072</TD><TD align=right>12040</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Кленовское</p></TD><TD align=right>4238</TD><TD align=right>4246</TD><TD align=right>4449</TD><TD align=right>5609</TD><TD align=right>5747</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Кокошкино</p></TD><TD align=right>19323</TD><TD align=right>19026</TD><TD align=right>19610</TD><TD align=right>21818</TD><TD align=right>21756</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Краснопахорское</p></TD><TD align=right>5380</TD><TD align=right>5398</TD><TD align=right>5575</TD><TD align=right>12896</TD><TD align=right>13029</TD><TD align=right>36136</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Марушкинское</p></TD><TD align=right>7694</TD><TD align=right>7709</TD><TD align=right>8033</TD><TD align=right>15692</TD><TD align=right>16230</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Михайлово-Ярцевское</p></TD><TD align=right>5768</TD><TD align=right>5776</TD><TD align=right>5878</TD><TD align=right>9287</TD><TD align=right>9107</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Московский</p></TD><TD align=right>63010</TD><TD align=right>63007</TD><TD align=right>70901</TD><TD align=right>111718</TD><TD align=right>114244</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Мосрентген</p></TD><TD align=right>20967</TD><TD align=right>20571</TD><TD align=right>21331</TD><TD align=right>22029</TD><TD align=right>21590</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Новофедоровское</p></TD><TD align=right>7381</TD><TD align=right>7399</TD><TD align=right>9402</TD><TD align=right>21725</TD><TD align=right>23187</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Первомайское</p></TD><TD align=right>9215</TD><TD align=right>9224</TD><TD align=right>12051</TD><TD align=right>24782</TD><TD align=right>27069</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Роговское</p></TD><TD align=right>4096</TD><TD align=right>4107</TD><TD align=right>4401</TD><TD align=right>6478</TD><TD align=right>6688</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Рязановское</p></TD><TD align=right>21683</TD><TD align=right>21703</TD><TD align=right>22573</TD><TD align=right>32215</TD><TD align=right>33033</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Сосенское</p></TD><TD align=right>33096</TD><TD align=right>33418</TD><TD align=right>39866</TD><TD align=right>115545</TD><TD align=right>122303</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Филимонковское</p></TD><TD align=right>8017</TD><TD align=right>8041</TD><TD align=right>8458</TD><TD align=right>16237</TD><TD align=right>17811</TD><TD align=right>137565</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>поселение Щаповское</p></TD><TD align=right>9601</TD><TD align=right>9584</TD><TD align=right>10383</TD><TD align=right>13350</TD><TD align=right>13360</TD><TD align=right>&nbsp;</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Коммунарка</p></TD><TD align=right>&nbsp;</TD><TD align=right>&nbsp;</TD><TD align=right>&nbsp;</TD><TD align=right>&nbsp;</TD><TD align=right>&nbsp;</TD><TD align=right>180477</TD></TR>
+<TR><TD class=TblBok><p  class=bL0 align=left>Бекасово</p></TD><TD align=right>&nbsp;</TD><TD align=right>&nbsp;</TD><TD align=right>&nbsp;</TD><TD align=right>&nbsp;</TD><TD align=right>&nbsp;</TD><TD align=right>35814</TD></TR>
+</TABLE>
+<br>
+<!--  Файл:DBInet.cgi  Версия:1.1.1.12  -->
+</font> 
+</div>
+<p align=right style="border-top: 1 solid black"><small><i>Copyright © Федеральная служба государственной статистики, 2007</i></small></p>
+</BODY>
+</HTML>

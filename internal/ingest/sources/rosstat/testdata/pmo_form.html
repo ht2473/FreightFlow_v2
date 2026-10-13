@@ -1,0 +1,1744 @@
+<HTML>
+<HEAD>
+<META content="text/html; charset=windows-1251" http-equiv=Content-Type>
+<TITLE>Запрос к Базе данных показателей муниципальных образований</TITLE>
+<style type=text/css>@import url(/db/1CDBSS.css);</style>
+<script language="JavaScript">
+
+<!--
+function HelpWin()
+{      
+
+alert( 'Выберите в каждом списке хотя бы одно значение.\n'+
+'Для выбора ряда значений выберите первое, щелкнув '+
+'на нем кнопкой мыши, а затем  щелкните на последнем значении диапазона, '+
+'удерживая нажатой клавишу Shift. Будут выбраны все элементы, с первого по последний.\n '+
+'Удерживая клавишу Ctrl, щелкните кнопкой мыши на нужных элементах. '+
+'К выбранным ранее элементам будут добавлены новые.\n ' );
+} 
+
+function HelpWindow()
+{      
+
+alert( 'Ручное макетирование позволяет описать таблицу нужного вида, разместив показатели '+
+'и их атрибуты в ней по своему усмотрению.\n '+
+'Цифра в таблице описания определяет в какой части выходной таблицы разместить '+
+'соответствующий атрибут и задает порядок вложенности атрибутов.' );
+} 
+
+
+function chShowOn() {
+objItem = window.event.srcElement;
+objItem.style.color="#3965b5";
+}
+
+function chShowOut() {
+objItem = window.event.srcElement;
+objItem.style.color="black";
+}
+
+//-->
+</script>
+
+</HEAD><BODY onLoad="InitLoad();LoadImg()" >
+<p><img border="0" src="/dbscripts/munst/Banner.jpg" width="800" height="113"><br>
+<div STYLE="font-family:Arial; color:darkblue; font-size:12; font-weight:bold; position:absolute; top:60; left:120;">
+ФЕДЕРАЛЬНАЯ СЛУЖБА ГОСУДАРСТВЕННОЙ СТАТИСТИКИ</div>
+<img border="0" src="region.gif" width="559" height="17"><img border="0" src="/dbscripts/munst/Regionright.jpg" width="241" height="17"></p>
+<div align="left">
+
+<!--  Файл:DBInet.cgi  Версия:1.1.1.12  -->
+<SCRIPT LANGUAGE="JavaScript">
+<!--  
+function FormStrDsc(PriznLst, Postfix) {
+  var s="";
+  if (PriznLst.length>1){
+    for (i=0;i<PriznLst.length;i++){
+      var eltNm='a_'+GetPriznByName(PriznLst[i]);
+      var j=document.all[eltNm].selectedIndex;
+      var N=document.all[eltNm].options[j].text;
+      s+=GetPriznByName(PriznLst[i])+'_'+Postfix+':'+N+';';
+    }
+  }
+  else
+  {
+    s+=GetPriznByName(PriznLst[0])+'_'+Postfix+':'+1+';';
+  }
+  return s;
+}
+function CopyGeomDsc() {
+  var s1= FormStrDsc(ZagPrizn, 'z');
+  s1+= FormStrDsc(ShapPrizn, 's');
+  s1+= FormStrDsc(BokPrizn, 'b');
+  document.forms[1].QryGm.value=s1;
+}
+function TestPriznSequence(PriznLst) {
+  Error=false;
+  for (i=0;i<PriznLst.length;i++){
+    for (j=0;j<PriznLst.length;j++){
+      if (i!=j){
+      var eltNm='a_'+GetPriznByName(PriznLst[i]);
+      var k=document.all[eltNm].selectedIndex;
+      var N1=document.all[eltNm].options[k].text;
+          eltNm='a_'+GetPriznByName(PriznLst[j]);
+          k=document.all[eltNm].selectedIndex;
+      var N2=document.all[eltNm].options[k].text;
+      Error=(N1==N2);
+      if (Error) { break }
+    }}
+  }
+  return Error;
+}
+function TestSequence(){
+  var boErr1=false;
+  if (ZagPrizn.length>1){
+    boErr1=(TestPriznSequence(ZagPrizn));
+  }
+  if (!boErr1){
+  if (ShapPrizn.length>1){
+    boErr1=(TestPriznSequence(ShapPrizn));
+  }
+  }
+  if (!boErr1){
+  if (BokPrizn.length>1){
+    boErr1=(TestPriznSequence(BokPrizn));
+  }
+  }
+  if (boErr1){
+    alert('Ошибка в нумерации последовательности признаков.');
+    return false }
+  else {
+    return true }
+}
+function chPokazateli_z() {
+document.forms[1].Pokazateli_s.value="";
+document.forms[1].Pokazateli_b.value="";CountResultSz();};
+
+function chPokazateli_s() {
+document.forms[1].Pokazateli_z.value="";
+document.forms[1].Pokazateli_b.value="";CountResultSz();}; 
+
+function chPokazateli_b() {
+document.forms[1].Pokazateli_z.value="";
+document.forms[1].Pokazateli_s.value="";CountResultSz();}; 
+function chmunr_z() {
+document.forms[1].munr_s.value="";
+document.forms[1].munr_b.value="";CountResultSz();};
+
+function chmunr_s() {
+document.forms[1].munr_z.value="";
+document.forms[1].munr_b.value="";CountResultSz();}; 
+
+function chmunr_b() {
+document.forms[1].munr_z.value="";
+document.forms[1].munr_s.value="";CountResultSz();}; 
+function chtippos_z() {
+document.forms[1].tippos_s.value="";
+document.forms[1].tippos_b.value="";CountResultSz();};
+
+function chtippos_s() {
+document.forms[1].tippos_z.value="";
+document.forms[1].tippos_b.value="";CountResultSz();}; 
+
+function chtippos_b() {
+document.forms[1].tippos_z.value="";
+document.forms[1].tippos_s.value="";CountResultSz();}; 
+function choktmo_z() {
+document.forms[1].oktmo_s.value="";
+document.forms[1].oktmo_b.value="";CountResultSz();};
+
+function choktmo_s() {
+document.forms[1].oktmo_z.value="";
+document.forms[1].oktmo_b.value="";CountResultSz();}; 
+
+function choktmo_b() {
+document.forms[1].oktmo_z.value="";
+document.forms[1].oktmo_s.value="";CountResultSz();}; 
+function chmest_z() {
+document.forms[1].mest_s.value="";
+document.forms[1].mest_b.value="";CountResultSz();};
+
+function chmest_s() {
+document.forms[1].mest_z.value="";
+document.forms[1].mest_b.value="";CountResultSz();}; 
+
+function chmest_b() {
+document.forms[1].mest_z.value="";
+document.forms[1].mest_s.value="";CountResultSz();}; 
+function chgod_z() {
+document.forms[1].god_s.value="";
+document.forms[1].god_b.value="";CountResultSz();};
+
+function chgod_s() {
+document.forms[1].god_z.value="";
+document.forms[1].god_b.value="";CountResultSz();}; 
+
+function chgod_b() {
+document.forms[1].god_z.value="";
+document.forms[1].god_s.value="";CountResultSz();}; 
+function chperiod_z() {
+document.forms[1].period_s.value="";
+document.forms[1].period_b.value="";CountResultSz();};
+
+function chperiod_s() {
+document.forms[1].period_z.value="";
+document.forms[1].period_b.value="";CountResultSz();}; 
+
+function chperiod_b() {
+document.forms[1].period_z.value="";
+document.forms[1].period_s.value="";CountResultSz();}; 
+
+p_Pokazateli=new Array();
+p_munr=new Array();
+p_tippos=new Array();
+p_oktmo=new Array();
+p_mest=new Array();
+p_god=new Array();
+p_period=new Array();
+g_DataDscCount=7;
+function ExtractAttrCodes(){
+document.forms[1].Qry.value="";
+var s="Pokazateli:";
+var Fl=0;
+with (document.forms[0].Pokazateli) {
+for (var i=0;i<length;i++) {
+if (options[i].selected) {
+if (Fl==1){
+s+=","+p_Pokazateli[i];}
+else {
+s+=p_Pokazateli[i];}
+Fl=1;
+}}}
+s+=";munr:";
+Fl=0;
+with (document.forms[0].munr) {
+for (var i=0;i<length;i++) {
+if (options[i].selected) {
+if (Fl==1){
+s+=","+p_munr[i];}
+else {
+s+=p_munr[i];}
+Fl=1;
+}}}
+s+=";tippos:";
+Fl=0;
+with (document.forms[0].tippos) {
+for (var i=0;i<length;i++) {
+if (options[i].selected) {
+if (Fl==1){
+s+=","+p_tippos[i];}
+else {
+s+=p_tippos[i];}
+Fl=1;
+}}}
+s+=";oktmo:";
+Fl=0;
+with (document.forms[0].oktmo) {
+for (var i=0;i<length;i++) {
+if (options[i].selected) {
+if (Fl==1){
+s+=","+p_oktmo[i];}
+else {
+s+=p_oktmo[i];}
+Fl=1;
+}}}
+s+=";mest:";
+Fl=0;
+with (document.forms[0].mest) {
+for (var i=0;i<length;i++) {
+if (options[i].selected) {
+if (Fl==1){
+s+=","+p_mest[i];}
+else {
+s+=p_mest[i];}
+Fl=1;
+}}}
+s+=";god:";
+Fl=0;
+with (document.forms[0].god) {
+for (var i=0;i<length;i++) {
+if (options[i].selected) {
+if (Fl==1){
+s+=","+p_god[i];}
+else {
+s+=p_god[i];}
+Fl=1;
+}}}
+s+=";period:";
+Fl=0;
+with (document.forms[0].period) {
+for (var i=0;i<length;i++) {
+if (options[i].selected) {
+if (Fl==1){
+s+=","+p_period[i];}
+else {
+s+=p_period[i];}
+Fl=1;
+}}}
+s+=";"
+document.forms[1].Qry.value+=s;
+}
+function CountPriznLocate(){
+var iPD=0;
+with (document.forms[1]) {
+((_Pokazateli[0].checked)||(_Pokazateli[1].checked)||(_Pokazateli[2].checked))?iPD++:{};
+((_munr[0].checked)||(_munr[1].checked)||(_munr[2].checked))?iPD++:{};
+((_tippos[0].checked)||(_tippos[1].checked)||(_tippos[2].checked))?iPD++:{};
+((_oktmo[0].checked)||(_oktmo[1].checked)||(_oktmo[2].checked))?iPD++:{};
+((_mest[0].checked)||(_mest[1].checked)||(_mest[2].checked))?iPD++:{};
+((_god[0].checked)||(_god[1].checked)||(_god[2].checked))?iPD++:{};
+((_period[0].checked)||(_period[1].checked)||(_period[2].checked))?iPD++:{};
+return(iPD);
+}
+}
+function ChkPiznShapBok(){
+var boOk = true;
+with (document.forms[1]) {
+boOk=(
+(_Pokazateli[0].checked)||
+(_munr[0].checked)||
+(_tippos[0].checked)||
+(_oktmo[0].checked)||
+(_mest[0].checked)||
+(_god[0].checked)||
+(_period[0].checked))&&
+((_Pokazateli[1].checked)||
+(_munr[1].checked)||
+(_tippos[1].checked)||
+(_oktmo[1].checked)||
+(_mest[1].checked)||
+(_god[1].checked)||
+(_period[1].checked))&&
+((_Pokazateli[2].checked)||
+(_munr[2].checked)||
+(_tippos[2].checked)||
+(_oktmo[2].checked)||
+(_mest[2].checked)||
+(_god[2].checked)||
+(_period[2].checked));
+return(boOk);
+}
+}
+function CheckTblLayout()
+{
+var boOk=true;
+var iPD=CountPriznLocate();
+if (iPD==0) {}
+else {
+if (iPD==7) {
+boOk=ChkPiznShapBok();
+if (boOk){}
+else {
+alert( 'Необходимо чтобы в заголовке, в шапке и в боковике таблицы было выбрано не менее 1-го признака.');
+}
+}
+else {
+alert( 'При описании геометрии необходимо указать\n размещение всех признаков в частях таблицы.');
+boOk=false;
+}
+}
+return( boOk )
+}
+
+function ShowSelectedAmount(){
+with (document){
+document.all["Pokazateli_slct"].innerText=CountSelected(forms[0].elements["Pokazateli"] );
+document.all["munr_slct"].innerText=CountSelected(forms[0].elements["munr"] );
+document.all["tippos_slct"].innerText=CountSelected(forms[0].elements["tippos"] );
+document.all["oktmo_slct"].innerText=CountSelected(forms[0].elements["oktmo"] );
+document.all["mest_slct"].innerText=CountSelected(forms[0].elements["mest"] );
+document.all["god_slct"].innerText=CountSelected(forms[0].elements["god"] );
+document.all["period_slct"].innerText=CountSelected(forms[0].elements["period"] );
+}
+}
+function CheckAttrSelectionNM(){
+with (document.forms[0]) {
+boExit=(Pokazateli.selectedIndex==-1)&&
+(munr.selectedIndex==-1)&&
+(tippos.selectedIndex==-1)&&
+(oktmo.selectedIndex==-1)&&
+(mest.selectedIndex==-1)&&
+(god.selectedIndex==-1)&&
+(period.selectedIndex==-1);
+if (boExit){
+boOk=false;
+return(false);
+}
+else {
+boOk=(Pokazateli.selectedIndex>-1)&&
+(munr.selectedIndex>-1)&&
+(tippos.selectedIndex>-1)&&
+(oktmo.selectedIndex>-1)&&
+(mest.selectedIndex>-1)&&
+(god.selectedIndex>-1)&&
+(period.selectedIndex>-1);
+if (!boOk){
+return(boOk);
+}
+}
+}
+return( boOk );
+}
+function CheckAttrSelection(){
+with (document.forms[0]) {
+boExit=(Pokazateli.selectedIndex==-1)&&
+(munr.selectedIndex==-1)&&
+(tippos.selectedIndex==-1)&&
+(oktmo.selectedIndex==-1)&&
+(mest.selectedIndex==-1)&&
+(god.selectedIndex==-1)&&
+(period.selectedIndex==-1);
+if (boExit){
+alert( "Нет выбранных значений признаков показателя.");
+boOk=false;
+return(false);
+}
+else {
+boOk=(Pokazateli.selectedIndex>-1)&&
+(munr.selectedIndex>-1)&&
+(tippos.selectedIndex>-1)&&
+(oktmo.selectedIndex>-1)&&
+(mest.selectedIndex>-1)&&
+(god.selectedIndex>-1)&&
+(period.selectedIndex>-1);
+if (!boOk){
+alert( "Необходимо выбрать значения у всех признаков.");
+return(boOk);
+}
+}
+}
+return( boOk );
+}
+function PriznInfoItem( P, PN, No ){
+this.PriznName=PN;
+this.Prizn=P;
+this.No=No;
+this.TPart="";
+}
+function CreatePriznInfo(){
+PriznInfo=new Array();
+PriznInfo[0]=new PriznInfoItem( "Pokazateli","Показатель",0);
+PriznInfo[1]=new PriznInfoItem( "munr","Вхождение муниципального образования",1);
+PriznInfo[2]=new PriznInfoItem( "tippos","Тип поселения",2);
+PriznInfo[3]=new PriznInfoItem( "oktmo","Муниципальное образование",3);
+PriznInfo[4]=new PriznInfoItem( "mest","Население",4);
+PriznInfo[5]=new PriznInfoItem( "god","Годы",5);
+PriznInfo[6]=new PriznInfoItem( "period","Периоды",6);
+ZagPrizn=new Array();
+ShapPrizn=new Array();
+BokPrizn=new Array();
+}
+
+function TestAllPriznInclude(){
+  with (document.forms[1]){
+    boOk=
+       ((_Pokazateli[0].checked)||(_Pokazateli[1].checked)||(_Pokazateli[2].checked))
+          &&
+       ((_munr[0].checked)||(_munr[1].checked)||(_munr[2].checked))
+          &&
+       ((_tippos[0].checked)||(_tippos[1].checked)||(_tippos[2].checked))
+          &&
+       ((_oktmo[0].checked)||(_oktmo[1].checked)||(_oktmo[2].checked))
+          &&
+       ((_mest[0].checked)||(_mest[1].checked)||(_mest[2].checked))
+          &&
+       ((_god[0].checked)||(_god[1].checked)||(_god[2].checked))
+          &&
+       ((_period[0].checked)||(_period[1].checked)||(_period[2].checked))
+          ;
+  }
+  if (!boOk) {alert('Не все атрибуты включены в описание макета таблицы.');}
+  return( boOk );
+}
+function TestShapBok(){
+  if ((document.forms[1].Shap.options.length==0)||
+      (document.forms[1].Bok.options.length==0))
+  {
+    alert('Необходимо чтобы в шапке и в боковике было выбрано хотя бы по одному реквизиту.');
+    return( false );
+  }
+  else
+    return( true );
+}
+function GetPriznName( Prizn ){
+  for (ii=0; ii<PriznInfo.length; ii++ ){
+    if (PriznInfo[ii].Prizn==Prizn){ 
+      return(PriznInfo[ii].PriznName);
+      break;
+    }
+  }
+}
+function GetPriznByName( PriznNm ){
+  for (ii=0; ii<PriznInfo.length; ii++ ){
+    if (PriznInfo[ii].PriznName==PriznNm){ 
+      return(PriznInfo[ii].Prizn);
+      break;
+    }
+  }
+}
+function WritePriznTable( PriznList, TPart ){
+  var s="<TABLE width=300>";
+  for (i=0;i<PriznList.length;i++){
+    var PriznName=PriznList[i];
+    var Prizn=GetPriznByName( PriznName );
+    if (PriznList.length<2){
+      s+='<TR><TD width=200>'+PriznList[i]+'</TD><TD></TD></TR>';
+    } else {
+      s+='<TR><TD width=200>'+PriznList[i]+'</TD><TD> <SELECT NAME=a_'+Prizn+' SIZE=1 CLASS=Select>';
+      for (j=0;j<PriznList.length;j++){
+        if (j==i){
+          s+='<OPTION SELECTED>'+(j+1);
+        } else {
+          s+='<OPTION>'+(j+1);
+        }  
+      }  
+      s+='</SELECT></TD></TR>';
+    }
+  }
+  s+='</TABLE>';
+  document.all[ TPart ].innerHTML=s;
+}  
+
+function AddPriznInList( PriznName, PriznList, TPart ){
+  PriznList.length=PriznList.length+1;
+  PriznList[PriznList.length-1]=PriznName;
+  for (ii=0;ii<PriznInfo.length;ii++){
+    if (PriznInfo[ii].PriznName==PriznName){
+      PriznInfo[ii].TPart=TPart;
+    }
+  }
+  WritePriznTable( PriznList, TPart );
+ }
+function AddPrizn( Prizn, TblPartNo ){
+PriznName=GetPriznName( Prizn );
+switch( TblPartNo ){ 
+case 0:
+  AddPriznInList( PriznName, ZagPrizn, "Zag" );
+  break;
+case 1:
+  AddPriznInList( PriznName, ShapPrizn, "Shap" );
+  break;
+case 2:
+  AddPriznInList( PriznName, BokPrizn, "Bok" );
+}
+}
+ 
+function DelPriznInList( PriznName, PriznList, TPart ){
+  PriznArr=new Array();
+  j=0;
+  for (i=0;i<PriznList.length;i++){
+    if (PriznList[i] != PriznName){
+      PriznArr[j]=PriznList[i];
+      j++;
+    }
+  }
+  PriznList.length=PriznArr.length;
+  for (i=0;i<PriznArr.length;i++){
+    PriznList[i]=PriznArr[i];
+  }
+  WritePriznTable( PriznList, TPart );
+}  
+function DelPrizn(Prizn, TblPartNo){
+PriznName=GetPriznName( Prizn );
+switch( TblPartNo ){ 
+case 0:
+  DelPriznInList( PriznName, ZagPrizn, "Zag" );
+  break;
+case 1:
+  DelPriznInList( PriznName, ShapPrizn, "Shap" );
+  break;
+case 2:
+  DelPriznInList( PriznName, BokPrizn, "Bok" );
+}
+}
+function PriznInLstBx( Prizn, TblPartNo ){
+switch( TblPartNo ){ 
+case 0:
+  PriznList= ZagPrizn;
+  break;
+case 1:
+  PriznList= ShapPrizn;
+  break;
+case 2:
+  PriznList= BokPrizn;
+}
+boFind=false;
+  for (i=0;i<PriznList.length;i++){
+    if (PriznList[i] == PriznName){
+      boFind=true;
+    }
+  }
+return( boFind );
+}
+function UpdateChk( Prizn, TblPartNo ){
+PriznName=GetPriznName( Prizn );
+if (document.all["_"+Prizn][TblPartNo].checked){
+  if (!PriznInLstBx( Prizn, TblPartNo )){
+    AddPrizn( Prizn, TblPartNo );
+  }
+}
+for (j=0;j<3;j++){
+  if (j!=TblPartNo){
+  if (PriznInLstBx( Prizn, j )){
+    DelPrizn( Prizn, j );
+  }
+}
+}
+}
+rdLayoutType="";
+newWindow=null;
+function ClickSubmit(sBtnName){
+document.forms[1].elements[sBtnName].click();
+}
+function LoadImg() {
+ImgLoadOk=false;
+if (document.images) {
+ActImg=newImg("cbsd/GoTbl.gif");
+ActImg=newImg("cbsd/GoTblA.gif");
+ImgLoadOk=true;
+}
+}
+function newImg(arg) {
+if (document.images) {
+Res = new Image();
+Res.src = arg;
+return Res;
+}
+}
+function chImg() {
+if (document.images && ImgLoadOk) {
+document[chImg.arguments[0]].src=chImg.arguments[1];
+}
+}
+function ClearAttrSelection(){
+with (document.forms[0]) {
+for (var i=0;i< elements.length;i++) {
+elements[i].options[0].selected=true;
+if (elements[i].options.length>1){
+for (var j=0;j<elements[i].options.length;j++) {
+elements[i].options[j].selected=false;
+}
+}
+}
+}
+}
+function ClearLayoutSelection(){
+with (document.forms[1]) {
+for (var i=0;i< elements.length;i++) {
+  if (( elements[i].name.substring( 0,1 )=='_')&&(elements[i].type=="radio")) {
+    elements[i].checked=false;
+  }
+}
+}
+}
+function MnlLayout(){
+document.all["form2"].style.visibility="visible";
+MakeIndicAttrPool();
+if (rdLayoutType!="Mnl")
+   InvertReadOnlyLayout();
+rdLayoutType="Mnl";
+document.location.href="#Bottom";
+document.all("Manual").classname="Thick";
+document.all("Automatic").classname="Thin";
+}
+function StandartLayout(){
+ClearLayoutSelection();
+with (document.forms[1]) {
+iSL=0;
+oldNm="";
+for (var i=1;i< elements.length;i++) {
+  if (( elements[i].name.substring( 0,1 )=='_')&&(elements[i].type=="radio")) {
+    if (oldName!=elements[i].name){j=0} else {j++}
+    if ((elements[i].name=='_Pokazateli')&&(j=1)){elements[i].checked=true}
+    if ((elements[i].name!='_Pokazateli')&&(j=2)){elements[i].checked=true}
+    oldName=elements[i].name;
+  }
+}
+}
+CountResultSz();
+}
+function CheckQryComplete(){
+boOk=CheckAttrSelection();
+if (boOk) {
+boOk=CheckTblLayout();
+if (boOk){
+boOk=TestSequence();
+if (boOk){
+InitCodesArray();
+ExtractAttrCodes();CopyGeomDsc();
+}
+}
+}
+return(boOk);
+}
+function AttrInfo( name, range, index ){
+this.name=name;
+this.range=range;
+this.sortindex=index;
+this.layout="";
+}
+function CountSelected( SelectElement ){
+jCS=0;
+for (iCS=0;iCS<SelectElement.length;iCS++) {
+if (SelectElement.options[iCS].selected==true) {
+jCS++;
+}
+}
+return(jCS)
+}
+function CopyAloneToZag(){
+ZagAttrLen=0;
+if (CountAloneVal()>AttrPool.length-2){
+ZagAttrLen=AttrPool.length-2;
+}
+else{
+ZagAttrLen=CountAloneVal();
+}
+jCAZ=0;
+iLastCopied=-1;
+for (ii=0;ii<AttrPool.length;ii++){
+if ((AttrPool[ii].range==1)&&(ZagAttrLen>jCAZ)){
+ZagAttr[jCAZ]=new AttrInfo( AttrPool[ii].name, AttrPool[ii].range,
+AttrPool[ii].sortindex);
+ZagAttr[jCAZ].layout="z";
+AttrPool[ii].layout="z";
+iLastCopied=ii;
+jCAZ++;
+if (jCAZ==AttrPool.length-2){
+break;
+}
+}
+}
+if ((AttrPool[AttrPool.length-1].layout=="")&&
+(AttrPool[AttrPool.length-1].range==1)&&
+(ZagAttr.length>0)&&(iLastCopied>=0))
+{
+AttrPool[iLastCopied].layout="";
+
+ZagAttr[ZagAttr.length-1].name=AttrPool[AttrPool.length-1].name;
+ZagAttr[ZagAttr.length-1].range=AttrPool[AttrPool.length-1].range;
+ZagAttr[ZagAttr.length-1].sortindex=AttrPool[AttrPool.length-1].sortindex;
+AttrPool[AttrPool.length-1].layout="z";
+}
+}
+
+
+function CountTblPartSz(sPart){
+Sz=1;
+rSz=0;
+for (iCTA=0;iCTA<AttrPool.length;iCTA++){
+if (AttrPool[iCTA].layout==sPart){
+Sz*=AttrPool[iCTA].range;
+rSz=1;
+}
+}
+if (rSz==1){
+rSz=Sz;
+}
+else{
+rSz=0;
+}
+return(rSz);
+}
+function CountTblPartAttr(sPart){
+iA=0;
+for (iCTA=0;iCTA<AttrPool.length;iCTA++){
+if (AttrPool[iCTA].layout==sPart){
+iA++
+}
+}
+return(iA);
+}
+function AttemptCopyKNPToShap(){
+
+for (i=0;i<AttrPool.length;i++){
+  if ((AttrPool[i].name=="knp")&&(AttrPool[i].range<=10)&&(AttrPool[i].layout=="")){
+ShapAttr[ShapAttr.length]=new AttrInfo( AttrPool[i].name, AttrPool[i].range,
+AttrPool[i].sortindex);
+AttrPool[i].layout="s";
+ShapAttr[ShapAttr.length-1].layout="s";
+}
+}
+}
+function AttemptAddToShap(){
+i=0;
+for (i=0;i<AttrPool.length;i++){
+if ((AttrPool[i].layout=="")&&(AttrPool[i].range<10)){
+
+if (CountTblPartSz("s")==0){
+ShapAttr[ShapAttr.length]=new AttrInfo( AttrPool[i].name, AttrPool[i].range,
+AttrPool[i].sortindex);
+AttrPool[i].layout="s";
+ShapAttr[ShapAttr.length-1].layout="s";
+
+break;
+}
+else
+{
+if ((CountTblPartSz("s")*AttrPool[i].range) <=10 ){
+ShapAttr[ShapAttr.length]=new AttrInfo( AttrPool[i].name, AttrPool[i].range,
+AttrPool[i].sortindex);
+AttrPool[i].layout="s";
+ShapAttr[ShapAttr.length-1].layout="s";
+break;
+}
+}
+}
+}
+}
+function CopyYearsToShap(){
+  for (i=0;i<AttrPool.length;i++){
+    if ( AttrPool[i].name == 'god'){
+      ShapAttr[ShapAttr.length]= new AttrInfo( AttrPool[i].name, AttrPool[i].range, AttrPool[i].sortindex);
+      AttrPool[i].layout='s';
+      ShapAttr[ShapAttr.length-1].layout='s';
+    }
+  }
+}
+function FormShap(){
+ShapAttr=new Array();
+CopyYearsToShap();
+AttemptCopyKNPToShap();
+iCikle=0;
+boShapFormed=new Boolean(false);
+while (boShapFormed!=true){
+if (CountTblPartSz("s")>=10){
+break;
+}
+if (CountTblPartAttr("")==1){
+break;
+}
+AttemptAddToShap();
+
+iCikle++;
+if (iCikle==AttrPool.length){ break }
+}
+}
+function CountAloneVal(){
+jCA=0;
+for (iCA=0;iCA<AttrPool.length;iCA++) {
+if (AttrPool[iCA].range==1) {
+jCA++;
+}
+}
+return(jCA);
+}
+function MakeIndicAttrPool(){
+j=0;
+with (document.forms[0]) {
+for (var i=0;i<elements.length;i++) {
+  if (( elements[i].type != "checkbox" )&&( elements[i].name != "footnotes" )) {
+    j++;
+  }
+}
+}
+AttrPool=new Array( j );
+j=0;
+with (document.forms[0]) {
+for (var i=0;i<elements.length;i++) {
+  if (( elements[i].type != "checkbox" )&&( elements[i].name != "footnotes" )) {
+    AttrPool[j]=new AttrInfo( elements[i].name, CountSelected(elements[i]),
+j);
+    j++;
+  }
+}
+}
+}
+function GetAttrLayout(sAttrName){
+if (document.all['_'+sAttrName][0].checked){ sLayout='z'}
+if (document.all['_'+sAttrName][1].checked){ sLayout='s'}
+if (document.all['_'+sAttrName][2].checked){ sLayout='b'}
+return(sLayout);
+}
+function RefreshAttrPoolData(){
+if (AttrPool.length==0) {
+  MakeIndicAttrPool();
+  j=0;
+  with (document.forms[0]) {
+    for (var i=0;i<elements.length;i++) {
+      if (( elements[i].type != "checkbox" )&&( elements[i].name != "footnotes" )) {
+        AttrPool[j].layout=GetAttrLayout(AttrPool[j].name);
+        j++;
+      }
+    }
+  }
+}
+else {
+  j=0;
+  with (document.forms[0]) {
+    for (var i=0;i<elements.length;i++) {
+      if (( elements[i].type != "checkbox" )&&( elements[i].name != "footnotes" )) {
+        AttrPool[j].layout=GetAttrLayout(AttrPool[j].name);
+        AttrPool[j].range=CountSelected(elements[i]);
+        j++;
+      }
+    }
+  }
+}
+}
+function CountResultSz(){
+RefreshAttrPoolData();
+nTables=1;
+nRows=1
+nCols=1;
+for (i=0;i<AttrPool.length;i++){
+if (AttrPool[i].layout=="z"){
+nTables=nTables*AttrPool[i].range;
+}
+else
+if (AttrPool[i].layout=="s"){
+nCols=nCols*AttrPool[i].range;
+}
+else
+if (AttrPool[i].layout=="z"){
+nTables=nTables*AttrPool[i].range;
+}
+else
+if (AttrPool[i].layout=="b"){
+nRows=nRows*AttrPool[i].range;
+}
+}
+document.forms[1].NVal.value=nTables*nRows*nCols;
+document.forms[1].NTbl.value=nTables;
+document.forms[1].NCol.value=nCols;
+document.forms[1].NRow.value=nRows;
+
+}
+function ShowZagLayout(){
+for (iz=0;iz<ZagAttr.length;iz++){
+  document.all['_'+ZagAttr[iz].name][0].checked=true;
+  UpdateChk(ZagAttr[iz].name,0);
+}
+}
+function ShowShapLayout(){
+for (is=0;is<ShapAttr.length;is++){
+  document.all['_'+ShapAttr[is].name][1].checked=true;
+  UpdateChk(ShapAttr[is].name,1);
+}
+}
+function ShowBokLayout(){
+for (ib=0;ib<AttrPool.length;ib++){
+  if (AttrPool[ib].layout==""){
+    document.all['_'+AttrPool[ib].name][2].checked=true;
+    UpdateChk(AttrPool[ib].name,2);
+  }
+}
+}
+
+
+function InvertReadOnlyLayout(){
+}
+
+function ShowOptimized(){
+ClearLayoutSelection();
+ShowZagLayout();
+ShowShapLayout();
+ShowBokLayout();
+}
+function TestShap(){
+if ((CountTblPartAttr("s")==0)&&(CountTblPartAttr("z")>0 )){
+ShapAttr[0]=new AttrInfo(ZagAttr[0].name,ZagAttr[0].range,
+                     ZagAttr[0].sortindex);
+ShapAttr[0].layout="s";
+for (ii=0;ii<AttrPool.length;ii++){
+  if (AttrPool[ii].name==ShapAttr[0].name) {
+    AttrPool[ii].layout="s";
+}}
+ZagAttr.splice(0,1)
+}}
+function OptimizeLayout(){
+if (rdLayoutType!="Au"){InvertReadOnlyLayout()}
+rdLayoutType="Au";document.forms[1].rdLayoutType.value="Au"
+if (CheckAttrSelectionNM()==true){
+ZagAttr=new Array();
+MakeIndicAttrPool();
+if (CountAloneVal()>0){
+CopyAloneToZag()
+}
+FormShap();
+TestShap();
+ShowOptimized();
+CountResultSz();
+}
+else
+{
+return( false );
+}
+}
+function InitLoad(){
+document.all["form2"].style.visibility="hidden";
+CreatePriznInfo();
+ShowSelectedAmount();
+OptimizeLayout();
+InitCodesArray();
+document.all("Manual").classname="Thin";
+document.all("Automatic").classname="Thick";
+}
+function ChangeLayout(){
+ShowSelectedAmount();
+if (rdLayoutType=="Mnl"){
+CountResultSz();
+}
+else{
+if (CheckAttrSelectionNM()==true){
+if (rdLayoutType=="Au"){
+OptimizeLayout();
+}
+else{
+StandartLayout();
+}
+}
+
+}
+}
+function ClearQryProc() {
+ClearAttrSelection();
+ClearLayoutSelection();
+InitLoad();
+}
+function GetRusChar( code ){
+  switch( code ){
+    case 65:
+      rChar="ф";
+      break;
+    case 66:
+      rChar="и";
+      break;
+    case 67:      // c
+      rChar="с";
+      break;
+    case 68:      // d
+      rChar="в";
+      break;
+    case 69:      // e
+      rChar="у";
+      break;
+    case 70:      // f
+      rChar="а";
+      break;
+    case 71:      // g
+      rChar="п";
+      break;
+    case 72:      // h
+      rChar="р";
+      break;
+    case 73:      // i
+      rChar="ш";
+      break;
+    case 74:      //  j
+      rChar="о";
+      break;
+    case 75:      //  k
+      rChar="л";
+      break;
+    case 76:      //  l
+      rChar="д";
+      break;
+    case 77:
+      rChar="ь";  //  m
+      break;
+    case 78:
+      rChar="т";  //  n
+      break;
+    case 79:
+      rChar="щ";  //  o
+      break;
+    case 80:
+      rChar="з";  //  p
+      break;
+    case 81:
+      rChar="й";  //  q
+      break;
+    case 82:
+      rChar="к";   // r
+      break;
+    case 83:
+      rChar="ы";   // s
+      break;
+    case 84:
+      rChar="е";   // t
+      break;
+    case 85:
+      rChar="г";   // u
+      break;
+    case 86:
+      rChar="м";   // v
+      break;
+    case 87:
+      rChar="ц";   // w
+      break;
+    case 88:
+      rChar="ч";   // x
+      break;
+    case 89:
+      rChar="н";   // y
+      break;
+    case 90:
+      rChar="я";   // z
+      break;
+    case 188:
+      rChar="б";
+      break;
+    case 190:
+      rChar="ю";
+      break;
+    case 186:
+      rChar="ж";
+      break;
+    case 222:
+      rChar="э";
+      break;
+    case 219:
+      rChar="х";
+      break;
+    case 221:
+      rChar="ъ";
+      break;
+    default:
+      rChar="|";
+  }
+  return rChar;
+}
+function UpDateKeyInList( Element, Str ) {
+  if (( Element.type=="select-one" )|| ( Element.type=="select-multiple" )) {
+    if ((Element.options[Element.selectedIndex].text.substring( 0,1 )!= Str )&&
+        (Element.options[Element.selectedIndex].text.substring( 0,1 )!= Str.toUpperCase()))
+    {
+      for ( i=0; i<Element.length; i++ ) {
+        if ((Element.options[i].text.substring( 0,1 )== Str )||
+            (Element.options[i].text.substring( 0,1 )== Str.toUpperCase()))
+        {
+          Element.selectedIndex=i;
+          break;
+        }
+      }
+    }
+  }
+}
+function keyDownEvent(){
+  Str=GetRusChar( window.event.keyCode );
+  UpDateKeyInList( window.event.srcElement, Str );
+}
+function InitCodesArray() {
+p_Pokazateli[0]="8112027";
+p_munr[0]="45000000";
+p_tippos[0]="3";
+p_oktmo[0]="45301000";
+p_oktmo[1]="45000000";
+p_oktmo[2]="45302000";
+p_oktmo[3]="45303000";
+p_oktmo[4]="45304000";
+p_oktmo[5]="45305000";
+p_oktmo[6]="45306000";
+p_oktmo[7]="45307000";
+p_oktmo[8]="45308000";
+p_oktmo[9]="45309000";
+p_oktmo[10]="45310000";
+p_oktmo[11]="45311000";
+p_oktmo[12]="45312000";
+p_oktmo[13]="45313000";
+p_oktmo[14]="45314000";
+p_oktmo[15]="45315000";
+p_oktmo[16]="45316000";
+p_oktmo[17]="45317000";
+p_oktmo[18]="45318000";
+p_oktmo[19]="45319000";
+p_oktmo[20]="45320000";
+p_oktmo[21]="45321000";
+p_oktmo[22]="45322000";
+p_oktmo[23]="45323000";
+p_oktmo[24]="45324000";
+p_oktmo[25]="45325000";
+p_oktmo[26]="45326000";
+p_oktmo[27]="45327000";
+p_oktmo[28]="45328000";
+p_oktmo[29]="45329000";
+p_oktmo[30]="45330000";
+p_oktmo[31]="45331000";
+p_oktmo[32]="45332000";
+p_oktmo[33]="45333000";
+p_oktmo[34]="45334000";
+p_oktmo[35]="45335000";
+p_oktmo[36]="45336000";
+p_oktmo[37]="45337000";
+p_oktmo[38]="45338000";
+p_oktmo[39]="45339000";
+p_oktmo[40]="45340000";
+p_oktmo[41]="45341000";
+p_oktmo[42]="45342000";
+p_oktmo[43]="45343000";
+p_oktmo[44]="45344000";
+p_oktmo[45]="45345000";
+p_oktmo[46]="45346000";
+p_oktmo[47]="45347000";
+p_oktmo[48]="45348000";
+p_oktmo[49]="45349000";
+p_oktmo[50]="45350000";
+p_oktmo[51]="45351000";
+p_oktmo[52]="45352000";
+p_oktmo[53]="45353000";
+p_oktmo[54]="45354000";
+p_oktmo[55]="45355000";
+p_oktmo[56]="45356000";
+p_oktmo[57]="45357000";
+p_oktmo[58]="45358000";
+p_oktmo[59]="45359000";
+p_oktmo[60]="45360000";
+p_oktmo[61]="45361000";
+p_oktmo[62]="45362000";
+p_oktmo[63]="45363000";
+p_oktmo[64]="45364000";
+p_oktmo[65]="45365000";
+p_oktmo[66]="45366000";
+p_oktmo[67]="45367000";
+p_oktmo[68]="45368000";
+p_oktmo[69]="45369000";
+p_oktmo[70]="45370000";
+p_oktmo[71]="45371000";
+p_oktmo[72]="45372000";
+p_oktmo[73]="45373000";
+p_oktmo[74]="45374000";
+p_oktmo[75]="45375000";
+p_oktmo[76]="45376000";
+p_oktmo[77]="45377000";
+p_oktmo[78]="45378000";
+p_oktmo[79]="45379000";
+p_oktmo[80]="45380000";
+p_oktmo[81]="45381000";
+p_oktmo[82]="45382000";
+p_oktmo[83]="45383000";
+p_oktmo[84]="45384000";
+p_oktmo[85]="45385000";
+p_oktmo[86]="45386000";
+p_oktmo[87]="45387000";
+p_oktmo[88]="45388000";
+p_oktmo[89]="45389000";
+p_oktmo[90]="45390000";
+p_oktmo[91]="45391000";
+p_oktmo[92]="45392000";
+p_oktmo[93]="45393000";
+p_oktmo[94]="45394000";
+p_oktmo[95]="45395000";
+p_oktmo[96]="45396000";
+p_oktmo[97]="45397000";
+p_oktmo[98]="45398000";
+p_oktmo[99]="45901000";
+p_oktmo[100]="45902000";
+p_oktmo[101]="45903000";
+p_oktmo[102]="45904000";
+p_oktmo[103]="45905000";
+p_oktmo[104]="45906000";
+p_oktmo[105]="45907000";
+p_oktmo[106]="45908000";
+p_oktmo[107]="45909000";
+p_oktmo[108]="45910000";
+p_oktmo[109]="45911000";
+p_oktmo[110]="45912000";
+p_oktmo[111]="45913000";
+p_oktmo[112]="45914000";
+p_oktmo[113]="45915000";
+p_oktmo[114]="45916000";
+p_oktmo[115]="45917000";
+p_oktmo[116]="45918000";
+p_oktmo[117]="45919000";
+p_oktmo[118]="45920000";
+p_oktmo[119]="45921000";
+p_oktmo[120]="45922000";
+p_oktmo[121]="45923000";
+p_oktmo[122]="45924000";
+p_oktmo[123]="45925000";
+p_oktmo[124]="45926000";
+p_oktmo[125]="45927000";
+p_oktmo[126]="45931000";
+p_oktmo[127]="45932000";
+p_oktmo[128]="45941000";
+p_oktmo[129]="45942000";
+p_oktmo[130]="45943000";
+p_oktmo[131]="45944000";
+p_oktmo[132]="45945000";
+p_oktmo[133]="45946000";
+p_oktmo[134]="45947000";
+p_oktmo[135]="45948000";
+p_oktmo[136]="45949000";
+p_oktmo[137]="45951000";
+p_oktmo[138]="45952000";
+p_oktmo[139]="45953000";
+p_oktmo[140]="45954000";
+p_oktmo[141]="45955000";
+p_oktmo[142]="45956000";
+p_oktmo[143]="45957000";
+p_oktmo[144]="45958000";
+p_oktmo[145]="45959000";
+p_oktmo[146]="45961000";
+p_oktmo[147]="45963000";
+p_oktmo[148]="45966000";
+p_mest[0]="11";
+p_mest[1]="12";
+p_mest[2]="13";
+p_god[0]="2009";
+p_god[1]="2010";
+p_god[2]="2011";
+p_god[3]="2012";
+p_god[4]="2013";
+p_god[5]="2014";
+p_god[6]="2015";
+p_god[7]="2016";
+p_god[8]="2017";
+p_god[9]="2018";
+p_god[10]="2019";
+p_god[11]="2020";
+p_god[12]="2021";
+p_god[13]="2022";
+p_god[14]="2023";
+p_god[15]="2024";
+p_god[16]="2025";
+p_period[0]="208";
+}
+function Clr( prizn ){
+  for ( i=0; i<document.forms[0].elements[ prizn ].length; i++ ) {
+    document.forms[0].elements[ prizn ].options[i].selected=false;
+  }
+}
+function Slct( prizn ){
+  for ( i=0; i<document.forms[0].elements[ prizn ].length; i++ ) {
+    document.forms[0].elements[ prizn ].options[i].selected=true;
+  }
+ChangeLayout();
+}
+function ClrChk( eltName ){
+  document.forms[0].elements[ eltName ].checked=false;
+}
+function Toggle_munr(){
+  if ( document.forms[0].elements['munr_chk'].checked ) {
+  Slct('munr');
+  } else {
+  Clr('munr');
+  }
+}
+function Toggle_tippos(){
+  if ( document.forms[0].elements['tippos_chk'].checked ) {
+  Slct('tippos');
+  } else {
+  Clr('tippos');
+  }
+}
+function Toggle_oktmo(){
+  if ( document.forms[0].elements['oktmo_chk'].checked ) {
+  Slct('oktmo');
+  } else {
+  Clr('oktmo');
+  }
+}
+function Toggle_mest(){
+  if ( document.forms[0].elements['mest_chk'].checked ) {
+  Slct('mest');
+  } else {
+  Clr('mest');
+  }
+}
+function Toggle_god(){
+  if ( document.forms[0].elements['god_chk'].checked ) {
+  Slct('god');
+  } else {
+  Clr('god');
+  }
+}
+function Toggle_period(){
+  if ( document.forms[0].elements['period_chk'].checked ) {
+  Slct('period');
+  } else {
+  Clr('period');
+  }
+}
+
+  -->
+</SCRIPT>
+
+
+<div align="center">
+  <font face="verdana">
+  <center>
+  <table border="2" width="96%" bordercolorlight="#FFFFFF" bordercolordark="#FFFFFF" cellspacing="0" cellpadding="6">
+    <tr>
+      <td width="100%" bordercolor="#ffffff" bordercolorlight="#ffffff" bordercolordark="#ffffff">
+        
+        <FORM ACTION=/dbscripts/munst/munst45/DBInet.cgi target="newWindow" >
+<TABLE border=0 cellspacing=5>
+<TR>
+</TR>
+<TR>
+</TR>
+</TABLE>
+<TABLE border=0 cellspacing=5>
+<TR>
+<TD CLASS=SelectCell>
+<span CLASS=SelectWord>Показатель</span>
+<span CLASS=SelectWord>Выберите <i>Показатель</i></span><span CLASS=SelectWord>&nbsp;(1)</span>&nbsp;&nbsp;<img name="help" style="cursor:hand; " src="/dbimages/Help.bmp" onclick="HelpWin()">
+</TD>
+</TR>
+<TR>
+<TD valign="top" align="left">
+<SELECT NAME="Pokazateli" SIZE="1" CLASS="SelectPok" multiple onchange="ChangeLayout()"  onkeydown="keyDownEvent();">
+<OPTION SELECTED>Оценка численности населения на 1 января текущего года (до 2010 года единица измерения тыс. человек), человек
+</SELECT>
+</TD>
+</TR>
+</TABLE>
+<TABLE border=0 cellspacing=5>
+<TR>
+<TD CLASS=SelectCell>
+<span CLASS=SelectWord>Выберите <i>Вхождение муниципального образования</i></span><span CLASS=SelectWord>&nbsp;(1)</span>&nbsp;&nbsp;<img name="help" style="cursor:hand; " src="/dbimages/Help.bmp" onclick="HelpWin()">
+</TD>
+</TR>
+<TR>
+<TD valign="top" align="left">
+<input type=checkbox  name=munr_chk value=munr onclick="Toggle_munr()" ><span CLASS=SelectWord>Выбрать все</span><br>
+<SELECT NAME="munr" SIZE="1" CLASS="Select" multiple onchange="ChangeLayout()" onClick="ClrChk('munr_chk')"  onkeydown="keyDownEvent();ClrChk('munr_chk')">
+<OPTION SELECTED>Муниципальные образования города Москвы (столицы Российской Федерации города федерального значения)
+</SELECT>
+</TD>
+</TR>
+</TABLE>
+<TABLE border=0 cellspacing=5>
+<TR>
+<TD CLASS=SelectCell>
+<span CLASS=SelectWord>Выберите <i>Тип поселения</i></span><span CLASS=SelectWord>&nbsp;(1)</span>&nbsp;&nbsp;<img name="help" style="cursor:hand; " src="/dbimages/Help.bmp" onclick="HelpWin()">
+</TD>
+</TR>
+<TR>
+<TD valign="top" align="left">
+<input type=checkbox  name=tippos_chk value=tippos onclick="Toggle_tippos()" ><span CLASS=SelectWord>Выбрать все</span><br>
+<SELECT NAME="tippos" SIZE="1" CLASS="Select" multiple onchange="ChangeLayout()" onClick="ClrChk('tippos_chk')"  onkeydown="keyDownEvent();ClrChk('tippos_chk')">
+<OPTION SELECTED>Внутригородская территория
+(внутригородское муниципальное образование) города федерального значения
+</SELECT>
+</TD>
+</TR>
+</TABLE>
+<TABLE border=0 cellspacing=5>
+<TR>
+<TD CLASS=SelectCell>
+<span CLASS=SelectWord>Выберите <i>Муниципальное образование</i></span><span CLASS=SelectWord>&nbsp;(149)</span>&nbsp;&nbsp;<img name="help" style="cursor:hand; " src="/dbimages/Help.bmp" onclick="HelpWin()">
+</TD>
+<TD CLASS=SelectCell>
+<span CLASS=SelectWord>Выберите <i>Население</i></span><span CLASS=SelectWord>&nbsp;(3)</span>&nbsp;&nbsp;<img name="help" style="cursor:hand; " src="/dbimages/Help.bmp" onclick="HelpWin()">
+</TD>
+</TR>
+<TR>
+<TD valign="top" align="left">
+<input type=checkbox  name=oktmo_chk value=oktmo onclick="Toggle_oktmo()" ><span CLASS=SelectWord>Выбрать все</span><br>
+<SELECT NAME="oktmo" SIZE="7" CLASS="Select" multiple onchange="ChangeLayout()" onClick="ClrChk('oktmo_chk')"  onkeydown="keyDownEvent();ClrChk('oktmo_chk')">
+<OPTION SELECTED>Богородское
+<OPTION>Москва
+<OPTION>Вешняки
+<OPTION>Восточное Измайлово
+<OPTION>Восточное
+<OPTION>Гольяново
+<OPTION>Ивановское
+<OPTION>Измайлово
+<OPTION>Косино-Ухтомское
+<OPTION>Новогиреево
+<OPTION>Новокосино
+<OPTION>Метрогородок
+<OPTION>Перово
+<OPTION>Северное Измайлово
+<OPTION>Соколиная Гора
+<OPTION>Сокольники
+<OPTION>Преображенское
+<OPTION>Внуково
+<OPTION>Дорогомилово
+<OPTION>Крылатское
+<OPTION>Кунцево
+<OPTION>Можайское
+<OPTION>Ново-Переделкино
+<OPTION>Очаково-Матвеевское
+<OPTION>Проспект Вернадского
+<OPTION>Раменки
+<OPTION>Солнцево
+<OPTION>Тропарево-Никулино
+<OPTION>Филевский Парк
+<OPTION>Фили-Давыдково
+<OPTION>Крюково
+<OPTION>Матушкино
+<OPTION>Силино
+<OPTION>Аэропорт
+<OPTION>Беговое
+<OPTION>Бескудниковское
+<OPTION>Войковское
+<OPTION>Восточное Дегунино
+<OPTION>Головинское
+<OPTION>Дмитровское
+<OPTION>Западное Дегунино
+<OPTION>Коптево
+<OPTION>Левобережное
+<OPTION>Молжаниновское
+<OPTION>Савеловское
+<OPTION>Сокол
+<OPTION>Тимирязевское
+<OPTION>Ховрино
+<OPTION>Хорошевское
+<OPTION>Алексеевское
+<OPTION>Алтуфьевское
+<OPTION>Бабушкинское
+<OPTION>Бибирево
+<OPTION>Бутырское
+<OPTION>Лианозово
+<OPTION>Лосиноостровское
+<OPTION>Марфино
+<OPTION>Марьина Роща
+<OPTION>Останкинское
+<OPTION>Отрадное
+<OPTION>Ростокино
+<OPTION>Свиблово
+<OPTION>Северное Медведково
+<OPTION>Северное
+<OPTION>Южное Медведково
+<OPTION>Ярославское
+<OPTION>Куркино
+<OPTION>Митино
+<OPTION>Покровское-Стрешнево
+<OPTION>Северное Тушино
+<OPTION>Строгино
+<OPTION>Хорошево-Мневники
+<OPTION>Щукино
+<OPTION>Южное Тушино
+<OPTION>Арбат
+<OPTION>Басманное
+<OPTION>Замоскворечье
+<OPTION>Савелки
+<OPTION>Красносельское
+<OPTION>Мещанское
+<OPTION>Пресненское
+<OPTION>Таганское
+<OPTION>Тверское
+<OPTION>Хамовники
+<OPTION>Якиманка
+<OPTION>Выхино-Жулебино
+<OPTION>Капотня
+<OPTION>Кузьминки
+<OPTION>Лефортово
+<OPTION>Люблино
+<OPTION>Марьино
+<OPTION>Некрасовка
+<OPTION>Нижегородское
+<OPTION>Печатники
+<OPTION>Рязанское
+<OPTION>Текстильщики
+<OPTION>Южнопортовое
+<OPTION>Академическое
+<OPTION>Гагаринское
+<OPTION>Зюзино
+<OPTION>Коньково
+<OPTION>Котловка
+<OPTION>Ломоносовское
+<OPTION>Обручевское
+<OPTION>Северное Бутово
+<OPTION>Теплый Стан
+<OPTION>Черемушки
+<OPTION>Южное Бутово
+<OPTION>Ясенево
+<OPTION>Бирюлево Восточное
+<OPTION>Бирюлево Западное
+<OPTION>Братеево
+<OPTION>Даниловское
+<OPTION>Донское
+<OPTION>Зябликово
+<OPTION>Москворечье-Сабурово
+<OPTION>Нагатино-Садовники
+<OPTION>Нагатинский Затон
+<OPTION>Нагорное
+<OPTION>Орехово-Борисово Северное
+<OPTION>Орехово-Борисово Южное
+<OPTION>Царицыно
+<OPTION>Чертаново Северное
+<OPTION>Чертаново Центральное
+<OPTION>Чертаново Южное
+<OPTION>Старое Крюково
+<OPTION>городской округ Троицк
+<OPTION>городской округ Щербинка
+<OPTION>поселение Внуковское
+<OPTION>поселение Воскресенское
+<OPTION>поселение Вороновское
+<OPTION>поселение Десеновское
+<OPTION>поселение Киевский
+<OPTION>поселение Кленовское
+<OPTION>поселение Кокошкино
+<OPTION>поселение Краснопахорское
+<OPTION>поселение Марушкинское
+<OPTION>поселение Михайлово-Ярцевское
+<OPTION>поселение Московский
+<OPTION>поселение Мосрентген
+<OPTION>поселение Новофедоровское
+<OPTION>поселение Первомайское
+<OPTION>поселение Роговское
+<OPTION>поселение Рязановское
+<OPTION>поселение Сосенское
+<OPTION>поселение Филимонковское
+<OPTION>поселение Щаповское
+<OPTION>Коммунарка
+<OPTION>Бекасово
+</SELECT>
+</TD>
+<TD valign="top" align="left">
+<input type=checkbox  name=mest_chk value=mest onclick="Toggle_mest()" ><span CLASS=SelectWord>Выбрать все</span><br>
+<SELECT NAME="mest" SIZE="7" CLASS="Select" multiple onchange="ChangeLayout()" onClick="ClrChk('mest_chk')"  onkeydown="keyDownEvent();ClrChk('mest_chk')">
+<OPTION SELECTED>Все население
+<OPTION>Городское население
+<OPTION>Сельское население
+</SELECT>
+</TD>
+</TR>
+</TABLE>
+<TABLE border=0 cellspacing=5>
+<TR>
+<TD CLASS=SelectCell>
+<span CLASS=SelectWord>Выберите <i>Годы</i></span><span CLASS=SelectWord>&nbsp;(17)</span>&nbsp;&nbsp;<img name="help" style="cursor:hand; " src="/dbimages/Help.bmp" onclick="HelpWin()">
+</TD>
+<TD CLASS=SelectCell>
+<span CLASS=SelectWord>Выберите <i>Периоды</i></span><span CLASS=SelectWord>&nbsp;(1)</span>&nbsp;&nbsp;<img name="help" style="cursor:hand; " src="/dbimages/Help.bmp" onclick="HelpWin()">
+</TD>
+</TR>
+<TR>
+<TD valign="top" align="left">
+<input type=checkbox  name=god_chk value=god onclick="Toggle_god()" ><span CLASS=SelectWord>Выбрать все</span><br>
+<SELECT NAME="god" SIZE="7" CLASS="Select" multiple onchange="ChangeLayout()" onClick="ClrChk('god_chk')"  onkeydown="keyDownEvent();ClrChk('god_chk')">
+<OPTION>2009
+<OPTION>2010
+<OPTION>2011
+<OPTION>2012
+<OPTION>2013
+<OPTION>2014
+<OPTION>2015
+<OPTION>2016
+<OPTION>2017
+<OPTION>2018
+<OPTION>2019
+<OPTION>2020
+<OPTION>2021
+<OPTION>2022
+<OPTION>2023
+<OPTION>2024
+<OPTION SELECTED>2025
+</SELECT>
+</TD>
+<TD valign="top" align="left">
+<input type=checkbox checked name=period_chk value=period onclick="Toggle_period()" ><span CLASS=SelectWord>Выбрать все</span><br>
+<SELECT NAME="period" SIZE="7" CLASS="Select" multiple onchange="ChangeLayout()" onClick="ClrChk('period_chk')"  onkeydown="keyDownEvent();ClrChk('period_chk')">
+<OPTION SELECTED>на 1 января
+</SELECT>
+</TD>
+</TR>
+</TABLE>
+</FORM>        
+      </td>
+    </tr>
+    <tr>
+      <td width="100%" bordercolor="#ffffff" bordercolorlight="#ffffff" bordercolordark="#ffffff">
+      <span style="font-weight:bold; color:#000080;">
+      </span><FORM ACTION=/dbscripts/munst/munst45/DBInet.cgi target="newWindow"  method="POST" onSubmit="return CheckQryComplete();">
+<TABLE border=1 bordecolor="darkgrey" cellspacing="0" width="750" ><TR><TD CLASS=ShowTblCell>&nbsp;&nbsp;<INPUT TYPE="button" VALUE="Показать таблицу" NAME="STbl"  CLASS=BtnStyle  onClick="ClickSubmit('tbl')">&nbsp;<INPUT CHECKED ID="Automatic" name=rdLayoutType onclick=InitLoad() type=radio value=Au><span class=ShowTable  ONCLICK="document.all['Automatic'].click();" ONMOUSEOVER="chShowOn()" ONMOUSEOUT="chShowOut()">&nbsp;Автоматическое макетирование&nbsp;&nbsp;</span><INPUT ID="Manual" name=rdLayoutType onclick=MnlLayout() type=radio value=Mnl><span class=ShowTable  ONCLICK="document.all['Manual'].click();" ONMOUSEOVER="chShowOn()" ONMOUSEOUT="chShowOut()">&nbsp;Ручное макетирование</span>&nbsp;&nbsp;&nbsp;&nbsp;<img name="help" style="cursor:hand; " src="/dbimages/Help.bmp" onclick="HelpWindow()"></TD></TR></TABLE>
+<DIV ID="form2" style="visibility:hidden">
+<TABLE border=1 cellspacing=0 width="750"
+<TR>
+<TD width="65%"  CLASS=SelectCell>
+<TABLE cellspacing="5" border="0"><TR><TD width="20"></TD><TD COLSPAN=3><span CLASS=SelectCell>Макет таблицы<span></TD><TD width=20></TD></TR><TR><TD width="60"></TD><TD width="60">Заголовок</TD><TD width="60">Шапка</TD><TD width="60">Боковик</TD><TD width="60">Выбрано значений</TD></TR>
+<TR><TD>Показатель</TD><TD><input type=radio name="_Pokazateli" CLASS="Select" onclick="UpdateChk('Pokazateli',0);CountResultSz()"></TD><TD><input type=radio name="_Pokazateli" CLASS="Select" onclick="UpdateChk('Pokazateli',1);CountResultSz()"></TD><TD><input type=radio name="_Pokazateli" CLASS="Select" onclick="UpdateChk('Pokazateli',2);CountResultSz()"></TD><TD><DIV ID="Pokazateli_slct" CLASS="Select"></DIV></TD></TR>
+<TR><TD>Вхождение муниципального образования</TD><TD><input type=radio name="_munr" CLASS="Select" onclick="UpdateChk('munr',0);CountResultSz()"></TD><TD><input type=radio name="_munr" CLASS="Select" onclick="UpdateChk('munr',1);CountResultSz()"></TD><TD><input type=radio name="_munr" CLASS="Select" onclick="UpdateChk('munr',2);CountResultSz()"></TD><TD><DIV ID="munr_slct" CLASS="Select"></DIV></TD></TR>
+<TR><TD>Тип поселения</TD><TD><input type=radio name="_tippos" CLASS="Select" onclick="UpdateChk('tippos',0);CountResultSz()"></TD><TD><input type=radio name="_tippos" CLASS="Select" onclick="UpdateChk('tippos',1);CountResultSz()"></TD><TD><input type=radio name="_tippos" CLASS="Select" onclick="UpdateChk('tippos',2);CountResultSz()"></TD><TD><DIV ID="tippos_slct" CLASS="Select"></DIV></TD></TR>
+<TR><TD>Муниципальное образование</TD><TD><input type=radio name="_oktmo" CLASS="Select" onclick="UpdateChk('oktmo',0);CountResultSz()"></TD><TD><input type=radio name="_oktmo" CLASS="Select" onclick="UpdateChk('oktmo',1);CountResultSz()"></TD><TD><input type=radio name="_oktmo" CLASS="Select" onclick="UpdateChk('oktmo',2);CountResultSz()"></TD><TD><DIV ID="oktmo_slct" CLASS="Select"></DIV></TD></TR>
+<TR><TD>Население</TD><TD><input type=radio name="_mest" CLASS="Select" onclick="UpdateChk('mest',0);CountResultSz()"></TD><TD><input type=radio name="_mest" CLASS="Select" onclick="UpdateChk('mest',1);CountResultSz()"></TD><TD><input type=radio name="_mest" CLASS="Select" onclick="UpdateChk('mest',2);CountResultSz()"></TD><TD><DIV ID="mest_slct" CLASS="Select"></DIV></TD></TR>
+<TR><TD>Годы</TD><TD><input type=radio name="_god" CLASS="Select" onclick="UpdateChk('god',0);CountResultSz()"></TD><TD><input type=radio name="_god" CLASS="Select" onclick="UpdateChk('god',1);CountResultSz()"></TD><TD><input type=radio name="_god" CLASS="Select" onclick="UpdateChk('god',2);CountResultSz()"></TD><TD><DIV ID="god_slct" CLASS="Select"></DIV></TD></TR>
+<TR><TD>Периоды</TD><TD><input type=radio name="_period" CLASS="Select" onclick="UpdateChk('period',0);CountResultSz()"></TD><TD><input type=radio name="_period" CLASS="Select" onclick="UpdateChk('period',1);CountResultSz()"></TD><TD><input type=radio name="_period" CLASS="Select" onclick="UpdateChk('period',2);CountResultSz()"></TD><TD><DIV ID="period_slct" CLASS="Select"></DIV></TD></TR>
+</TR>
+</TABLE>
+</TD>
+<TD ROWSPAN=2>
+<TABLE cellpadding=5 CLASS="Kolichestvo">
+<TR>
+<TD><span CLASS="KolTitle">По запросу будет сформировано:<span></TD>
+</TR>
+<TR>
+<TD>Значений<BR>показателя</TD>
+<TD><INPUT TYPE="TEXT" NAME="NVal" CLASS="Select" READONLY DISABLED SIZE="8"></TD>
+</TR>
+<TR>
+<TD>Таблиц</TD>
+<TD><INPUT TYPE="TEXT" NAME="NTbl" CLASS="Select" READONLY DISABLED SIZE="8"></TD>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp; в каждой:</TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR>
+<TD>Столбцов</TD>
+<TD><INPUT TYPE="TEXT" NAME="NCol" CLASS="Select" READONLY DISABLED SIZE="8"></TD>
+</TR>
+<TR>
+<TD>Строк</TD>
+<TD><INPUT TYPE="TEXT" NAME="NRow" CLASS="Select" READONLY DISABLED SIZE="8"></TD>
+</TR>
+</TABLE>
+</TD>
+</TR>
+<TR>
+<TD>
+<br>
+<center><TABLE><TR><TD WIDTH=200></TD><TD><span CLASS=Order align=right>Порядок реквизитов</span></TD></TR></TABLE>
+<TABLE cellspacing=5>
+<TR>
+<TD colspan=2>
+<span CLASS=Order>Заголовок</span>
+</TD>
+</TR>
+<TR>
+<TD>
+<DIV id=Zag STYLE="width=200" CLASS="Select" >
+</DIV>
+</TD>
+</TR>
+<TR>
+<TD>
+<span CLASS=Order>Шапка</span>
+</TD>
+</TR>
+<TR>
+<TD>
+<DIV id=Shap STYLE="width=200" CLASS="Select" >
+</DIV>
+</TD>
+</TR>
+<TR>
+<TD>
+<span CLASS=Order>Боковик</span>
+</TD>
+</TR>
+<TR>
+<TD>
+<DIV id=Bok STYLE="width=200" CLASS="Select">
+</DIV>
+</center></TD>
+</TR>
+</TABLE>
+</TD>
+</TR>
+</TABLE>
+<A NAME="Bottom">
+</A>
+</DIV>
+<TD><INPUT TYPE="reset" style="visibility:hidden" NAME="ClearQry" VALUE="Очистить запрос"onClick="ClearQryProc()">
+</TD></TR></TABLE>
+<INPUT TYPE="hidden" NAME="Qry" VALUE=";">
+<INPUT TYPE="hidden" NAME="QryGm" VALUE=";">
+<INPUT TYPE="hidden" NAME="QryFootNotes" VALUE=";">
+<INPUT TYPE="hidden" NAME="YearsList" VALUE="2009;2010;2011;2012;2013;2014;2015;2016;2017;2018;2019;2020;2021;2022;2023;2024;2025;">
+<INPUT TYPE="submit" style="visibility:hidden" NAME="tbl" value="Показать таблицу" ></FORM> 
+      </td>      
+    </tr>
+  </table>
+  </center>
+  </font>  
+</div>
+<h3 align="center">&nbsp;</h3>
+<br><br>
+</BODY>
+</HTML>

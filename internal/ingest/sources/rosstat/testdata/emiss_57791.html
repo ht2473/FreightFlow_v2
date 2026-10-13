@@ -1,0 +1,1974 @@
+
+
+
+<!DOCTYPE html>
+<html>
+  
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <title>ЕМИСС </title>
+    <link rel="icon" href="/common/img/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/common/img/favicon.ico" type="image/x-icon">
+    <link rel="image_src" type="image/jpeg" href="/common/img/logo.jpg">
+    <link rel="stylesheet" href="/common/css/style.css">
+    <script src="/common/js/jquery.min.js"></script>
+    <script src="/js/lib/handlebars-v4.0.4.js"></script>
+    
+</head>
+
+  <body>
+    <div id="overlay" class="overlay"></div>
+    <div class="wrap">
+    
+
+<header>
+    <div class="ocol">
+        <div class="site_logo"><a href="/" class="main_logo">
+            <div class="logo icon-footer_logo"></div>
+            <div class="txt">
+                <div class="sp1">ЕМИСС</div>
+                <div class="sp2">Государственная статистика</div>
+            </div></a></div>
+        <div class="show768">
+            <nav class="nav_main_menu">
+                <ul class="main_menu">
+                    <li class="li_menu"><a href="/indicators/" class="lnk a_menu"><span class="sp_menu">Показатели</span></a></li>
+                    <li class="li_menu"><a href="/organizations/" class="lnk a_menu"><span class="sp_menu">Ведомства</span></a></li>
+                </ul>
+            </nav>
+            <div class="h_r"><!--<a href="/user/changeLanguage?language=en" class="lnk main_lang"><span class="sp_lang">Eng</span></a>--><span class="board"></span>
+                <div id="main_outh" class="main_outh">
+                    <a href="/user/login?redirectUrl=%2Findicator%2F57791%3Fid%3D57791" class="btn white_btn_border login_btn">Войти</a>
+                </div>
+            </div>
+        </div>
+        <div class="hide480">
+            <div class="h_r"><!--<a href="/user/changeLanguage?language=en" class="lnk main_lang"><span class="sp_lang">Eng</span></a>-->
+                <div id="mobile_menu" class="mobile_menu"><span class="glyphicon glyphicon-align-justify"></span></div>
+            </div>
+        </div>
+        <div class="right_swipe hide480">
+            <div class="custom-scroll_y">
+                <div class="rs_ocol">
+                    <div class="close_button icon-cross"></div>
+                    <div class="site_logo"><a href="/" class="main_logo">
+                        <div class="logo icon-footer_logo"></div>
+                        <div class="txt">
+                            <div class="sp1">ЕМИСС</div>
+                            <div class="sp2">Государственная статистика</div>
+                        </div></a></div>
+                    <div id="main_search" class="main_search">
+                        <form action="/indicators/" class="search_form"><span class="icon-lupa"></span>
+                            <div class="si_cont">
+                                <input placeholder="Начните вводить название показателя" class="inp_search" name="searchText">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <nav class="nav_main_menu">
+                    <ul class="main_menu">
+                        <li class="li_menu"><a href="/indicators/" class="lnk a_menu active"><span class="sp_menu">Показатели</span></a></li>
+                        <li class="li_menu"><a href="/organizations/" class="lnk a_menu"><span class="sp_menu">Ведомства</span></a></li>
+                    </ul>
+                </nav>
+                <div class="main_outh"><a href="/user/login?redirectUrl=%2Findicator%2F57791%3Fid%3D57791" class="btn white_btn_border">Войти</a><a href="/user/registration" class="btn white_btn">Регистрация</a></div>
+                <div class="rs_ocol">
+                    <div class="df df2">
+                        <div class="ttl">Информация о сайте</div>
+                        <ul class="ul_footer">
+                            <li><a href="#" class="lnk footlnk">Нормативные документы</a></li>
+                            <li><a href="#" class="lnk footlnk">Сообщить об ошибке</a></li>
+                            <li><a href="#" class="lnk footlnk">Статистика сайта</a></li>
+                            <li><a href="#" class="lnk footlnk">Информация о сайте</a></li>
+                        </ul>
+                    </div>
+                    <!--
+					<div class="df df3">
+                        <div class="ttl">Горячая линия</div>
+                        <ul class="ul_footer">
+                            <li><a href="tel:88003018647" class="lnk footlnk"><span class="icon-phone"></span>8 (800) 301-86-47</a></li>
+                        </ul>
+                    </div>
+					-->
+                    <div class="df df4">
+                        <div class="ttl">Электронная почта</div>
+                        <ul class="ul_footer">
+                            <li><a href="mailto:emiss@digital.gov.ru" class="footlnk"><span class="icon-mail"></span>emiss@digital.gov.ru</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+  
+      <div class="topnc">
+        <div class="ocol">
+          <div class="topnc_pd">
+            <div class="pos_rel_all">
+
+                <div id="modal_failure_sogl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                                <h4 id="myModalLabel" class="modal-title">Отказ в согласовании</h4>
+                            </div>
+                            <div class="modal-body">
+                              <form enctype="multipart/form-data" method="post" action="/indicator/unpublish" class="reject_form">
+                                  <input type="hidden" name="struts.token.name" value="token" />
+<input type="hidden" name="token" value="DXZFR4H32Y9QBLYHKN1I02XGVDJ6TEHI" />
+                                <input type="hidden" name="id" value="57791" id="id"/>
+                                <div class="maxlength_text">
+                                    <textarea rows="5" placeholder="Введите причину отказа" class="form-control" maxlength="1500" name="reason" id="confirmRejectReason"></textarea>
+                                    <div class="textareaFeedback">1500</div>
+                                </div>
+                                  <!--
+                                                                  <div class="modal_btns">
+                                                                <span class="btn white_btn upload_btn"><span class="glyphicon glyphicon-plus"></span>Прикрепит документ
+                                                                  <input type="file" class="inp_fileupload" id="fileupload" multiple="" data-url="" name="files[]">
+                                                                </span>
+                                                                  </div>-->
+                                <div class="modal_btns2">
+                                    <button type="button" class="btn gray_btn" onclick="if (document.getElementById('confirmRejectReason').value.trim().length > 0) this.form.submit(); else alert('Указание причины отказа - ОБЯЗАТЕЛЬНОЕ ТРЕБОВАНИЕ');">Отказать</button>
+                                    <button type="button" data-dismiss="modal" class="btn white_btn">Отмена</button>
+                                </div>
+                              </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="modal_reject_sogl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                                <h4 id="myModalLabel" class="modal-title">Отклонить утверждение</h4>
+                            </div>
+                            <div class="modal-body">
+                              <form enctype="multipart/form-data" method="post" action="/indicator/unconfirm" class="reject_form">
+                                <input type="hidden" name="struts.token.name" value="token" />
+<input type="hidden" name="token" value="DXZFR4H32Y9QBLYHKN1I02XGVDJ6TEHI" />
+                                <input type="hidden" name="id" value="57791" id="id"/>
+                                <div class="maxlength_text">
+                                    <textarea rows="5" placeholder="Введите причину отказа" class="form-control" maxlength="1500" name="reason" id="approveRejectReason"></textarea>
+                                    <div class="textareaFeedback">1500</div>
+                                </div>
+                                  <!--                                <div class="modal_btns">
+                                                                <span class="btn white_btn upload_btn"><span class="glyphicon glyphicon-plus"></span>Прикрепит документ
+                                                                  <input type="file" class="inp_fileupload" id="fileupload" multiple="" data-url="" name="files[]">
+                                                                </span>
+                                                                  </div>-->
+                                <div class="modal_btns2">
+                                    <button type="button" class="btn gray_btn" onclick="if (document.getElementById('approveRejectReason').value.trim().length > 0) this.form.submit(); else alert('Указание причины отказа - ОБЯЗАТЕЛЬНОЕ ТРЕБОВАНИЕ');">Отказать</button>
+                                    <button type="button" data-dismiss="modal" class="btn white_btn">Отмена</button>
+                                </div>
+                              </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="modal_exclude" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                                <h4 id="myModalLabel" class="modal-title">Исключение показателя из ФПСР</h4>
+                            </div>
+                            <div class="modal-body">
+                                <form enctype="multipart/form-data" method="post" action="/indicator/exclude" class="reject_form">
+                                    <input type="hidden" name="struts.token.name" value="token" />
+<input type="hidden" name="token" value="DXZFR4H32Y9QBLYHKN1I02XGVDJ6TEHI" />
+                                    <input type="hidden" name="id" value="57791" id="id"/>
+                                    <div class="maxlength_text">
+                                        <textarea rows="5" placeholder="Основание для исключения" class="form-control" maxlength="1500" name="reason" id="excludeReason"></textarea>
+                                        <div class="textareaFeedback">1500</div>
+                                    </div>
+                                    <!--                                <div class="modal_btns">
+                                                                  <span class="btn white_btn upload_btn"><span class="glyphicon glyphicon-plus"></span>Прикрепит документ
+                                                                    <input type="file" class="inp_fileupload" id="fileupload" multiple="" data-url="" name="files[]">
+                                                                  </span>
+                                                                    </div>-->
+                                    <div class="modal_btns2">
+                                        <button type="button" class="btn gray_btn" onclick="if (document.getElementById('excludeReason').value.trim().length > 0) this.form.submit(); else alert('Указание основания для исключения - ОБЯЗАТЕЛЬНОЕ ТРЕБОВАНИЕ');">Исключить</button>
+                                        <button type="button" data-dismiss="modal" class="btn white_btn">Отмена</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="dtable">
+
+              <div class="dcell cell_l">
+                <!--
+                <div class="icon_l hide1024">
+                  <ul class="ul_top">
+                    <li class="li_top"><a href="#" class="lnk"><span class="icon-star"></span></a></li>
+                    <li class="li_top"><a href="#" class="lnk"><span class="icon-cover"></span></a></li>
+                    <li class="li_top"><a href="#" class="lnk"><span class="icon-question"></span></a></li>
+                    <li class="li_top"><a href="#" class="lnk"><span class="icon-calc"></span></a></li>
+                  </ul>
+                </div>
+                -->
+                <span class="sp_txt">Перевозка грузов автомобильным транспортом организаций всех видов экономической деятельности (без субъектов малого предпринимательства)</span>
+              </div>
+              <div class="dcell cell_r show1024">
+                <ul class="ul_top">
+                  
+                  <li class="li_top">
+                    
+                  </li>
+                  <li class="li_top"><a href="#" data-target="#modal_vote_sogl" data-toggle="modal" class="lnk"><span class="icon-question"></span>Спросить эксперта</a></li>
+                  <li class="li_top"><a href="#" class="lnk" onclick="$('#table_tabs_content').find('.tabsdata').addClass('hide'); $('#table_tabs_content').find('.tabspass').removeClass('hide'); $('#table_tabs').find('.li_data_tab').removeClass('active'); $('#table_tabs').find('.li_pass_tab').addClass('active');"><span class="icon-calc"></span>Методика расчета</a></li>
+                </ul>
+
+              <div id="modal_vote_sogl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade">
+                <div class="modal-dialog modal-sm">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                      <h4 id="myModalLabel" class="modal-title">Вопрос эксперту</h4>
+                    </div>
+                    <div class="modal-body">
+                            
+<form id="questionForm" name="questionForm" onsubmit="return submitQuestion();" action="/communication/messages/sendToHelpdesk" method="post">
+                      <input type="hidden" name="struts.token.name" value="token" />
+<input type="hidden" name="token" value="DXZFR4H32Y9QBLYHKN1I02XGVDJ6TEHI" />
+                      <input type="hidden" name="helpdeskTypeId" value="0" id="questionForm_helpdeskTypeId"/>
+                      <input type="hidden" name="id" value="57791" id="questionForm_id"/>
+                      <input type="hidden" name="redirectUrl" value="%2Findicator%2F57791%3Fid%3D57791" id="questionForm_redirectUrl"/>
+                      <div class="maxlength_text">
+                        <textarea id="questionText" name="messageContent" rows="5" placeholder="Введите текст сообщения" class="form-control" maxlength="1500"></textarea>
+                        <div class="textareaFeedback">1500</div>
+                      </div>
+
+                      <br>Уважаемые пользователи! Просим Вас задавать вопросы применительно к данному показателю. Вопросы, не имеющие прямого отношения к данному показателю, просим направлять на электронную почту ведомства, или воспользоваться режимом обратной связи на официальном сайте ведомства.
+                      <div class="hr_modal">
+                        <hr>
+                      </div>
+
+                      
+                      <h3 class="h3_modal">Введите данные для обратной связи</h3>
+                        <input type="text" class="form-control fc-mb10" placeholder="Имя" name="senderName">
+                        <input type="email" class="form-control" placeholder="Электронная почта" name="senderEmail" id="questionEmail">
+                        <div class="hr_modal">
+                        <hr>
+                      </div>
+                      
+
+                      <div id="questionCaptcha"></div>
+
+                      <div class="modal_btns2">
+                        <button type="submit" class="btn gray_btn">Отправить</button>
+                        <button type="button" data-dismiss="modal" class="btn white_btn">Отмена</button>
+                      </div>
+                    </form>
+
+
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="datapass">
+        <div class="ocol">
+        
+          <ul id="table_tabs" class="tabs">
+            <li class="li_tab li_data_tab active"><a href="tabsdata" class="lnk">Данные</a></li>
+            <li class="li_tab li_pass_tab"><a href="tabspass" class="lnk">Паспорт показателя</a></li>
+          </ul>
+          <div class="tabl_stat show768">
+            <span class="sp_1">Опубликован:</span><span class="sp_2">в открытых данных.</span>
+            
+            
+          </div>
+        </div>
+      </div>
+
+
+       
+
+       
+
+      <div id="table_tabs_content" class="table_tabs_content">
+
+        <div class="tabsdata tabsdata_tab_content">
+          <div class="tabsdata_item">
+            <div class="tabsdata_mobile hide768">
+              <div class="ocol">
+                <div class="txt1">Просмотр данных на мобильных телефонах не предусмотрен</div>
+                
+                <div class="btns">
+                  <form action="/indicator/57791/download" method="post" style="display:inline; margin:0; padding:0;">
+                        <input type="hidden" name="struts.token.name" value="token" />
+<input type="hidden" name="token" value="DXZFR4H32Y9QBLYHKN1I02XGVDJ6TEHI" />
+                        <input type="hidden" name="id" value="57791"/>
+                        <input type="hidden" name="format" value="excel"/>
+                        <button type="submit" class="btn gray_btn"><span class="icon-cloud"></span>СКАЧАТЬ</button>
+                    </form>
+				  <!--<button class="btn gray_btn">ПОДЕЛИТЬСЯ</button>-->
+                </div>
+                <!--
+                <div class="txt2">—&nbsp;или&nbsp;—</div>
+                <div class="txt2">Установите мобильное приложение</div>
+                -->
+              </div>
+            </div>
+
+            <div class="tabsdata_mobile tabsdata_bad_browser show768" style="display:none">
+              <div class="ocol">
+                <div class="txt1">Используемая версия браузера не поддерживается. Обновите версию браузера.</div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+<!--dinamika-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="datapass_filt show768">
+              <div class="ocol">
+                <div class="filt_btns">
+
+                  <div class="dropdown_wrap dropdown_button">
+                     <button class="btn blue_btn dropdown_trigger"><span class="icon-download"></span>Скачать</button>
+                     <div class="dropdown" id="downloadTokenHolder">
+                        <input type="hidden" name="struts.token.name" value="token" />
+<input type="hidden" name="token" value="DXZFR4H32Y9QBLYHKN1I02XGVDJ6TEHI" />
+                        <ul>
+                          
+                            <li>
+                                <div class="dropdown_element" id="download_excel_file">
+                                    <span class="backgr-exel"></span>Выбранные данные
+                                </div>
+                            </li>
+                          <li>
+                            <div class="dropdown_element" id="download_sdmx_file">
+                              <span class="icon-sdmx"></span>В формате SDMX...
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                  <button id="agrid-action-create-graphic" class="btn gray_btn"><span class="icon-graph"></span>Построить график</button>
+                  <button class="btn white_btn cont_tit" elem_name="setting_cont" id="setting_tab"><span class="icon-settings"></span>Настройки</button>
+                </div>
+                <div id="agrid-filters-tab" class="filt_tab cont_tit" elem_name="filt_cont"><span class="icon-filters"></span>Фильтры</div><div class="inst_tab cont_tit" elem_name="inst_cont"><span class="icon-instr"></span>Инструменты</div>
+                <div class="filt_cont cont_div" id="agrid-filters-content">
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <link rel="stylesheet" href="/common/css/fgrid/kendo.common.min.css">
+    <link rel="stylesheet" href="/common/css/fgrid/kendo.default.min.css">
+
+	<script type="text/javascript" src="/js/util.js"></script>
+	<script type="text/javascript" src="/js/report.js"></script>
+	<script type="text/javascript" src="/js/map.js"></script>
+	
+    <script type="text/javascript" src="/common/js/fgrid/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/common/js/fgrid/taffy.js"></script>
+    <script type="text/javascript" src="/common/js/fgrid/FGrid.js?v=13527C1"></script>
+    <script type="text/javascript" src="/common/js/fgrid/FTable.js"></script>
+    
+    <script type="text/javascript" src="/common/js/fgrid/colResizable-1.5.min.js"></script>
+
+	<link rel="stylesheet" href="/common/css/style.css">
+
+	<script type="text/javascript" src="/common/js/fgrid/jquery.ui.touch-punch.min.js"></script>
+
+    <script>
+            $(function () {
+                if(checkBrowser()) {
+                    window['grid'] = new FGrid({
+                        id: 57791,
+                        block: $('#grid'),
+                        debug: true,
+                        title: '\u041F\u0435\u0440\u0435\u0432\u043E\u0437\u043A\u0430 \u0433\u0440\u0443\u0437\u043E\u0432 \u0430\u0432\u0442\u043E\u043C\u043E\u0431\u0438\u043B\u044C\u043D\u044B\u043C \u0442\u0440\u0430\u043D\u0441\u043F\u043E\u0440\u0442\u043E\u043C \u043E\u0440\u0433\u0430\u043D\u0438\u0437\u0430\u0446\u0438\u0439 \u0432\u0441\u0435\u0445 \u0432\u0438\u0434\u043E\u0432 \u044D\u043A\u043E\u043D\u043E\u043C\u0438\u0447\u0435\u0441\u043A\u043E\u0439 \u0434\u0435\u044F\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u0438 (\u0431\u0435\u0437 \u0441\u0443\u0431\u044A\u0435\u043A\u0442\u043E\u0432 \u043C\u0430\u043B\u043E\u0433\u043E \u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u0430)',
+                        unit: '\u0442\u044B\u0441\u044F\u0447\u0430 \u0442\u043E\u043D\u043D',
+                        filters: {
+                            0: {
+                                title: '\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u0435\u043B\u044C',
+                                all: true,
+                                values: {
+                                    57791: {
+                                        title: '\u041F\u0435\u0440\u0435\u0432\u043E\u0437\u043A\u0430 \u0433\u0440\u0443\u0437\u043E\u0432 \u0430\u0432\u0442\u043E\u043C\u043E\u0431\u0438\u043B\u044C\u043D\u044B\u043C \u0442\u0440\u0430\u043D\u0441\u043F\u043E\u0440\u0442\u043E\u043C \u043E\u0440\u0433\u0430\u043D\u0438\u0437\u0430\u0446\u0438\u0439 \u0432\u0441\u0435\u0445 \u0432\u0438\u0434\u043E\u0432 \u044D\u043A\u043E\u043D\u043E\u043C\u0438\u0447\u0435\u0441\u043A\u043E\u0439 \u0434\u0435\u044F\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u0438 (\u0431\u0435\u0437 \u0441\u0443\u0431\u044A\u0435\u043A\u0442\u043E\u0432 \u043C\u0430\u043B\u043E\u0433\u043E \u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u0430)',
+                                        order: 0,
+                                        checked: true
+                                    }
+                                },
+                                indicator: true
+                            },
+                            3: {
+                                title: '\u0413\u043E\u0434',
+                                all: false,
+                                values: {
+                                    2016: {
+                                        title: '2016',
+                                        order: 0,
+                                        checked: true
+                                    },
+                                    2017: {
+                                        title: '2017',
+                                        order: 1,
+                                        checked: true
+                                    },
+                                    2018: {
+                                        title: '2018',
+                                        order: 2,
+                                        checked: true
+                                    },
+                                    2019: {
+                                        title: '2019',
+                                        order: 3,
+                                        checked: false
+                                    },
+                                    2020: {
+                                        title: '2020',
+                                        order: 4,
+                                        checked: false
+                                    },
+                                    2021: {
+                                        title: '2021',
+                                        order: 5,
+                                        checked: false
+                                    },
+                                    2022: {
+                                        title: '2022',
+                                        order: 6,
+                                        checked: false
+                                    },
+                                    2023: {
+                                        title: '2023',
+                                        order: 7,
+                                        checked: false
+                                    },
+                                    2024: {
+                                        title: '2024',
+                                        order: 8,
+                                        checked: false
+                                    },
+                                    2025: {
+                                        title: '2025',
+                                        order: 9,
+                                        checked: false
+                                    }
+                                },
+                                indicator: false
+                            },
+                            57831: {
+                                title: '\u041A\u043B\u0430\u0441\u0441\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440 \u043E\u0431\u044A\u0435\u043A\u0442\u043E\u0432 \u0430\u0434\u043C\u0438\u043D\u0438\u0441\u0442\u0440\u0430\u0442\u0438\u0432\u043D\u043E-\u0442\u0435\u0440\u0440\u0438\u0442\u043E\u0440\u0438\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0434\u0435\u043B\u0435\u043D\u0438\u044F (\u041E\u041A\u0410\u0422\u041E)',
+                                all: false,
+                                values: {
+                                    1688487: {
+                                        title: '\u0420\u043E\u0441\u0441\u0438\u0439\u0441\u043A\u0430\u044F \u0424\u0435\u0434\u0435\u0440\u0430\u0446\u0438\u044F',
+                                        order: 0,
+                                        checked: true
+                                    },
+                                    1849012: {
+                                        title: '\u0420\u043E\u0441\u0441\u0438\u0439\u0441\u043A\u0430\u044F \u0424\u0435\u0434\u0435\u0440\u0430\u0446\u0438\u044F \u0431\u0435\u0437 \u0443\u0447\u0435\u0442\u0430 \u043D\u043E\u0432\u044B\u0445 \u0441\u0443\u0431\u044A\u0435\u043A\u0442\u043E\u0432 (\u0441 01.01.2023)',
+                                        order: 1,
+                                        checked: false
+                                    },
+                                    1688488: {
+                                        title: '\u0426\u0435\u043D\u0442\u0440\u0430\u043B\u044C\u043D\u044B\u0439 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433',
+                                        order: 2,
+                                        checked: false
+                                    },
+                                    1688489: {
+                                        title: '\u0411\u0435\u043B\u0433\u043E\u0440\u043E\u0434\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 3,
+                                        checked: false
+                                    },
+                                    1688490: {
+                                        title: '\u0411\u0440\u044F\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 4,
+                                        checked: false
+                                    },
+                                    1688491: {
+                                        title: '\u0412\u043B\u0430\u0434\u0438\u043C\u0438\u0440\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 5,
+                                        checked: false
+                                    },
+                                    1688492: {
+                                        title: '\u0412\u043E\u0440\u043E\u043D\u0435\u0436\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 6,
+                                        checked: false
+                                    },
+                                    1688493: {
+                                        title: '\u0418\u0432\u0430\u043D\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 7,
+                                        checked: false
+                                    },
+                                    1688494: {
+                                        title: '\u041A\u0430\u043B\u0443\u0436\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 8,
+                                        checked: false
+                                    },
+                                    1688495: {
+                                        title: '\u041A\u043E\u0441\u0442\u0440\u043E\u043C\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 9,
+                                        checked: false
+                                    },
+                                    1688496: {
+                                        title: '\u041A\u0443\u0440\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 10,
+                                        checked: false
+                                    },
+                                    1688497: {
+                                        title: '\u041B\u0438\u043F\u0435\u0446\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 11,
+                                        checked: false
+                                    },
+                                    1688498: {
+                                        title: '\u041C\u043E\u0441\u043A\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 12,
+                                        checked: false
+                                    },
+                                    1688499: {
+                                        title: '\u041E\u0440\u043B\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 13,
+                                        checked: false
+                                    },
+                                    1688500: {
+                                        title: '\u0420\u044F\u0437\u0430\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 14,
+                                        checked: false
+                                    },
+                                    1688501: {
+                                        title: '\u0421\u043C\u043E\u043B\u0435\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 15,
+                                        checked: false
+                                    },
+                                    1688502: {
+                                        title: '\u0422\u0430\u043C\u0431\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 16,
+                                        checked: false
+                                    },
+                                    1688503: {
+                                        title: '\u0422\u0432\u0435\u0440\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 17,
+                                        checked: false
+                                    },
+                                    1688504: {
+                                        title: '\u0422\u0443\u043B\u044C\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 18,
+                                        checked: false
+                                    },
+                                    1688505: {
+                                        title: '\u042F\u0440\u043E\u0441\u043B\u0430\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 19,
+                                        checked: false
+                                    },
+                                    1688506: {
+                                        title: '\u0413\u043E\u0440\u043E\u0434 \u041C\u043E\u0441\u043A\u0432\u0430 \u0441\u0442\u043E\u043B\u0438\u0446\u0430 \u0420\u043E\u0441\u0441\u0438\u0439\u0441\u043A\u043E\u0439 \u0424\u0435\u0434\u0435\u0440\u0430\u0446\u0438\u0438 \u0433\u043E\u0440\u043E\u0434 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F',
+                                        order: 20,
+                                        checked: false
+                                    },
+                                    1688507: {
+                                        title: '\u0421\u0435\u0432\u0435\u0440\u043E-\u0417\u0430\u043F\u0430\u0434\u043D\u044B\u0439 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433',
+                                        order: 21,
+                                        checked: false
+                                    },
+                                    1688508: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u041A\u0430\u0440\u0435\u043B\u0438\u044F',
+                                        order: 22,
+                                        checked: false
+                                    },
+                                    1688509: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u041A\u043E\u043C\u0438',
+                                        order: 23,
+                                        checked: false
+                                    },
+                                    1688510: {
+                                        title: '\u0410\u0440\u0445\u0430\u043D\u0433\u0435\u043B\u044C\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 24,
+                                        checked: false
+                                    },
+                                    1688511: {
+                                        title: '\u041D\u0435\u043D\u0435\u0446\u043A\u0438\u0439 \u0430\u0432\u0442\u043E\u043D\u043E\u043C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433 (\u0410\u0440\u0445\u0430\u043D\u0433\u0435\u043B\u044C\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C)',
+                                        order: 25,
+                                        checked: false
+                                    },
+                                    1692939: {
+                                        title: '\u0410\u0440\u0445\u0430\u043D\u0433\u0435\u043B\u044C\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C (\u043A\u0440\u043E\u043C\u0435 \u041D\u0435\u043D\u0435\u0446\u043A\u043E\u0433\u043E \u0430\u0432\u0442\u043E\u043D\u043E\u043C\u043D\u043E\u0433\u043E \u043E\u043A\u0440\u0443\u0433\u0430)',
+                                        order: 26,
+                                        checked: false
+                                    },
+                                    1688513: {
+                                        title: '\u0412\u043E\u043B\u043E\u0433\u043E\u0434\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 27,
+                                        checked: false
+                                    },
+                                    1688514: {
+                                        title: '\u041A\u0430\u043B\u0438\u043D\u0438\u043D\u0433\u0440\u0430\u0434\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 28,
+                                        checked: false
+                                    },
+                                    1688515: {
+                                        title: '\u041B\u0435\u043D\u0438\u043D\u0433\u0440\u0430\u0434\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 29,
+                                        checked: false
+                                    },
+                                    1688516: {
+                                        title: '\u041C\u0443\u0440\u043C\u0430\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 30,
+                                        checked: false
+                                    },
+                                    1688517: {
+                                        title: '\u041D\u043E\u0432\u0433\u043E\u0440\u043E\u0434\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 31,
+                                        checked: false
+                                    },
+                                    1688518: {
+                                        title: '\u041F\u0441\u043A\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 32,
+                                        checked: false
+                                    },
+                                    1688519: {
+                                        title: '\u0413\u043E\u0440\u043E\u0434 \u0421\u0430\u043D\u043A\u0442-\u041F\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433 \u0433\u043E\u0440\u043E\u0434 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F',
+                                        order: 33,
+                                        checked: false
+                                    },
+                                    1692937: {
+                                        title: '\u042E\u0436\u043D\u044B\u0439 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433',
+                                        order: 34,
+                                        checked: false
+                                    },
+                                    1688522: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0410\u0434\u044B\u0433\u0435\u044F (\u0410\u0434\u044B\u0433\u0435\u044F)',
+                                        order: 35,
+                                        checked: false
+                                    },
+                                    1688523: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u041A\u0430\u043B\u043C\u044B\u043A\u0438\u044F',
+                                        order: 36,
+                                        checked: false
+                                    },
+                                    1692938: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u041A\u0440\u044B\u043C',
+                                        order: 37,
+                                        checked: false
+                                    },
+                                    1688524: {
+                                        title: '\u041A\u0440\u0430\u0441\u043D\u043E\u0434\u0430\u0440\u0441\u043A\u0438\u0439 \u043A\u0440\u0430\u0439',
+                                        order: 38,
+                                        checked: false
+                                    },
+                                    1688525: {
+                                        title: '\u0410\u0441\u0442\u0440\u0430\u0445\u0430\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 39,
+                                        checked: false
+                                    },
+                                    1688526: {
+                                        title: '\u0412\u043E\u043B\u0433\u043E\u0433\u0440\u0430\u0434\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 40,
+                                        checked: false
+                                    },
+                                    1688527: {
+                                        title: '\u0420\u043E\u0441\u0442\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 41,
+                                        checked: false
+                                    },
+                                    1695534: {
+                                        title: '\u0413\u043E\u0440\u043E\u0434 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0421\u0435\u0432\u0430\u0441\u0442\u043E\u043F\u043E\u043B\u044C',
+                                        order: 42,
+                                        checked: false
+                                    },
+                                    1688528: {
+                                        title: '\u0421\u0435\u0432\u0435\u0440\u043E-\u041A\u0430\u0432\u043A\u0430\u0437\u0441\u043A\u0438\u0439 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433',
+                                        order: 43,
+                                        checked: false
+                                    },
+                                    1688529: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0414\u0430\u0433\u0435\u0441\u0442\u0430\u043D',
+                                        order: 44,
+                                        checked: false
+                                    },
+                                    1688530: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0418\u043D\u0433\u0443\u0448\u0435\u0442\u0438\u044F',
+                                        order: 45,
+                                        checked: false
+                                    },
+                                    1688531: {
+                                        title: '\u041A\u0430\u0431\u0430\u0440\u0434\u0438\u043D\u043E-\u0411\u0430\u043B\u043A\u0430\u0440\u0441\u043A\u0430\u044F \u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430',
+                                        order: 46,
+                                        checked: false
+                                    },
+                                    1688532: {
+                                        title: '\u041A\u0430\u0440\u0430\u0447\u0430\u0435\u0432\u043E-\u0427\u0435\u0440\u043A\u0435\u0441\u0441\u043A\u0430\u044F \u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430',
+                                        order: 47,
+                                        checked: false
+                                    },
+                                    1688533: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0421\u0435\u0432\u0435\u0440\u043D\u0430\u044F \u041E\u0441\u0435\u0442\u0438\u044F-\u0410\u043B\u0430\u043D\u0438\u044F',
+                                        order: 48,
+                                        checked: false
+                                    },
+                                    1688534: {
+                                        title: '\u0427\u0435\u0447\u0435\u043D\u0441\u043A\u0430\u044F \u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430',
+                                        order: 49,
+                                        checked: false
+                                    },
+                                    1688535: {
+                                        title: '\u0421\u0442\u0430\u0432\u0440\u043E\u043F\u043E\u043B\u044C\u0441\u043A\u0438\u0439 \u043A\u0440\u0430\u0439',
+                                        order: 50,
+                                        checked: false
+                                    },
+                                    1688536: {
+                                        title: '\u041F\u0440\u0438\u0432\u043E\u043B\u0436\u0441\u043A\u0438\u0439 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433',
+                                        order: 51,
+                                        checked: false
+                                    },
+                                    1688537: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0411\u0430\u0448\u043A\u043E\u0440\u0442\u043E\u0441\u0442\u0430\u043D',
+                                        order: 52,
+                                        checked: false
+                                    },
+                                    1688538: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u041C\u0430\u0440\u0438\u0439 \u042D\u043B',
+                                        order: 53,
+                                        checked: false
+                                    },
+                                    1688539: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u041C\u043E\u0440\u0434\u043E\u0432\u0438\u044F',
+                                        order: 54,
+                                        checked: false
+                                    },
+                                    1688540: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0422\u0430\u0442\u0430\u0440\u0441\u0442\u0430\u043D (\u0422\u0430\u0442\u0430\u0440\u0441\u0442\u0430\u043D)',
+                                        order: 55,
+                                        checked: false
+                                    },
+                                    1688541: {
+                                        title: '\u0423\u0434\u043C\u0443\u0440\u0442\u0441\u043A\u0430\u044F \u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430',
+                                        order: 56,
+                                        checked: false
+                                    },
+                                    1688542: {
+                                        title: '\u0427\u0443\u0432\u0430\u0448\u0441\u043A\u0430\u044F \u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 - \u0427\u0443\u0432\u0430\u0448\u0438\u044F',
+                                        order: 57,
+                                        checked: false
+                                    },
+                                    1688543: {
+                                        title: '\u041F\u0435\u0440\u043C\u0441\u043A\u0438\u0439 \u043A\u0440\u0430\u0439',
+                                        order: 58,
+                                        checked: false
+                                    },
+                                    1688545: {
+                                        title: '\u041A\u0438\u0440\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 59,
+                                        checked: false
+                                    },
+                                    1688546: {
+                                        title: '\u041D\u0438\u0436\u0435\u0433\u043E\u0440\u043E\u0434\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 60,
+                                        checked: false
+                                    },
+                                    1688547: {
+                                        title: '\u041E\u0440\u0435\u043D\u0431\u0443\u0440\u0433\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 61,
+                                        checked: false
+                                    },
+                                    1688548: {
+                                        title: '\u041F\u0435\u043D\u0437\u0435\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 62,
+                                        checked: false
+                                    },
+                                    1688549: {
+                                        title: '\u0421\u0430\u043C\u0430\u0440\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 63,
+                                        checked: false
+                                    },
+                                    1688550: {
+                                        title: '\u0421\u0430\u0440\u0430\u0442\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 64,
+                                        checked: false
+                                    },
+                                    1688551: {
+                                        title: '\u0423\u043B\u044C\u044F\u043D\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 65,
+                                        checked: false
+                                    },
+                                    1688552: {
+                                        title: '\u0423\u0440\u0430\u043B\u044C\u0441\u043A\u0438\u0439 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433',
+                                        order: 66,
+                                        checked: false
+                                    },
+                                    1688553: {
+                                        title: '\u041A\u0443\u0440\u0433\u0430\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 67,
+                                        checked: false
+                                    },
+                                    1688554: {
+                                        title: '\u0421\u0432\u0435\u0440\u0434\u043B\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 68,
+                                        checked: false
+                                    },
+                                    1688555: {
+                                        title: '\u0422\u044E\u043C\u0435\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 69,
+                                        checked: false
+                                    },
+                                    1688556: {
+                                        title: '\u0425\u0430\u043D\u0442\u044B-\u041C\u0430\u043D\u0441\u0438\u0439\u0441\u043A\u0438\u0439 \u0430\u0432\u0442\u043E\u043D\u043E\u043C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433 - \u042E\u0433\u0440\u0430 (\u0422\u044E\u043C\u0435\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C)',
+                                        order: 70,
+                                        checked: false
+                                    },
+                                    1688557: {
+                                        title: '\u042F\u043C\u0430\u043B\u043E-\u041D\u0435\u043D\u0435\u0446\u043A\u0438\u0439 \u0430\u0432\u0442\u043E\u043D\u043E\u043C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433 (\u0422\u044E\u043C\u0435\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C)',
+                                        order: 71,
+                                        checked: false
+                                    },
+                                    1692940: {
+                                        title: '\u0422\u044E\u043C\u0435\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C (\u043A\u0440\u043E\u043C\u0435 \u0425\u0430\u043D\u0442\u044B-\u041C\u0430\u043D\u0441\u0438\u0439\u0441\u043A\u043E\u0433\u043E \u0430\u0432\u0442\u043E\u043D\u043E\u043C\u043D\u043E\u0433\u043E \u043E\u043A\u0440\u0443\u0433\u0430-\u042E\u0433\u0440\u044B \u0438 \u042F\u043C\u0430\u043B\u043E-\u041D\u0435\u043D\u0435\u0446\u043A\u043E\u0433\u043E \u0430\u0432\u0442\u043E\u043D\u043E\u043C\u043D\u043E\u0433\u043E \u043E\u043A\u0440\u0443\u0433\u0430)',
+                                        order: 72,
+                                        checked: false
+                                    },
+                                    1688559: {
+                                        title: '\u0427\u0435\u043B\u044F\u0431\u0438\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 73,
+                                        checked: false
+                                    },
+                                    1795276: {
+                                        title: '\u0421\u0438\u0431\u0438\u0440\u0441\u043A\u0438\u0439 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433',
+                                        order: 74,
+                                        checked: false
+                                    },
+                                    1688561: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0410\u043B\u0442\u0430\u0439',
+                                        order: 75,
+                                        checked: false
+                                    },
+                                    1688563: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0422\u044B\u0432\u0430',
+                                        order: 76,
+                                        checked: false
+                                    },
+                                    1688564: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0425\u0430\u043A\u0430\u0441\u0438\u044F',
+                                        order: 77,
+                                        checked: false
+                                    },
+                                    1688565: {
+                                        title: '\u0410\u043B\u0442\u0430\u0439\u0441\u043A\u0438\u0439 \u043A\u0440\u0430\u0439',
+                                        order: 78,
+                                        checked: false
+                                    },
+                                    1688568: {
+                                        title: '\u041A\u0440\u0430\u0441\u043D\u043E\u044F\u0440\u0441\u043A\u0438\u0439 \u043A\u0440\u0430\u0439',
+                                        order: 79,
+                                        checked: false
+                                    },
+                                    1688571: {
+                                        title: '\u0418\u0440\u043A\u0443\u0442\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 80,
+                                        checked: false
+                                    },
+                                    1688573: {
+                                        title: '\u041A\u0435\u043C\u0435\u0440\u043E\u0432\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C - \u041A\u0443\u0437\u0431\u0430\u0441\u0441',
+                                        order: 81,
+                                        checked: false
+                                    },
+                                    1688574: {
+                                        title: '\u041D\u043E\u0432\u043E\u0441\u0438\u0431\u0438\u0440\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 82,
+                                        checked: false
+                                    },
+                                    1688575: {
+                                        title: '\u041E\u043C\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 83,
+                                        checked: false
+                                    },
+                                    1688576: {
+                                        title: '\u0422\u043E\u043C\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 84,
+                                        checked: false
+                                    },
+                                    1795277: {
+                                        title: '\u0414\u0430\u043B\u044C\u043D\u0435\u0432\u043E\u0441\u0442\u043E\u0447\u043D\u044B\u0439 \u0444\u0435\u0434\u0435\u0440\u0430\u043B\u044C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433',
+                                        order: 85,
+                                        checked: false
+                                    },
+                                    1688562: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0411\u0443\u0440\u044F\u0442\u0438\u044F',
+                                        order: 86,
+                                        checked: false
+                                    },
+                                    1688566: {
+                                        title: '\u0417\u0430\u0431\u0430\u0439\u043A\u0430\u043B\u044C\u0441\u043A\u0438\u0439 \u043A\u0440\u0430\u0439',
+                                        order: 87,
+                                        checked: false
+                                    },
+                                    1688578: {
+                                        title: '\u0420\u0435\u0441\u043F\u0443\u0431\u043B\u0438\u043A\u0430 \u0421\u0430\u0445\u0430 (\u042F\u043A\u0443\u0442\u0438\u044F)',
+                                        order: 88,
+                                        checked: false
+                                    },
+                                    1688579: {
+                                        title: '\u041A\u0430\u043C\u0447\u0430\u0442\u0441\u043A\u0438\u0439 \u043A\u0440\u0430\u0439',
+                                        order: 89,
+                                        checked: false
+                                    },
+                                    1688581: {
+                                        title: '\u041F\u0440\u0438\u043C\u043E\u0440\u0441\u043A\u0438\u0439 \u043A\u0440\u0430\u0439',
+                                        order: 90,
+                                        checked: false
+                                    },
+                                    1688582: {
+                                        title: '\u0425\u0430\u0431\u0430\u0440\u043E\u0432\u0441\u043A\u0438\u0439 \u043A\u0440\u0430\u0439',
+                                        order: 91,
+                                        checked: false
+                                    },
+                                    1688583: {
+                                        title: '\u0410\u043C\u0443\u0440\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 92,
+                                        checked: false
+                                    },
+                                    1688584: {
+                                        title: '\u041C\u0430\u0433\u0430\u0434\u0430\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 93,
+                                        checked: false
+                                    },
+                                    1688585: {
+                                        title: '\u0421\u0430\u0445\u0430\u043B\u0438\u043D\u0441\u043A\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 94,
+                                        checked: false
+                                    },
+                                    1688586: {
+                                        title: '\u0415\u0432\u0440\u0435\u0439\u0441\u043A\u0430\u044F \u0430\u0432\u0442\u043E\u043D\u043E\u043C\u043D\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C',
+                                        order: 95,
+                                        checked: false
+                                    },
+                                    1688587: {
+                                        title: '\u0427\u0443\u043A\u043E\u0442\u0441\u043A\u0438\u0439 \u0430\u0432\u0442\u043E\u043D\u043E\u043C\u043D\u044B\u0439 \u043E\u043A\u0440\u0443\u0433',
+                                        order: 96,
+                                        checked: false
+                                    },
+                                    1707677: {
+                                        title: '\u0421\u0443\u0445\u043E\u043F\u0443\u0442\u043D\u044B\u0435 \u0442\u0435\u0440\u0440\u0438\u0442\u043E\u0440\u0438\u0438 \u0410\u0440\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0439 \u0437\u043E\u043D\u044B \u0420\u043E\u0441\u0441\u0438\u0439\u0441\u043A\u043E\u0439 \u0424\u0435\u0434\u0435\u0440\u0430\u0446\u0438\u0438',
+                                        order: 97,
+                                        checked: false
+                                    }
+                                },
+                                indicator: false
+                            },
+                            30611: {
+                                title: '\u0415\u0434\u0438\u043D\u0438\u0446\u0430 \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u044F',
+                                all: true,
+                                values: {
+                                    950311: {
+                                        title: '\u0442\u044B\u0441\u044F\u0447\u0430 \u0442\u043E\u043D\u043D',
+                                        order: 0,
+                                        checked: true
+                                    }
+                                },
+                                indicator: false
+                            },
+                            33560: {
+                                title: '\u041F\u0435\u0440\u0438\u043E\u0434',
+                                all: true,
+                                values: {
+                                    1558883: {
+                                        title: '\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435 \u043F\u043E\u043A\u0430\u0437\u0430\u0442\u0435\u043B\u044F \u0437\u0430 \u0433\u043E\u0434',
+                                        order: 0,
+                                        checked: true
+                                    }
+                                },
+                                indicator: false
+                            }
+                        },
+                        left_columns: [
+                            57831, 30611
+                        ],
+                        top_columns: [
+                            3, 33560
+                        ],
+                        groups: [
+                            
+                        ],
+                        filterObjectIds: [
+                            
+                        ]
+                    });
+                    grid.init();
+                } else {
+                    //$('#table_tabs_content .tabsdata').hide();
+                   $('.tabsdata_bad_browser').show();
+                   $('.show768:not(.tabsdata_bad_browser)').hide();
+                }
+				
+				mapValues = [
+        ];
+            });
+    </script>
+
+      <script>
+          /*$(document).ready(function() {
+              $('.dropdown_trigger').on('click', function(e) {
+                  var $this = $(this),
+                      $dropdown = $this.closest('.dropdown_wrap').find('.dropdown');
+
+                  //флаг, чтобы не дублировать события
+                  $this.addClass('tied');
+
+                  if ($dropdown.css('display') != 'block') {
+                      $dropdown.stop().slideToggle(200);
+
+                      var yourClick = true;
+
+                      $(document).on('click.myEvent', function (e) {
+                          if (!yourClick && $(e.target).closest($dropdown).length == 0) {
+                              $('.dropdown').stop().slideUp(200);
+                              $(document).off('click.myEvent');
+                          }
+                          yourClick = false;
+                      });
+                  }
+                  e.preventDefault();
+              });
+
+
+          });*/
+      </script>
+
+
+                  <!--<div class="setting_tab"><span class="icon-settings"></span>Настройки</div>-->
+    <div id="agrid-action-block" class="inst_cont cont_div">
+
+        <div class="dropdown_wrap dropdown_grid"><span class="dropdown_trigger"><span class="icon-vydel"></span>Выделить<span class="icon-arrow_down"></span></span>
+          <div class="dropdown dropdown_w240">
+            <ul>
+              <li>
+                <div class="agrid-action-select-all-rows dropdown_element">
+                  <span class="icon-vydel_str"></span>Выделить все строки
+                </div>
+              </li>
+              <li>
+                <div class="agrid-action-select-all-cols dropdown_element">
+                  <span class="icon-vydel_stol"></span>Выделить все столбцы
+                </div>
+              </li>
+              <li>
+                <div class="agrid-action-deselect dropdown_element">
+                  <span class="icon-vydel_sn"></span>Снять выделение
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="dropdown_wrap dropdown_grid"><span class="dropdown_trigger"><span class="icon-glaz"></span>Данные<span class="icon-arrow_down"></span></span>
+          <div class="dropdown dropdown_w296">
+            <ul>
+              <li>
+                <div class="agrid-action-hide-selected dropdown_element">
+                  <span class="icon-hide"></span>Скрыть выделенные данные
+                </div>
+              </li>
+              <li>
+                <div class="agrid-action-hide-only-deselected dropdown_element">
+                  <span class="icon-hide_all"></span>Скрыть все, кроме выделенного
+                </div>
+              </li>
+              <li>
+                <div class="agrid-action-return-hidden dropdown_element">
+                  <span class="icon-retrive"></span>Вернуть скрытые данные
+                </div>
+              </li>
+            
+            
+            
+            </ul>
+          </div>
+        </div>
+
+        <div class="btn_grid_menu btn_grid_menu2 agrid-action-reverse"><span class="icon-transpor"></span>Транспонировать</div>
+        <div class="btn_grid_menu btn_grid_menu2 agrid-action-fullscreen"><span class="icon-expand"></span>Развернуть</div>
+        <div class="btn_grid_menu btn_grid_menu3 agrid-action-default-state" style="display: none;"><span class="icon-cross"></span>Сбросить</div>
+
+        <br clear="all">
+    </div>
+
+    <div id="agrid-settings-block" class="setting_cont cont_div">
+        <h3 class="mb20">Макет таблицы<span class="icon-tems" data-original-title="
+         <div class='tool_html'>
+         <p>Для уточнения набора отображаемых в таблице данных и структуры их представления можно воспользоваться следующими инструментами:</p>
+         <ul>
+         	<li>«Фильтры» - задаются критерии для выборки данных;</li>
+			<li>«Настройки» - настройка табличного представления данных. Перетаскивая атрибуты (справочники) в области строк, столбцов, группировки, фильтров, сформируйте собственное табличное представление данных;</li>
+			<li>Группа – в данную область можно вынести атрибуты показателя, чтобы упростить структуру таблицы.</li>
+		</ul>
+		<p>Для визуализации результатов выполненной настройки нажмите кнопку «Обновить».</p>
+		</div>
+		" container="body" data-placement="top" data-toggle="tooltip_html"></span></h3>
+        <div>
+            <h3 class="h3_modal">Фильтры</h3>
+            <div>
+                <div class="agrid-preview-column agrid-preview-filters"><p class="hidden-p"></p></div>
+            </div>
+        </div>
+        <div>
+            <div style="clear:both;"></div>
+            <h3 class="h3_modal">Группы</h3>
+            <div class="min-h-agr">
+                <div class="agrid-preview-column agrid-preview-grouping"><p class="hidden-p"></p></div>
+            </div>
+        </div>
+        <div style="clear:both"></div>
+        <div class="mb20">
+            <table class="tabl_maket">
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>
+                        <h3 class="h3_modal tit_tab_mak">Столбцы</h3>
+                        <div class="agrid-preview-column agrid-preview-top-column"><p class="hidden-p"></p></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <h3 class="h3_modal tit_tab_mak">Строки</h3>
+                        <div class="agrid-preview-column agrid-preview-left-column"><p class="hidden-p"></p></div>
+                    </td>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+        </div>
+<!--
+        <div class="mb20">
+            <h3 class="h3_modal">Отображение</h3>
+             <div class="vb_elemen">
+                <div class="vb_el_td2"><input type="checkbox" checked="" class="checkb_polz" name="displayClassifierCodes"/></div>
+                <div class="vb_el_td1">Показать коды элементов</div>
+              </div>
+             <div class="vb_elemen">
+                <div class="vb_el_td2"><input type="checkbox" checked="" class="checkb_polz" name="displayClassifierPeriods"/></div>
+                <div class="vb_el_td1">Показать период действия элементов</div>
+              </div>
+          </div>
+-->
+        <div>
+            <button class="agrid-action-preview-refresh mr8">Обновить</button>
+
+    
+            <button class="agrid-action-preview-default-state btn white_btn mr8"><span class="icon-cross"></span>Сбросить</button>
+        </div>
+    </div>
+
+              <div id="modal_grafik_sogl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade">
+                <div class="modal-dialog modal-sm">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                      <h4 id="myModalLabel" class="modal-title">Диаграмма</h4>
+                    </div>
+                    <div class="modal-body">
+
+					<!--
+                     <h3 class="h3_modal">Диапазон данных<span class="icon-tems" data-original-title="1111" container="body" data-placement="top" data-toggle="tooltip"></span></h3>
+                     <div class="pole_diapozon">
+                        <input type="text" class="form-control" placeholder="Все значения" style="display: inline;">
+                        <span data-target="#modal_grafik_sogl2" data-toggle="modal" class="icon-vydel_sn"></span>
+                    </div>
+					-->
+
+
+                        <div role="tabpanel" class="modal_tab">
+
+                          <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#graf" class="agrid-graphics-type-line" aria-controls="graf" role="tab" data-toggle="tab">ГРАФИК</a></li>
+                            <li role="presentation"><a href="#gistogr" class="agrid-graphics-type-gist" aria-controls="gistogr" role="tab" data-toggle="tab">ГИСТОГРАММА</a></li>
+                            <li role="presentation"><a href="#karta" class="agrid-graphics-type-map" aria-controls="karta" role="tab" data-toggle="tab">КАРТА</a></li>
+                          </ul>
+
+                            <div id="agrid-graphics-content" class="ltab-content"></div>
+
+<!--             не нужно, работаем с обним блоком               -->
+                          <!--<div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="graf">1</div>
+                            <div role="tabpanel" class="tab-pane" id="gistogr">2</div>
+                            <div role="tabpanel" class="tab-pane" id="karta">3</div>
+                          </div>-->
+
+                        </div>
+						<div id="map_prompt" class="podskazka_grafik" style="display: none"></div>
+                        <div id="map_colors"></div>
+
+                      <div class="modal_btns2">
+                        
+                        <button type="button" data-dismiss="modal" class="btn white_btn">Назад</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+    
+
+    
+            <div id="enter_widget_name" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true" class="modal fade">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                            <h4 id="myModalLabel2" class="modal-title">Регистрация</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="pole_diapozon2">
+                                <p>Функция доступна только зарегистрированным пользователям.</p>
+                            </div>
+
+
+                            <div class="modal_btns2">
+                                <a href="/user/login">
+                                <button type="button" class="btn gray_btn">Войти</button>
+                                </a>
+                                <button type="button" data-dismiss="modal" class="btn white_btn">Отмена</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+
+    <div id="dialog_data_is_null" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true" class="modal fade">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                    <h4 id="myModalLabel2" class="modal-title">Нет данных</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="pole_diapozon2">
+                        <p>Нет данных для выбранного сочетания признаков.</p>
+                        <p>Попробуйте изменить настройку признаков и фильтров.</p>
+                    </div>
+
+                    <div class="modal_btns2">
+                        <button type="button" data-dismiss="modal" class="btn white_btn">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dialog_filters_is_empty" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true" class="modal fade">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                    <h4 id="myModalLabel2" class="modal-title">Фильтры</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="pole_diapozon2">
+                        <p>Выберите хотя бы один элемент из списка.</p>
+                    </div>
+
+                    <div class="modal_btns2">
+                        <button type="button" data-dismiss="modal" class="btn white_btn">Ок</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="add_new_value_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true" class="modal fade">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                    <h4 id="myModalLabel3" class="modal-title">Добавление нового значения</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="pole_diapozon2"></div>
+
+                    <div class="modal_btns2">
+                        <button type="button" id="add_new_value" class="btn white_btn">Добавить</button>
+                        <button type="button" data-dismiss="modal" class="btn white_btn">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="add_new_value_save_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true" class="modal fade">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                    <h4 id="myModalLabel3" class="modal-title">Добавление нового значения</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="pole_diapozon2">
+                        У вас уже имеются несохраненные изменения значений показателя.<br/>
+                        Добавление нового значения приведет к откату несохраненных данных.
+                    </div>
+
+                    <div class="modal_btns2">
+                        <button type="button" id="editor-save-all-values" class="btn white_btn">Сохранить все значения</button>
+                        <button type="button" data-dismiss="modal" class="btn white_btn">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="error_ohter_functions_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true" class="modal fade">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                    <h4 id="myModalLabel3" class="modal-title">Режим редактирования</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="pole_diapozon2">
+                        Для работы с данным функционалом необходимо выйти из режима редактирования. <br>
+                        При выходе из режима редактирования произойдет откат несохраненных изменений.
+                    </div>
+
+                    <div class="modal_btns2">
+                        <button type="button" id="editor-exit" class="btn white_btn">Выйти</button>
+                        <button type="button" data-dismiss="modal" class="btn white_btn">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<div class="pole_knopki">
+                  <button class="btn white_btn agrid-action-default-state" id="agrid-action-default-state2" style="display: none"><span class="icon-cross"></span>Отменить настройку</button>
+    
+                </div>
+    <div class="pole_knopki" id="agrid-editor-buttons-block"></div>
+
+        <div id="grid" class="subtbl" style="max-height: none;"></div>
+
+
+
+
+              <div id="modal_grafik_sogl2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade">
+                <div class="modal-dialog modal-sm">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                      <h4 id="myModalLabel" class="modal-title">Выберите диапазон</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="pole_diapozon2">
+                            <input type="text" class="form-control" placeholder="Все значения" style="display: inline;">
+                        </div>
+                        <div class="pole_diapozon2">
+                            <a href="#">Добавить другой диапазон</a>
+                        </div>
+
+
+                      <div class="modal_btns2">
+                        <button type="button" class="btn gray_btn">ОК</button>
+                        <button type="button" data-dismiss="modal" class="btn white_btn">Отмена</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--  end   -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabspass tabsdata_tab_content hide">
+          <div class="tabsdata_item">
+            <div class="ocol">
+              <div class="pass_l">
+                  
+                      <div class="pass_item">
+                          <div class="pass_name"><a id="methodologyToggle" class="lnk full_txt" style="display: none;" onclick="toggleTextBlock('methodology');" href="#">Полный текст</a>Методика расчета</div>
+                          <div class="pass_txt">
+                              <div id="methodologyFull" style="display: none;">
+                                  Отражаются суммарные объемы перевозки грузов, выполненные по дорогам общего пользования, грузоперевозящими автомобилями: грузовыми (включая грузовые такси), пикапами и легковыми фургонами на шасси легковых автомобилей и автоприцепами, как на коммерческой основе (за плату для заказчика - юридического или физического лица), так и для собственных производственных целей (собственные грузы).
+ Показатель формируется в соответствии с Официальной статистической методологией формирования официальной статистической информации (приказ Росстата от 30.09.2025 № 546).
+                              </div>
+                              <div id="methodologyPreview"></div>
+                          </div>
+                          <script src="/js/util.js"></script>
+                          <script type="text/javascript">
+                              function toggleTextBlock(blockId) {
+                                  var previewTextBlock = document.getElementById(blockId+'Preview');
+                                  var fullTextBlock = document.getElementById(blockId+'Full');
+                                  var blockToggle = document.getElementById(blockId+'Toggle');
+                                  if (fullTextBlock.style.display == "none") {
+                                      previewTextBlock.style.display = "none";
+                                      fullTextBlock.style.display = "block";
+                                      blockToggle.innerHTML = "Сокращенный текст";
+                                  } else {
+                                      fullTextBlock.style.display = "none";
+                                      previewTextBlock.style.display = "block";
+                                      blockToggle.innerHTML = "Полный текст";
+                                  }
+                              }
+
+                              function initTextBlock(blockId) {
+                                  var fullLengthContainer = document.getElementById(blockId+"Full");
+                                  var fullLengthContent = fullLengthContainer.innerHTML;
+                                  var clippedContent = new CutString(fullLengthContent, 500).cut();
+                                  if (fullLengthContent == clippedContent)
+                                      fullLengthContainer.style.display = "block";
+                                  else {
+                                      document.getElementById(blockId+"Preview").innerHTML = clippedContent;
+                                      document.getElementById(blockId+"Toggle").style.display = "block";
+                                  }
+                              }
+
+                              initTextBlock("methodology");
+                          </script>
+                      
+                      </div>
+                  
+                  
+                      <div class="pass_item">
+                          <div class="pass_name"><a id="commentIndicatorToggle" class="lnk full_txt" style="display: none;" onclick="toggleTextBlock('commentIndicator');" href="#">Полный текст</a>Комментарии</div>
+                          <div class="pass_txt">
+                              <div id="commentIndicatorFull" style="display: none;"> Статистические данные по Российской Федерации публикуются без учета статистической информации по Донецкой Народной Республике (ДНР), Луганской Народной Республике (ЛНР), Запорожской и Херсонской областям</div>
+                              <div id="commentIndicatorPreview"></div>
+                          </div>
+                          <script type="text/javascript">
+                              initTextBlock("commentIndicator");
+                          </script>
+                      </div>
+                  
+                  <div class="pass_item">
+                      <div class="pass_name">Ведомство</div>
+                      <div class="pass_txt">
+                          <p>Федеральная служба государственной статистики</p>
+                          Управление статистики рыночных услуг
+                      
+                          <hr>
+                          <div class="pass_lbl">Разделы ФПСР</div>
+                          <p>
+                          
+                              <ul>
+                                  
+                                      <li><a href="/organizations/?expandId=1293270#fpsr1293270">1.24.1. Перевозка грузов и грузооборот по видам транспорта </a></li>
+                                  
+                              </ul>
+                          
+                          
+                          </p>
+                      
+                      </div>
+                  </div>
+                
+                
+              </div>
+              <div class="pass_r">
+                  
+                      <div class="pass_item">
+                          <div class="pass_name">Ответственный</div>
+                          <div class="pass_txt">
+                              <p>
+                                  
+                                      Ответственный исполнитель
+                                  
+                              </p>
+                              
+                                  <a href="tel:(000)000-00-00" class="lnk tel_mail"><span class="icon-phone"></span>(000)000-00-00</a>
+                              
+                              <br>
+                              
+                                  <a href="mailto:contact@example.com" class="lnk tel_mail"><span class="icon-mail"></span>contact@example.com</a>
+                              
+                          </div>
+                      </div>
+                  
+                  
+                  
+                  
+                  
+                  <div class="pass_item">
+                      <div class="pass_name">Характеристики</div>
+                      <div class="pass_txt">
+                          
+                              <div class="pass_lbl">Периодичность сбора (разработки) и временной ряд показателя</div>
+                              <ul>
+                                  
+                                      <li>
+                                          Годовая
+                                          
+                                              <br><span class="sp_pi_g">
+                                    Характеристика: не охарактеризована<br>
+                                    Представляется: 2-я декада июня<br>
+                                  </span>
+                                          
+                                      </li>
+                                  
+                              </ul>
+                              <hr>
+                          
+                          
+                              <div class="pass_lbl">Единицы измерения</div>
+                              <ul>
+                                  
+                                      <li>тысяча тонн</li>
+                                  
+                              </ul>
+                              <hr>
+                          
+                          
+                              <div class="pass_lbl">Период действия</div>
+                              <p>
+                                  с 01.01.2016
+                                  
+                              </p>
+                              <hr>
+                          
+                          
+                              <div class="pass_lbl">Длина временного ряда</div>
+                              <p>2016 - 2025</p>
+                              <hr>
+                          
+                          
+                              <div class="pass_lbl">Последнее обновление данных</div>
+                              <p>23.06.2026</p>
+                              <hr>
+                          
+                          
+                              <div class="pass_lbl">Признаки (классификаторы и справочники)</div>
+                              <ul>
+                                  
+                                      <li>
+                                          Классификатор объектов административно-территориального деления (ОКАТО)
+                                      </li>
+                                  
+                              </ul>
+                          
+                      </div>
+                  </div>
+                  <div class="pass_item">
+                      <div class="pass_name">Источники и способ формирования показателя</div>
+                      <div class="pass_txt">
+                          <p>
+                          
+                          <ul>
+                              
+                                  <li><a href="/form/10152">1-ТР (автотранспорт)-год Сведения об автотранспорте и о протяженности ведомственных и частных автодорог</a></li>
+                              
+                          </ul>
+                          
+                          
+                          </p>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="footer_push"></div>
+    </div>
+    
+
+<footer>
+    <div class="ocol">
+        <div class="df df1">
+            <div class="footer_logo"><a href="/" class="footer_logo">
+                <div class="logo icon-footer_logo"></div>
+                <div class="txt">
+                    <div class="sp1">ЕМИСС</div>
+                    <div class="sp2">Государственная статистика</div>
+                </div></a></div>
+        </div>
+        <div class="df df2">
+            <div class="ttl">Информация о сайте</div>
+            <ul class="ul_footer">
+                <li><a href="/documents_normative" class="lnk footlnk">Нормативные документы</a></li>
+                <li><a href="#" data-target="#modal_error_sogl" data-toggle="modal" class="lnk footlnk">Сообщить об ошибке</a></li>
+                <!--
+                <li><a href="https://metrika.yandex.ru/stat/?counter_id=18614431" target="blank" class="lnk footlnk">Статистика сайта</a></li>
+                -->
+                <li><a href="https://metrika.yandex.ru/dashboard?group=day&period=quarter&id=18614431" target="blank" class="lnk footlnk">Статистика сайта</a></li>
+                <li><a href="#" data-target="#about_servis" data-toggle="modal" class="lnk footlnk">О сервисе</a></li>
+                <li><a href="/opendata" class="lnk footlnk">Открытые данные</a></li>
+            </ul>
+
+            <div id="about_servis" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade">
+                <div class="modal-dialog modal-m">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                            <h4 id="myModalLabel" class="modal-title">О ЕМИСС</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="tsl_cont">
+                                <div class="tsl">
+                                    <div class="site_logo">
+                                        <a href="index.html" class="main_logo">
+                                            <div class="logo icon-footer_logo"></div>
+                                            <div class="txt">
+                                                <div class="sp1">ЕМИСС</div>
+                                                <div class="sp2">Государственная статистика</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <p>
+                                    <span class="tsl_strong">Единая межведомственная информационно-статистическая система
+                                    (ЕМИСС)</span> разрабатывалась в рамках реализации федеральной целевой
+                                    программы «Развитие государственной статистики России в 2007-2011
+                                    годах».
+                                </p>
+
+                                <div class="gray_cont">
+                                    <p>
+                                        Целью создания Системы является обеспечение доступа
+                                        с использованием сети Интернет государственных органов,
+                                        органов местного самоуправления, юридических и физических
+                                        лиц к официальной статистической информации, включая
+                                        метаданные, формируемой в соответствии с федеральным
+                                        планом статистических работ.
+                                    </p>
+                                </div>
+
+                                <p>
+                                    <span class="tsl_strong">ЕМИСС представляет собой государственный информационный ресурс</span>,
+                                    объединяющий официальные государственные информационные
+                                    статистические ресурсы, формируемые субъектами официального
+                                    статистического учета в рамках реализации федерального плана
+                                    статистических работ.
+                                </p>
+
+                                <p>
+                                    Доступ к официальной статистической информации, включенной в
+                                    состав статистических ресурсов, входящих в межведомственную
+                                    систему, осуществляется на безвозмездной и недискриминационной
+                                    основе.
+                                </p>
+
+                                <div class="gray_cont">
+                                    <p>
+                                        Система введена в эксплуатацию совместным приказом
+                                        Минкомсвязи России и Росстата от 16 ноября 2011 года <br/>
+                                        <a href="#" class="lnk">№318/461</a>.
+                                    </p>
+                                </div>
+
+                                <p>
+                                    Координатором ЕМИСС является Федеральная служба государственной
+                                    статистики.
+                                </p>
+                                <div class="tsl_iconp">
+                                    <a href="http://www.gks.ru/" class="lnk" target="_blank">
+                                        <span class="icon-rosstat"></span>
+                                    </a>
+                                </div>
+
+                                <p>
+                                    Оператором ЕМИСС является Министерство связи и массовых
+                                    коммуникаций РФ».
+                                </p>
+                                <div class="tsl_iconp">
+                                    <div class="footer_gerb">
+                                        <a href="https://digital.gov.ru" class="lnk a_footer_gerb" target="_blank">
+                                            <div class="logo icon-footer_gerb"></div>
+                                            <div class="txt">
+                                                <div class="sp1">Минцифры</div>
+                                                <div class="sp2">России</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="tsl_contakts">
+                                    <h2 class="h_publ">Контактная информация</h2>
+                                    <p>
+                                        В случае возникновения проблем при работе с системой пишите нам: <br/>
+                                        <a href="mailto:emiss@digital.gov.ru" class="lnk">emiss@digital.gov.ru</a> <br/>
+                                        <!--
+                                        или звоните: <br/>
+                                        <a href="tel:88003018647" class="lnk footlnk"><span class="icon-phone"></span>8 (800) 301-86-47</a>
+                                        <br/> -->
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="modal_error_sogl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="icon-cross"></span></button>
+                            <h4 id="myModalLabel" class="modal-title">Сообщить об ошибке</h4>
+                        </div>
+                        <div class="modal-body">
+                                    
+<form id="helpdeskForm" name="helpdeskForm" onsubmit="return submitToHelpDesk();" action="/communication/messages/sendToHelpdesk" method="post">
+                                <input type="hidden" name="struts.token.name" value="token" />
+<input type="hidden" name="token" value="DXZFR4H32Y9QBLYHKN1I02XGVDJ6TEHI" />
+                                <input type="hidden" name="redirectUrl" value="%2Findicator%2F57791%3Fid%3D57791" id="helpdeskForm_redirectUrl"/>
+                                <div class="maxlength_text">
+                                    <textarea id="helpdeskMessage" name="messageContent" rows="5" placeholder="Введите текст сообщения" class="form-control" maxlength="1500"></textarea>
+                                    <div class="textareaFeedback">1500</div>
+                                </div>
+
+                                <div class="hr_modal">
+                                    <hr>
+                                </div>
+
+                                
+                                    <h3 class="h3_modal">Введите данные для обратной связи</h3>
+                                    <input type="text" class="form-control fc-mb10" placeholder="Имя" name="senderName">
+                                    <input type="email" class="form-control" placeholder="Электронная почта" name="senderEmail">
+                                    <div class="hr_modal">
+                                        <hr>
+                                    </div>
+                                
+
+                                <div id="helpdeskCaptcha"></div>
+
+                                <div class="modal_btns2">
+                                    <button type="submit" class="btn gray_btn">Отправить</button>
+                                    <button type="button" data-dismiss="modal" class="btn white_btn">Отмена</button>
+                                </div>
+                            </form>
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="df df3">
+            <!--
+                <div class="ttl">Горячая линия</div>
+                <ul class="ul_footer">
+                    <li><a href="tel:88003018647" class="lnk footlnk"><span class="icon-phone"></span>8 (800) 301-86-47</a></li>
+                </ul>
+            -->
+        </div>
+        <div class="df df4">
+            <div class="ttl">Электронная почта</div>
+            <ul class="ul_footer">
+                <li><a href="mailto:emiss@digital.gov.ru" class="footlnk"><span class="icon-mail"></span>emiss@digital.gov.ru</a></li>
+            </ul>
+        </div>
+        <hr class="foot_hr">
+        <div class="df df5">
+            <div class="txt">
+                <div class="icon-cc"></div>
+                <div><span class="sp1">Все материалы сайта доступны по лицензии</span><a class="lnk lnk_lic" href="http://creativecommons.org/licenses/by/3.0/deed.ru">Creative Common Attribution 3.0</a><br><span class="sp1">Официальный интернет-ресурс.</span></div>
+            </div>
+        </div>
+        <div class="df df6">
+            <div class="footer_gerb"><a href="https://digital.gov.ru" class="a_footer_gerb" target="_blank">
+                <div class="logo icon-footer_gerb"></div>
+                <div class="txt">
+                    <div class="sp1">Минцифры</div>
+                    <div class="sp2">России</div>
+                </div></a></div>
+        </div>
+        <div class="df df7">
+            <a href="http://www.gks.ru/" class="lnk" target="_blank">
+                <span class="icon-rosstat"></span>
+            </a>
+        </div>
+    </div>
+</footer>
+<script type="text/javascript" src="/common/js/plugins.js"></script>
+<script type="text/javascript" src="/common/js/style.js"></script>
+<script>
+    function submitToHelpDesk() {
+        if ($('#helpdeskMessage').val().length == 0) {
+            alert('Нужно ввести текст сообщения');
+            return false;
+        }
+        if ($('#helpdeskForm [name=g-recaptcha-response]').val() === '') {
+            alert('Пройдите проверку reCaptcha');
+            return false;
+        } else {
+            alert('Спасибо! Ваше сообщение отправлено.');
+            return true;
+        }
+    }
+
+    var RecaptchaCallback = function(){
+        grecaptcha.render('helpdeskCaptcha', {'sitekey' : '6Le3MwkTAAAAAIMRG92-JXelRqpYt-TdJFCmvSq9'});
+        if (document.getElementById('questionCaptcha'))
+            grecaptcha.render('questionCaptcha', {'sitekey' : '6Le3MwkTAAAAAIMRG92-JXelRqpYt-TdJFCmvSq9'});
+        if (document.getElementById('messageCaptcha'))
+            grecaptcha.render('messageCaptcha', {'sitekey' : '6Le3MwkTAAAAAIMRG92-JXelRqpYt-TdJFCmvSq9'});
+    };
+</script>
+
+
+
+
+<script src="//www.google.com/recaptcha/api.js?onload=RecaptchaCallback&render=explicit" async defer></script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter18614431 = new Ya.Metrika({id:18614431});
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="//mc.yandex.ru/watch/18614431" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- google-analytics counter -->
+<script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39452977-1']);
+    _gaq.push(['_setDomainName', 'fedstat.ru']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+</script>
+<!-- /google-analytics counter -->
+
+    
+    
+
+  
+  </body>
+    <script language="javascript" type="text/javascript">
+        function submitQuestion() {
+            if ($('#questionText').val().length == 0) {
+                alert('Нужно ввести текст воспроса');
+                return false;
+            }
+            if ($('#questionEmail').val().length == 0) {
+                alert('Необходимо указать адрес электронной почты для отправки ответа');
+                return false;
+            }
+            if ($('#questionForm [name=g-recaptcha-response]').val() === '') {
+                alert('Пройдите проверку reCaptcha');
+                return false;
+            } else {
+                alert('Спасибо! Ваш вопрос отправлен.');
+                return true;
+            }
+        }
+    </script>
+  </body>
+</html>
