@@ -1,0 +1,378 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     37.608056,
+     55.689444
+    ]
+   },
+   "properties": {
+    "id": 6,
+    "tags": [
+     "Дорожно-транспортные происшествия"
+    ],
+    "light": "В темное время суток, освещение включено",
+    "point": {
+     "lat": 55.689444,
+     "long": 37.608056
+    },
+    "nearby": [
+     "Отсутствие в непосредственной близости объектов УДС и объектов притяжения",
+     "Перегон (нет объектов на месте ДТП)"
+    ],
+    "region": "Котловка",
+    "scheme": "610",
+    "address": "г Москва, ул Черемушкинская Б., 1",
+    "weather": [
+     "Пасмурно"
+    ],
+    "category": "Наезд на препятствие",
+    "datetime": "2015-01-01 00:23:00",
+    "severity": "С погибшими",
+    "vehicles": [
+     {
+      "year": 2000,
+      "brand": "DODGE",
+      "color": "Фиолетовый",
+      "model": "300C",
+      "category": "D-класс (средний) до 4,6 м",
+      "participants": [
+       {
+        "role": "Пассажир"
+       },
+       {
+        "role": "Водитель"
+       }
+      ]
+     }
+    ],
+    "dead_count": 1,
+    "gibdd_number": "157054063",
+    "participants": [],
+    "injured_count": 1,
+    "parent_region": "Москва",
+    "road_conditions": [
+     "Отсутствие, плохая различимость вертикальной разметки"
+    ],
+    "participants_count": 2,
+    "participant_categories": [
+     "Все участники"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     37.666744,
+     55.695831
+    ]
+   },
+   "properties": {
+    "id": 2217,
+    "tags": [
+     "Дорожно-транспортные происшествия"
+    ],
+    "light": "Светлое время суток",
+    "point": {
+     "lat": 55.695831,
+     "long": 37.666744
+    },
+    "nearby": [
+     "Отсутствие в непосредственной близости объектов УДС и объектов притяжения",
+     "Перегон (нет объектов на месте ДТП)"
+    ],
+    "region": "Нагатино-Садовники",
+    "scheme": "070",
+    "address": "г Москва, пр-кт Андропова, 8",
+    "weather": [
+     "Ясно"
+    ],
+    "category": "Столкновение",
+    "datetime": "2015-01-06 11:30:00",
+    "severity": "Легкий",
+    "vehicles": [
+     {
+      "year": 2005,
+      "brand": "TOYOTA",
+      "color": "Серый",
+      "model": "Rio",
+      "category": "D-класс (средний) до 4,6 м",
+      "participants": [
+       {
+        "role": "Водитель"
+       }
+      ]
+     },
+     {
+      "year": 2011,
+      "brand": "TOYOTA",
+      "color": "Серый",
+      "model": "Rio",
+      "category": "D-класс (средний) до 4,6 м",
+      "participants": [
+       {
+        "role": "Пассажир"
+       },
+       {
+        "role": "Пассажир"
+       },
+       {
+        "role": "Пассажир"
+       },
+       {
+        "role": "Водитель"
+       }
+      ]
+     },
+     {
+      "year": 2012,
+      "brand": "VOLVO",
+      "color": "Красный",
+      "model": "CX-5",
+      "category": "Самосвалы",
+      "participants": [
+       {
+        "role": "Водитель"
+       }
+      ]
+     }
+    ],
+    "dead_count": 0,
+    "gibdd_number": "157625206",
+    "participants": [],
+    "injured_count": 4,
+    "parent_region": "Москва",
+    "road_conditions": [
+     "Отсутствие пешеходных ограждений в необходимых местах"
+    ],
+    "participants_count": 6,
+    "participant_categories": [
+     "Все участники"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     37.685,
+     55.893889
+    ]
+   },
+   "properties": {
+    "id": 104,
+    "tags": [
+     "Дорожно-транспортные происшествия"
+    ],
+    "light": "В темное время суток, освещение включено",
+    "point": {
+     "lat": 55.893889,
+     "long": 37.685
+    },
+    "nearby": [
+     "Отсутствие в непосредственной близости объектов УДС и объектов притяжения",
+     "Перегон (нет объектов на месте ДТП)"
+    ],
+    "region": "Северное Медведково",
+    "scheme": "060",
+    "address": null,
+    "weather": [
+     "Пасмурно"
+    ],
+    "category": "Столкновение",
+    "datetime": "2015-01-01 04:00:00",
+    "severity": "Легкий",
+    "vehicles": [
+     {
+      "year": 2005,
+      "brand": "RENAULT",
+      "color": "Белый",
+      "model": "Logan",
+      "category": "Фургоны",
+      "participants": [
+       {
+        "role": "Водитель"
+       }
+      ]
+     },
+     {
+      "year": 2011,
+      "brand": "HYUNDAI",
+      "color": "Серый",
+      "model": "Accent",
+      "category": "В-класс (малый) до 3,9 м",
+      "participants": [
+       {
+        "role": "Водитель"
+       }
+      ]
+     },
+     {
+      "year": 2013,
+      "brand": "SKODA",
+      "color": "Желтый",
+      "model": "RAV 4",
+      "category": "В-класс (малый) до 3,9 м",
+      "participants": [
+       {
+        "role": "Водитель"
+       }
+      ]
+     }
+    ],
+    "dead_count": 0,
+    "gibdd_number": "157156964",
+    "participants": [],
+    "injured_count": 1,
+    "parent_region": "Москва",
+    "road_conditions": [
+     "Не установлены"
+    ],
+    "participants_count": 3,
+    "participant_categories": [
+     "Все участники"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "id": 8245,
+    "tags": [
+     "Дорожно-транспортные происшествия"
+    ],
+    "light": "Светлое время суток",
+    "point": {
+     "lat": null,
+     "long": null
+    },
+    "nearby": [
+     "Отсутствие в непосредственной близости объектов УДС и объектов притяжения",
+     "Перегон (нет объектов на месте ДТП)"
+    ],
+    "region": "Новофёдоровское поселение",
+    "scheme": "040",
+    "address": "г Москва, М-3 Украина Москва - Калуга - Брянск - граница с Украиной (основное направление), 57км",
+    "weather": [
+     "Ясно"
+    ],
+    "category": "Столкновение",
+    "datetime": "2015-01-21 08:00:00",
+    "severity": "Легкий",
+    "vehicles": [
+     {
+      "year": 2000,
+      "brand": "HYUNDAI",
+      "color": "Иные цвета",
+      "model": "Accent",
+      "category": "Одноэтажные длиной от 8 до 12 м",
+      "participants": [
+       {
+        "role": "Водитель"
+       }
+      ]
+     },
+     {
+      "year": 2013,
+      "brand": "VOLVO",
+      "color": "Иные цвета",
+      "model": "CX-5",
+      "category": "D-класс (средний) до 4,6 м",
+      "participants": [
+       {
+        "role": "Водитель"
+       }
+      ]
+     }
+    ],
+    "dead_count": 0,
+    "gibdd_number": "160573536",
+    "participants": [],
+    "injured_count": 1,
+    "parent_region": "Москва",
+    "road_conditions": [
+     "Не установлены"
+    ],
+    "participants_count": 2,
+    "participant_categories": [
+     "Все участники"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     37.752778,
+     55.661667
+    ]
+   },
+   "properties": {
+    "id": 22,
+    "tags": [
+     "Дорожно-транспортные происшествия"
+    ],
+    "light": "В темное время суток, освещение включено",
+    "point": {
+     "lat": 55.661667,
+     "long": 37.752778
+    },
+    "nearby": [
+     "Жилые дома индивидуальной застройки",
+     "Нерегулируемый пешеходный переход",
+     "Отсутствие в непосредственной близости объектов УДС и объектов притяжения",
+     "Перегон (нет объектов на месте ДТП)"
+    ],
+    "region": "Марьино",
+    "scheme": "740",
+    "address": "г Москва, ул Братиславская, 10",
+    "weather": [
+     "Пасмурно"
+    ],
+    "category": "Наезд на пешехода",
+    "datetime": "2015-01-01 01:00:00",
+    "severity": "Тяжёлый",
+    "vehicles": [
+     {
+      "year": 2008,
+      "brand": "MITSUBISHI",
+      "color": "Зеленый",
+      "model": "ВАЗ 2123 и модификации",
+      "category": "Минивэны и универсалы повышенной вместимости",
+      "participants": [
+       {
+        "role": "Водитель"
+       }
+      ]
+     }
+    ],
+    "dead_count": 0,
+    "gibdd_number": "157125004",
+    "participants": [
+     {
+      "role": "Пешеход"
+     }
+    ],
+    "injured_count": 1,
+    "parent_region": "Москва",
+    "road_conditions": [
+     "Не установлены"
+    ],
+    "participants_count": 2,
+    "participant_categories": [
+     "Все участники",
+     "Пешеходы"
+    ]
+   }
+  }
+ ]
+}

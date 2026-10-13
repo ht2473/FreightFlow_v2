@@ -71,6 +71,7 @@ const (
 	// mixedAttribution — слои, где официальные записи дополнены записями OSM.
 	mixedAttribution = mosAttribution + "; " + osmAttribution
 	// dtpAttribution — ДТП по данным ГИБДД в обработке «Карты ДТП».
+	dtpAttribution = "«Карта ДТП», dtp-stat.ru (данные ГИБДД)"
 	// cargoFrameAttribution — перечень улиц Дептранса, сопоставленный с участками OSM.
 	cargoFrameAttribution = "Дептранс Москвы, transport.mos.ru; " + osmAttribution
 )
@@ -111,6 +112,18 @@ var poiProps = []Property{
 	{Name: "source", Title: "Источник записи", Kind: "enum", Labels: map[string]string{
 		"mos": "Портал открытых данных Москвы", "osm": "OpenStreetMap",
 	}},
+}
+
+var incidentProps = []Property{
+	{Name: "occurred", Title: "Дата и время", Kind: "text"},
+	{Name: "category", Title: "Вид ДТП", Kind: "text"},
+	{Name: "severity", Title: "Тяжесть", Kind: "enum", Labels: map[string]string{
+		"fatal": "с погибшими", "severe": "тяжёлый вред здоровью", "light": "лёгкий вред здоровью", "none": "без пострадавших",
+	}},
+	{Name: "dead", Title: "Погибших", Kind: "number"},
+	{Name: "injured", Title: "Раненых", Kind: "number"},
+	{Name: "vehicles", Title: "Транспортные средства", Kind: "text"},
+	{Name: "address", Title: "Адрес", Kind: "text"},
 }
 
 // Registry — слои карты в порядке отрисовки снизу вверх.
@@ -339,6 +352,29 @@ var Registry = []Layer{
 			{Name: "customer", Title: "Заказчик", Kind: "text"},
 			{Name: "contractor", Title: "Исполнитель", Kind: "text"},
 		},
+	},
+	{
+		Code: "incidents", Group: "operations", Title: "ДТП с пострадавшими",
+		Description: "ДТП за последние три года и текущий по данным ГИБДД; цвет — тяжесть", Geometry: "point",
+		MinZoom: 12, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"operations"},
+		Attribution: dtpAttribution,
+		Style: Style{Kind: "category", Property: "severity", Categories: []Category{
+			{Values: []string{"fatal"}, Label: "С погибшими", Color: "crit"},
+			{Values: []string{"severe"}, Label: "Тяжёлый вред здоровью", Color: "warn"},
+			{Values: []string{"light", "none"}, Label: "Лёгкий вред здоровью", Color: "n9"},
+		}},
+		Properties: incidentProps,
+	},
+	{
+		Code: "freight_incidents", Group: "operations", Title: "ДТП с грузовым транспортом",
+		Description: "ДТП с участием грузовиков, тягачей, самосвалов, прицепов и фургонов за последние три года", Geometry: "point",
+		MinZoom: 10, MaxZoom: 16, Permission: identity.PermMapView, Domains: []string{"operations"},
+		Attribution: dtpAttribution,
+		Style: Style{Kind: "category", Property: "heavy_freight", Categories: []Category{
+			{Values: []string{"true"}, Label: "Грузовик, тягач, самосвал, прицеп", Color: "cat2"},
+			{Values: []string{"false"}, Label: "Грузовой фургон", Color: "cat5"},
+		}},
+		Properties: incidentProps,
 	},
 	{
 		Code: "commissioning", Group: "objects", Title: "Ввод объектов в эксплуатацию",
