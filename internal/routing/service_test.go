@@ -70,3 +70,38 @@ func TestMatrixClosedZone(t *testing.T) {
 		t.Errorf("too large: %v", err)
 	}
 }
+
+func TestRouteAvoidedByTrace(t *testing.T) {
+	t.Parallel()
+	pool := dbtest.New(t)
+	loadDistrict(t, pool)
+	// Запрет грузовиков на Газгольдерной улице — на пути легкового автомобиля из записанного ответа.
+	var n int
+	if err := pool.QueryRow(t.Context(), `
+		WITH r AS (
+			INSERT INTO network.restriction (id, segment_id, kind, raw, origin, source_code)
+			SELECT uuidv7(), id, 'hgv_ban', 'no', 'osm', 'test' FROM network.road_segment WHERE osm_id = 193708567
+			RETURNING 1)
+		SELECT count(*) FROM r`).Scan(&n); err != nil || n != 1 {
+		t.Fatalf("restriction: %d, %v", n, err)
+	}
+	c, request := recorded(t, map[string]string{"/route": "route", "/trace_attributes": "trace_attributes"})
+	svc := NewService(pool, c)
+	out, err := svc.Route(t.Context(), RouteInput{
+		Points:  []Point{pointA, pointB},
+		Profile: Profile{GrossT: 20, PayloadT: 11, AxleLoadT: 10, HeightM: 4, WidthM: 2.55, LengthM: 10, EcoClass: 5},
+	})
+	if err != nil || out.Baseline == nil {
+		t.Fatalf("route: %v", err)
+	}
+	if body := request("/trace_attributes"); body["costing"] != "auto" {
+		t.Errorf("trace costing %v", body["costing"])
+	}
+	found := false
+	for _, a := range out.Avoided {
+		found = found || a.Kind == "hgv_ban" && a.Street == "Газгольдерная улица"
+	}
+	if !found {
+		t.Errorf("avoided %+v", out.Avoided)
+	}
+}

@@ -75,6 +75,12 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 	case errors.Is(err, routing.ErrNoAnalysis):
 		return problem.New(http.StatusNotFound, "no_analysis", "Сетевой анализ ещё не выполнен").
 			WithDetail("Граф анализа строится после загрузки дорожной сети")
+	case errors.Is(err, routing.ErrNoLocation):
+		return problem.New(http.StatusUnprocessableEntity, "no_location", "Точка далеко от дорог, доступных этому ТС").
+			WithDetail("Поставьте точку ближе к улице или проезду")
+	case errors.Is(err, routing.ErrLimit):
+		return problem.New(http.StatusUnprocessableEntity, "routing_limit", "Превышен предел службы маршрутизации").
+			WithDetail(err.Error())
 	case errors.Is(err, routing.ErrUnavailable):
 		return problem.New(http.StatusServiceUnavailable, "routing_unavailable", "Служба маршрутизации недоступна")
 	case errors.As(err, new(*routing.Error)):

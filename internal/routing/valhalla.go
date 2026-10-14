@@ -85,8 +85,24 @@ var ErrUnavailable = errors.New("valhalla: unavailable")
 // ErrNoRoute — путь между точками не найден (код 442).
 var ErrNoRoute = errors.New("valhalla: no route")
 
-// Is сопоставляет ошибку «путь не найден» с ErrNoRoute.
-func (e *Error) Is(target error) bool { return target == ErrNoRoute && e.Code == 442 }
+// ErrNoLocation — рядом с точкой нет дороги, доступной ТС (код 171).
+var ErrNoLocation = errors.New("valhalla: no suitable edges near location")
+
+// ErrLimit — превышен предел службы: число точек, расстояние, область (коды 150–158).
+var ErrLimit = errors.New("valhalla: service limit exceeded")
+
+// Is сопоставляет коды ошибок службы с ErrNoRoute, ErrNoLocation и ErrLimit.
+func (e *Error) Is(target error) bool {
+	switch target {
+	case ErrNoRoute:
+		return e.Code == 442
+	case ErrNoLocation:
+		return e.Code == 171
+	case ErrLimit:
+		return e.Code >= 150 && e.Code <= 158
+	}
+	return false
+}
 
 type location struct {
 	Lat              float64  `json:"lat"`
@@ -289,6 +305,91 @@ type Status struct {
 	Version  string `json:"version"`
 	Tileset  int64  `json:"tileset_last_modified"`
 	Services []any  `json:"available_actions"`
+}
+
+// Snap — привязка точки к сети: ближайший участок графа (линия OSM) и точка на нём.
+type Snap struct {
+	WayID    int64
+	Names    []string
+	Distance float64 // м
+	Point    Point
+}
+
+// Locate привязывает точки к сети для ТС; nil — рядом нет доступного участка.
+func (c *Client) Locate(ctx context.Context, pts []Point, t *Truck) ([]*Snap, error) {
+	body := map[string]any{
+		"locations":       locations(pts, 0),
+		"costing":         "truck",
+		"costing_options": costingOptions("truck", t),
+		"verbose":         true,
+	}
+	var resp []struct {
+		Edges []struct {
+			Lat      float64 `json:"correlated_lat"`
+			Lon      float64 `json:"correlated_lon"`
+			Distance float64 `json:"distance"`
+			Info     struct {
+				WayID int64    `json:"way_id"`
+				Names []string `json:"names"`
+			} `json:"edge_info"`
+		} `json:"edges"`
+	}
+	if err := c.post(ctx, "/locate", body, &resp); err != nil {
+		return nil, err
+	}
+	out := make([]*Snap, len(resp))
+	for i, r := range resp {
+		for _, e := range r.Edges {
+			if out[i] == nil || e.Distance < out[i].Distance {
+				out[i] = &Snap{
+					WayID: e.Info.WayID, Names: e.Info.Names, Distance: e.Distance,
+					Point: Point{Lon: e.Lon, Lat: e.Lat},
+				}
+			}
+		}
+	}
+	return out, nil
+}
+
+// EdgeAttr — участок пути по графу: линия OSM, название, класс, скорость, длина, номера точек
+// пути в начале и конце участка.
+type EdgeAttr struct {
+	WayID      int64    `json:"way_id"`
+	Names      []string `json:"names"`
+	RoadClass  string   `json:"road_class"`
+	Speed      float64  `json:"speed"`  // км/ч
+	Length     float64  `json:"length"` // км
+	Bridge     bool     `json:"bridge"`
+	Tunnel     bool     `json:"tunnel"`
+	BeginShape int      `json:"begin_shape_index"`
+	EndShape   int      `json:"end_shape_index"`
+}
+
+// TraceAttributes сопоставляет линию пути с графом и возвращает участки, по которым она идёт;
+// costing — как у построенного пути (auto для пути без ограничений).
+func (c *Client) TraceAttributes(ctx context.Context, shape []Point, costing string, t *Truck) ([]EdgeAttr, error) {
+	pts := make([]location, len(shape))
+	for i, p := range shape {
+		pts[i] = location{Lat: p.Lat, Lon: p.Lon}
+	}
+	body := map[string]any{
+		"shape":           pts,
+		"costing":         costing,
+		"costing_options": costingOptions(costing, t),
+		"shape_match":     "map_snap",
+		"filters": map[string]any{
+			"attributes": []string{
+				"edge.way_id", "edge.names", "edge.length", "edge.speed", "edge.road_class", "edge.bridge",
+				"edge.tunnel", "edge.begin_shape_index", "edge.end_shape_index",
+			},
+			"action": "include",
+		},
+	}
+	var resp struct {
+		Edges []EdgeAttr `json:"edges"`
+	}
+	err := c.post(ctx, "/trace_attributes", body, &resp)
+	return resp.Edges, err
 }
 
 // Status проверяет готовность службы.

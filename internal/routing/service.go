@@ -208,15 +208,21 @@ func (s *Service) avoided(ctx context.Context, baseline Route, p Profile) ([]Avo
 	if err != nil || line == nil {
 		return nil, err
 	}
-	rows, err := s.pool.Query(ctx, `
-		WITH b AS (
-		    SELECT g, ST_Buffer(g::geography, 8)::geometry AS corridor
-		    FROM (SELECT ST_SetSRID(ST_GeomFromGeoJSON($1), 4326) AS g) x
-		), seg AS (
+	// Участки пути — линии OSM, по которым служба провела путь (граф собран из тех же линий);
+	// если сопоставление не удалось (длинный путь сверх предела службы) — по коридору 8 м.
+	ways, err := s.routeWays(ctx, baseline)
+	segments, path := `SELECT s.id, s.name, s.length_m FROM network.road_segment s WHERE s.osm_id = ANY ($1::bigint[])`, any(ways)
+	if err != nil || len(ways) == 0 {
+		segments = `
 		    SELECT s.id, s.name, s.length_m
-		    FROM network.road_segment s, b
+		    FROM network.road_segment s,
+		         (SELECT ST_Buffer(ST_SetSRID(ST_GeomFromGeoJSON($1::text), 4326)::geography, 8)::geometry AS corridor) b
 		    WHERE s.geom && b.corridor AND ST_Intersects(s.geom, b.corridor)
-		      AND ST_Length(ST_Intersection(s.geom, b.corridor)::geography) > 0.6 * s.length_m
+		      AND ST_Length(ST_Intersection(s.geom, b.corridor)::geography) > 0.6 * s.length_m`
+		path = string(line)
+	}
+	rows, err := s.pool.Query(ctx, `
+		WITH seg AS (`+segments+`
 		)
 		SELECT e.kind, coalesce(seg.name, ''), e.value::float8, coalesce(e.origins, '{}'), count(*), sum(seg.length_m)
 		FROM seg JOIN network.restriction_effective e ON e.segment_id = seg.id
@@ -231,7 +237,7 @@ func (s *Service) avoided(ctx context.Context, baseline Route, p Profile) ([]Avo
 		       OR (e.kind = 'maxlength' AND e.value < $7))
 		GROUP BY e.kind, seg.name, e.value, e.origins
 		ORDER BY sum(seg.length_m) DESC
-		LIMIT 50`, string(line), p.Hazmat, p.GrossT, p.AxleLoadT, p.HeightM, p.WidthM, p.LengthM)
+		LIMIT 50`, path, p.Hazmat, p.GrossT, p.AxleLoadT, p.HeightM, p.WidthM, p.LengthM)
 	if err != nil {
 		return nil, fmt.Errorf("avoided restrictions: %w", err)
 	}
@@ -240,6 +246,27 @@ func (s *Service) avoided(ctx context.Context, baseline Route, p Profile) ([]Avo
 		err := row.Scan(&a.Kind, &a.Street, &a.Value, &a.Origins, &a.Segments, &a.LengthM)
 		return a, err
 	})
+}
+
+// routeWays — линии OSM пути легкового автомобиля по сопоставлению с графом службы.
+func (s *Service) routeWays(ctx context.Context, r Route) ([]int64, error) {
+	var shape []Point
+	for _, l := range r.Legs {
+		shape = append(shape, l.Shape...)
+	}
+	edges, err := s.vh.TraceAttributes(ctx, shape, "auto", nil)
+	if err != nil {
+		return nil, err
+	}
+	seen := map[int64]bool{}
+	var ways []int64
+	for _, e := range edges {
+		if e.WayID != 0 && !seen[e.WayID] {
+			seen[e.WayID] = true
+			ways = append(ways, e.WayID)
+		}
+	}
+	return ways, nil
 }
 
 // zonesCrossed — закрытые для ТС зоны, через которые проходит путь «без ограничений»; зона — с
