@@ -113,6 +113,17 @@ func TestTransformDistrict(t *testing.T) {
 	if n := count(t, pool, `SELECT count(*) FROM network.restriction WHERE kind = 'maxweight' AND (value IS NULL OR unit <> 't')`); n != 0 {
 		t.Fatalf("maxweight without value: %d", n)
 	}
+	// Величина — всё число тега («4.5» → 4,5; «4» → 4; «3500 kg» → 3,5).
+	var parsed string
+	if err := pool.QueryRow(t.Context(), `SELECT concat_ws(' ', network.parse_measure('4.5'), network.parse_measure('4'),
+		network.parse_measure('3,5 t'), network.parse_measure('4.2 m'), network.parse_measure('3500 kg'),
+		network.parse_measure('none'))`).Scan(&parsed); err != nil || parsed != "4.5 4 3.5 4.2 3.5000000000000000" {
+		t.Fatalf("parse_measure: %q, %v", parsed, err)
+	}
+	if n := count(t, pool, `SELECT count(*) FROM network.restriction
+		WHERE origin = 'osm' AND raw ~ '^[0-9]+(\.[0-9]+)?$' AND value IS DISTINCT FROM raw::numeric`); n != 0 {
+		t.Fatalf("restriction value differs from tag: %d", n)
+	}
 
 	// Повторный перенос того же снимка: идентификаторы и даты появления не меняются.
 	before := map[string]string{}
