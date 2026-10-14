@@ -8,6 +8,7 @@ import (
 	ogenerrors "github.com/ogen-go/ogen/ogenerrors"
 
 	"freightflow/internal/api/gen"
+	"freightflow/internal/facility"
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
 	"freightflow/internal/platform/problem"
@@ -69,6 +70,10 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 	case errors.Is(err, routing.ErrNoRoute):
 		return problem.New(http.StatusUnprocessableEntity, "no_route", "Маршрут для этого ТС не найден").
 			WithDetail("Между точками нет пути с учётом ограничений и закрытых зон")
+	case errors.Is(err, facility.ErrNotFound):
+		return problem.NotFound
+	case errors.Is(err, facility.ErrBadFilter):
+		return problem.BadRequest.WithDetail(err.Error())
 	case errors.Is(err, routing.ErrMatrixTooLarge):
 		return problem.New(http.StatusUnprocessableEntity, "matrix_too_large", "Слишком большая матрица").
 			WithDetail("Источников × целей — не более 2 500")

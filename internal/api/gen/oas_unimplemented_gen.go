@@ -70,6 +70,15 @@ func (UnimplementedHandler) ChangePassword(ctx context.Context, req *ChangePassw
 	return ht.ErrNotImplemented
 }
 
+// CompareFacilities implements compareFacilities operation.
+//
+// Сравнение объектов (2–4).
+//
+// GET /facilities/compare
+func (UnimplementedHandler) CompareFacilities(ctx context.Context, params CompareFacilitiesParams) (r []FacilityCard, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ConfirmTotp implements confirmTotp operation.
 //
 // Подтвердить подключение кодом из приложения.
@@ -113,6 +122,29 @@ func (UnimplementedHandler) CreateUser(ctx context.Context, req *CreateUser) (r 
 // DELETE /me/totp
 func (UnimplementedHandler) DisableTotp(ctx context.Context, req *PasswordConfirmation) error {
 	return ht.ErrNotImplemented
+}
+
+// FacilityFacets implements facilityFacets operation.
+//
+// Распределения выборки по типу, округу, кольцу и
+// достоверности; в каждом фасете учитываются все
+// фильтры, кроме его собственного.
+//
+// GET /facilities/facets
+func (UnimplementedHandler) FacilityFacets(ctx context.Context, params FacilityFacetsParams) (r *FacilityFacets, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetFacility implements getFacility operation.
+//
+// Строка реестра, геометрия, достоверность с причинами,
+// официальные источники, время до МКАД, ТТК, центра и ж/д
+// пунктов по профилям ТС, ограничения в 500 м, дорожные
+// работы рядом, ближайшая инфраструктура в 3 км.
+//
+// GET /facilities/{facilityId}
+func (UnimplementedHandler) GetFacility(ctx context.Context, params GetFacilityParams) (r *FacilityCard, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // GetMe implements getMe operation.
@@ -224,6 +256,17 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 //
 // GET /admin/audit
 func (UnimplementedHandler) ListAudit(ctx context.Context, params ListAuditParams) (r *AuditPage, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListFacilities implements listFacilities operation.
+//
+// Страница реестра с фильтрами, сортировкой
+// `sort=поле,-поле` (name, type, area, floorArea, confidence, mkad, firstSeen) и
+// курсором. Всего — число объектов по фильтру.
+//
+// GET /facilities
+func (UnimplementedHandler) ListFacilities(ctx context.Context, params ListFacilitiesParams) (r *FacilityPage, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

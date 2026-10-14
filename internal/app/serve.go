@@ -12,6 +12,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"freightflow/internal/api"
+	"freightflow/internal/facility"
 	"freightflow/internal/identity"
 	"freightflow/internal/platform/events"
 	"freightflow/internal/platform/httpx"
@@ -60,7 +61,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	routingClient := routing.NewClient(cfg.ValhallaURL)
 	apiHandler, err := api.New(api.Deps{
 		Identity: ids, Ingest: mods.ingest, Layers: layers, Regulation: regulation.New(pool),
-		Routing: routing.NewService(pool, routingClient), Sessions: sessions, Mailer: mailer,
+		Routing: routing.NewService(pool, routingClient), Facilities: facility.New(pool), Sessions: sessions, Mailer: mailer,
 		BaseURL: cfg.BaseURL, Log: env.Log, Meters: rt.tel.Meters, Tracers: rt.tel.Tracers,
 	})
 	if err != nil {

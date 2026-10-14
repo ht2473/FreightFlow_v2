@@ -3,6 +3,7 @@
 package gen
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -15,6 +16,1229 @@ import (
 	"github.com/ogen-go/ogen/uri"
 	"github.com/ogen-go/ogen/validate"
 )
+
+// CompareFacilitiesParams is parameters of compareFacilities operation.
+type CompareFacilitiesParams struct {
+	ID []uuid.UUID `json:",omitempty"`
+}
+
+func unpackCompareFacilitiesParams(packed middleware.Parameters) (params CompareFacilitiesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "id",
+			In:   "query",
+		}
+		params.ID = packed[key].([]uuid.UUID)
+	}
+	return params
+}
+
+func decodeCompareFacilitiesParams(args [0]string, argsEscaped bool, r *http.Request) (params CompareFacilitiesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: id.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.ID = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotIDVal uuid.UUID
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToUUID(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotIDVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.ID = append(params.ID, paramsDotIDVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.ID == nil {
+					return errors.New("nil is invalid value")
+				}
+				if err := (validate.Array{
+					MinLength:    2,
+					MinLengthSet: true,
+					MaxLength:    4,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.ID)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "id",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// FacilityFacetsParams is parameters of facilityFacets operation.
+type FacilityFacetsParams struct {
+	// Подстрока названия или адреса.
+	Q        OptString          `json:",omitempty,omitzero"`
+	Type     []string           `json:",omitempty"`
+	Okrug    []uuid.UUID        `json:",omitempty"`
+	District []uuid.UUID        `json:",omitempty"`
+	Ring     []FacilityRingItem `json:",omitempty"`
+	// Площадь застройки от, м².
+	MinArea       OptFloat64        `json:",omitempty,omitzero"`
+	MaxArea       OptFloat64        `json:",omitempty,omitzero"`
+	MinConfidence OptFloat64        `json:",omitempty,omitzero"`
+	Status        OptFacilityStatus `json:",omitempty,omitzero"`
+	// Рамка «запад,юг,восток,север».
+	Bbox []float64 `json:",omitempty"`
+	// Окрестность «долгота,широта,радиус в метрах».
+	Near []float64 `json:",omitempty"`
+	// Время до МКАД грузовика 20 т не больше, мин.
+	MaxMkadMin OptFloat64 `json:",omitempty,omitzero"`
+	// Запрет или предел массы и габаритов в 300 м.
+	NearRestrictions OptBool `json:",omitempty,omitzero"`
+	// Есть разрешение на ввод в эксплуатацию.
+	HasPermit OptBool `json:",omitempty,omitzero"`
+}
+
+func unpackFacilityFacetsParams(packed middleware.Parameters) (params FacilityFacetsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "q",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Q = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "type",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Type = v.([]string)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "okrug",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Okrug = v.([]uuid.UUID)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "district",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.District = v.([]uuid.UUID)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "ring",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Ring = v.([]FacilityRingItem)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "minArea",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MinArea = v.(OptFloat64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "maxArea",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MaxArea = v.(OptFloat64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "minConfidence",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MinConfidence = v.(OptFloat64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "status",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Status = v.(OptFacilityStatus)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "bbox",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Bbox = v.([]float64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "near",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Near = v.([]float64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "maxMkadMin",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MaxMkadMin = v.(OptFloat64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "nearRestrictions",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.NearRestrictions = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "hasPermit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.HasPermit = v.(OptBool)
+		}
+	}
+	return params
+}
+
+func decodeFacilityFacetsParams(args [0]string, argsEscaped bool, r *http.Request) (params FacilityFacetsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: q.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "q",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotQVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotQVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Q.SetTo(paramsDotQVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Q.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     200,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "q",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: type.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Type = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotTypeVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotTypeVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Type = append(params.Type, paramsDotTypeVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Type == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    20,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Type)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.Type {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     64,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(elem)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "type",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: okrug.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "okrug",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Okrug = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotOkrugVal uuid.UUID
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToUUID(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotOkrugVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Okrug = append(params.Okrug, paramsDotOkrugVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Okrug == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    20,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Okrug)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "okrug",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: district.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "district",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.District = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotDistrictVal uuid.UUID
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToUUID(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotDistrictVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.District = append(params.District, paramsDotDistrictVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.District == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    200,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.District)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "district",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: ring.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "ring",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Ring = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotRingVal FacilityRingItem
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotRingVal = FacilityRingItem(c)
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Ring = append(params.Ring, paramsDotRingVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Ring == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    5,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Ring)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.Ring {
+					if err := func() error {
+						if err := elem.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ring",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: minArea.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "minArea",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMinAreaVal float64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToFloat64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMinAreaVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MinArea.SetTo(paramsDotMinAreaVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.MinArea.Get(); ok {
+					if err := func() error {
+						if err := (validate.Float{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    nil,
+							Pattern:       nil,
+						}).Validate(float64(value)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "minArea",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: maxArea.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "maxArea",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMaxAreaVal float64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToFloat64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMaxAreaVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MaxArea.SetTo(paramsDotMaxAreaVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.MaxArea.Get(); ok {
+					if err := func() error {
+						if err := (validate.Float{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    nil,
+							Pattern:       nil,
+						}).Validate(float64(value)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "maxArea",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: minConfidence.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "minConfidence",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMinConfidenceVal float64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToFloat64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMinConfidenceVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MinConfidence.SetTo(paramsDotMinConfidenceVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.MinConfidence.Get(); ok {
+					if err := func() error {
+						if err := (validate.Float{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        true,
+							Max:           1,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    nil,
+							Pattern:       nil,
+						}).Validate(float64(value)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "minConfidence",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: status.
+	{
+		val := FacilityStatus("active")
+		params.Status.SetTo(val)
+	}
+	// Decode query: status.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "status",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotStatusVal FacilityStatus
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotStatusVal = FacilityStatus(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Status.SetTo(paramsDotStatusVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Status.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "status",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: bbox.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "bbox",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Bbox = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotBboxVal float64
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToFloat64(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotBboxVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Bbox = append(params.Bbox, paramsDotBboxVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Bbox == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    4,
+					MinLengthSet: true,
+					MaxLength:    4,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Bbox)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.Bbox {
+					if err := func() error {
+						if err := (validate.Float{}).Validate(float64(elem)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bbox",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: near.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "near",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Near = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotNearVal float64
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToFloat64(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotNearVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Near = append(params.Near, paramsDotNearVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Near == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    3,
+					MinLengthSet: true,
+					MaxLength:    3,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Near)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.Near {
+					if err := func() error {
+						if err := (validate.Float{}).Validate(float64(elem)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "near",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: maxMkadMin.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "maxMkadMin",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMaxMkadMinVal float64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToFloat64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMaxMkadMinVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MaxMkadMin.SetTo(paramsDotMaxMkadMinVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.MaxMkadMin.Get(); ok {
+					if err := func() error {
+						if err := (validate.Float{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    nil,
+							Pattern:       nil,
+						}).Validate(float64(value)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "maxMkadMin",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: nearRestrictions.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "nearRestrictions",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotNearRestrictionsVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotNearRestrictionsVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.NearRestrictions.SetTo(paramsDotNearRestrictionsVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "nearRestrictions",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: hasPermit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "hasPermit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotHasPermitVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotHasPermitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.HasPermit.SetTo(paramsDotHasPermitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "hasPermit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetFacilityParams is parameters of getFacility operation.
+type GetFacilityParams struct {
+	FacilityId uuid.UUID
+}
+
+func unpackGetFacilityParams(packed middleware.Parameters) (params GetFacilityParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "facilityId",
+			In:   "path",
+		}
+		params.FacilityId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetFacilityParams(args [1]string, argsEscaped bool, r *http.Request) (params GetFacilityParams, _ error) {
+	// Decode path: facilityId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "facilityId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.FacilityId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "facilityId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
 
 // GetNetworkAnalysisParams is parameters of getNetworkAnalysis operation.
 type GetNetworkAnalysisParams struct {
@@ -430,6 +1654,1323 @@ func decodeListAuditParams(args [0]string, argsEscaped bool, r *http.Request) (p
 				params.Cursor.SetTo(paramsDotCursorVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "cursor",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(50)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           200,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListFacilitiesParams is parameters of listFacilities operation.
+type ListFacilitiesParams struct {
+	// Подстрока названия или адреса.
+	Q        OptString          `json:",omitempty,omitzero"`
+	Type     []string           `json:",omitempty"`
+	Okrug    []uuid.UUID        `json:",omitempty"`
+	District []uuid.UUID        `json:",omitempty"`
+	Ring     []FacilityRingItem `json:",omitempty"`
+	// Площадь застройки от, м².
+	MinArea       OptFloat64        `json:",omitempty,omitzero"`
+	MaxArea       OptFloat64        `json:",omitempty,omitzero"`
+	MinConfidence OptFloat64        `json:",omitempty,omitzero"`
+	Status        OptFacilityStatus `json:",omitempty,omitzero"`
+	// Рамка «запад,юг,восток,север».
+	Bbox []float64 `json:",omitempty"`
+	// Окрестность «долгота,широта,радиус в метрах».
+	Near []float64 `json:",omitempty"`
+	// Время до МКАД грузовика 20 т не больше, мин.
+	MaxMkadMin OptFloat64 `json:",omitempty,omitzero"`
+	// Запрет или предел массы и габаритов в 300 м.
+	NearRestrictions OptBool `json:",omitempty,omitzero"`
+	// Есть разрешение на ввод в эксплуатацию.
+	HasPermit OptBool   `json:",omitempty,omitzero"`
+	Sort      OptString `json:",omitempty,omitzero"`
+	Cursor    OptString `json:",omitempty,omitzero"`
+	Limit     OptInt    `json:",omitempty,omitzero"`
+}
+
+func unpackListFacilitiesParams(packed middleware.Parameters) (params ListFacilitiesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "q",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Q = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "type",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Type = v.([]string)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "okrug",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Okrug = v.([]uuid.UUID)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "district",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.District = v.([]uuid.UUID)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "ring",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Ring = v.([]FacilityRingItem)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "minArea",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MinArea = v.(OptFloat64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "maxArea",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MaxArea = v.(OptFloat64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "minConfidence",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MinConfidence = v.(OptFloat64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "status",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Status = v.(OptFacilityStatus)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "bbox",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Bbox = v.([]float64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "near",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Near = v.([]float64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "maxMkadMin",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MaxMkadMin = v.(OptFloat64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "nearRestrictions",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.NearRestrictions = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "hasPermit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.HasPermit = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Sort = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "cursor",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Cursor = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeListFacilitiesParams(args [0]string, argsEscaped bool, r *http.Request) (params ListFacilitiesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: q.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "q",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotQVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotQVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Q.SetTo(paramsDotQVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Q.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     200,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "q",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: type.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Type = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotTypeVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotTypeVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Type = append(params.Type, paramsDotTypeVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Type == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    20,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Type)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.Type {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     64,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(elem)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "type",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: okrug.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "okrug",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Okrug = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotOkrugVal uuid.UUID
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToUUID(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotOkrugVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Okrug = append(params.Okrug, paramsDotOkrugVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Okrug == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    20,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Okrug)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "okrug",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: district.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "district",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.District = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotDistrictVal uuid.UUID
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToUUID(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotDistrictVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.District = append(params.District, paramsDotDistrictVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.District == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    200,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.District)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "district",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: ring.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "ring",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Ring = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotRingVal FacilityRingItem
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotRingVal = FacilityRingItem(c)
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Ring = append(params.Ring, paramsDotRingVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Ring == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    5,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Ring)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.Ring {
+					if err := func() error {
+						if err := elem.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ring",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: minArea.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "minArea",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMinAreaVal float64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToFloat64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMinAreaVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MinArea.SetTo(paramsDotMinAreaVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.MinArea.Get(); ok {
+					if err := func() error {
+						if err := (validate.Float{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    nil,
+							Pattern:       nil,
+						}).Validate(float64(value)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "minArea",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: maxArea.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "maxArea",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMaxAreaVal float64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToFloat64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMaxAreaVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MaxArea.SetTo(paramsDotMaxAreaVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.MaxArea.Get(); ok {
+					if err := func() error {
+						if err := (validate.Float{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    nil,
+							Pattern:       nil,
+						}).Validate(float64(value)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "maxArea",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: minConfidence.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "minConfidence",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMinConfidenceVal float64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToFloat64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMinConfidenceVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MinConfidence.SetTo(paramsDotMinConfidenceVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.MinConfidence.Get(); ok {
+					if err := func() error {
+						if err := (validate.Float{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        true,
+							Max:           1,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    nil,
+							Pattern:       nil,
+						}).Validate(float64(value)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "minConfidence",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: status.
+	{
+		val := FacilityStatus("active")
+		params.Status.SetTo(val)
+	}
+	// Decode query: status.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "status",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotStatusVal FacilityStatus
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotStatusVal = FacilityStatus(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Status.SetTo(paramsDotStatusVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Status.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "status",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: bbox.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "bbox",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Bbox = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotBboxVal float64
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToFloat64(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotBboxVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Bbox = append(params.Bbox, paramsDotBboxVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Bbox == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    4,
+					MinLengthSet: true,
+					MaxLength:    4,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Bbox)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.Bbox {
+					if err := func() error {
+						if err := (validate.Float{}).Validate(float64(elem)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bbox",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: near.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "near",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Near = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotNearVal float64
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToFloat64(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotNearVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Near = append(params.Near, paramsDotNearVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.Near == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    3,
+					MinLengthSet: true,
+					MaxLength:    3,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.Near)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.Near {
+					if err := func() error {
+						if err := (validate.Float{}).Validate(float64(elem)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "near",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: maxMkadMin.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "maxMkadMin",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMaxMkadMinVal float64
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToFloat64(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMaxMkadMinVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MaxMkadMin.SetTo(paramsDotMaxMkadMinVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.MaxMkadMin.Get(); ok {
+					if err := func() error {
+						if err := (validate.Float{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    nil,
+							Pattern:       nil,
+						}).Validate(float64(value)); err != nil {
+							return errors.Wrap(err, "float")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "maxMkadMin",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: nearRestrictions.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "nearRestrictions",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotNearRestrictionsVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotNearRestrictionsVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.NearRestrictions.SetTo(paramsDotNearRestrictionsVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "nearRestrictions",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: hasPermit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "hasPermit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotHasPermitVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotHasPermitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.HasPermit.SetTo(paramsDotHasPermitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "hasPermit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: sort.
+	{
+		val := string("-confidence,name")
+		params.Sort.SetTo(val)
+	}
+	// Decode query: sort.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSortVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSortVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Sort.SetTo(paramsDotSortVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Sort.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     100,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: cursor.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCursorVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCursorVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Cursor.SetTo(paramsDotCursorVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Cursor.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     1024,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}

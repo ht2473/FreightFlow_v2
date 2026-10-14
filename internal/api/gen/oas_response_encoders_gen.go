@@ -70,6 +70,23 @@ func encodeChangePasswordResponse(response *ChangePasswordNoContent, w http.Resp
 	return nil
 }
 
+func encodeCompareFacilitiesResponse(response []FacilityCard, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	e.ArrStart()
+	for _, elem := range response {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeConfirmTotpResponse(response *RecoveryCodes, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -124,6 +141,32 @@ func encodeCreateUserResponse(response *User, w http.ResponseWriter, span trace.
 
 func encodeDisableTotpResponse(response *DisableTotpNoContent, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(204)
+
+	return nil
+}
+
+func encodeFacilityFacetsResponse(response *FacilityFacets, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeGetFacilityResponse(response *FacilityCard, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
 
 	return nil
 }
@@ -259,6 +302,19 @@ func encodeGetUserResponse(response *User, w http.ResponseWriter, span trace.Spa
 }
 
 func encodeListAuditResponse(response *AuditPage, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListFacilitiesResponse(response *FacilityPage, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 

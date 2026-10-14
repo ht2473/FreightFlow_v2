@@ -50,6 +50,12 @@ type Handler interface {
 	//
 	// POST /me/password
 	ChangePassword(ctx context.Context, req *ChangePassword) error
+	// CompareFacilities implements compareFacilities operation.
+	//
+	// Сравнение объектов (2–4).
+	//
+	// GET /facilities/compare
+	CompareFacilities(ctx context.Context, params CompareFacilitiesParams) ([]FacilityCard, error)
 	// ConfirmTotp implements confirmTotp operation.
 	//
 	// Подтвердить подключение кодом из приложения.
@@ -80,6 +86,23 @@ type Handler interface {
 	//
 	// DELETE /me/totp
 	DisableTotp(ctx context.Context, req *PasswordConfirmation) error
+	// FacilityFacets implements facilityFacets operation.
+	//
+	// Распределения выборки по типу, округу, кольцу и
+	// достоверности; в каждом фасете учитываются все
+	// фильтры, кроме его собственного.
+	//
+	// GET /facilities/facets
+	FacilityFacets(ctx context.Context, params FacilityFacetsParams) (*FacilityFacets, error)
+	// GetFacility implements getFacility operation.
+	//
+	// Строка реестра, геометрия, достоверность с причинами,
+	// официальные источники, время до МКАД, ТТК, центра и ж/д
+	// пунктов по профилям ТС, ограничения в 500 м, дорожные
+	// работы рядом, ближайшая инфраструктура в 3 км.
+	//
+	// GET /facilities/{facilityId}
+	GetFacility(ctx context.Context, params GetFacilityParams) (*FacilityCard, error)
 	// GetMe implements getMe operation.
 	//
 	// Текущий пользователь и его права.
@@ -159,6 +182,14 @@ type Handler interface {
 	//
 	// GET /admin/audit
 	ListAudit(ctx context.Context, params ListAuditParams) (*AuditPage, error)
+	// ListFacilities implements listFacilities operation.
+	//
+	// Страница реестра с фильтрами, сортировкой
+	// `sort=поле,-поле` (name, type, area, floorArea, confidence, mkad, firstSeen) и
+	// курсором. Всего — число объектов по фильтру.
+	//
+	// GET /facilities
+	ListFacilities(ctx context.Context, params ListFacilitiesParams) (*FacilityPage, error)
 	// ListLayers implements listLayers operation.
 	//
 	// Слои в порядке отрисовки снизу вверх с адресами тайлов

@@ -630,6 +630,43 @@ func (s *ChangePassword) SetNewPassword(val string) {
 // ChangePasswordNoContent is response for ChangePassword operation.
 type ChangePasswordNoContent struct{}
 
+// Ref: #/components/schemas/ConfidenceReason
+type ConfidenceReason struct {
+	Code   string  `json:"code"`
+	Text   string  `json:"text"`
+	Weight float64 `json:"weight"`
+}
+
+// GetCode returns the value of Code.
+func (s *ConfidenceReason) GetCode() string {
+	return s.Code
+}
+
+// GetText returns the value of Text.
+func (s *ConfidenceReason) GetText() string {
+	return s.Text
+}
+
+// GetWeight returns the value of Weight.
+func (s *ConfidenceReason) GetWeight() float64 {
+	return s.Weight
+}
+
+// SetCode sets the value of Code.
+func (s *ConfidenceReason) SetCode(val string) {
+	s.Code = val
+}
+
+// SetText sets the value of Text.
+func (s *ConfidenceReason) SetText(val string) {
+	s.Text = val
+}
+
+// SetWeight sets the value of Weight.
+func (s *ConfidenceReason) SetWeight(val float64) {
+	s.Weight = val
+}
+
 // Ref: #/components/schemas/ConflictCount
 type ConflictCount struct {
 	// Sign_not_in_osm — знак есть, в OSM ограничения нет; osm_not_signed — в
@@ -1147,6 +1184,1022 @@ func (s *ElementDamage) SetMaxDelay(val float64) {
 // SetDisconnected sets the value of Disconnected.
 func (s *ElementDamage) SetDisconnected(val int) {
 	s.Disconnected = val
+}
+
+// Ref: #/components/schemas/FacetValue
+type FacetValue struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
+	Count int    `json:"count"`
+}
+
+// GetValue returns the value of Value.
+func (s *FacetValue) GetValue() string {
+	return s.Value
+}
+
+// GetLabel returns the value of Label.
+func (s *FacetValue) GetLabel() string {
+	return s.Label
+}
+
+// GetCount returns the value of Count.
+func (s *FacetValue) GetCount() int {
+	return s.Count
+}
+
+// SetValue sets the value of Value.
+func (s *FacetValue) SetValue(val string) {
+	s.Value = val
+}
+
+// SetLabel sets the value of Label.
+func (s *FacetValue) SetLabel(val string) {
+	s.Label = val
+}
+
+// SetCount sets the value of Count.
+func (s *FacetValue) SetCount(val int) {
+	s.Count = val
+}
+
+// Ref: #/components/schemas/FacilityAccess
+type FacilityAccess struct {
+	Profile     string               `json:"profile"`
+	ProfileName string               `json:"profileName"`
+	Target      FacilityAccessTarget `json:"target"`
+	TargetName  OptString            `json:"targetName"`
+	Minutes     OptFloat64           `json:"minutes"`
+	Km          OptFloat64           `json:"km"`
+}
+
+// GetProfile returns the value of Profile.
+func (s *FacilityAccess) GetProfile() string {
+	return s.Profile
+}
+
+// GetProfileName returns the value of ProfileName.
+func (s *FacilityAccess) GetProfileName() string {
+	return s.ProfileName
+}
+
+// GetTarget returns the value of Target.
+func (s *FacilityAccess) GetTarget() FacilityAccessTarget {
+	return s.Target
+}
+
+// GetTargetName returns the value of TargetName.
+func (s *FacilityAccess) GetTargetName() OptString {
+	return s.TargetName
+}
+
+// GetMinutes returns the value of Minutes.
+func (s *FacilityAccess) GetMinutes() OptFloat64 {
+	return s.Minutes
+}
+
+// GetKm returns the value of Km.
+func (s *FacilityAccess) GetKm() OptFloat64 {
+	return s.Km
+}
+
+// SetProfile sets the value of Profile.
+func (s *FacilityAccess) SetProfile(val string) {
+	s.Profile = val
+}
+
+// SetProfileName sets the value of ProfileName.
+func (s *FacilityAccess) SetProfileName(val string) {
+	s.ProfileName = val
+}
+
+// SetTarget sets the value of Target.
+func (s *FacilityAccess) SetTarget(val FacilityAccessTarget) {
+	s.Target = val
+}
+
+// SetTargetName sets the value of TargetName.
+func (s *FacilityAccess) SetTargetName(val OptString) {
+	s.TargetName = val
+}
+
+// SetMinutes sets the value of Minutes.
+func (s *FacilityAccess) SetMinutes(val OptFloat64) {
+	s.Minutes = val
+}
+
+// SetKm sets the value of Km.
+func (s *FacilityAccess) SetKm(val OptFloat64) {
+	s.Km = val
+}
+
+type FacilityAccessTarget string
+
+const (
+	FacilityAccessTargetMkad        FacilityAccessTarget = "mkad"
+	FacilityAccessTargetTtk         FacilityAccessTarget = "ttk"
+	FacilityAccessTargetCenter      FacilityAccessTarget = "center"
+	FacilityAccessTargetRailFreight FacilityAccessTarget = "rail_freight"
+)
+
+// AllValues returns all FacilityAccessTarget values.
+func (FacilityAccessTarget) AllValues() []FacilityAccessTarget {
+	return []FacilityAccessTarget{
+		FacilityAccessTargetMkad,
+		FacilityAccessTargetTtk,
+		FacilityAccessTargetCenter,
+		FacilityAccessTargetRailFreight,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityAccessTarget) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityAccessTargetMkad:
+		return []byte(s), nil
+	case FacilityAccessTargetTtk:
+		return []byte(s), nil
+	case FacilityAccessTargetCenter:
+		return []byte(s), nil
+	case FacilityAccessTargetRailFreight:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityAccessTarget) UnmarshalText(data []byte) error {
+	switch FacilityAccessTarget(data) {
+	case FacilityAccessTargetMkad:
+		*s = FacilityAccessTargetMkad
+		return nil
+	case FacilityAccessTargetTtk:
+		*s = FacilityAccessTargetTtk
+		return nil
+	case FacilityAccessTargetCenter:
+		*s = FacilityAccessTargetCenter
+		return nil
+	case FacilityAccessTargetRailFreight:
+		*s = FacilityAccessTargetRailFreight
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/FacilityCard
+type FacilityCard struct {
+	Facility FacilityItem       `json:"facility"`
+	Status   FacilityCardStatus `json:"status"`
+	// Контур зданий (GeoJSON).
+	Footprint OptFacilityCardFootprint `json:"footprint"`
+	// Территория (GeoJSON).
+	Territory         OptFacilityCardTerritory `json:"territory"`
+	Levels            OptInt                   `json:"levels"`
+	OsmType           FacilityCardOsmType      `json:"osmType"`
+	OsmId             int64                    `json:"osmId"`
+	Attrs             FacilityCardAttrs        `json:"attrs"`
+	ConfidenceReasons []ConfidenceReason       `json:"confidenceReasons"`
+	LastSeen          time.Time                `json:"lastSeen"`
+	UpdatedAt         time.Time                `json:"updatedAt"`
+	Sources           []FacilitySource         `json:"sources"`
+	Access            []FacilityAccess         `json:"access"`
+	Restrictions      []NearbyRestriction      `json:"restrictions"`
+	Works             []NearbyWork             `json:"works"`
+	Nearby            []NearbyPoi              `json:"nearby"`
+}
+
+// GetFacility returns the value of Facility.
+func (s *FacilityCard) GetFacility() FacilityItem {
+	return s.Facility
+}
+
+// GetStatus returns the value of Status.
+func (s *FacilityCard) GetStatus() FacilityCardStatus {
+	return s.Status
+}
+
+// GetFootprint returns the value of Footprint.
+func (s *FacilityCard) GetFootprint() OptFacilityCardFootprint {
+	return s.Footprint
+}
+
+// GetTerritory returns the value of Territory.
+func (s *FacilityCard) GetTerritory() OptFacilityCardTerritory {
+	return s.Territory
+}
+
+// GetLevels returns the value of Levels.
+func (s *FacilityCard) GetLevels() OptInt {
+	return s.Levels
+}
+
+// GetOsmType returns the value of OsmType.
+func (s *FacilityCard) GetOsmType() FacilityCardOsmType {
+	return s.OsmType
+}
+
+// GetOsmId returns the value of OsmId.
+func (s *FacilityCard) GetOsmId() int64 {
+	return s.OsmId
+}
+
+// GetAttrs returns the value of Attrs.
+func (s *FacilityCard) GetAttrs() FacilityCardAttrs {
+	return s.Attrs
+}
+
+// GetConfidenceReasons returns the value of ConfidenceReasons.
+func (s *FacilityCard) GetConfidenceReasons() []ConfidenceReason {
+	return s.ConfidenceReasons
+}
+
+// GetLastSeen returns the value of LastSeen.
+func (s *FacilityCard) GetLastSeen() time.Time {
+	return s.LastSeen
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *FacilityCard) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// GetSources returns the value of Sources.
+func (s *FacilityCard) GetSources() []FacilitySource {
+	return s.Sources
+}
+
+// GetAccess returns the value of Access.
+func (s *FacilityCard) GetAccess() []FacilityAccess {
+	return s.Access
+}
+
+// GetRestrictions returns the value of Restrictions.
+func (s *FacilityCard) GetRestrictions() []NearbyRestriction {
+	return s.Restrictions
+}
+
+// GetWorks returns the value of Works.
+func (s *FacilityCard) GetWorks() []NearbyWork {
+	return s.Works
+}
+
+// GetNearby returns the value of Nearby.
+func (s *FacilityCard) GetNearby() []NearbyPoi {
+	return s.Nearby
+}
+
+// SetFacility sets the value of Facility.
+func (s *FacilityCard) SetFacility(val FacilityItem) {
+	s.Facility = val
+}
+
+// SetStatus sets the value of Status.
+func (s *FacilityCard) SetStatus(val FacilityCardStatus) {
+	s.Status = val
+}
+
+// SetFootprint sets the value of Footprint.
+func (s *FacilityCard) SetFootprint(val OptFacilityCardFootprint) {
+	s.Footprint = val
+}
+
+// SetTerritory sets the value of Territory.
+func (s *FacilityCard) SetTerritory(val OptFacilityCardTerritory) {
+	s.Territory = val
+}
+
+// SetLevels sets the value of Levels.
+func (s *FacilityCard) SetLevels(val OptInt) {
+	s.Levels = val
+}
+
+// SetOsmType sets the value of OsmType.
+func (s *FacilityCard) SetOsmType(val FacilityCardOsmType) {
+	s.OsmType = val
+}
+
+// SetOsmId sets the value of OsmId.
+func (s *FacilityCard) SetOsmId(val int64) {
+	s.OsmId = val
+}
+
+// SetAttrs sets the value of Attrs.
+func (s *FacilityCard) SetAttrs(val FacilityCardAttrs) {
+	s.Attrs = val
+}
+
+// SetConfidenceReasons sets the value of ConfidenceReasons.
+func (s *FacilityCard) SetConfidenceReasons(val []ConfidenceReason) {
+	s.ConfidenceReasons = val
+}
+
+// SetLastSeen sets the value of LastSeen.
+func (s *FacilityCard) SetLastSeen(val time.Time) {
+	s.LastSeen = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *FacilityCard) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// SetSources sets the value of Sources.
+func (s *FacilityCard) SetSources(val []FacilitySource) {
+	s.Sources = val
+}
+
+// SetAccess sets the value of Access.
+func (s *FacilityCard) SetAccess(val []FacilityAccess) {
+	s.Access = val
+}
+
+// SetRestrictions sets the value of Restrictions.
+func (s *FacilityCard) SetRestrictions(val []NearbyRestriction) {
+	s.Restrictions = val
+}
+
+// SetWorks sets the value of Works.
+func (s *FacilityCard) SetWorks(val []NearbyWork) {
+	s.Works = val
+}
+
+// SetNearby sets the value of Nearby.
+func (s *FacilityCard) SetNearby(val []NearbyPoi) {
+	s.Nearby = val
+}
+
+type FacilityCardAttrs map[string]jx.Raw
+
+func (s *FacilityCardAttrs) init() FacilityCardAttrs {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Контур зданий (GeoJSON).
+type FacilityCardFootprint map[string]jx.Raw
+
+func (s *FacilityCardFootprint) init() FacilityCardFootprint {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type FacilityCardOsmType string
+
+const (
+	FacilityCardOsmTypeFalse FacilityCardOsmType = "false"
+	FacilityCardOsmTypeW     FacilityCardOsmType = "W"
+	FacilityCardOsmTypeR     FacilityCardOsmType = "R"
+)
+
+// AllValues returns all FacilityCardOsmType values.
+func (FacilityCardOsmType) AllValues() []FacilityCardOsmType {
+	return []FacilityCardOsmType{
+		FacilityCardOsmTypeFalse,
+		FacilityCardOsmTypeW,
+		FacilityCardOsmTypeR,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityCardOsmType) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityCardOsmTypeFalse:
+		return []byte(s), nil
+	case FacilityCardOsmTypeW:
+		return []byte(s), nil
+	case FacilityCardOsmTypeR:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityCardOsmType) UnmarshalText(data []byte) error {
+	switch FacilityCardOsmType(data) {
+	case FacilityCardOsmTypeFalse:
+		*s = FacilityCardOsmTypeFalse
+		return nil
+	case FacilityCardOsmTypeW:
+		*s = FacilityCardOsmTypeW
+		return nil
+	case FacilityCardOsmTypeR:
+		*s = FacilityCardOsmTypeR
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type FacilityCardStatus string
+
+const (
+	FacilityCardStatusActive   FacilityCardStatus = "active"
+	FacilityCardStatusMissing  FacilityCardStatus = "missing"
+	FacilityCardStatusExcluded FacilityCardStatus = "excluded"
+)
+
+// AllValues returns all FacilityCardStatus values.
+func (FacilityCardStatus) AllValues() []FacilityCardStatus {
+	return []FacilityCardStatus{
+		FacilityCardStatusActive,
+		FacilityCardStatusMissing,
+		FacilityCardStatusExcluded,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityCardStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityCardStatusActive:
+		return []byte(s), nil
+	case FacilityCardStatusMissing:
+		return []byte(s), nil
+	case FacilityCardStatusExcluded:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityCardStatus) UnmarshalText(data []byte) error {
+	switch FacilityCardStatus(data) {
+	case FacilityCardStatusActive:
+		*s = FacilityCardStatusActive
+		return nil
+	case FacilityCardStatusMissing:
+		*s = FacilityCardStatusMissing
+		return nil
+	case FacilityCardStatusExcluded:
+		*s = FacilityCardStatusExcluded
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Территория (GeoJSON).
+type FacilityCardTerritory map[string]jx.Raw
+
+func (s *FacilityCardTerritory) init() FacilityCardTerritory {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/FacilityFacets
+type FacilityFacets struct {
+	Types      []FacetValue `json:"types"`
+	Okrugs     []FacetValue `json:"okrugs"`
+	Rings      []FacetValue `json:"rings"`
+	Confidence []FacetValue `json:"confidence"`
+}
+
+// GetTypes returns the value of Types.
+func (s *FacilityFacets) GetTypes() []FacetValue {
+	return s.Types
+}
+
+// GetOkrugs returns the value of Okrugs.
+func (s *FacilityFacets) GetOkrugs() []FacetValue {
+	return s.Okrugs
+}
+
+// GetRings returns the value of Rings.
+func (s *FacilityFacets) GetRings() []FacetValue {
+	return s.Rings
+}
+
+// GetConfidence returns the value of Confidence.
+func (s *FacilityFacets) GetConfidence() []FacetValue {
+	return s.Confidence
+}
+
+// SetTypes sets the value of Types.
+func (s *FacilityFacets) SetTypes(val []FacetValue) {
+	s.Types = val
+}
+
+// SetOkrugs sets the value of Okrugs.
+func (s *FacilityFacets) SetOkrugs(val []FacetValue) {
+	s.Okrugs = val
+}
+
+// SetRings sets the value of Rings.
+func (s *FacilityFacets) SetRings(val []FacetValue) {
+	s.Rings = val
+}
+
+// SetConfidence sets the value of Confidence.
+func (s *FacilityFacets) SetConfidence(val []FacetValue) {
+	s.Confidence = val
+}
+
+// Ref: #/components/schemas/FacilityItem
+type FacilityItem struct {
+	ID       uuid.UUID           `json:"id"`
+	Name     OptString           `json:"name"`
+	Type     string              `json:"type"`
+	TypeName string              `json:"typeName"`
+	Address  OptString           `json:"address"`
+	Okrug    OptString           `json:"okrug"`
+	District OptString           `json:"district"`
+	Ring     OptFacilityItemRing `json:"ring"`
+	// Площадь застройки, м².
+	BuildingAreaM2 OptFloat64 `json:"buildingAreaM2"`
+	// Оценка общей площади, м².
+	FloorAreaM2     OptFloat64 `json:"floorAreaM2"`
+	TerritoryAreaM2 OptFloat64 `json:"territoryAreaM2"`
+	Buildings       int        `json:"buildings"`
+	Confidence      float64    `json:"confidence"`
+	// Время до МКАД грузовика 20 т, мин.
+	MkadMin   OptFloat64 `json:"mkadMin"`
+	HasPermit bool       `json:"hasPermit"`
+	Point     LngLat     `json:"point"`
+	FirstSeen time.Time  `json:"firstSeen"`
+}
+
+// GetID returns the value of ID.
+func (s *FacilityItem) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *FacilityItem) GetName() OptString {
+	return s.Name
+}
+
+// GetType returns the value of Type.
+func (s *FacilityItem) GetType() string {
+	return s.Type
+}
+
+// GetTypeName returns the value of TypeName.
+func (s *FacilityItem) GetTypeName() string {
+	return s.TypeName
+}
+
+// GetAddress returns the value of Address.
+func (s *FacilityItem) GetAddress() OptString {
+	return s.Address
+}
+
+// GetOkrug returns the value of Okrug.
+func (s *FacilityItem) GetOkrug() OptString {
+	return s.Okrug
+}
+
+// GetDistrict returns the value of District.
+func (s *FacilityItem) GetDistrict() OptString {
+	return s.District
+}
+
+// GetRing returns the value of Ring.
+func (s *FacilityItem) GetRing() OptFacilityItemRing {
+	return s.Ring
+}
+
+// GetBuildingAreaM2 returns the value of BuildingAreaM2.
+func (s *FacilityItem) GetBuildingAreaM2() OptFloat64 {
+	return s.BuildingAreaM2
+}
+
+// GetFloorAreaM2 returns the value of FloorAreaM2.
+func (s *FacilityItem) GetFloorAreaM2() OptFloat64 {
+	return s.FloorAreaM2
+}
+
+// GetTerritoryAreaM2 returns the value of TerritoryAreaM2.
+func (s *FacilityItem) GetTerritoryAreaM2() OptFloat64 {
+	return s.TerritoryAreaM2
+}
+
+// GetBuildings returns the value of Buildings.
+func (s *FacilityItem) GetBuildings() int {
+	return s.Buildings
+}
+
+// GetConfidence returns the value of Confidence.
+func (s *FacilityItem) GetConfidence() float64 {
+	return s.Confidence
+}
+
+// GetMkadMin returns the value of MkadMin.
+func (s *FacilityItem) GetMkadMin() OptFloat64 {
+	return s.MkadMin
+}
+
+// GetHasPermit returns the value of HasPermit.
+func (s *FacilityItem) GetHasPermit() bool {
+	return s.HasPermit
+}
+
+// GetPoint returns the value of Point.
+func (s *FacilityItem) GetPoint() LngLat {
+	return s.Point
+}
+
+// GetFirstSeen returns the value of FirstSeen.
+func (s *FacilityItem) GetFirstSeen() time.Time {
+	return s.FirstSeen
+}
+
+// SetID sets the value of ID.
+func (s *FacilityItem) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *FacilityItem) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetType sets the value of Type.
+func (s *FacilityItem) SetType(val string) {
+	s.Type = val
+}
+
+// SetTypeName sets the value of TypeName.
+func (s *FacilityItem) SetTypeName(val string) {
+	s.TypeName = val
+}
+
+// SetAddress sets the value of Address.
+func (s *FacilityItem) SetAddress(val OptString) {
+	s.Address = val
+}
+
+// SetOkrug sets the value of Okrug.
+func (s *FacilityItem) SetOkrug(val OptString) {
+	s.Okrug = val
+}
+
+// SetDistrict sets the value of District.
+func (s *FacilityItem) SetDistrict(val OptString) {
+	s.District = val
+}
+
+// SetRing sets the value of Ring.
+func (s *FacilityItem) SetRing(val OptFacilityItemRing) {
+	s.Ring = val
+}
+
+// SetBuildingAreaM2 sets the value of BuildingAreaM2.
+func (s *FacilityItem) SetBuildingAreaM2(val OptFloat64) {
+	s.BuildingAreaM2 = val
+}
+
+// SetFloorAreaM2 sets the value of FloorAreaM2.
+func (s *FacilityItem) SetFloorAreaM2(val OptFloat64) {
+	s.FloorAreaM2 = val
+}
+
+// SetTerritoryAreaM2 sets the value of TerritoryAreaM2.
+func (s *FacilityItem) SetTerritoryAreaM2(val OptFloat64) {
+	s.TerritoryAreaM2 = val
+}
+
+// SetBuildings sets the value of Buildings.
+func (s *FacilityItem) SetBuildings(val int) {
+	s.Buildings = val
+}
+
+// SetConfidence sets the value of Confidence.
+func (s *FacilityItem) SetConfidence(val float64) {
+	s.Confidence = val
+}
+
+// SetMkadMin sets the value of MkadMin.
+func (s *FacilityItem) SetMkadMin(val OptFloat64) {
+	s.MkadMin = val
+}
+
+// SetHasPermit sets the value of HasPermit.
+func (s *FacilityItem) SetHasPermit(val bool) {
+	s.HasPermit = val
+}
+
+// SetPoint sets the value of Point.
+func (s *FacilityItem) SetPoint(val LngLat) {
+	s.Point = val
+}
+
+// SetFirstSeen sets the value of FirstSeen.
+func (s *FacilityItem) SetFirstSeen(val time.Time) {
+	s.FirstSeen = val
+}
+
+type FacilityItemRing string
+
+const (
+	FacilityItemRingSk      FacilityItemRing = "sk"
+	FacilityItemRingTtk     FacilityItemRing = "ttk"
+	FacilityItemRingMkad    FacilityItemRing = "mkad"
+	FacilityItemRingCkad    FacilityItemRing = "ckad"
+	FacilityItemRingOutside FacilityItemRing = "outside"
+)
+
+// AllValues returns all FacilityItemRing values.
+func (FacilityItemRing) AllValues() []FacilityItemRing {
+	return []FacilityItemRing{
+		FacilityItemRingSk,
+		FacilityItemRingTtk,
+		FacilityItemRingMkad,
+		FacilityItemRingCkad,
+		FacilityItemRingOutside,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityItemRing) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityItemRingSk:
+		return []byte(s), nil
+	case FacilityItemRingTtk:
+		return []byte(s), nil
+	case FacilityItemRingMkad:
+		return []byte(s), nil
+	case FacilityItemRingCkad:
+		return []byte(s), nil
+	case FacilityItemRingOutside:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityItemRing) UnmarshalText(data []byte) error {
+	switch FacilityItemRing(data) {
+	case FacilityItemRingSk:
+		*s = FacilityItemRingSk
+		return nil
+	case FacilityItemRingTtk:
+		*s = FacilityItemRingTtk
+		return nil
+	case FacilityItemRingMkad:
+		*s = FacilityItemRingMkad
+		return nil
+	case FacilityItemRingCkad:
+		*s = FacilityItemRingCkad
+		return nil
+	case FacilityItemRingOutside:
+		*s = FacilityItemRingOutside
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/FacilityPage
+type FacilityPage struct {
+	Items []FacilityItem `json:"items"`
+	Total int            `json:"total"`
+	// Курсор следующей страницы.
+	Next OptString `json:"next"`
+}
+
+// GetItems returns the value of Items.
+func (s *FacilityPage) GetItems() []FacilityItem {
+	return s.Items
+}
+
+// GetTotal returns the value of Total.
+func (s *FacilityPage) GetTotal() int {
+	return s.Total
+}
+
+// GetNext returns the value of Next.
+func (s *FacilityPage) GetNext() OptString {
+	return s.Next
+}
+
+// SetItems sets the value of Items.
+func (s *FacilityPage) SetItems(val []FacilityItem) {
+	s.Items = val
+}
+
+// SetTotal sets the value of Total.
+func (s *FacilityPage) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetNext sets the value of Next.
+func (s *FacilityPage) SetNext(val OptString) {
+	s.Next = val
+}
+
+type FacilityRingItem string
+
+const (
+	FacilityRingItemSk      FacilityRingItem = "sk"
+	FacilityRingItemTtk     FacilityRingItem = "ttk"
+	FacilityRingItemMkad    FacilityRingItem = "mkad"
+	FacilityRingItemCkad    FacilityRingItem = "ckad"
+	FacilityRingItemOutside FacilityRingItem = "outside"
+)
+
+// AllValues returns all FacilityRingItem values.
+func (FacilityRingItem) AllValues() []FacilityRingItem {
+	return []FacilityRingItem{
+		FacilityRingItemSk,
+		FacilityRingItemTtk,
+		FacilityRingItemMkad,
+		FacilityRingItemCkad,
+		FacilityRingItemOutside,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityRingItem) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityRingItemSk:
+		return []byte(s), nil
+	case FacilityRingItemTtk:
+		return []byte(s), nil
+	case FacilityRingItemMkad:
+		return []byte(s), nil
+	case FacilityRingItemCkad:
+		return []byte(s), nil
+	case FacilityRingItemOutside:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityRingItem) UnmarshalText(data []byte) error {
+	switch FacilityRingItem(data) {
+	case FacilityRingItemSk:
+		*s = FacilityRingItemSk
+		return nil
+	case FacilityRingItemTtk:
+		*s = FacilityRingItemTtk
+		return nil
+	case FacilityRingItemMkad:
+		*s = FacilityRingItemMkad
+		return nil
+	case FacilityRingItemCkad:
+		*s = FacilityRingItemCkad
+		return nil
+	case FacilityRingItemOutside:
+		*s = FacilityRingItemOutside
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/FacilitySource
+type FacilitySource struct {
+	Relation FacilitySourceRelation `json:"relation"`
+	Ref      string                 `json:"ref"`
+	Details  FacilitySourceDetails  `json:"details"`
+}
+
+// GetRelation returns the value of Relation.
+func (s *FacilitySource) GetRelation() FacilitySourceRelation {
+	return s.Relation
+}
+
+// GetRef returns the value of Ref.
+func (s *FacilitySource) GetRef() string {
+	return s.Ref
+}
+
+// GetDetails returns the value of Details.
+func (s *FacilitySource) GetDetails() FacilitySourceDetails {
+	return s.Details
+}
+
+// SetRelation sets the value of Relation.
+func (s *FacilitySource) SetRelation(val FacilitySourceRelation) {
+	s.Relation = val
+}
+
+// SetRef sets the value of Ref.
+func (s *FacilitySource) SetRef(val string) {
+	s.Ref = val
+}
+
+// SetDetails sets the value of Details.
+func (s *FacilitySource) SetDetails(val FacilitySourceDetails) {
+	s.Details = val
+}
+
+type FacilitySourceDetails map[string]jx.Raw
+
+func (s *FacilitySourceDetails) init() FacilitySourceDetails {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type FacilitySourceRelation string
+
+const (
+	FacilitySourceRelationAddress FacilitySourceRelation = "address"
+	FacilitySourceRelationPermit  FacilitySourceRelation = "permit"
+)
+
+// AllValues returns all FacilitySourceRelation values.
+func (FacilitySourceRelation) AllValues() []FacilitySourceRelation {
+	return []FacilitySourceRelation{
+		FacilitySourceRelationAddress,
+		FacilitySourceRelationPermit,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilitySourceRelation) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilitySourceRelationAddress:
+		return []byte(s), nil
+	case FacilitySourceRelationPermit:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilitySourceRelation) UnmarshalText(data []byte) error {
+	switch FacilitySourceRelation(data) {
+	case FacilitySourceRelationAddress:
+		*s = FacilitySourceRelationAddress
+		return nil
+	case FacilitySourceRelationPermit:
+		*s = FacilitySourceRelationPermit
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type FacilityStatus string
+
+const (
+	FacilityStatusActive   FacilityStatus = "active"
+	FacilityStatusMissing  FacilityStatus = "missing"
+	FacilityStatusExcluded FacilityStatus = "excluded"
+)
+
+// AllValues returns all FacilityStatus values.
+func (FacilityStatus) AllValues() []FacilityStatus {
+	return []FacilityStatus{
+		FacilityStatusActive,
+		FacilityStatusMissing,
+		FacilityStatusExcluded,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityStatusActive:
+		return []byte(s), nil
+	case FacilityStatusMissing:
+		return []byte(s), nil
+	case FacilityStatusExcluded:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityStatus) UnmarshalText(data []byte) error {
+	switch FacilityStatus(data) {
+	case FacilityStatusActive:
+		*s = FacilityStatusActive
+		return nil
+	case FacilityStatusMissing:
+		*s = FacilityStatusMissing
+		return nil
+	case FacilityStatusExcluded:
+		*s = FacilityStatusExcluded
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/FieldError
@@ -2377,6 +3430,305 @@ func (s *NamedCount) SetCount(val int) {
 	s.Count = val
 }
 
+// Ref: #/components/schemas/NearbyPoi
+type NearbyPoi struct {
+	Kind      string    `json:"kind"`
+	Name      OptString `json:"name"`
+	DistanceM float64   `json:"distanceM"`
+	Point     LngLat    `json:"point"`
+}
+
+// GetKind returns the value of Kind.
+func (s *NearbyPoi) GetKind() string {
+	return s.Kind
+}
+
+// GetName returns the value of Name.
+func (s *NearbyPoi) GetName() OptString {
+	return s.Name
+}
+
+// GetDistanceM returns the value of DistanceM.
+func (s *NearbyPoi) GetDistanceM() float64 {
+	return s.DistanceM
+}
+
+// GetPoint returns the value of Point.
+func (s *NearbyPoi) GetPoint() LngLat {
+	return s.Point
+}
+
+// SetKind sets the value of Kind.
+func (s *NearbyPoi) SetKind(val string) {
+	s.Kind = val
+}
+
+// SetName sets the value of Name.
+func (s *NearbyPoi) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetDistanceM sets the value of DistanceM.
+func (s *NearbyPoi) SetDistanceM(val float64) {
+	s.DistanceM = val
+}
+
+// SetPoint sets the value of Point.
+func (s *NearbyPoi) SetPoint(val LngLat) {
+	s.Point = val
+}
+
+// Ref: #/components/schemas/NearbyRestriction
+type NearbyRestriction struct {
+	Kind      string     `json:"kind"`
+	Value     OptFloat64 `json:"value"`
+	Condition OptString  `json:"condition"`
+	Street    OptString  `json:"street"`
+	Origins   []string   `json:"origins"`
+	DistanceM float64    `json:"distanceM"`
+}
+
+// GetKind returns the value of Kind.
+func (s *NearbyRestriction) GetKind() string {
+	return s.Kind
+}
+
+// GetValue returns the value of Value.
+func (s *NearbyRestriction) GetValue() OptFloat64 {
+	return s.Value
+}
+
+// GetCondition returns the value of Condition.
+func (s *NearbyRestriction) GetCondition() OptString {
+	return s.Condition
+}
+
+// GetStreet returns the value of Street.
+func (s *NearbyRestriction) GetStreet() OptString {
+	return s.Street
+}
+
+// GetOrigins returns the value of Origins.
+func (s *NearbyRestriction) GetOrigins() []string {
+	return s.Origins
+}
+
+// GetDistanceM returns the value of DistanceM.
+func (s *NearbyRestriction) GetDistanceM() float64 {
+	return s.DistanceM
+}
+
+// SetKind sets the value of Kind.
+func (s *NearbyRestriction) SetKind(val string) {
+	s.Kind = val
+}
+
+// SetValue sets the value of Value.
+func (s *NearbyRestriction) SetValue(val OptFloat64) {
+	s.Value = val
+}
+
+// SetCondition sets the value of Condition.
+func (s *NearbyRestriction) SetCondition(val OptString) {
+	s.Condition = val
+}
+
+// SetStreet sets the value of Street.
+func (s *NearbyRestriction) SetStreet(val OptString) {
+	s.Street = val
+}
+
+// SetOrigins sets the value of Origins.
+func (s *NearbyRestriction) SetOrigins(val []string) {
+	s.Origins = val
+}
+
+// SetDistanceM sets the value of DistanceM.
+func (s *NearbyRestriction) SetDistanceM(val float64) {
+	s.DistanceM = val
+}
+
+// Ref: #/components/schemas/NearbyWork
+type NearbyWork struct {
+	ID        uuid.UUID       `json:"id"`
+	Title     string          `json:"title"`
+	Kind      NearbyWorkKind  `json:"kind"`
+	State     NearbyWorkState `json:"state"`
+	Closure   bool            `json:"closure"`
+	Starts    OptDate         `json:"starts"`
+	Ends      OptDate         `json:"ends"`
+	DistanceM float64         `json:"distanceM"`
+}
+
+// GetID returns the value of ID.
+func (s *NearbyWork) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetTitle returns the value of Title.
+func (s *NearbyWork) GetTitle() string {
+	return s.Title
+}
+
+// GetKind returns the value of Kind.
+func (s *NearbyWork) GetKind() NearbyWorkKind {
+	return s.Kind
+}
+
+// GetState returns the value of State.
+func (s *NearbyWork) GetState() NearbyWorkState {
+	return s.State
+}
+
+// GetClosure returns the value of Closure.
+func (s *NearbyWork) GetClosure() bool {
+	return s.Closure
+}
+
+// GetStarts returns the value of Starts.
+func (s *NearbyWork) GetStarts() OptDate {
+	return s.Starts
+}
+
+// GetEnds returns the value of Ends.
+func (s *NearbyWork) GetEnds() OptDate {
+	return s.Ends
+}
+
+// GetDistanceM returns the value of DistanceM.
+func (s *NearbyWork) GetDistanceM() float64 {
+	return s.DistanceM
+}
+
+// SetID sets the value of ID.
+func (s *NearbyWork) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetTitle sets the value of Title.
+func (s *NearbyWork) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetKind sets the value of Kind.
+func (s *NearbyWork) SetKind(val NearbyWorkKind) {
+	s.Kind = val
+}
+
+// SetState sets the value of State.
+func (s *NearbyWork) SetState(val NearbyWorkState) {
+	s.State = val
+}
+
+// SetClosure sets the value of Closure.
+func (s *NearbyWork) SetClosure(val bool) {
+	s.Closure = val
+}
+
+// SetStarts sets the value of Starts.
+func (s *NearbyWork) SetStarts(val OptDate) {
+	s.Starts = val
+}
+
+// SetEnds sets the value of Ends.
+func (s *NearbyWork) SetEnds(val OptDate) {
+	s.Ends = val
+}
+
+// SetDistanceM sets the value of DistanceM.
+func (s *NearbyWork) SetDistanceM(val float64) {
+	s.DistanceM = val
+}
+
+type NearbyWorkKind string
+
+const (
+	NearbyWorkKindRepair    NearbyWorkKind = "repair"
+	NearbyWorkKindEmergency NearbyWorkKind = "emergency"
+	NearbyWorkKindClosure   NearbyWorkKind = "closure"
+)
+
+// AllValues returns all NearbyWorkKind values.
+func (NearbyWorkKind) AllValues() []NearbyWorkKind {
+	return []NearbyWorkKind{
+		NearbyWorkKindRepair,
+		NearbyWorkKindEmergency,
+		NearbyWorkKindClosure,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s NearbyWorkKind) MarshalText() ([]byte, error) {
+	switch s {
+	case NearbyWorkKindRepair:
+		return []byte(s), nil
+	case NearbyWorkKindEmergency:
+		return []byte(s), nil
+	case NearbyWorkKindClosure:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *NearbyWorkKind) UnmarshalText(data []byte) error {
+	switch NearbyWorkKind(data) {
+	case NearbyWorkKindRepair:
+		*s = NearbyWorkKindRepair
+		return nil
+	case NearbyWorkKindEmergency:
+		*s = NearbyWorkKindEmergency
+		return nil
+	case NearbyWorkKindClosure:
+		*s = NearbyWorkKindClosure
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type NearbyWorkState string
+
+const (
+	NearbyWorkStatePlanned NearbyWorkState = "planned"
+	NearbyWorkStateActive  NearbyWorkState = "active"
+)
+
+// AllValues returns all NearbyWorkState values.
+func (NearbyWorkState) AllValues() []NearbyWorkState {
+	return []NearbyWorkState{
+		NearbyWorkStatePlanned,
+		NearbyWorkStateActive,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s NearbyWorkState) MarshalText() ([]byte, error) {
+	switch s {
+	case NearbyWorkStatePlanned:
+		return []byte(s), nil
+	case NearbyWorkStateActive:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *NearbyWorkState) UnmarshalText(data []byte) error {
+	switch NearbyWorkState(data) {
+	case NearbyWorkStatePlanned:
+		*s = NearbyWorkStatePlanned
+		return nil
+	case NearbyWorkStateActive:
+		*s = NearbyWorkStateActive
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/NetworkAnalysis
 type NetworkAnalysis struct {
 	Version int `json:"version"`
@@ -3028,6 +4380,190 @@ func (o OptElementDamage) Get() (v ElementDamage, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptElementDamage) Or(d ElementDamage) ElementDamage {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFacilityCardFootprint returns new OptFacilityCardFootprint with value set to v.
+func NewOptFacilityCardFootprint(v FacilityCardFootprint) OptFacilityCardFootprint {
+	return OptFacilityCardFootprint{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFacilityCardFootprint is optional FacilityCardFootprint.
+type OptFacilityCardFootprint struct {
+	Value FacilityCardFootprint
+	Set   bool
+}
+
+// IsSet returns true if OptFacilityCardFootprint was set.
+func (o OptFacilityCardFootprint) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFacilityCardFootprint) Reset() {
+	var v FacilityCardFootprint
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFacilityCardFootprint) SetTo(v FacilityCardFootprint) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFacilityCardFootprint) Get() (v FacilityCardFootprint, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFacilityCardFootprint) Or(d FacilityCardFootprint) FacilityCardFootprint {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFacilityCardTerritory returns new OptFacilityCardTerritory with value set to v.
+func NewOptFacilityCardTerritory(v FacilityCardTerritory) OptFacilityCardTerritory {
+	return OptFacilityCardTerritory{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFacilityCardTerritory is optional FacilityCardTerritory.
+type OptFacilityCardTerritory struct {
+	Value FacilityCardTerritory
+	Set   bool
+}
+
+// IsSet returns true if OptFacilityCardTerritory was set.
+func (o OptFacilityCardTerritory) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFacilityCardTerritory) Reset() {
+	var v FacilityCardTerritory
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFacilityCardTerritory) SetTo(v FacilityCardTerritory) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFacilityCardTerritory) Get() (v FacilityCardTerritory, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFacilityCardTerritory) Or(d FacilityCardTerritory) FacilityCardTerritory {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFacilityItemRing returns new OptFacilityItemRing with value set to v.
+func NewOptFacilityItemRing(v FacilityItemRing) OptFacilityItemRing {
+	return OptFacilityItemRing{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFacilityItemRing is optional FacilityItemRing.
+type OptFacilityItemRing struct {
+	Value FacilityItemRing
+	Set   bool
+}
+
+// IsSet returns true if OptFacilityItemRing was set.
+func (o OptFacilityItemRing) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFacilityItemRing) Reset() {
+	var v FacilityItemRing
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFacilityItemRing) SetTo(v FacilityItemRing) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFacilityItemRing) Get() (v FacilityItemRing, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFacilityItemRing) Or(d FacilityItemRing) FacilityItemRing {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFacilityStatus returns new OptFacilityStatus with value set to v.
+func NewOptFacilityStatus(v FacilityStatus) OptFacilityStatus {
+	return OptFacilityStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFacilityStatus is optional FacilityStatus.
+type OptFacilityStatus struct {
+	Value FacilityStatus
+	Set   bool
+}
+
+// IsSet returns true if OptFacilityStatus was set.
+func (o OptFacilityStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFacilityStatus) Reset() {
+	var v FacilityStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFacilityStatus) SetTo(v FacilityStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFacilityStatus) Get() (v FacilityStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFacilityStatus) Or(d FacilityStatus) FacilityStatus {
 	if v, ok := o.Get(); ok {
 		return v
 	}

@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -11,9 +12,14 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	spec "freightflow/api"
+	"freightflow/internal/facility"
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
+	"freightflow/internal/ingest/sources/osm/osmtest"
 	"freightflow/internal/platform/blob"
 	"freightflow/internal/platform/dbtest"
 	"freightflow/internal/platform/httpx"
@@ -59,6 +65,7 @@ func (m *memoryMailer) Send(_ context.Context, msg mail.Message) error {
 
 type fixture struct {
 	srv      *httptest.Server
+	pool     *pgxpool.Pool
 	identity *identity.Service
 	mailer   *memoryMailer
 }
@@ -88,7 +95,8 @@ func newFixture(t *testing.T) *fixture {
 	layers := tiles.NewService(pool, ing, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	h, err := New(Deps{
 		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
-		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Sessions: sessions, Mailer: mailer,
+		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facility.New(pool),
+		Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
@@ -97,7 +105,7 @@ func newFixture(t *testing.T) *fixture {
 	}
 	srv := httptest.NewServer(httpx.Chain(h, httpx.WithClient(), sessions.LoadAndSave))
 	t.Cleanup(srv.Close)
-	return &fixture{srv: srv, identity: ids, mailer: mailer}
+	return &fixture{srv: srv, pool: pool, identity: ids, mailer: mailer}
 }
 
 func (f *fixture) token(t *testing.T, email string, role string, scopes ...identity.Permission) string {
@@ -349,5 +357,58 @@ func TestAPIRouting(t *testing.T) {
 		`{"points":[{"lon":37.6,"lat":55.7}],"vehicle":{"grossT":20,"heightM":4,"widthM":2.55,"lengthM":10}}`); resp.StatusCode != http.StatusBadRequest &&
 		resp.StatusCode != http.StatusUnprocessableEntity {
 		t.Errorf("one point: %d", resp.StatusCode)
+	}
+}
+
+func TestAPIFacilities(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	osmtest.LoadDistrict(t, f.pool)
+	analyst := f.token(t, "fac@example.com", identity.RoleAnalyst)
+
+	resp, body := f.do(t, http.MethodGet, "/api/v1/facilities?limit=3&sort=name", analyst, "")
+	var page struct {
+		Items []struct {
+			ID    string
+			Type  string
+			Point struct{ Lon, Lat float64 }
+		}
+		Total int
+		Next  string
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &page) != nil || len(page.Items) != 3 || page.Total < 3 || page.Next == "" {
+		t.Fatalf("list: %d %s", resp.StatusCode, body)
+	}
+	resp, body = f.do(t, http.MethodGet, "/api/v1/facilities?limit=3&sort=name&cursor="+page.Next, analyst, "")
+	if resp.StatusCode != http.StatusOK || strings.Contains(string(body), page.Items[0].ID) {
+		t.Errorf("next page: %d %s", resp.StatusCode, body)
+	}
+	// Фильтры параметрами: тип (несколько значений), рамка.
+	it := page.Items[0]
+	q := fmt.Sprintf("/api/v1/facilities?type=%s&type=terminal&bbox=%f,%f,%f,%f", it.Type, it.Point.Lon-0.01, it.Point.Lat-0.01,
+		it.Point.Lon+0.01, it.Point.Lat+0.01)
+	if resp, body := f.do(t, http.MethodGet, q, analyst, ""); resp.StatusCode != http.StatusOK || !strings.Contains(string(body), it.ID) {
+		t.Errorf("filtered: %d %s", resp.StatusCode, body)
+	}
+	if resp, body := f.do(t, http.MethodGet, "/api/v1/facilities/facets?ring=outside", analyst, ""); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(body), `"types":[{`) {
+		t.Errorf("facets: %d %s", resp.StatusCode, body)
+	}
+	resp, body = f.do(t, http.MethodGet, "/api/v1/facilities/"+it.ID, analyst, "")
+	if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), `"confidenceReasons":[{`) {
+		t.Errorf("card: %d %s", resp.StatusCode, body)
+	}
+	if resp, body := f.do(t, http.MethodGet, "/api/v1/facilities/compare?id="+it.ID+"&id="+page.Items[1].ID, analyst, ""); resp.StatusCode != http.StatusOK {
+		t.Errorf("compare: %d %s", resp.StatusCode, body)
+	}
+	// Ошибки: неизвестный объект, сортировка, одно значение для сравнения.
+	for path, want := range map[string]int{
+		"/api/v1/facilities/" + uuid.NewString():            http.StatusNotFound,
+		"/api/v1/facilities?sort=price":                     http.StatusBadRequest,
+		"/api/v1/facilities/compare?id=" + uuid.NewString(): http.StatusBadRequest,
+	} {
+		if resp, body := f.do(t, http.MethodGet, path, analyst, ""); resp.StatusCode != want {
+			t.Errorf("%s: %d %s", path, resp.StatusCode, body)
+		}
 	}
 }

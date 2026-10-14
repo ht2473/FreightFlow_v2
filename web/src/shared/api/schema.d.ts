@@ -338,6 +338,87 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/facilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Реестр объектов логистики
+         * @description Страница реестра с фильтрами, сортировкой `sort=поле,-поле` (name, type, area, floorArea,
+         *     confidence, mkad, firstSeen) и курсором. Всего — число объектов по фильтру.
+         */
+        get: operations["listFacilities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facilities/facets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Фасеты реестра
+         * @description Распределения выборки по типу, округу, кольцу и достоверности; в каждом фасете учитываются
+         *     все фильтры, кроме его собственного.
+         */
+        get: operations["facilityFacets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facilities/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Сравнение объектов (2–4) */
+        get: operations["compareFacilities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facilities/{facilityId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Карточка объекта
+         * @description Строка реестра, геометрия, достоверность с причинами, официальные источники, время до МКАД,
+         *     ТТК, центра и ж/д пунктов по профилям ТС, ограничения в 500 м, дорожные работы рядом,
+         *     ближайшая инфраструктура в 3 км.
+         */
+        get: operations["getFacility"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/regulation": {
         parameters: {
             query?: never;
@@ -1025,6 +1106,130 @@ export interface components {
             ecoClass?: number;
             hazmat?: boolean;
         };
+        FacilityItem: {
+            /** Format: uuid */
+            id: string;
+            name?: string;
+            type: string;
+            typeName: string;
+            address?: string;
+            okrug?: string;
+            district?: string;
+            /** @enum {string} */
+            ring?: "sk" | "ttk" | "mkad" | "ckad" | "outside";
+            /** @description Площадь застройки, м² */
+            buildingAreaM2?: number;
+            /** @description Оценка общей площади, м² */
+            floorAreaM2?: number;
+            territoryAreaM2?: number;
+            buildings: number;
+            confidence: number;
+            /** @description Время до МКАД грузовика 20 т, мин */
+            mkadMin?: number;
+            hasPermit: boolean;
+            point: components["schemas"]["LngLat"];
+            /** Format: date-time */
+            firstSeen: string;
+        };
+        FacilityPage: {
+            items: components["schemas"]["FacilityItem"][];
+            total: number;
+            /** @description Курсор следующей страницы */
+            next?: string;
+        };
+        FacetValue: {
+            value: string;
+            label: string;
+            count: number;
+        };
+        FacilityFacets: {
+            types: components["schemas"]["FacetValue"][];
+            okrugs: components["schemas"]["FacetValue"][];
+            rings: components["schemas"]["FacetValue"][];
+            confidence: components["schemas"]["FacetValue"][];
+        };
+        ConfidenceReason: {
+            code: string;
+            text: string;
+            weight: number;
+        };
+        FacilitySource: {
+            /** @enum {string} */
+            relation: "address" | "permit";
+            ref: string;
+            details: {
+                [key: string]: unknown;
+            };
+        };
+        FacilityAccess: {
+            profile: string;
+            profileName: string;
+            /** @enum {string} */
+            target: "mkad" | "ttk" | "center" | "rail_freight";
+            targetName?: string;
+            minutes?: number;
+            km?: number;
+        };
+        NearbyRestriction: {
+            kind: string;
+            value?: number;
+            condition?: string;
+            street?: string;
+            origins: string[];
+            distanceM: number;
+        };
+        NearbyWork: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** @enum {string} */
+            kind: "repair" | "emergency" | "closure";
+            /** @enum {string} */
+            state: "planned" | "active";
+            closure: boolean;
+            /** Format: date */
+            starts?: string;
+            /** Format: date */
+            ends?: string;
+            distanceM: number;
+        };
+        NearbyPoi: {
+            kind: string;
+            name?: string;
+            distanceM: number;
+            point: components["schemas"]["LngLat"];
+        };
+        FacilityCard: {
+            facility: components["schemas"]["FacilityItem"];
+            /** @enum {string} */
+            status: "active" | "missing" | "excluded";
+            /** @description Контур зданий (GeoJSON) */
+            footprint?: {
+                [key: string]: unknown;
+            };
+            /** @description Территория (GeoJSON) */
+            territory?: {
+                [key: string]: unknown;
+            };
+            levels?: number;
+            /** @enum {string} */
+            osmType: "N" | "W" | "R";
+            /** Format: int64 */
+            osmId: number;
+            attrs: {
+                [key: string]: unknown;
+            };
+            confidenceReasons: components["schemas"]["ConfidenceReason"][];
+            /** Format: date-time */
+            lastSeen: string;
+            /** Format: date-time */
+            updatedAt: string;
+            sources: components["schemas"]["FacilitySource"][];
+            access: components["schemas"]["FacilityAccess"][];
+            restrictions: components["schemas"]["NearbyRestriction"][];
+            works: components["schemas"]["NearbyWork"][];
+            nearby: components["schemas"]["NearbyPoi"][];
+        };
         LngLat: {
             lon: number;
             lat: number;
@@ -1262,6 +1467,27 @@ export interface components {
         SourceCode: string;
         UserId: string;
         TokenId: string;
+        /** @description Подстрока названия или адреса */
+        FacilityQ: string;
+        FacilityType: string[];
+        FacilityOkrug: string[];
+        FacilityDistrict: string[];
+        FacilityRing: ("sk" | "ttk" | "mkad" | "ckad" | "outside")[];
+        /** @description Площадь застройки от, м² */
+        FacilityMinArea: number;
+        FacilityMaxArea: number;
+        FacilityMinConfidence: number;
+        FacilityStatus: "active" | "missing" | "excluded";
+        /** @description Рамка «запад,юг,восток,север» */
+        FacilityBBox: number[];
+        /** @description Окрестность «долгота,широта,радиус в метрах» */
+        FacilityNear: number[];
+        /** @description Время до МКАД грузовика 20 т не больше, мин */
+        FacilityMaxMkad: number;
+        /** @description Запрет или предел массы и габаритов в 300 м */
+        FacilityNearRestrictions: boolean;
+        /** @description Есть разрешение на ввод в эксплуатацию */
+        FacilityHasPermit: boolean;
     };
     requestBodies: never;
     headers: never;
@@ -1872,6 +2098,141 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunDetail"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFacilities: {
+        parameters: {
+            query?: {
+                /** @description Подстрока названия или адреса */
+                q?: components["parameters"]["FacilityQ"];
+                type?: components["parameters"]["FacilityType"];
+                okrug?: components["parameters"]["FacilityOkrug"];
+                district?: components["parameters"]["FacilityDistrict"];
+                ring?: components["parameters"]["FacilityRing"];
+                /** @description Площадь застройки от, м² */
+                minArea?: components["parameters"]["FacilityMinArea"];
+                maxArea?: components["parameters"]["FacilityMaxArea"];
+                minConfidence?: components["parameters"]["FacilityMinConfidence"];
+                status?: components["parameters"]["FacilityStatus"];
+                /** @description Рамка «запад,юг,восток,север» */
+                bbox?: components["parameters"]["FacilityBBox"];
+                /** @description Окрестность «долгота,широта,радиус в метрах» */
+                near?: components["parameters"]["FacilityNear"];
+                /** @description Время до МКАД грузовика 20 т не больше, мин */
+                maxMkadMin?: components["parameters"]["FacilityMaxMkad"];
+                /** @description Запрет или предел массы и габаритов в 300 м */
+                nearRestrictions?: components["parameters"]["FacilityNearRestrictions"];
+                /** @description Есть разрешение на ввод в эксплуатацию */
+                hasPermit?: components["parameters"]["FacilityHasPermit"];
+                sort?: string;
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница реестра */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityPage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    facilityFacets: {
+        parameters: {
+            query?: {
+                /** @description Подстрока названия или адреса */
+                q?: components["parameters"]["FacilityQ"];
+                type?: components["parameters"]["FacilityType"];
+                okrug?: components["parameters"]["FacilityOkrug"];
+                district?: components["parameters"]["FacilityDistrict"];
+                ring?: components["parameters"]["FacilityRing"];
+                /** @description Площадь застройки от, м² */
+                minArea?: components["parameters"]["FacilityMinArea"];
+                maxArea?: components["parameters"]["FacilityMaxArea"];
+                minConfidence?: components["parameters"]["FacilityMinConfidence"];
+                status?: components["parameters"]["FacilityStatus"];
+                /** @description Рамка «запад,юг,восток,север» */
+                bbox?: components["parameters"]["FacilityBBox"];
+                /** @description Окрестность «долгота,широта,радиус в метрах» */
+                near?: components["parameters"]["FacilityNear"];
+                /** @description Время до МКАД грузовика 20 т не больше, мин */
+                maxMkadMin?: components["parameters"]["FacilityMaxMkad"];
+                /** @description Запрет или предел массы и габаритов в 300 м */
+                nearRestrictions?: components["parameters"]["FacilityNearRestrictions"];
+                /** @description Есть разрешение на ввод в эксплуатацию */
+                hasPermit?: components["parameters"]["FacilityHasPermit"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Фасеты */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityFacets"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    compareFacilities: {
+        parameters: {
+            query: {
+                id: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Карточки в порядке запроса */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityCard"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFacility: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                facilityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Карточка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityCard"];
                 };
             };
             default: components["responses"]["Problem"];
