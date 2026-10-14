@@ -48,7 +48,7 @@ export function AppShell() {
   const user = me.data;
   const role = user.roles[0] ? roleTitle(user.roles[0]) : "";
   // Разделы с картой во всю высоту рабочей области.
-  const fullBleed = pathname.startsWith("/map") || pathname.startsWith("/network");
+  const fullBleed = pathname.startsWith("/map") || pathname === "/network";
 
   return (
     <div className={s.app}>

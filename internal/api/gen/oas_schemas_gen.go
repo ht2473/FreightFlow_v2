@@ -547,6 +547,60 @@ func (s *CargoFrameOkrug) SetLengthKm(val float64) {
 	s.LengthKm = val
 }
 
+// Ref: #/components/schemas/CentralityAccuracy
+type CentralityAccuracy struct {
+	// Узлов-источников в выборке.
+	Sources int `json:"sources"`
+	// Источники — все узлы графа.
+	Exact bool `json:"exact"`
+	// Медиана относительной стандартной ошибки по верхней
+	// сотне участков.
+	Rse OptFloat64 `json:"rse"`
+	// Ранговая корреляция Спирмена оценок двух половин
+	// выборки.
+	SplitHalf OptFloat64 `json:"splitHalf"`
+}
+
+// GetSources returns the value of Sources.
+func (s *CentralityAccuracy) GetSources() int {
+	return s.Sources
+}
+
+// GetExact returns the value of Exact.
+func (s *CentralityAccuracy) GetExact() bool {
+	return s.Exact
+}
+
+// GetRse returns the value of Rse.
+func (s *CentralityAccuracy) GetRse() OptFloat64 {
+	return s.Rse
+}
+
+// GetSplitHalf returns the value of SplitHalf.
+func (s *CentralityAccuracy) GetSplitHalf() OptFloat64 {
+	return s.SplitHalf
+}
+
+// SetSources sets the value of Sources.
+func (s *CentralityAccuracy) SetSources(val int) {
+	s.Sources = val
+}
+
+// SetExact sets the value of Exact.
+func (s *CentralityAccuracy) SetExact(val bool) {
+	s.Exact = val
+}
+
+// SetRse sets the value of Rse.
+func (s *CentralityAccuracy) SetRse(val OptFloat64) {
+	s.Rse = val
+}
+
+// SetSplitHalf sets the value of SplitHalf.
+func (s *CentralityAccuracy) SetSplitHalf(val OptFloat64) {
+	s.SplitHalf = val
+}
+
 // Ref: #/components/schemas/ChangePassword
 type ChangePassword struct {
 	CurrentPassword string `json:"currentPassword"`
@@ -820,8 +874,280 @@ func (s *CreatedToken) SetValue(val string) {
 	s.Value = val
 }
 
+// Ref: #/components/schemas/CriticalElement
+type CriticalElement struct {
+	ID       int                 `json:"id"`
+	Kind     CriticalElementKind `json:"kind"`
+	Name     string              `json:"name"`
+	Rank     int                 `json:"rank"`
+	Graph    ElementDamage       `json:"graph"`
+	Valhalla OptElementDamage    `json:"valhalla"`
+	Point    LngLat              `json:"point"`
+	// Элементов той же дороги с тем же эффектом (показан
+	// первый).
+	Same int `json:"same"`
+}
+
+// GetID returns the value of ID.
+func (s *CriticalElement) GetID() int {
+	return s.ID
+}
+
+// GetKind returns the value of Kind.
+func (s *CriticalElement) GetKind() CriticalElementKind {
+	return s.Kind
+}
+
+// GetName returns the value of Name.
+func (s *CriticalElement) GetName() string {
+	return s.Name
+}
+
+// GetRank returns the value of Rank.
+func (s *CriticalElement) GetRank() int {
+	return s.Rank
+}
+
+// GetGraph returns the value of Graph.
+func (s *CriticalElement) GetGraph() ElementDamage {
+	return s.Graph
+}
+
+// GetValhalla returns the value of Valhalla.
+func (s *CriticalElement) GetValhalla() OptElementDamage {
+	return s.Valhalla
+}
+
+// GetPoint returns the value of Point.
+func (s *CriticalElement) GetPoint() LngLat {
+	return s.Point
+}
+
+// GetSame returns the value of Same.
+func (s *CriticalElement) GetSame() int {
+	return s.Same
+}
+
+// SetID sets the value of ID.
+func (s *CriticalElement) SetID(val int) {
+	s.ID = val
+}
+
+// SetKind sets the value of Kind.
+func (s *CriticalElement) SetKind(val CriticalElementKind) {
+	s.Kind = val
+}
+
+// SetName sets the value of Name.
+func (s *CriticalElement) SetName(val string) {
+	s.Name = val
+}
+
+// SetRank sets the value of Rank.
+func (s *CriticalElement) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetGraph sets the value of Graph.
+func (s *CriticalElement) SetGraph(val ElementDamage) {
+	s.Graph = val
+}
+
+// SetValhalla sets the value of Valhalla.
+func (s *CriticalElement) SetValhalla(val OptElementDamage) {
+	s.Valhalla = val
+}
+
+// SetPoint sets the value of Point.
+func (s *CriticalElement) SetPoint(val LngLat) {
+	s.Point = val
+}
+
+// SetSame sets the value of Same.
+func (s *CriticalElement) SetSame(val int) {
+	s.Same = val
+}
+
+type CriticalElementKind string
+
+const (
+	CriticalElementKindBridge  CriticalElementKind = "bridge"
+	CriticalElementKindSegment CriticalElementKind = "segment"
+)
+
+// AllValues returns all CriticalElementKind values.
+func (CriticalElementKind) AllValues() []CriticalElementKind {
+	return []CriticalElementKind{
+		CriticalElementKindBridge,
+		CriticalElementKindSegment,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CriticalElementKind) MarshalText() ([]byte, error) {
+	switch s {
+	case CriticalElementKindBridge:
+		return []byte(s), nil
+	case CriticalElementKindSegment:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CriticalElementKind) UnmarshalText(data []byte) error {
+	switch CriticalElementKind(data) {
+	case CriticalElementKindBridge:
+		*s = CriticalElementKindBridge
+		return nil
+	case CriticalElementKindSegment:
+		*s = CriticalElementKindSegment
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/CriticalityStats
+type CriticalityStats struct {
+	Facilities int `json:"facilities"`
+	// Объектов, привязанных к графу в 500 м.
+	FacilitiesSnapped int `json:"facilitiesSnapped"`
+	// Точек МКАД.
+	Targets        int `json:"targets"`
+	TargetsSnapped int `json:"targetsSnapped"`
+	// Оценённых элементов.
+	Elements int `json:"elements"`
+	Bridges  int `json:"bridges"`
+	// Проверено матрицами Valhalla.
+	Confirmed int `json:"confirmed"`
+}
+
+// GetFacilities returns the value of Facilities.
+func (s *CriticalityStats) GetFacilities() int {
+	return s.Facilities
+}
+
+// GetFacilitiesSnapped returns the value of FacilitiesSnapped.
+func (s *CriticalityStats) GetFacilitiesSnapped() int {
+	return s.FacilitiesSnapped
+}
+
+// GetTargets returns the value of Targets.
+func (s *CriticalityStats) GetTargets() int {
+	return s.Targets
+}
+
+// GetTargetsSnapped returns the value of TargetsSnapped.
+func (s *CriticalityStats) GetTargetsSnapped() int {
+	return s.TargetsSnapped
+}
+
+// GetElements returns the value of Elements.
+func (s *CriticalityStats) GetElements() int {
+	return s.Elements
+}
+
+// GetBridges returns the value of Bridges.
+func (s *CriticalityStats) GetBridges() int {
+	return s.Bridges
+}
+
+// GetConfirmed returns the value of Confirmed.
+func (s *CriticalityStats) GetConfirmed() int {
+	return s.Confirmed
+}
+
+// SetFacilities sets the value of Facilities.
+func (s *CriticalityStats) SetFacilities(val int) {
+	s.Facilities = val
+}
+
+// SetFacilitiesSnapped sets the value of FacilitiesSnapped.
+func (s *CriticalityStats) SetFacilitiesSnapped(val int) {
+	s.FacilitiesSnapped = val
+}
+
+// SetTargets sets the value of Targets.
+func (s *CriticalityStats) SetTargets(val int) {
+	s.Targets = val
+}
+
+// SetTargetsSnapped sets the value of TargetsSnapped.
+func (s *CriticalityStats) SetTargetsSnapped(val int) {
+	s.TargetsSnapped = val
+}
+
+// SetElements sets the value of Elements.
+func (s *CriticalityStats) SetElements(val int) {
+	s.Elements = val
+}
+
+// SetBridges sets the value of Bridges.
+func (s *CriticalityStats) SetBridges(val int) {
+	s.Bridges = val
+}
+
+// SetConfirmed sets the value of Confirmed.
+func (s *CriticalityStats) SetConfirmed(val int) {
+	s.Confirmed = val
+}
+
 // DisableTotpNoContent is response for DisableTotp operation.
 type DisableTotpNoContent struct{}
+
+// Ref: #/components/schemas/ElementDamage
+type ElementDamage struct {
+	// Объектов с приростом времени до МКАД.
+	Facilities int `json:"facilities"`
+	// Суммарный прирост, объекто-минуты.
+	Minutes float64 `json:"minutes"`
+	// Наибольший прирост, мин.
+	MaxDelay float64 `json:"maxDelay"`
+	// Объектов, теряющих доступ к МКАД.
+	Disconnected int `json:"disconnected"`
+}
+
+// GetFacilities returns the value of Facilities.
+func (s *ElementDamage) GetFacilities() int {
+	return s.Facilities
+}
+
+// GetMinutes returns the value of Minutes.
+func (s *ElementDamage) GetMinutes() float64 {
+	return s.Minutes
+}
+
+// GetMaxDelay returns the value of MaxDelay.
+func (s *ElementDamage) GetMaxDelay() float64 {
+	return s.MaxDelay
+}
+
+// GetDisconnected returns the value of Disconnected.
+func (s *ElementDamage) GetDisconnected() int {
+	return s.Disconnected
+}
+
+// SetFacilities sets the value of Facilities.
+func (s *ElementDamage) SetFacilities(val int) {
+	s.Facilities = val
+}
+
+// SetMinutes sets the value of Minutes.
+func (s *ElementDamage) SetMinutes(val float64) {
+	s.Minutes = val
+}
+
+// SetMaxDelay sets the value of MaxDelay.
+func (s *ElementDamage) SetMaxDelay(val float64) {
+	s.MaxDelay = val
+}
+
+// SetDisconnected sets the value of Disconnected.
+func (s *ElementDamage) SetDisconnected(val int) {
+	s.Disconnected = val
+}
 
 // Ref: #/components/schemas/FieldError
 type FieldError struct {
@@ -1916,6 +2242,363 @@ func (s *NamedCount) SetCount(val int) {
 	s.Count = val
 }
 
+// Ref: #/components/schemas/NetworkAnalysis
+type NetworkAnalysis struct {
+	Version int `json:"version"`
+	// Профиль ТС анализа.
+	Profile string    `json:"profile"`
+	BuiltAt time.Time `json:"builtAt"`
+	Nodes   int       `json:"nodes"`
+	Edges   int       `json:"edges"`
+	// Направлений проезда, открытых профилю.
+	Arcs int `json:"arcs"`
+	// Доля узлов в наибольшей сильно связной компоненте.
+	LargestComponent float64             `json:"largestComponent"`
+	Accuracy         CentralityAccuracy  `json:"accuracy"`
+	FreeAccuracy     CentralityAccuracy  `json:"freeAccuracy"`
+	DurationSeconds  float64             `json:"durationSeconds"`
+	TopStreets       []StreetRank        `json:"topStreets"`
+	Bottlenecks      []NetworkBottleneck `json:"bottlenecks"`
+	// Участков OSM — узких мест.
+	BottleneckCount int `json:"bottleneckCount"`
+	// Из них без объезда.
+	NoDetourCount int               `json:"noDetourCount"`
+	Criticality   CriticalityStats  `json:"criticality"`
+	Critical      []CriticalElement `json:"critical"`
+}
+
+// GetVersion returns the value of Version.
+func (s *NetworkAnalysis) GetVersion() int {
+	return s.Version
+}
+
+// GetProfile returns the value of Profile.
+func (s *NetworkAnalysis) GetProfile() string {
+	return s.Profile
+}
+
+// GetBuiltAt returns the value of BuiltAt.
+func (s *NetworkAnalysis) GetBuiltAt() time.Time {
+	return s.BuiltAt
+}
+
+// GetNodes returns the value of Nodes.
+func (s *NetworkAnalysis) GetNodes() int {
+	return s.Nodes
+}
+
+// GetEdges returns the value of Edges.
+func (s *NetworkAnalysis) GetEdges() int {
+	return s.Edges
+}
+
+// GetArcs returns the value of Arcs.
+func (s *NetworkAnalysis) GetArcs() int {
+	return s.Arcs
+}
+
+// GetLargestComponent returns the value of LargestComponent.
+func (s *NetworkAnalysis) GetLargestComponent() float64 {
+	return s.LargestComponent
+}
+
+// GetAccuracy returns the value of Accuracy.
+func (s *NetworkAnalysis) GetAccuracy() CentralityAccuracy {
+	return s.Accuracy
+}
+
+// GetFreeAccuracy returns the value of FreeAccuracy.
+func (s *NetworkAnalysis) GetFreeAccuracy() CentralityAccuracy {
+	return s.FreeAccuracy
+}
+
+// GetDurationSeconds returns the value of DurationSeconds.
+func (s *NetworkAnalysis) GetDurationSeconds() float64 {
+	return s.DurationSeconds
+}
+
+// GetTopStreets returns the value of TopStreets.
+func (s *NetworkAnalysis) GetTopStreets() []StreetRank {
+	return s.TopStreets
+}
+
+// GetBottlenecks returns the value of Bottlenecks.
+func (s *NetworkAnalysis) GetBottlenecks() []NetworkBottleneck {
+	return s.Bottlenecks
+}
+
+// GetBottleneckCount returns the value of BottleneckCount.
+func (s *NetworkAnalysis) GetBottleneckCount() int {
+	return s.BottleneckCount
+}
+
+// GetNoDetourCount returns the value of NoDetourCount.
+func (s *NetworkAnalysis) GetNoDetourCount() int {
+	return s.NoDetourCount
+}
+
+// GetCriticality returns the value of Criticality.
+func (s *NetworkAnalysis) GetCriticality() CriticalityStats {
+	return s.Criticality
+}
+
+// GetCritical returns the value of Critical.
+func (s *NetworkAnalysis) GetCritical() []CriticalElement {
+	return s.Critical
+}
+
+// SetVersion sets the value of Version.
+func (s *NetworkAnalysis) SetVersion(val int) {
+	s.Version = val
+}
+
+// SetProfile sets the value of Profile.
+func (s *NetworkAnalysis) SetProfile(val string) {
+	s.Profile = val
+}
+
+// SetBuiltAt sets the value of BuiltAt.
+func (s *NetworkAnalysis) SetBuiltAt(val time.Time) {
+	s.BuiltAt = val
+}
+
+// SetNodes sets the value of Nodes.
+func (s *NetworkAnalysis) SetNodes(val int) {
+	s.Nodes = val
+}
+
+// SetEdges sets the value of Edges.
+func (s *NetworkAnalysis) SetEdges(val int) {
+	s.Edges = val
+}
+
+// SetArcs sets the value of Arcs.
+func (s *NetworkAnalysis) SetArcs(val int) {
+	s.Arcs = val
+}
+
+// SetLargestComponent sets the value of LargestComponent.
+func (s *NetworkAnalysis) SetLargestComponent(val float64) {
+	s.LargestComponent = val
+}
+
+// SetAccuracy sets the value of Accuracy.
+func (s *NetworkAnalysis) SetAccuracy(val CentralityAccuracy) {
+	s.Accuracy = val
+}
+
+// SetFreeAccuracy sets the value of FreeAccuracy.
+func (s *NetworkAnalysis) SetFreeAccuracy(val CentralityAccuracy) {
+	s.FreeAccuracy = val
+}
+
+// SetDurationSeconds sets the value of DurationSeconds.
+func (s *NetworkAnalysis) SetDurationSeconds(val float64) {
+	s.DurationSeconds = val
+}
+
+// SetTopStreets sets the value of TopStreets.
+func (s *NetworkAnalysis) SetTopStreets(val []StreetRank) {
+	s.TopStreets = val
+}
+
+// SetBottlenecks sets the value of Bottlenecks.
+func (s *NetworkAnalysis) SetBottlenecks(val []NetworkBottleneck) {
+	s.Bottlenecks = val
+}
+
+// SetBottleneckCount sets the value of BottleneckCount.
+func (s *NetworkAnalysis) SetBottleneckCount(val int) {
+	s.BottleneckCount = val
+}
+
+// SetNoDetourCount sets the value of NoDetourCount.
+func (s *NetworkAnalysis) SetNoDetourCount(val int) {
+	s.NoDetourCount = val
+}
+
+// SetCriticality sets the value of Criticality.
+func (s *NetworkAnalysis) SetCriticality(val CriticalityStats) {
+	s.Criticality = val
+}
+
+// SetCritical sets the value of Critical.
+func (s *NetworkAnalysis) SetCritical(val []CriticalElement) {
+	s.Critical = val
+}
+
+// Ref: #/components/schemas/NetworkBottleneck
+type NetworkBottleneck struct {
+	SegmentId uuid.UUID             `json:"segmentId"`
+	Name      string                `json:"name"`
+	Kind      NetworkBottleneckKind `json:"kind"`
+	// Величина предела, т или м.
+	Value OptFloat64 `json:"value"`
+	// Место участка в рейтинге значимости без пределов
+	// габаритов.
+	FreeRank int `json:"freeRank"`
+	// Доля путей, которые шли бы через участок без предела, %.
+	FreeShare float64 `json:"freeShare"`
+	// Дополнительное время объезда, мин; нет — объезда нет.
+	DetourMinutes OptFloat64 `json:"detourMinutes"`
+	Point         LngLat     `json:"point"`
+	// Линий OSM улицы с тем же пределом (показана самая
+	// значимая).
+	Segments int `json:"segments"`
+}
+
+// GetSegmentId returns the value of SegmentId.
+func (s *NetworkBottleneck) GetSegmentId() uuid.UUID {
+	return s.SegmentId
+}
+
+// GetName returns the value of Name.
+func (s *NetworkBottleneck) GetName() string {
+	return s.Name
+}
+
+// GetKind returns the value of Kind.
+func (s *NetworkBottleneck) GetKind() NetworkBottleneckKind {
+	return s.Kind
+}
+
+// GetValue returns the value of Value.
+func (s *NetworkBottleneck) GetValue() OptFloat64 {
+	return s.Value
+}
+
+// GetFreeRank returns the value of FreeRank.
+func (s *NetworkBottleneck) GetFreeRank() int {
+	return s.FreeRank
+}
+
+// GetFreeShare returns the value of FreeShare.
+func (s *NetworkBottleneck) GetFreeShare() float64 {
+	return s.FreeShare
+}
+
+// GetDetourMinutes returns the value of DetourMinutes.
+func (s *NetworkBottleneck) GetDetourMinutes() OptFloat64 {
+	return s.DetourMinutes
+}
+
+// GetPoint returns the value of Point.
+func (s *NetworkBottleneck) GetPoint() LngLat {
+	return s.Point
+}
+
+// GetSegments returns the value of Segments.
+func (s *NetworkBottleneck) GetSegments() int {
+	return s.Segments
+}
+
+// SetSegmentId sets the value of SegmentId.
+func (s *NetworkBottleneck) SetSegmentId(val uuid.UUID) {
+	s.SegmentId = val
+}
+
+// SetName sets the value of Name.
+func (s *NetworkBottleneck) SetName(val string) {
+	s.Name = val
+}
+
+// SetKind sets the value of Kind.
+func (s *NetworkBottleneck) SetKind(val NetworkBottleneckKind) {
+	s.Kind = val
+}
+
+// SetValue sets the value of Value.
+func (s *NetworkBottleneck) SetValue(val OptFloat64) {
+	s.Value = val
+}
+
+// SetFreeRank sets the value of FreeRank.
+func (s *NetworkBottleneck) SetFreeRank(val int) {
+	s.FreeRank = val
+}
+
+// SetFreeShare sets the value of FreeShare.
+func (s *NetworkBottleneck) SetFreeShare(val float64) {
+	s.FreeShare = val
+}
+
+// SetDetourMinutes sets the value of DetourMinutes.
+func (s *NetworkBottleneck) SetDetourMinutes(val OptFloat64) {
+	s.DetourMinutes = val
+}
+
+// SetPoint sets the value of Point.
+func (s *NetworkBottleneck) SetPoint(val LngLat) {
+	s.Point = val
+}
+
+// SetSegments sets the value of Segments.
+func (s *NetworkBottleneck) SetSegments(val int) {
+	s.Segments = val
+}
+
+type NetworkBottleneckKind string
+
+const (
+	NetworkBottleneckKindMaxheight   NetworkBottleneckKind = "maxheight"
+	NetworkBottleneckKindMaxweight   NetworkBottleneckKind = "maxweight"
+	NetworkBottleneckKindMaxaxleload NetworkBottleneckKind = "maxaxleload"
+	NetworkBottleneckKindMaxwidth    NetworkBottleneckKind = "maxwidth"
+	NetworkBottleneckKindMaxlength   NetworkBottleneckKind = "maxlength"
+)
+
+// AllValues returns all NetworkBottleneckKind values.
+func (NetworkBottleneckKind) AllValues() []NetworkBottleneckKind {
+	return []NetworkBottleneckKind{
+		NetworkBottleneckKindMaxheight,
+		NetworkBottleneckKindMaxweight,
+		NetworkBottleneckKindMaxaxleload,
+		NetworkBottleneckKindMaxwidth,
+		NetworkBottleneckKindMaxlength,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s NetworkBottleneckKind) MarshalText() ([]byte, error) {
+	switch s {
+	case NetworkBottleneckKindMaxheight:
+		return []byte(s), nil
+	case NetworkBottleneckKindMaxweight:
+		return []byte(s), nil
+	case NetworkBottleneckKindMaxaxleload:
+		return []byte(s), nil
+	case NetworkBottleneckKindMaxwidth:
+		return []byte(s), nil
+	case NetworkBottleneckKindMaxlength:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *NetworkBottleneckKind) UnmarshalText(data []byte) error {
+	switch NetworkBottleneckKind(data) {
+	case NetworkBottleneckKindMaxheight:
+		*s = NetworkBottleneckKindMaxheight
+		return nil
+	case NetworkBottleneckKindMaxweight:
+		*s = NetworkBottleneckKindMaxweight
+		return nil
+	case NetworkBottleneckKindMaxaxleload:
+		*s = NetworkBottleneckKindMaxaxleload
+		return nil
+	case NetworkBottleneckKindMaxwidth:
+		*s = NetworkBottleneckKindMaxwidth
+		return nil
+	case NetworkBottleneckKindMaxlength:
+		*s = NetworkBottleneckKindMaxlength
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/OfficialPage
 type OfficialPage struct {
 	Code                     string    `json:"code"`
@@ -2164,6 +2847,52 @@ func (o OptDateTime) Get() (v time.Time, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDateTime) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptElementDamage returns new OptElementDamage with value set to v.
+func NewOptElementDamage(v ElementDamage) OptElementDamage {
+	return OptElementDamage{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptElementDamage is optional ElementDamage.
+type OptElementDamage struct {
+	Value ElementDamage
+	Set   bool
+}
+
+// IsSet returns true if OptElementDamage was set.
+func (o OptElementDamage) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptElementDamage) Reset() {
+	var v ElementDamage
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptElementDamage) SetTo(v ElementDamage) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptElementDamage) Get() (v ElementDamage, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptElementDamage) Or(d ElementDamage) ElementDamage {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -4502,6 +5231,68 @@ func (s *StartRun) GetForce() OptBool {
 // SetForce sets the value of Force.
 func (s *StartRun) SetForce(val OptBool) {
 	s.Force = val
+}
+
+// Ref: #/components/schemas/StreetRank
+type StreetRank struct {
+	Name string `json:"name"`
+	// Наибольшая доля путей через участок улицы, %.
+	Share float64 `json:"share"`
+	// Лучшее место участка улицы в рейтинге.
+	Rank int `json:"rank"`
+	// Длина участков улицы в верхних 5 %, км.
+	TopKm float64 `json:"topKm"`
+	Point LngLat  `json:"point"`
+}
+
+// GetName returns the value of Name.
+func (s *StreetRank) GetName() string {
+	return s.Name
+}
+
+// GetShare returns the value of Share.
+func (s *StreetRank) GetShare() float64 {
+	return s.Share
+}
+
+// GetRank returns the value of Rank.
+func (s *StreetRank) GetRank() int {
+	return s.Rank
+}
+
+// GetTopKm returns the value of TopKm.
+func (s *StreetRank) GetTopKm() float64 {
+	return s.TopKm
+}
+
+// GetPoint returns the value of Point.
+func (s *StreetRank) GetPoint() LngLat {
+	return s.Point
+}
+
+// SetName sets the value of Name.
+func (s *StreetRank) SetName(val string) {
+	s.Name = val
+}
+
+// SetShare sets the value of Share.
+func (s *StreetRank) SetShare(val float64) {
+	s.Share = val
+}
+
+// SetRank sets the value of Rank.
+func (s *StreetRank) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetTopKm sets the value of TopKm.
+func (s *StreetRank) SetTopKm(val float64) {
+	s.TopKm = val
+}
+
+// SetPoint sets the value of Point.
+func (s *StreetRank) SetPoint(val LngLat) {
+	s.Point = val
 }
 
 // Ref: #/components/schemas/TotpCode

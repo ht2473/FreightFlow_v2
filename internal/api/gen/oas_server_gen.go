@@ -77,6 +77,16 @@ type Handler interface {
 	//
 	// GET /me
 	GetMe(ctx context.Context) (*Me, error)
+	// GetNetworkAnalysis implements getNetworkAnalysis operation.
+	//
+	// Текущая версия графа анализа для профиля 12 т: состав,
+	// точность выборочной оценки центральности, улицы с
+	// наибольшей значимостью, узкие места по значимости
+	// путей, мосты и участки по росту времени доступа
+	// объектов к МКАД при закрытии.
+	//
+	// GET /routing/analysis
+	GetNetworkAnalysis(ctx context.Context, params GetNetworkAnalysisParams) (*NetworkAnalysis, error)
 	// GetPassStats implements getPassStats operation.
 	//
 	// Только агрегаты; номера пропусков и сведения о ТС не

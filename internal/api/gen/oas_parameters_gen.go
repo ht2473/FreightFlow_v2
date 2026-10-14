@@ -16,6 +16,100 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+// GetNetworkAnalysisParams is parameters of getNetworkAnalysis operation.
+type GetNetworkAnalysisParams struct {
+	Top OptInt `json:",omitempty,omitzero"`
+}
+
+func unpackGetNetworkAnalysisParams(packed middleware.Parameters) (params GetNetworkAnalysisParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "top",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Top = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeGetNetworkAnalysisParams(args [0]string, argsEscaped bool, r *http.Request) (params GetNetworkAnalysisParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Set default value for query: top.
+	{
+		val := int(20)
+		params.Top.SetTo(val)
+	}
+	// Decode query: top.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "top",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTopVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTopVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Top.SetTo(paramsDotTopVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Top.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           100,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "top",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetRunParams is parameters of getRun operation.
 type GetRunParams struct {
 	RunId uuid.UUID

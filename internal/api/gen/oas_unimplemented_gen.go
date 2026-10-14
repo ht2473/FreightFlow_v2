@@ -112,6 +112,19 @@ func (UnimplementedHandler) GetMe(ctx context.Context) (r *Me, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// GetNetworkAnalysis implements getNetworkAnalysis operation.
+//
+// Текущая версия графа анализа для профиля 12 т: состав,
+// точность выборочной оценки центральности, улицы с
+// наибольшей значимостью, узкие места по значимости
+// путей, мосты и участки по росту времени доступа
+// объектов к МКАД при закрытии.
+//
+// GET /routing/analysis
+func (UnimplementedHandler) GetNetworkAnalysis(ctx context.Context, params GetNetworkAnalysisParams) (r *NetworkAnalysis, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetPassStats implements getPassStats operation.
 //
 // Только агрегаты; номера пропусков и сведения о ТС не

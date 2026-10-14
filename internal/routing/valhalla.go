@@ -89,9 +89,34 @@ var ErrNoRoute = errors.New("valhalla: no route")
 func (e *Error) Is(target error) bool { return target == ErrNoRoute && e.Code == 442 }
 
 type location struct {
-	Lat    float64 `json:"lat"`
-	Lon    float64 `json:"lon"`
-	Radius int     `json:"radius,omitempty"`
+	Lat              float64  `json:"lat"`
+	Lon              float64  `json:"lon"`
+	Radius           int      `json:"radius,omitempty"`
+	Heading          *float64 `json:"heading,omitempty"`
+	HeadingTolerance int      `json:"heading_tolerance,omitempty"`
+}
+
+// ExcludePoint — участок, исключаемый из графа: ближайший к точке с направлением движения
+// Heading (градусы от севера по часовой стрелке). Направление отличает мост от дороги под ним и
+// одну проезжую часть от встречной.
+type ExcludePoint struct {
+	Point
+	Heading float64
+}
+
+// excludeHeadingTolerance — допуск направления исключаемого участка, градусы.
+const excludeHeadingTolerance = 30
+
+func excludeLocations(ps []ExcludePoint) []location {
+	if len(ps) == 0 {
+		return nil
+	}
+	out := make([]location, len(ps))
+	for i, p := range ps {
+		h := p.Heading
+		out[i] = location{Lat: p.Lat, Lon: p.Lon, Heading: &h, HeadingTolerance: excludeHeadingTolerance}
+	}
+	return out
 }
 
 // locations — точки запроса; radius — в каком радиусе (м) искать участки для привязки, кроме
@@ -216,6 +241,8 @@ type MatrixRequest struct {
 	Exclude          []Ring
 	// SourceRadius — радиус привязки источников, м (0 — ближайший участок).
 	SourceRadius int
+	// ExcludeLocations — закрытые участки (сценарий выпадения элемента сети).
+	ExcludeLocations []ExcludePoint
 }
 
 // Cell — время (секунды) и расстояние (километры) между источником и целью; Reachable = false,
@@ -228,12 +255,13 @@ type Cell struct {
 // Matrix возвращает матрицу «источники × цели».
 func (c *Client) Matrix(ctx context.Context, req MatrixRequest) ([][]Cell, error) {
 	body := map[string]any{
-		"sources":          locations(req.Sources, req.SourceRadius),
-		"targets":          locations(req.Targets, 0),
-		"costing":          req.Costing,
-		"costing_options":  costingOptions(req.Costing, req.Truck),
-		"exclude_polygons": excludePolygons(req.Exclude),
-		"units":            "kilometers",
+		"sources":           locations(req.Sources, req.SourceRadius),
+		"targets":           locations(req.Targets, 0),
+		"costing":           req.Costing,
+		"costing_options":   costingOptions(req.Costing, req.Truck),
+		"exclude_polygons":  excludePolygons(req.Exclude),
+		"exclude_locations": excludeLocations(req.ExcludeLocations),
+		"units":             "kilometers",
 	}
 	var resp struct {
 		Rows [][]struct {
@@ -293,6 +321,10 @@ func dropNil(body any) any {
 				out[k] = x
 			}
 		case [][][2]float64:
+			if x != nil {
+				out[k] = x
+			}
+		case []location:
 			if x != nil {
 				out[k] = x
 			}

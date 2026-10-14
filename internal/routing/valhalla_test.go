@@ -100,3 +100,33 @@ func TestMatrixUnreachable(t *testing.T) {
 		t.Fatalf("matrix: %+v", m)
 	}
 }
+
+func TestMatrixExcludeLocations(t *testing.T) {
+	t.Parallel()
+	var bodies []map[string]any
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		bodies = append(bodies, body)
+		_, _ = io.WriteString(w, `{"sources_to_targets":[[{"time":60,"distance":1}]]}`)
+	}))
+	defer srv.Close()
+	c := NewClient(srv.URL)
+	req := MatrixRequest{Sources: []Point{{}}, Targets: []Point{{}}, Costing: "truck"}
+	if _, err := c.Matrix(t.Context(), req); err != nil {
+		t.Fatal(err)
+	}
+	req.ExcludeLocations = []ExcludePoint{{Point: Point{Lon: 37.6, Lat: 55.7}, Heading: 0}}
+	if _, err := c.Matrix(t.Context(), req); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := bodies[0]["exclude_locations"]; ok {
+		t.Errorf("empty exclude_locations sent: %v", bodies[0])
+	}
+	// Направление передаётся и при нуле (север), с допуском.
+	loc, _ := bodies[1]["exclude_locations"].([]any)
+	first, _ := loc[0].(map[string]any)
+	if len(loc) != 1 || first["heading"] != 0.0 || first["heading_tolerance"] != float64(excludeHeadingTolerance) {
+		t.Errorf("exclude_locations %v", bodies[1]["exclude_locations"])
+	}
+}

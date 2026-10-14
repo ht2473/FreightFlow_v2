@@ -58,9 +58,51 @@ func (w *AccessibilityWorker) Work(ctx context.Context, _ *river.Job[Accessibili
 	return nil
 }
 
-// Register добавляет ежечасную проверку графа и пересчёт доступности.
+// AnalysisArgs — сетевой анализ, если дорожная сеть новее графа анализа.
+type AnalysisArgs struct{}
+
+// Kind — вид задачи.
+func (AnalysisArgs) Kind() string { return "routing.network_analysis" }
+
+// AnalysisWorker строит граф анализа и пересчитывает значимость рёбер и узкие места после
+// публикации новой версии дорожной сети.
+type AnalysisWorker struct {
+	river.WorkerDefaults[AnalysisArgs]
+	Service *Service
+	Log     *slog.Logger
+}
+
+// Timeout — две оценки центральности по сети Москвы.
+func (w *AnalysisWorker) Timeout(*river.Job[AnalysisArgs]) time.Duration { return 2 * time.Hour }
+
+// Work сравнивает версию домена network с версией, по которой построен текущий граф.
+func (w *AnalysisWorker) Work(ctx context.Context, _ *river.Job[AnalysisArgs]) error {
+	var stale bool
+	if err := w.Service.pool.QueryRow(ctx, `
+		SELECT coalesce((SELECT version FROM ingest.data_version WHERE domain = 'network'), 0)
+		       IS DISTINCT FROM (SELECT network_version FROM network.graph_version WHERE id = network.current_graph())`).
+		Scan(&stale); err != nil {
+		return err
+	}
+	if !stale {
+		return nil
+	}
+	st, err := w.Service.AnalyzeNetwork(ctx, DefaultCentrality, nil)
+	if err != nil {
+		return err
+	}
+	w.Log.InfoContext(ctx, "network analysis built", "version", st.Version, "nodes", st.Nodes, "edges", st.Edges,
+		"sources", st.Profile.Sources, "bottlenecks", st.Bottlenecks, "duration", st.Duration)
+	return nil
+}
+
+// Register добавляет ежечасные проверки: граф маршрутизации — пересчёт доступности, дорожная
+// сеть — сетевой анализ.
 func Register(reg *jobs.Registry, pool *pgxpool.Pool, valhallaURL string, log *slog.Logger) {
-	jobs.Register(reg, &AccessibilityWorker{Service: NewService(pool, NewClient(valhallaURL)), Log: log})
-	reg.Every(AccessibilityArgs{}.Kind(), time.Hour, AccessibilityArgs{},
-		&river.InsertOpts{Queue: jobs.QueueRouting, UniqueOpts: river.UniqueOpts{ByArgs: true}}, false)
+	svc := NewService(pool, NewClient(valhallaURL))
+	jobs.Register(reg, &AccessibilityWorker{Service: svc, Log: log})
+	jobs.Register(reg, &AnalysisWorker{Service: svc, Log: log})
+	opts := &river.InsertOpts{Queue: jobs.QueueRouting, UniqueOpts: river.UniqueOpts{ByArgs: true}}
+	reg.Every(AccessibilityArgs{}.Kind(), time.Hour, AccessibilityArgs{}, opts, false)
+	reg.Every(AnalysisArgs{}.Kind(), time.Hour, AnalysisArgs{}, opts, false)
 }

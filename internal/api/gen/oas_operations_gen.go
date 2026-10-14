@@ -16,6 +16,7 @@ const (
 	CreateUserOperation          OperationName = "CreateUser"
 	DisableTotpOperation         OperationName = "DisableTotp"
 	GetMeOperation               OperationName = "GetMe"
+	GetNetworkAnalysisOperation  OperationName = "GetNetworkAnalysis"
 	GetPassStatsOperation        OperationName = "GetPassStats"
 	GetPermitStatsOperation      OperationName = "GetPermitStats"
 	GetRegulationOperation       OperationName = "GetRegulation"

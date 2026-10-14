@@ -1,0 +1,38 @@
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.accuracy {
+  margin: 14px 0 0;
+  color: var(--tx2);
+  font-size: 13px;
+}
+
+.mapLink {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: var(--r1);
+  color: var(--tx2);
+}
+
+.mapLink:hover {
+  color: var(--acc);
+}
+
+.method {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--tx2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.kind {
+  color: var(--tx2);
+  font-size: 12px;
+}

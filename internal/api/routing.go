@@ -177,3 +177,66 @@ func (s *Server) GetRoutingStatus(ctx context.Context) (*gen.RoutingStatus, erro
 	}
 	return out, nil
 }
+
+func (s *Server) GetNetworkAnalysis(ctx context.Context, params gen.GetNetworkAnalysisParams) (*gen.NetworkAnalysis, error) {
+	sum, err := s.routing.NetworkAnalysis(ctx, params.Top.Or(20))
+	if err != nil {
+		return nil, err
+	}
+	accuracy := func(a routing.Accuracy) gen.CentralityAccuracy {
+		out := gen.CentralityAccuracy{Sources: a.Sources, Exact: a.Exact}
+		if a.RSE != nil {
+			out.Rse = gen.NewOptFloat64(*a.RSE)
+		}
+		if a.SplitHalf != nil {
+			out.SplitHalf = gen.NewOptFloat64(*a.SplitHalf)
+		}
+		return out
+	}
+	out := &gen.NetworkAnalysis{
+		Version: sum.Version, Profile: sum.Profile, BuiltAt: sum.BuiltAt, Nodes: sum.Nodes, Edges: sum.Edges,
+		Arcs: sum.Arcs, LargestComponent: sum.LargestComponent, Accuracy: accuracy(sum.Profiled),
+		FreeAccuracy: accuracy(sum.Free), DurationSeconds: sum.Duration.Seconds(),
+		TopStreets: make([]gen.StreetRank, len(sum.TopStreets)), Bottlenecks: make([]gen.NetworkBottleneck, len(sum.Bottlenecks)),
+		BottleneckCount: sum.BottleneckCount, NoDetourCount: sum.NoDetourCount,
+		Criticality: gen.CriticalityStats{
+			Facilities: sum.Criticality.Facilities, FacilitiesSnapped: sum.Criticality.FacilitiesSnapped,
+			Targets: sum.Criticality.Targets, TargetsSnapped: sum.Criticality.TargetsSnapped,
+			Elements: sum.Criticality.Elements, Bridges: sum.Criticality.Bridges, Confirmed: sum.Criticality.Confirmed,
+		},
+		Critical: make([]gen.CriticalElement, len(sum.Critical)),
+	}
+	damage := func(d routing.Damage) gen.ElementDamage {
+		return gen.ElementDamage{Facilities: d.Facilities, Minutes: d.Minutes, MaxDelay: d.MaxDelay, Disconnected: d.Disconnected}
+	}
+	for i, el := range sum.Critical {
+		v := gen.CriticalElement{
+			ID: el.ID, Kind: gen.CriticalElementKind(el.Kind), Name: el.Name, Rank: el.Rank, Graph: damage(el.Graph),
+			Point: gen.LngLat{Lon: el.Point.Lon, Lat: el.Point.Lat}, Same: el.Same,
+		}
+		if el.Valhalla != nil {
+			v.Valhalla = gen.NewOptElementDamage(damage(*el.Valhalla))
+		}
+		out.Critical[i] = v
+	}
+	for i, r := range sum.TopStreets {
+		out.TopStreets[i] = gen.StreetRank{
+			Name: r.Name, Share: r.Share, Rank: r.BestRank, TopKm: r.TopKm,
+			Point: gen.LngLat{Lon: r.Point.Lon, Lat: r.Point.Lat},
+		}
+	}
+	for i, b := range sum.Bottlenecks {
+		v := gen.NetworkBottleneck{
+			SegmentId: b.Segment, Name: b.Name, Kind: gen.NetworkBottleneckKind(b.Kind), FreeRank: b.FreeRank,
+			FreeShare: b.FreeShare, Point: gen.LngLat{Lon: b.Point.Lon, Lat: b.Point.Lat}, Segments: b.Segments,
+		}
+		if b.Value != nil {
+			v.Value = gen.NewOptFloat64(*b.Value)
+		}
+		if b.DetourMin != nil {
+			v.DetourMinutes = gen.NewOptFloat64(*b.DetourMin)
+		}
+		out.Bottlenecks[i] = v
+	}
+	return out, nil
+}

@@ -98,6 +98,16 @@ type Invoker interface {
 	//
 	// GET /me
 	GetMe(ctx context.Context) (*Me, error)
+	// GetNetworkAnalysis invokes getNetworkAnalysis operation.
+	//
+	// Текущая версия графа анализа для профиля 12 т: состав,
+	// точность выборочной оценки центральности, улицы с
+	// наибольшей значимостью, узкие места по значимости
+	// путей, мосты и участки по росту времени доступа
+	// объектов к МКАД при закрытии.
+	//
+	// GET /routing/analysis
+	GetNetworkAnalysis(ctx context.Context, params GetNetworkAnalysisParams) (*NetworkAnalysis, error)
 	// GetPassStats invokes getPassStats operation.
 	//
 	// Только агрегаты; номера пропусков и сведения о ТС не
@@ -1572,6 +1582,156 @@ func (c *Client) sendGetMe(ctx context.Context) (res *Me, err error) {
 
 	stage = "DecodeResponse"
 	result, err := decodeGetMeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetNetworkAnalysis invokes getNetworkAnalysis operation.
+//
+// Текущая версия графа анализа для профиля 12 т: состав,
+// точность выборочной оценки центральности, улицы с
+// наибольшей значимостью, узкие места по значимости
+// путей, мосты и участки по росту времени доступа
+// объектов к МКАД при закрытии.
+//
+// GET /routing/analysis
+func (c *Client) GetNetworkAnalysis(ctx context.Context, params GetNetworkAnalysisParams) (*NetworkAnalysis, error) {
+	res, err := c.sendGetNetworkAnalysis(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetNetworkAnalysis(ctx context.Context, params GetNetworkAnalysisParams) (res *NetworkAnalysis, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getNetworkAnalysis"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/routing/analysis"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetNetworkAnalysisOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/routing/analysis"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "top" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "top",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Top.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, GetNetworkAnalysisOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetNetworkAnalysisOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetNetworkAnalysisResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

@@ -613,6 +613,28 @@ paths:
               schema: { $ref: "#/components/schemas/RoutingStatus" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /routing/analysis:
+    get:
+      tags: [routing]
+      operationId: getNetworkAnalysis
+      summary: Сетевой анализ — значимость участков, узкие места, критичные мосты и участки
+      description: |
+        Текущая версия графа анализа для профиля 12 т: состав, точность выборочной оценки
+        центральности, улицы с наибольшей значимостью, узкие места по значимости путей, мосты и
+        участки по росту времени доступа объектов к МКАД при закрытии.
+      x-permission: analytics.view
+      parameters:
+        - name: top
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: Сводка
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NetworkAnalysis" }
+        default: { $ref: "#/components/responses/Problem" }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -1456,6 +1478,118 @@ components:
         available: { type: boolean }
         version: { type: string }
         graphBuiltAt: { type: string, format: date-time }
+
+    CentralityAccuracy:
+      type: object
+      required: [sources, exact]
+      properties:
+        sources: { type: integer, description: "Узлов-источников в выборке" }
+        exact: { type: boolean, description: "Источники — все узлы графа" }
+        rse: { type: number, description: "Медиана относительной стандартной ошибки по верхней сотне участков" }
+        splitHalf: { type: number, description: "Ранговая корреляция Спирмена оценок двух половин выборки" }
+
+    StreetRank:
+      type: object
+      required: [name, share, rank, topKm, point]
+      properties:
+        name: { type: string }
+        share: { type: number, description: "Наибольшая доля путей через участок улицы, %" }
+        rank: { type: integer, description: "Лучшее место участка улицы в рейтинге" }
+        topKm: { type: number, description: "Длина участков улицы в верхних 5 %, км" }
+        point: { $ref: "#/components/schemas/LngLat" }
+
+    NetworkBottleneck:
+      type: object
+      required: [segmentId, name, kind, freeRank, freeShare, point, segments]
+      properties:
+        segmentId: { type: string, format: uuid }
+        name: { type: string }
+        kind:
+          type: string
+          enum: [maxheight, maxweight, maxaxleload, maxwidth, maxlength]
+        value: { type: number, description: "Величина предела, т или м" }
+        freeRank: { type: integer, description: "Место участка в рейтинге значимости без пределов габаритов" }
+        freeShare: { type: number, description: "Доля путей, которые шли бы через участок без предела, %" }
+        detourMinutes: { type: number, description: "Дополнительное время объезда, мин; нет — объезда нет" }
+        point: { $ref: "#/components/schemas/LngLat" }
+        segments: { type: integer, description: "Линий OSM улицы с тем же пределом (показана самая значимая)" }
+
+    ElementDamage:
+      type: object
+      required: [facilities, minutes, maxDelay, disconnected]
+      properties:
+        facilities: { type: integer, description: "Объектов с приростом времени до МКАД" }
+        minutes: { type: number, description: "Суммарный прирост, объекто-минуты" }
+        maxDelay: { type: number, description: "Наибольший прирост, мин" }
+        disconnected: { type: integer, description: "Объектов, теряющих доступ к МКАД" }
+
+    CriticalElement:
+      type: object
+      required: [id, kind, name, rank, graph, point, same]
+      properties:
+        id: { type: integer }
+        kind: { type: string, enum: [bridge, segment] }
+        name: { type: string }
+        rank: { type: integer }
+        graph: { $ref: "#/components/schemas/ElementDamage" }
+        valhalla: { $ref: "#/components/schemas/ElementDamage" }
+        point: { $ref: "#/components/schemas/LngLat" }
+        same: { type: integer, description: "Элементов той же дороги с тем же эффектом (показан первый)" }
+
+    CriticalityStats:
+      type: object
+      required: [facilities, facilitiesSnapped, targets, targetsSnapped, elements, bridges, confirmed]
+      properties:
+        facilities: { type: integer }
+        facilitiesSnapped: { type: integer, description: "Объектов, привязанных к графу в 500 м" }
+        targets: { type: integer, description: "Точек МКАД" }
+        targetsSnapped: { type: integer }
+        elements: { type: integer, description: "Оценённых элементов" }
+        bridges: { type: integer }
+        confirmed: { type: integer, description: "Проверено матрицами Valhalla" }
+
+    NetworkAnalysis:
+      type: object
+      required:
+        - version
+        - profile
+        - builtAt
+        - nodes
+        - edges
+        - arcs
+        - largestComponent
+        - accuracy
+        - freeAccuracy
+        - durationSeconds
+        - topStreets
+        - bottlenecks
+        - bottleneckCount
+        - noDetourCount
+        - criticality
+        - critical
+      properties:
+        version: { type: integer }
+        profile: { type: string, description: "Профиль ТС анализа" }
+        builtAt: { type: string, format: date-time }
+        nodes: { type: integer }
+        edges: { type: integer }
+        arcs: { type: integer, description: "Направлений проезда, открытых профилю" }
+        largestComponent: { type: number, description: "Доля узлов в наибольшей сильно связной компоненте" }
+        accuracy: { $ref: "#/components/schemas/CentralityAccuracy" }
+        freeAccuracy: { $ref: "#/components/schemas/CentralityAccuracy" }
+        durationSeconds: { type: number }
+        topStreets:
+          type: array
+          items: { $ref: "#/components/schemas/StreetRank" }
+        bottlenecks:
+          type: array
+          items: { $ref: "#/components/schemas/NetworkBottleneck" }
+        bottleneckCount: { type: integer, description: "Участков OSM — узких мест" }
+        noDetourCount: { type: integer, description: "Из них без объезда" }
+        criticality: { $ref: "#/components/schemas/CriticalityStats" }
+        critical:
+          type: array
+          items: { $ref: "#/components/schemas/CriticalElement" }
 
     IsochroneRequest:
       type: object

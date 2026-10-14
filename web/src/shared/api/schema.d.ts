@@ -497,6 +497,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/routing/analysis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Сетевой анализ — значимость участков, узкие места, критичные мосты и участки
+         * @description Текущая версия графа анализа для профиля 12 т: состав, точность выборочной оценки
+         *     центральности, улицы с наибольшей значимостью, узкие места по значимости путей, мосты и
+         *     участки по росту времени доступа объектов к МКАД при закрытии.
+         */
+        get: operations["getNetworkAnalysis"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1034,6 +1056,103 @@ export interface components {
             version?: string;
             /** Format: date-time */
             graphBuiltAt?: string;
+        };
+        CentralityAccuracy: {
+            /** @description Узлов-источников в выборке */
+            sources: number;
+            /** @description Источники — все узлы графа */
+            exact: boolean;
+            /** @description Медиана относительной стандартной ошибки по верхней сотне участков */
+            rse?: number;
+            /** @description Ранговая корреляция Спирмена оценок двух половин выборки */
+            splitHalf?: number;
+        };
+        StreetRank: {
+            name: string;
+            /** @description Наибольшая доля путей через участок улицы, % */
+            share: number;
+            /** @description Лучшее место участка улицы в рейтинге */
+            rank: number;
+            /** @description Длина участков улицы в верхних 5 %, км */
+            topKm: number;
+            point: components["schemas"]["LngLat"];
+        };
+        NetworkBottleneck: {
+            /** Format: uuid */
+            segmentId: string;
+            name: string;
+            /** @enum {string} */
+            kind: "maxheight" | "maxweight" | "maxaxleload" | "maxwidth" | "maxlength";
+            /** @description Величина предела, т или м */
+            value?: number;
+            /** @description Место участка в рейтинге значимости без пределов габаритов */
+            freeRank: number;
+            /** @description Доля путей, которые шли бы через участок без предела, % */
+            freeShare: number;
+            /** @description Дополнительное время объезда, мин; нет — объезда нет */
+            detourMinutes?: number;
+            point: components["schemas"]["LngLat"];
+            /** @description Линий OSM улицы с тем же пределом (показана самая значимая) */
+            segments: number;
+        };
+        ElementDamage: {
+            /** @description Объектов с приростом времени до МКАД */
+            facilities: number;
+            /** @description Суммарный прирост, объекто-минуты */
+            minutes: number;
+            /** @description Наибольший прирост, мин */
+            maxDelay: number;
+            /** @description Объектов, теряющих доступ к МКАД */
+            disconnected: number;
+        };
+        CriticalElement: {
+            id: number;
+            /** @enum {string} */
+            kind: "bridge" | "segment";
+            name: string;
+            rank: number;
+            graph: components["schemas"]["ElementDamage"];
+            valhalla?: components["schemas"]["ElementDamage"];
+            point: components["schemas"]["LngLat"];
+            /** @description Элементов той же дороги с тем же эффектом (показан первый) */
+            same: number;
+        };
+        CriticalityStats: {
+            facilities: number;
+            /** @description Объектов, привязанных к графу в 500 м */
+            facilitiesSnapped: number;
+            /** @description Точек МКАД */
+            targets: number;
+            targetsSnapped: number;
+            /** @description Оценённых элементов */
+            elements: number;
+            bridges: number;
+            /** @description Проверено матрицами Valhalla */
+            confirmed: number;
+        };
+        NetworkAnalysis: {
+            version: number;
+            /** @description Профиль ТС анализа */
+            profile: string;
+            /** Format: date-time */
+            builtAt: string;
+            nodes: number;
+            edges: number;
+            /** @description Направлений проезда, открытых профилю */
+            arcs: number;
+            /** @description Доля узлов в наибольшей сильно связной компоненте */
+            largestComponent: number;
+            accuracy: components["schemas"]["CentralityAccuracy"];
+            freeAccuracy: components["schemas"]["CentralityAccuracy"];
+            durationSeconds: number;
+            topStreets: components["schemas"]["StreetRank"][];
+            bottlenecks: components["schemas"]["NetworkBottleneck"][];
+            /** @description Участков OSM — узких мест */
+            bottleneckCount: number;
+            /** @description Из них без объезда */
+            noDetourCount: number;
+            criticality: components["schemas"]["CriticalityStats"];
+            critical: components["schemas"]["CriticalElement"][];
         };
         IsochroneRequest: {
             origin: components["schemas"]["LngLat"];
@@ -1857,6 +1976,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RoutingStatus"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getNetworkAnalysis: {
+        parameters: {
+            query?: {
+                top?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сводка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NetworkAnalysis"];
                 };
             };
             default: components["responses"]["Problem"];

@@ -1,5 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import type { Geometry } from "geojson";
-import { Download, Minus, Plus, Route, Trash2, X } from "lucide-react";
+import { Download, Minus, Network, Plus, Route, Trash2, X } from "lucide-react";
 import type {
   ExpressionSpecification,
   GeoJSONSourceSpecification,
@@ -190,7 +191,12 @@ function RouteWorkspace() {
   return (
     <div className={s.workspace}>
       <aside className={s.panel} aria-label="Построение маршрута">
-        <h1 className={s.title}>{mode === "route" ? "Маршрут грузовика" : "Изохроны доступности"}</h1>
+        <div className={s.titleRow}>
+          <h1 className={s.title}>{mode === "route" ? "Маршрут грузовика" : "Изохроны доступности"}</h1>
+          <Link to="/network/analysis" className={s.sectionLink}>
+            <Network size={14} aria-hidden /> Анализ сети
+          </Link>
+        </div>
         <Tabs
           label="Режим"
           selected={mode}

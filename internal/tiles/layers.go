@@ -102,6 +102,11 @@ var poiKinds = map[string]string{
 	"technopark":    "Технопарк",
 }
 
+// limitKinds — пределы массы и габаритов.
+var limitKinds = map[string]string{
+	"maxheight": "высота", "maxweight": "масса", "maxaxleload": "нагрузка на ось", "maxwidth": "ширина", "maxlength": "длина",
+}
+
 var poiProps = []Property{
 	{Name: "name", Title: "Название", Kind: "text"},
 	{Name: "kind", Title: "Вид", Kind: "enum", Labels: poiKinds},
@@ -320,6 +325,75 @@ var Registry = []Layer{
 				"sign_not_in_osm": "знак Москвы без разметки OSM", "osm_not_signed": "разметка OSM без знака рядом",
 			}},
 			{Name: "kinds", Title: "Виды ограничений", Kind: "text"},
+		},
+	},
+	{
+		Code: "edge_centrality", Group: "network", Title: "Значимость участков",
+		Description: "Доля кратчайших по времени путей грузовика 12 т между узлами сети, проходящих через участок; " +
+			"верхние 20 % участков (на мелких масштабах — 5 %)", Geometry: "line",
+		MinZoom: 9, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"network_analysis"},
+		Attribution: mixedAttribution,
+		Style: Style{Kind: "category", Property: "level", Categories: []Category{
+			{Values: []string{"top1"}, Label: "Верхний 1 %", Color: "crit"},
+			{Values: []string{"top5"}, Label: "1–5 %", Color: "warn"},
+			{Values: []string{"top20"}, Label: "5–20 %", Color: "cat1"},
+		}},
+		Properties: []Property{
+			{Name: "name", Title: "Улица", Kind: "text"},
+			{Name: "rank", Title: "Место в рейтинге", Kind: "number"},
+			{Name: "share", Title: "Доля путей через участок", Kind: "number", Unit: "%"},
+			{Name: "level", Title: "Группа", Kind: "enum", Labels: map[string]string{
+				"top1": "верхний 1 % участков", "top5": "верхние 1–5 %", "top20": "верхние 5–20 %",
+			}},
+		},
+	},
+	{
+		Code: "bottlenecks", Group: "network", Title: "Узкие места по габаритам",
+		Description: "Участки, закрытые грузовику 12 т пределом массы или габарита, через которые без ограничения " +
+			"шли бы кратчайшие пути; цвет — значимость этих путей", Geometry: "line",
+		MinZoom: 10, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"network_analysis"},
+		Attribution: mixedAttribution,
+		Style: Style{
+			Kind: "category", Property: "importance", DashedBy: "no_detour",
+			Note: "Пунктир — объезда для грузовика нет",
+			Categories: []Category{
+				{Values: []string{"high"}, Label: "Путь из верхних 5 %", Color: "crit"},
+				{Values: []string{"medium"}, Label: "5–20 %", Color: "warn"},
+				{Values: []string{"low"}, Label: "Прочие пути", Color: "n9"},
+			},
+		},
+		Properties: []Property{
+			{Name: "name", Title: "Улица", Kind: "text"},
+			{Name: "kind", Title: "Ограничение", Kind: "enum", Labels: limitKinds},
+			{Name: "value", Title: "Предел (т или м)", Kind: "number"},
+			{Name: "detour_min", Title: "Дополнительное время объезда", Kind: "number", Unit: "мин"},
+			{Name: "no_detour", Title: "Объезда нет", Kind: "bool"},
+			{Name: "free_rank", Title: "Место без ограничения в рейтинге значимости", Kind: "number"},
+		},
+	},
+	{
+		Code: "critical_elements", Group: "network", Title: "Критичные мосты и участки",
+		Description: "Рост времени доступа объектов реестра к МКАД для грузовика 12 т при закрытии моста или участка; " +
+			"цвет — место в рейтинге", Geometry: "line",
+		MinZoom: 9, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"network_analysis"},
+		Attribution: mixedAttribution,
+		Style: Style{Kind: "category", Property: "level", Categories: []Category{
+			{Values: []string{"top10"}, Label: "Первые 10", Color: "crit"},
+			{Values: []string{"top50"}, Label: "11–50", Color: "warn"},
+			{Values: []string{"other"}, Label: "Прочие с ростом времени", Color: "n9"},
+		}},
+		Properties: []Property{
+			{Name: "name", Title: "Название", Kind: "text"},
+			{Name: "kind", Title: "Элемент", Kind: "enum", Labels: map[string]string{
+				"bridge": "мост, путепровод", "segment": "участок дороги",
+			}},
+			{Name: "rank", Title: "Место в рейтинге", Kind: "number"},
+			{Name: "facilities", Title: "Объектов с ростом времени", Kind: "number"},
+			{Name: "damage_min", Title: "Суммарный рост времени", Kind: "number", Unit: "объекто-мин"},
+			{Name: "max_delay_min", Title: "Наибольший рост", Kind: "number", Unit: "мин"},
+			{Name: "disconnected", Title: "Объектов без доступа к МКАД", Kind: "number"},
+			{Name: "confirmed", Title: "Проверено матрицами Valhalla", Kind: "bool"},
+			{Name: "valhalla_damage_min", Title: "Рост по Valhalla", Kind: "number", Unit: "объекто-мин"},
 		},
 	},
 	{
