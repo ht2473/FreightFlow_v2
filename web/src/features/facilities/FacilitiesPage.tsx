@@ -9,7 +9,7 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, Columns3, Map as MapIcon, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Columns3, GitCompare, Map as MapIcon, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { Dialog, DialogTrigger, Popover } from "react-aria-components";
 import { Guard } from "@/app/Guard";
@@ -28,6 +28,7 @@ import {
 } from "@/shared/ui";
 import { NumberField } from "@/shared/ui/fields";
 import { Pagination, SegmentedControl } from "@/shared/ui/navigation";
+import { maxCompare, useCompare } from "./compare";
 import { FacilityDrawer } from "./FacilityDrawer";
 import s from "./facilities.module.css";
 import { area, confidenceLevel } from "./labels";
@@ -199,6 +200,7 @@ function Registry() {
       <div className={s.layout}>
         <FacetPanel search={search} set={set} facets={facets.data} />
         <div className={s.main}>
+          <CompareBar />
           <SearchBar search={search} set={set} />
           <Section flush>
             <div className={s.tableHead}>
@@ -468,5 +470,31 @@ function ColumnsMenu({
         </Dialog>
       </Popover>
     </DialogTrigger>
+  );
+}
+
+/** Набор для сравнения: число объектов, переход к сравнению, очистка. */
+function CompareBar() {
+  const { ids, clear } = useCompare();
+  if (ids.length === 0) {
+    return null;
+  }
+  return (
+    <div className={s.compareBar} role="status">
+      <span>
+        В сравнении: {ids.length} из {maxCompare}
+        {ids.length < 2 && " — добавьте ещё объект"}
+      </span>
+      <div>
+        {ids.length >= 2 && (
+          <Link to="/facilities/compare" search={{ ids: ids.join(",") }} className="btn btn-sm btn-primary">
+            <GitCompare size={14} aria-hidden /> Сравнить
+          </Link>
+        )}
+        <Button size="sm" variant="ghost" onPress={clear}>
+          Очистить
+        </Button>
+      </div>
+    </div>
   );
 }

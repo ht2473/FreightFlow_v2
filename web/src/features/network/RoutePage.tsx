@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 import type { Geometry } from "geojson";
 import { Download, Minus, Network, Plus, Route, Trash2, X } from "lucide-react";
 import type {
@@ -33,6 +33,7 @@ import {
 } from "./labels";
 import { PlaceSearch } from "./PlaceSearch";
 import s from "./route.module.css";
+import { startPoint } from "./search";
 
 type Result = Schemas["RouteResult"];
 type IsoResult = Schemas["IsochroneResult"];
@@ -88,7 +89,10 @@ function RouteWorkspace() {
   const status = $api.useQuery("get", "/routing/status", {}, { staleTime: 30_000 });
   const build = $api.useMutation("post", "/routing/route");
   const iso = $api.useMutation("post", "/routing/isochrone");
-  const [mode, setMode] = useState<Mode>("route");
+  // Начальная точка и режим — из адреса (переход из карточки объекта).
+  const start = useSearch({ from: "/network" });
+  const startAt = startPoint(start);
+  const [mode, setMode] = useState<Mode>(start.mode ?? "route");
   const [minutes, setMinutes] = useState<Set<number>>(new Set([15, 30, 60]));
   const [isoResult, setIsoResult] = useState<IsoResult | null>(null);
   // Сравнение изохрон с другим типовым профилем ТС.
@@ -97,10 +101,12 @@ function RouteWorkspace() {
   const [compareResult, setCompareResult] = useState<IsoResult | null>(null);
   const [onlyBlocking, setOnlyBlocking] = useState(true);
 
-  const [points, setPoints] = useState<[number, number][]>([]);
+  const [points, setPoints] = useState<[number, number][]>(startAt ? [startAt] : []);
   // Названия точек, найденных поиском: «долгота,широта» → адрес или объект.
-  const [pointNames, setPointNames] = useState<Record<string, string>>({});
-  const [focus, setFocus] = useState<[number, number] | null>(null);
+  const [pointNames, setPointNames] = useState<Record<string, string>>(
+    startAt && start.name ? { [`${startAt[0]},${startAt[1]}`]: start.name } : {},
+  );
+  const [focus, setFocus] = useState<[number, number] | null>(startAt);
   const [profileCode, setProfileCode] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<keyof Vehicle, string>>({
     grossT: "",

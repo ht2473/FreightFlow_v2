@@ -70,3 +70,12 @@ export function formatSort(items: SortItem[]): string | undefined {
   const s = items.map((x) => (x.desc ? `-${x.id}` : x.id)).join(",");
   return s && s !== defaultSort ? s : undefined;
 }
+
+/** Сравнение: номера объектов через запятую (без них — набор из карточек). */
+export const compareSearchSchema = z.object({
+  ids: z
+    .string()
+    .regex(/^[0-9a-f-]{36}(,[0-9a-f-]{36}){0,3}$/)
+    .optional()
+    .catch(undefined),
+});

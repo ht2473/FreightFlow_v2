@@ -57,3 +57,37 @@ test("реестр: фасеты, сортировка, страницы, кар
   await expect(page).not.toHaveURL(/open=/);
   expect(errors).toEqual([]);
 });
+
+test("карточка: сравнение объектов и маршрут отсюда", async ({ page }, info) => {
+  test.setTimeout(90_000);
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await login(page, analyst, "/facilities");
+  await page.evaluate(() => localStorage.removeItem("ff.facilities.compare"));
+  await page.reload();
+  const table = page.getByRole("table", { name: "Реестр объектов" });
+  await expect(table.getByRole("row").nth(2)).toBeVisible({ timeout: 30_000 });
+
+  // Два объекта в сравнение из карточек.
+  for (const n of [1, 2]) {
+    await table.getByRole("row").nth(n).getByRole("button").first().click();
+    const drawer = page.getByRole("dialog");
+    await drawer.getByRole("button", { name: "Сравнить" }).click();
+    await expect(drawer.getByRole("button", { name: "Убрать из сравнения" })).toBeVisible();
+    await page.keyboard.press("Escape");
+  }
+  await expect(page.getByText("В сравнении: 2 из 4")).toBeVisible();
+  await page.getByRole("link", { name: "Сравнить" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Сравнение объектов" })).toBeVisible();
+  await expect(page.getByRole("rowheader", { name: "До МКАД (20 т), мин" })).toBeVisible({ timeout: 30_000 });
+  expect(await axeViolations(page)).toEqual([]);
+  await page.screenshot({ path: info.outputPath("compare.png"), fullPage: true });
+
+  // Из карточки — маршрут от объекта.
+  await page.goto("/facilities");
+  await table.getByRole("row").nth(1).getByRole("button").first().click();
+  await page.getByRole("dialog").getByRole("link", { name: "Маршрут отсюда" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Маршрут грузовика" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("button", { name: "Убрать точку A" })).toBeVisible();
+  expect(errors).toEqual([]);
+});

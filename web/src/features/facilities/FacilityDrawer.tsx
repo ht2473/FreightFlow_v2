@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { ExternalLink, Map as MapIcon } from "lucide-react";
+import { ExternalLink, GitCompare, Map as MapIcon, Route, Timer } from "lucide-react";
 import { $api, problemMessage, type Schemas } from "@/shared/api/client";
 import { date, dateTime, num } from "@/shared/format";
-import { Badge, cellClass, EmptyState, Skeleton, tableClass } from "@/shared/ui";
+import { Badge, Button, cellClass, EmptyState, Skeleton, tableClass } from "@/shared/ui";
 import { Tabs } from "@/shared/ui/navigation";
 import { Drawer } from "@/shared/ui/overlays";
 import { formatCenter } from "../map/state";
 import { restrictionText } from "../network/labels";
+import { maxCompare, useCompare } from "./compare";
 import s from "./facilities.module.css";
 import {
   area,
@@ -45,17 +46,7 @@ export function FacilityDrawer({ id, onClose }: { id: string | undefined; onClos
           </span>
         )
       }
-      footer={
-        f && (
-          <Link
-            to="/map"
-            search={{ c: formatCenter(f.point.lon, f.point.lat), z: 16, l: "facility_areas,facilities,restrictions" }}
-            className="btn btn-sm"
-          >
-            <MapIcon size={14} aria-hidden /> На карте
-          </Link>
-        )
-      }
+      footer={f && <Actions f={f} />}
     >
       {card.isPending ? (
         <Skeleton height={160} />
@@ -77,6 +68,33 @@ export function FacilityDrawer({ id, onClose }: { id: string | undefined; onClos
         />
       )}
     </Drawer>
+  );
+}
+
+function Actions({ f }: { f: Schemas["FacilityItem"] }) {
+  const compare = useCompare();
+  const inCompare = compare.ids.includes(f.id);
+  const from = formatCenter(f.point.lon, f.point.lat);
+  const name = f.name ?? f.typeName;
+  return (
+    <div className={s.actions}>
+      <Link to="/network" search={{ mode: "route", from, name }} className="btn btn-sm">
+        <Route size={14} aria-hidden /> Маршрут отсюда
+      </Link>
+      <Link to="/network" search={{ mode: "isochrone", from, name }} className="btn btn-sm">
+        <Timer size={14} aria-hidden /> Изохроны
+      </Link>
+      <Button
+        size="sm"
+        isDisabled={!inCompare && compare.ids.length >= maxCompare}
+        onPress={() => compare.toggle(f.id)}
+      >
+        <GitCompare size={14} aria-hidden /> {inCompare ? "Убрать из сравнения" : "Сравнить"}
+      </Button>
+      <Link to="/map" search={{ c: from, z: 16, l: "facility_areas,facilities,restrictions" }} className="btn btn-sm">
+        <MapIcon size={14} aria-hidden /> На карте
+      </Link>
+    </div>
   );
 }
 

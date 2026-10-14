@@ -271,3 +271,43 @@
   gap: 4px;
   white-space: nowrap;
 }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.compareBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border: 1px solid var(--acc);
+  border-radius: var(--r3);
+  background: var(--acc-soft);
+  color: var(--acc-tx);
+}
+
+.compareBar > div {
+  display: flex;
+  gap: 6px;
+}
+
+.compare th {
+  width: 180px;
+  color: var(--tx2);
+  font-weight: 500;
+  text-align: left;
+  vertical-align: top;
+}
+
+.compare td {
+  vertical-align: top;
+}
+
+.best {
+  font-weight: 600;
+  color: var(--ok);
+}

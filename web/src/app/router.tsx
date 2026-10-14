@@ -1,6 +1,7 @@
 import { createRootRoute, createRoute, createRouter, lazyRouteComponent, redirect } from "@tanstack/react-router";
-import { facilitySearchSchema } from "@/features/facilities/search";
+import { compareSearchSchema, facilitySearchSchema } from "@/features/facilities/search";
 import { mapSearchSchema } from "@/features/map/state";
+import { networkSearchSchema } from "@/features/network/search";
 import { ErrorPage, PendingPage } from "./ErrorPage";
 import { NotFound } from "./NotFound";
 import { SectionPage } from "./SectionPage";
@@ -52,7 +53,14 @@ const routeTree = rootRoute.addChildren([
   }),
   createRoute({
     getParentRoute: () => rootRoute,
+    path: "/facilities/compare",
+    validateSearch: (search: Record<string, unknown>) => compareSearchSchema.parse(search),
+    component: lazyRouteComponent(() => import("@/features/facilities/ComparePage"), "ComparePage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
     path: "/network",
+    validateSearch: (search: Record<string, unknown>) => networkSearchSchema.parse(search),
     component: lazyRouteComponent(() => import("@/features/network/RoutePage"), "RoutePage"),
   }),
   createRoute({
