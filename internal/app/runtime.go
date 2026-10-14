@@ -11,6 +11,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"freightflow/internal/admin"
+	"freightflow/internal/facility"
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
 	"freightflow/internal/operations"
@@ -19,6 +20,7 @@ import (
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/jobs"
 	"freightflow/internal/platform/telemetry"
+	"freightflow/internal/report"
 	"freightflow/internal/routing"
 )
 
@@ -74,9 +76,11 @@ func (rt *runtime) serveMetrics(ctx context.Context, env *Env, addr string) erro
 
 // modules — сервисы модулей, общие для app и worker.
 type modules struct {
-	identity *identity.Service
-	ingest   *ingest.Service
-	inserter *jobs.Client
+	identity   *identity.Service
+	ingest     *ingest.Service
+	facilities *facility.Service
+	reports    *report.Service
+	inserter   *jobs.Client
 }
 
 // newModules создаёт сервисы модулей. Постановка задач — через отдельный клиент очереди:
@@ -94,7 +98,11 @@ func newModules(ctx context.Context, env *Env, rt *runtime) (*modules, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &modules{identity: ids, ingest: ing, inserter: inserter}, nil
+	facilities := facility.New(rt.pool)
+	return &modules{
+		identity: ids, ingest: ing, facilities: facilities,
+		reports: report.New(rt.pool, inserter, rt.blobs, facilities), inserter: inserter,
+	}, nil
 }
 
 // registry собирает фоновые задачи модулей.
@@ -104,6 +112,7 @@ func (m *modules) registry(env *Env, pool *pgxpool.Pool) *jobs.Registry {
 	ingest.Register(reg, m.ingest)
 	operations.Register(reg, pool, env.Log.With("component", "operations"))
 	routing.Register(reg, pool, env.Config.ValhallaURL, env.Log.With("component", "routing"))
+	report.Register(reg, m.reports, env.Log.With("component", "report"))
 	return reg
 }
 

@@ -4,6 +4,7 @@ package gen
 
 import (
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/go-faster/errors"
@@ -1186,6 +1187,387 @@ func (s *ElementDamage) SetDisconnected(val int) {
 	s.Disconnected = val
 }
 
+// Ref: #/components/schemas/Export
+type Export struct {
+	ID         uuid.UUID    `json:"id"`
+	Kind       ExportKind   `json:"kind"`
+	Format     ExportFormat `json:"format"`
+	Status     ExportStatus `json:"status"`
+	Rows       OptInt       `json:"rows"`
+	FileSize   OptInt64     `json:"fileSize"`
+	Error      OptString    `json:"error"`
+	CreatedAt  time.Time    `json:"createdAt"`
+	FinishedAt OptDateTime  `json:"finishedAt"`
+	ExpiresAt  time.Time    `json:"expiresAt"`
+}
+
+// GetID returns the value of ID.
+func (s *Export) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetKind returns the value of Kind.
+func (s *Export) GetKind() ExportKind {
+	return s.Kind
+}
+
+// GetFormat returns the value of Format.
+func (s *Export) GetFormat() ExportFormat {
+	return s.Format
+}
+
+// GetStatus returns the value of Status.
+func (s *Export) GetStatus() ExportStatus {
+	return s.Status
+}
+
+// GetRows returns the value of Rows.
+func (s *Export) GetRows() OptInt {
+	return s.Rows
+}
+
+// GetFileSize returns the value of FileSize.
+func (s *Export) GetFileSize() OptInt64 {
+	return s.FileSize
+}
+
+// GetError returns the value of Error.
+func (s *Export) GetError() OptString {
+	return s.Error
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Export) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *Export) GetFinishedAt() OptDateTime {
+	return s.FinishedAt
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *Export) GetExpiresAt() time.Time {
+	return s.ExpiresAt
+}
+
+// SetID sets the value of ID.
+func (s *Export) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetKind sets the value of Kind.
+func (s *Export) SetKind(val ExportKind) {
+	s.Kind = val
+}
+
+// SetFormat sets the value of Format.
+func (s *Export) SetFormat(val ExportFormat) {
+	s.Format = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Export) SetStatus(val ExportStatus) {
+	s.Status = val
+}
+
+// SetRows sets the value of Rows.
+func (s *Export) SetRows(val OptInt) {
+	s.Rows = val
+}
+
+// SetFileSize sets the value of FileSize.
+func (s *Export) SetFileSize(val OptInt64) {
+	s.FileSize = val
+}
+
+// SetError sets the value of Error.
+func (s *Export) SetError(val OptString) {
+	s.Error = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Export) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *Export) SetFinishedAt(val OptDateTime) {
+	s.FinishedAt = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *Export) SetExpiresAt(val time.Time) {
+	s.ExpiresAt = val
+}
+
+type ExportFormat string
+
+const (
+	ExportFormatCsv     ExportFormat = "csv"
+	ExportFormatXlsx    ExportFormat = "xlsx"
+	ExportFormatGeojson ExportFormat = "geojson"
+)
+
+// AllValues returns all ExportFormat values.
+func (ExportFormat) AllValues() []ExportFormat {
+	return []ExportFormat{
+		ExportFormatCsv,
+		ExportFormatXlsx,
+		ExportFormatGeojson,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ExportFormat) MarshalText() ([]byte, error) {
+	switch s {
+	case ExportFormatCsv:
+		return []byte(s), nil
+	case ExportFormatXlsx:
+		return []byte(s), nil
+	case ExportFormatGeojson:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ExportFormat) UnmarshalText(data []byte) error {
+	switch ExportFormat(data) {
+	case ExportFormatCsv:
+		*s = ExportFormatCsv
+		return nil
+	case ExportFormatXlsx:
+		*s = ExportFormatXlsx
+		return nil
+	case ExportFormatGeojson:
+		*s = ExportFormatGeojson
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ExportKind string
+
+const (
+	ExportKindFacilities ExportKind = "facilities"
+)
+
+// AllValues returns all ExportKind values.
+func (ExportKind) AllValues() []ExportKind {
+	return []ExportKind{
+		ExportKindFacilities,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ExportKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ExportKindFacilities:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ExportKind) UnmarshalText(data []byte) error {
+	switch ExportKind(data) {
+	case ExportKindFacilities:
+		*s = ExportKindFacilities
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ExportRequest
+type ExportRequest struct {
+	Kind   ExportRequestKind   `json:"kind"`
+	Format ExportRequestFormat `json:"format"`
+	Filter OptFacilityFilter   `json:"filter"`
+	Sort   OptString           `json:"sort"`
+}
+
+// GetKind returns the value of Kind.
+func (s *ExportRequest) GetKind() ExportRequestKind {
+	return s.Kind
+}
+
+// GetFormat returns the value of Format.
+func (s *ExportRequest) GetFormat() ExportRequestFormat {
+	return s.Format
+}
+
+// GetFilter returns the value of Filter.
+func (s *ExportRequest) GetFilter() OptFacilityFilter {
+	return s.Filter
+}
+
+// GetSort returns the value of Sort.
+func (s *ExportRequest) GetSort() OptString {
+	return s.Sort
+}
+
+// SetKind sets the value of Kind.
+func (s *ExportRequest) SetKind(val ExportRequestKind) {
+	s.Kind = val
+}
+
+// SetFormat sets the value of Format.
+func (s *ExportRequest) SetFormat(val ExportRequestFormat) {
+	s.Format = val
+}
+
+// SetFilter sets the value of Filter.
+func (s *ExportRequest) SetFilter(val OptFacilityFilter) {
+	s.Filter = val
+}
+
+// SetSort sets the value of Sort.
+func (s *ExportRequest) SetSort(val OptString) {
+	s.Sort = val
+}
+
+type ExportRequestFormat string
+
+const (
+	ExportRequestFormatCsv     ExportRequestFormat = "csv"
+	ExportRequestFormatXlsx    ExportRequestFormat = "xlsx"
+	ExportRequestFormatGeojson ExportRequestFormat = "geojson"
+)
+
+// AllValues returns all ExportRequestFormat values.
+func (ExportRequestFormat) AllValues() []ExportRequestFormat {
+	return []ExportRequestFormat{
+		ExportRequestFormatCsv,
+		ExportRequestFormatXlsx,
+		ExportRequestFormatGeojson,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ExportRequestFormat) MarshalText() ([]byte, error) {
+	switch s {
+	case ExportRequestFormatCsv:
+		return []byte(s), nil
+	case ExportRequestFormatXlsx:
+		return []byte(s), nil
+	case ExportRequestFormatGeojson:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ExportRequestFormat) UnmarshalText(data []byte) error {
+	switch ExportRequestFormat(data) {
+	case ExportRequestFormatCsv:
+		*s = ExportRequestFormatCsv
+		return nil
+	case ExportRequestFormatXlsx:
+		*s = ExportRequestFormatXlsx
+		return nil
+	case ExportRequestFormatGeojson:
+		*s = ExportRequestFormatGeojson
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ExportRequestKind string
+
+const (
+	ExportRequestKindFacilities ExportRequestKind = "facilities"
+)
+
+// AllValues returns all ExportRequestKind values.
+func (ExportRequestKind) AllValues() []ExportRequestKind {
+	return []ExportRequestKind{
+		ExportRequestKindFacilities,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ExportRequestKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ExportRequestKindFacilities:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ExportRequestKind) UnmarshalText(data []byte) error {
+	switch ExportRequestKind(data) {
+	case ExportRequestKindFacilities:
+		*s = ExportRequestKindFacilities
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ExportStatus string
+
+const (
+	ExportStatusQueued  ExportStatus = "queued"
+	ExportStatusRunning ExportStatus = "running"
+	ExportStatusDone    ExportStatus = "done"
+	ExportStatusFailed  ExportStatus = "failed"
+)
+
+// AllValues returns all ExportStatus values.
+func (ExportStatus) AllValues() []ExportStatus {
+	return []ExportStatus{
+		ExportStatusQueued,
+		ExportStatusRunning,
+		ExportStatusDone,
+		ExportStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ExportStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ExportStatusQueued:
+		return []byte(s), nil
+	case ExportStatusRunning:
+		return []byte(s), nil
+	case ExportStatusDone:
+		return []byte(s), nil
+	case ExportStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ExportStatus) UnmarshalText(data []byte) error {
+	switch ExportStatus(data) {
+	case ExportStatusQueued:
+		*s = ExportStatusQueued
+		return nil
+	case ExportStatusRunning:
+		*s = ExportStatusRunning
+		return nil
+	case ExportStatusDone:
+		*s = ExportStatusDone
+		return nil
+	case ExportStatusFailed:
+		*s = ExportStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/FacetValue
 type FacetValue struct {
 	Value string `json:"value"`
@@ -1709,6 +2091,275 @@ func (s *FacilityFacets) SetConfidence(val []FacetValue) {
 	s.Confidence = val
 }
 
+// Фильтр реестра (как параметры GET /facilities).
+// Ref: #/components/schemas/FacilityFilter
+type FacilityFilter struct {
+	Q                OptString                `json:"q"`
+	Type             []string                 `json:"type"`
+	Okrug            []uuid.UUID              `json:"okrug"`
+	District         []uuid.UUID              `json:"district"`
+	Ring             []FacilityFilterRingItem `json:"ring"`
+	MinArea          OptFloat64               `json:"minArea"`
+	MaxArea          OptFloat64               `json:"maxArea"`
+	MinConfidence    OptFloat64               `json:"minConfidence"`
+	Status           OptFacilityFilterStatus  `json:"status"`
+	Bbox             []float64                `json:"bbox"`
+	Near             []float64                `json:"near"`
+	MaxMkadMin       OptFloat64               `json:"maxMkadMin"`
+	NearRestrictions OptBool                  `json:"nearRestrictions"`
+	HasPermit        OptBool                  `json:"hasPermit"`
+}
+
+// GetQ returns the value of Q.
+func (s *FacilityFilter) GetQ() OptString {
+	return s.Q
+}
+
+// GetType returns the value of Type.
+func (s *FacilityFilter) GetType() []string {
+	return s.Type
+}
+
+// GetOkrug returns the value of Okrug.
+func (s *FacilityFilter) GetOkrug() []uuid.UUID {
+	return s.Okrug
+}
+
+// GetDistrict returns the value of District.
+func (s *FacilityFilter) GetDistrict() []uuid.UUID {
+	return s.District
+}
+
+// GetRing returns the value of Ring.
+func (s *FacilityFilter) GetRing() []FacilityFilterRingItem {
+	return s.Ring
+}
+
+// GetMinArea returns the value of MinArea.
+func (s *FacilityFilter) GetMinArea() OptFloat64 {
+	return s.MinArea
+}
+
+// GetMaxArea returns the value of MaxArea.
+func (s *FacilityFilter) GetMaxArea() OptFloat64 {
+	return s.MaxArea
+}
+
+// GetMinConfidence returns the value of MinConfidence.
+func (s *FacilityFilter) GetMinConfidence() OptFloat64 {
+	return s.MinConfidence
+}
+
+// GetStatus returns the value of Status.
+func (s *FacilityFilter) GetStatus() OptFacilityFilterStatus {
+	return s.Status
+}
+
+// GetBbox returns the value of Bbox.
+func (s *FacilityFilter) GetBbox() []float64 {
+	return s.Bbox
+}
+
+// GetNear returns the value of Near.
+func (s *FacilityFilter) GetNear() []float64 {
+	return s.Near
+}
+
+// GetMaxMkadMin returns the value of MaxMkadMin.
+func (s *FacilityFilter) GetMaxMkadMin() OptFloat64 {
+	return s.MaxMkadMin
+}
+
+// GetNearRestrictions returns the value of NearRestrictions.
+func (s *FacilityFilter) GetNearRestrictions() OptBool {
+	return s.NearRestrictions
+}
+
+// GetHasPermit returns the value of HasPermit.
+func (s *FacilityFilter) GetHasPermit() OptBool {
+	return s.HasPermit
+}
+
+// SetQ sets the value of Q.
+func (s *FacilityFilter) SetQ(val OptString) {
+	s.Q = val
+}
+
+// SetType sets the value of Type.
+func (s *FacilityFilter) SetType(val []string) {
+	s.Type = val
+}
+
+// SetOkrug sets the value of Okrug.
+func (s *FacilityFilter) SetOkrug(val []uuid.UUID) {
+	s.Okrug = val
+}
+
+// SetDistrict sets the value of District.
+func (s *FacilityFilter) SetDistrict(val []uuid.UUID) {
+	s.District = val
+}
+
+// SetRing sets the value of Ring.
+func (s *FacilityFilter) SetRing(val []FacilityFilterRingItem) {
+	s.Ring = val
+}
+
+// SetMinArea sets the value of MinArea.
+func (s *FacilityFilter) SetMinArea(val OptFloat64) {
+	s.MinArea = val
+}
+
+// SetMaxArea sets the value of MaxArea.
+func (s *FacilityFilter) SetMaxArea(val OptFloat64) {
+	s.MaxArea = val
+}
+
+// SetMinConfidence sets the value of MinConfidence.
+func (s *FacilityFilter) SetMinConfidence(val OptFloat64) {
+	s.MinConfidence = val
+}
+
+// SetStatus sets the value of Status.
+func (s *FacilityFilter) SetStatus(val OptFacilityFilterStatus) {
+	s.Status = val
+}
+
+// SetBbox sets the value of Bbox.
+func (s *FacilityFilter) SetBbox(val []float64) {
+	s.Bbox = val
+}
+
+// SetNear sets the value of Near.
+func (s *FacilityFilter) SetNear(val []float64) {
+	s.Near = val
+}
+
+// SetMaxMkadMin sets the value of MaxMkadMin.
+func (s *FacilityFilter) SetMaxMkadMin(val OptFloat64) {
+	s.MaxMkadMin = val
+}
+
+// SetNearRestrictions sets the value of NearRestrictions.
+func (s *FacilityFilter) SetNearRestrictions(val OptBool) {
+	s.NearRestrictions = val
+}
+
+// SetHasPermit sets the value of HasPermit.
+func (s *FacilityFilter) SetHasPermit(val OptBool) {
+	s.HasPermit = val
+}
+
+type FacilityFilterRingItem string
+
+const (
+	FacilityFilterRingItemSk      FacilityFilterRingItem = "sk"
+	FacilityFilterRingItemTtk     FacilityFilterRingItem = "ttk"
+	FacilityFilterRingItemMkad    FacilityFilterRingItem = "mkad"
+	FacilityFilterRingItemCkad    FacilityFilterRingItem = "ckad"
+	FacilityFilterRingItemOutside FacilityFilterRingItem = "outside"
+)
+
+// AllValues returns all FacilityFilterRingItem values.
+func (FacilityFilterRingItem) AllValues() []FacilityFilterRingItem {
+	return []FacilityFilterRingItem{
+		FacilityFilterRingItemSk,
+		FacilityFilterRingItemTtk,
+		FacilityFilterRingItemMkad,
+		FacilityFilterRingItemCkad,
+		FacilityFilterRingItemOutside,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityFilterRingItem) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityFilterRingItemSk:
+		return []byte(s), nil
+	case FacilityFilterRingItemTtk:
+		return []byte(s), nil
+	case FacilityFilterRingItemMkad:
+		return []byte(s), nil
+	case FacilityFilterRingItemCkad:
+		return []byte(s), nil
+	case FacilityFilterRingItemOutside:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityFilterRingItem) UnmarshalText(data []byte) error {
+	switch FacilityFilterRingItem(data) {
+	case FacilityFilterRingItemSk:
+		*s = FacilityFilterRingItemSk
+		return nil
+	case FacilityFilterRingItemTtk:
+		*s = FacilityFilterRingItemTtk
+		return nil
+	case FacilityFilterRingItemMkad:
+		*s = FacilityFilterRingItemMkad
+		return nil
+	case FacilityFilterRingItemCkad:
+		*s = FacilityFilterRingItemCkad
+		return nil
+	case FacilityFilterRingItemOutside:
+		*s = FacilityFilterRingItemOutside
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type FacilityFilterStatus string
+
+const (
+	FacilityFilterStatusActive   FacilityFilterStatus = "active"
+	FacilityFilterStatusMissing  FacilityFilterStatus = "missing"
+	FacilityFilterStatusExcluded FacilityFilterStatus = "excluded"
+)
+
+// AllValues returns all FacilityFilterStatus values.
+func (FacilityFilterStatus) AllValues() []FacilityFilterStatus {
+	return []FacilityFilterStatus{
+		FacilityFilterStatusActive,
+		FacilityFilterStatusMissing,
+		FacilityFilterStatusExcluded,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityFilterStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityFilterStatusActive:
+		return []byte(s), nil
+	case FacilityFilterStatusMissing:
+		return []byte(s), nil
+	case FacilityFilterStatusExcluded:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityFilterStatus) UnmarshalText(data []byte) error {
+	switch FacilityFilterStatus(data) {
+	case FacilityFilterStatusActive:
+		*s = FacilityFilterStatusActive
+		return nil
+	case FacilityFilterStatusMissing:
+		*s = FacilityFilterStatusMissing
+		return nil
+	case FacilityFilterStatusExcluded:
+		*s = FacilityFilterStatusExcluded
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/FacilityItem
 type FacilityItem struct {
 	ID       uuid.UUID           `json:"id"`
@@ -2226,6 +2877,46 @@ func (s *FieldError) SetField(val string) {
 // SetMessage sets the value of Message.
 func (s *FieldError) SetMessage(val string) {
 	s.Message = val
+}
+
+type GetExportFileOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s GetExportFileOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// GetExportFileOKHeaders wraps GetExportFileOK with response headers.
+type GetExportFileOKHeaders struct {
+	ContentDisposition OptString
+	Response           GetExportFileOK
+}
+
+// GetContentDisposition returns the value of ContentDisposition.
+func (s *GetExportFileOKHeaders) GetContentDisposition() OptString {
+	return s.ContentDisposition
+}
+
+// GetResponse returns the value of Response.
+func (s *GetExportFileOKHeaders) GetResponse() GetExportFileOK {
+	return s.Response
+}
+
+// SetContentDisposition sets the value of ContentDisposition.
+func (s *GetExportFileOKHeaders) SetContentDisposition(val OptString) {
+	s.ContentDisposition = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetExportFileOKHeaders) SetResponse(val GetExportFileOK) {
+	s.Response = val
 }
 
 // Ref: #/components/schemas/InviteCreated
@@ -4472,6 +5163,98 @@ func (o OptFacilityCardTerritory) Get() (v FacilityCardTerritory, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptFacilityCardTerritory) Or(d FacilityCardTerritory) FacilityCardTerritory {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFacilityFilter returns new OptFacilityFilter with value set to v.
+func NewOptFacilityFilter(v FacilityFilter) OptFacilityFilter {
+	return OptFacilityFilter{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFacilityFilter is optional FacilityFilter.
+type OptFacilityFilter struct {
+	Value FacilityFilter
+	Set   bool
+}
+
+// IsSet returns true if OptFacilityFilter was set.
+func (o OptFacilityFilter) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFacilityFilter) Reset() {
+	var v FacilityFilter
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFacilityFilter) SetTo(v FacilityFilter) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFacilityFilter) Get() (v FacilityFilter, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFacilityFilter) Or(d FacilityFilter) FacilityFilter {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFacilityFilterStatus returns new OptFacilityFilterStatus with value set to v.
+func NewOptFacilityFilterStatus(v FacilityFilterStatus) OptFacilityFilterStatus {
+	return OptFacilityFilterStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFacilityFilterStatus is optional FacilityFilterStatus.
+type OptFacilityFilterStatus struct {
+	Value FacilityFilterStatus
+	Set   bool
+}
+
+// IsSet returns true if OptFacilityFilterStatus was set.
+func (o OptFacilityFilterStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFacilityFilterStatus) Reset() {
+	var v FacilityFilterStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFacilityFilterStatus) SetTo(v FacilityFilterStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFacilityFilterStatus) Get() (v FacilityFilterStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFacilityFilterStatus) Or(d FacilityFilterStatus) FacilityFilterStatus {
 	if v, ok := o.Get(); ok {
 		return v
 	}

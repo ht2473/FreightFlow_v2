@@ -419,6 +419,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Мои выгрузки за неделю */
+        get: operations["listExports"];
+        put?: never;
+        /**
+         * Выгрузить выборку
+         * @description Выгрузка формируется фоновой задачей: ответ — задание со статусом `queued`; состояние —
+         *     `GET /exports/{id}`, файл — `GET /exports/{id}/file` (хранится неделю). Не больше 100 000
+         *     строк; в каждом файле — атрибуция источников.
+         */
+        post: operations["createExport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/exports/{exportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Состояние выгрузки */
+        get: operations["getExport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/exports/{exportId}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Файл выгрузки */
+        get: operations["getExportFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/regulation": {
         parameters: {
             query?: never;
@@ -1106,6 +1163,52 @@ export interface components {
             ecoClass?: number;
             hazmat?: boolean;
         };
+        /** @description Фильтр реестра (как параметры GET /facilities) */
+        FacilityFilter: {
+            q?: string;
+            type?: string[];
+            okrug?: string[];
+            district?: string[];
+            ring?: ("sk" | "ttk" | "mkad" | "ckad" | "outside")[];
+            minArea?: number;
+            maxArea?: number;
+            minConfidence?: number;
+            /** @enum {string} */
+            status?: "active" | "missing" | "excluded";
+            bbox?: number[];
+            near?: number[];
+            maxMkadMin?: number;
+            nearRestrictions?: boolean;
+            hasPermit?: boolean;
+        };
+        ExportRequest: {
+            /** @enum {string} */
+            kind: "facilities";
+            /** @enum {string} */
+            format: "csv" | "xlsx" | "geojson";
+            filter?: components["schemas"]["FacilityFilter"];
+            sort?: string;
+        };
+        Export: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "facilities";
+            /** @enum {string} */
+            format: "csv" | "xlsx" | "geojson";
+            /** @enum {string} */
+            status: "queued" | "running" | "done" | "failed";
+            rows?: number;
+            /** Format: int64 */
+            fileSize?: number;
+            error?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
         FacilityItem: {
             /** Format: uuid */
             id: string;
@@ -1467,6 +1570,7 @@ export interface components {
         SourceCode: string;
         UserId: string;
         TokenId: string;
+        ExportId: string;
         /** @description Подстрока названия или адреса */
         FacilityQ: string;
         FacilityType: string[];
@@ -2233,6 +2337,99 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FacilityCard"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listExports: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Выгрузки, новые сверху */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Export"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExportRequest"];
+            };
+        };
+        responses: {
+            /** @description Задание поставлено */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Export"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                exportId: components["parameters"]["ExportId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Выгрузка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Export"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getExportFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                exportId: components["parameters"]["ExportId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Файл */
+            200: {
+                headers: {
+                    "Content-Disposition"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
                 };
             };
             default: components["responses"]["Problem"];

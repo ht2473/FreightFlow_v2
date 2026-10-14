@@ -23,11 +23,13 @@ import (
 	"freightflow/internal/platform/blob"
 	"freightflow/internal/platform/dbtest"
 	"freightflow/internal/platform/httpx"
+	"freightflow/internal/platform/jobs"
 	"freightflow/internal/platform/mail"
 	"freightflow/internal/platform/problem"
 	"freightflow/internal/platform/secret"
 	"freightflow/internal/platform/session"
 	"freightflow/internal/regulation"
+	"freightflow/internal/report"
 	"freightflow/internal/routing"
 	"freightflow/internal/tiles"
 )
@@ -93,10 +95,15 @@ func newFixture(t *testing.T) *fixture {
 		t.Fatal(err)
 	}
 	layers := tiles.NewService(pool, ing, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	inserter, err := jobs.NewInserter(pool, slog.New(slog.DiscardHandler))
+	if err != nil {
+		t.Fatal(err)
+	}
+	facilities := facility.New(pool)
 	h, err := New(Deps{
 		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
-		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facility.New(pool),
-		Sessions: sessions, Mailer: mailer,
+		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facilities,
+		Reports: report.New(pool, inserter, blobs, facilities), Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
@@ -410,5 +417,42 @@ func TestAPIFacilities(t *testing.T) {
 		if resp, body := f.do(t, http.MethodGet, path, analyst, ""); resp.StatusCode != want {
 			t.Errorf("%s: %d %s", path, resp.StatusCode, body)
 		}
+	}
+}
+
+func TestAPIExports(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	analyst := f.token(t, "exp@example.com", identity.RoleAnalyst)
+	viewer := f.token(t, "view@example.com", identity.RoleViewer)
+
+	body := `{"kind":"facilities","format":"csv","filter":{"type":["warehouse"],"ring":["mkad"]},"sort":"-area"}`
+	resp, raw := f.do(t, http.MethodPost, "/api/v1/exports", analyst, body)
+	var e struct {
+		ID     string
+		Status string
+	}
+	if resp.StatusCode != http.StatusAccepted || json.Unmarshal(raw, &e) != nil || e.Status != "queued" {
+		t.Fatalf("create: %d %s", resp.StatusCode, raw)
+	}
+	// Файл до формирования — 409; список и состояние — только свои.
+	if resp, raw := f.do(t, http.MethodGet, "/api/v1/exports/"+e.ID+"/file", analyst, ""); resp.StatusCode != http.StatusConflict {
+		t.Errorf("file before run: %d %s", resp.StatusCode, raw)
+	}
+	if resp, raw := f.do(t, http.MethodGet, "/api/v1/exports", analyst, ""); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(raw), e.ID) {
+		t.Errorf("list: %d %s", resp.StatusCode, raw)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/exports/"+e.ID, viewer, ""); resp.StatusCode != http.StatusForbidden {
+		t.Errorf("viewer: %d", resp.StatusCode)
+	}
+	var params string
+	if err := f.pool.QueryRow(t.Context(), `SELECT params::text FROM report.export WHERE id = $1`, e.ID).Scan(&params); err != nil ||
+		!strings.Contains(params, `"warehouse"`) || !strings.Contains(params, `"-area"`) {
+		t.Errorf("params %s, %v", params, err)
+	}
+	var audited int
+	if err := f.pool.QueryRow(t.Context(), `SELECT count(*) FROM core.audit_log WHERE action = 'export.created'`).Scan(&audited); err != nil || audited != 1 {
+		t.Errorf("audit: %d, %v", audited, err)
 	}
 }

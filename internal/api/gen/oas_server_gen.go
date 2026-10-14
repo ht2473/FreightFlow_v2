@@ -62,6 +62,15 @@ type Handler interface {
 	//
 	// POST /me/totp/confirm
 	ConfirmTotp(ctx context.Context, req *TotpCode) (*RecoveryCodes, error)
+	// CreateExport implements createExport operation.
+	//
+	// Выгрузка формируется фоновой задачей: ответ — задание
+	// со статусом `queued`; состояние — `GET /exports/{id}`, файл —
+	// `GET /exports/{id}/file` (хранится неделю). Не больше 100 000 строк; в
+	// каждом файле — атрибуция источников.
+	//
+	// POST /exports
+	CreateExport(ctx context.Context, req *ExportRequest) (*Export, error)
 	// CreateInvite implements createInvite operation.
 	//
 	// Пригласить пользователя.
@@ -94,6 +103,18 @@ type Handler interface {
 	//
 	// GET /facilities/facets
 	FacilityFacets(ctx context.Context, params FacilityFacetsParams) (*FacilityFacets, error)
+	// GetExport implements getExport operation.
+	//
+	// Состояние выгрузки.
+	//
+	// GET /exports/{exportId}
+	GetExport(ctx context.Context, params GetExportParams) (*Export, error)
+	// GetExportFile implements getExportFile operation.
+	//
+	// Файл выгрузки.
+	//
+	// GET /exports/{exportId}/file
+	GetExportFile(ctx context.Context, params GetExportFileParams) (*GetExportFileOKHeaders, error)
 	// GetFacility implements getFacility operation.
 	//
 	// Строка реестра, геометрия, достоверность с причинами,
@@ -182,6 +203,12 @@ type Handler interface {
 	//
 	// GET /admin/audit
 	ListAudit(ctx context.Context, params ListAuditParams) (*AuditPage, error)
+	// ListExports implements listExports operation.
+	//
+	// Мои выгрузки за неделю.
+	//
+	// GET /exports
+	ListExports(ctx context.Context) ([]Export, error)
 	// ListFacilities implements listFacilities operation.
 	//
 	// Страница реестра с фильтрами, сортировкой

@@ -1175,6 +1175,136 @@ func decodeFacilityFacetsParams(args [0]string, argsEscaped bool, r *http.Reques
 	return params, nil
 }
 
+// GetExportParams is parameters of getExport operation.
+type GetExportParams struct {
+	ExportId uuid.UUID
+}
+
+func unpackGetExportParams(packed middleware.Parameters) (params GetExportParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "exportId",
+			In:   "path",
+		}
+		params.ExportId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetExportParams(args [1]string, argsEscaped bool, r *http.Request) (params GetExportParams, _ error) {
+	// Decode path: exportId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "exportId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ExportId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "exportId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetExportFileParams is parameters of getExportFile operation.
+type GetExportFileParams struct {
+	ExportId uuid.UUID
+}
+
+func unpackGetExportFileParams(packed middleware.Parameters) (params GetExportFileParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "exportId",
+			In:   "path",
+		}
+		params.ExportId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetExportFileParams(args [1]string, argsEscaped bool, r *http.Request) (params GetExportFileParams, _ error) {
+	// Decode path: exportId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "exportId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ExportId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "exportId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetFacilityParams is parameters of getFacility operation.
 type GetFacilityParams struct {
 	FacilityId uuid.UUID

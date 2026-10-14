@@ -88,6 +88,18 @@ func (UnimplementedHandler) ConfirmTotp(ctx context.Context, req *TotpCode) (r *
 	return r, ht.ErrNotImplemented
 }
 
+// CreateExport implements createExport operation.
+//
+// Выгрузка формируется фоновой задачей: ответ — задание
+// со статусом `queued`; состояние — `GET /exports/{id}`, файл —
+// `GET /exports/{id}/file` (хранится неделю). Не больше 100 000 строк; в
+// каждом файле — атрибуция источников.
+//
+// POST /exports
+func (UnimplementedHandler) CreateExport(ctx context.Context, req *ExportRequest) (r *Export, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateInvite implements createInvite operation.
 //
 // Пригласить пользователя.
@@ -132,6 +144,24 @@ func (UnimplementedHandler) DisableTotp(ctx context.Context, req *PasswordConfir
 //
 // GET /facilities/facets
 func (UnimplementedHandler) FacilityFacets(ctx context.Context, params FacilityFacetsParams) (r *FacilityFacets, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetExport implements getExport operation.
+//
+// Состояние выгрузки.
+//
+// GET /exports/{exportId}
+func (UnimplementedHandler) GetExport(ctx context.Context, params GetExportParams) (r *Export, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetExportFile implements getExportFile operation.
+//
+// Файл выгрузки.
+//
+// GET /exports/{exportId}/file
+func (UnimplementedHandler) GetExportFile(ctx context.Context, params GetExportFileParams) (r *GetExportFileOKHeaders, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -256,6 +286,15 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 //
 // GET /admin/audit
 func (UnimplementedHandler) ListAudit(ctx context.Context, params ListAuditParams) (r *AuditPage, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListExports implements listExports operation.
+//
+// Мои выгрузки за неделю.
+//
+// GET /exports
+func (UnimplementedHandler) ListExports(ctx context.Context) (r []Export, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

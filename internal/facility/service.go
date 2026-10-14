@@ -357,3 +357,34 @@ func (s *Service) Compare(ctx context.Context, ids []uuid.UUID) ([]*Card, error)
 	}
 	return out, nil
 }
+
+// MaxExport — предел строк выгрузки.
+const MaxExport = 100_000
+
+// Each обходит всю выборку в порядке сортировки (не больше MaxExport строк).
+func (s *Service) Each(ctx context.Context, f Filter, sort string, fn func(Item) error) error {
+	order, err := orderBy(sort)
+	if err != nil {
+		return err
+	}
+	w, err := f.conditions("")
+	if err != nil {
+		return err
+	}
+	rows, err := s.pool.Query(ctx, `SELECT `+itemColumns+fromClause+`
+		WHERE `+w.sql()+` ORDER BY `+order+fmt.Sprintf(` LIMIT %d`, MaxExport), w.args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var it Item
+		if err := scanItem(rows, &it); err != nil {
+			return err
+		}
+		if err := fn(it); err != nil {
+			return err
+		}
+	}
+	return rows.Err()
+}

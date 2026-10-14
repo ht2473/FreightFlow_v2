@@ -12,6 +12,7 @@ import (
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
 	"freightflow/internal/platform/problem"
+	"freightflow/internal/report"
 	"freightflow/internal/routing"
 )
 
@@ -70,6 +71,10 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 	case errors.Is(err, routing.ErrNoRoute):
 		return problem.New(http.StatusUnprocessableEntity, "no_route", "Маршрут для этого ТС не найден").
 			WithDetail("Между точками нет пути с учётом ограничений и закрытых зон")
+	case errors.Is(err, report.ErrNotFound):
+		return problem.NotFound
+	case errors.Is(err, report.ErrNotReady):
+		return problem.New(http.StatusConflict, "export_not_ready", "Файл выгрузки ещё не готов")
 	case errors.Is(err, facility.ErrNotFound):
 		return problem.NotFound
 	case errors.Is(err, facility.ErrBadFilter):

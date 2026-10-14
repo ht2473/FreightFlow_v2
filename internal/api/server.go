@@ -24,6 +24,7 @@ import (
 	"freightflow/internal/platform/ratelimit"
 	"freightflow/internal/platform/session"
 	"freightflow/internal/regulation"
+	"freightflow/internal/report"
 	"freightflow/internal/routing"
 	"freightflow/internal/tiles"
 )
@@ -39,7 +40,9 @@ type Deps struct {
 	Ingest   *ingest.Service
 	// Facilities — реестр объектов.
 	Facilities *facility.Service
-	Layers     *tiles.Service
+	// Reports — выгрузки и отчёты.
+	Reports *report.Service
+	Layers  *tiles.Service
 	// Regulation — зоны, правила и статистика регулирования.
 	Regulation *regulation.Service
 	// Routing — маршруты грузовиков.
@@ -67,6 +70,7 @@ type Server struct {
 	regulation *regulation.Service
 	routing    *routing.Service
 	facilities *facility.Service
+	reports    *report.Service
 	routeLimit *ratelimit.Limiter
 	sessions   *session.Manager
 	mailer     Mailer
@@ -84,7 +88,7 @@ func New(d Deps) (http.Handler, error) {
 		return nil, err
 	}
 	s := &Server{
-		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, facilities: d.Facilities, sessions: d.Sessions, mailer: d.Mailer,
+		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, facilities: d.Facilities, reports: d.Reports, sessions: d.Sessions, mailer: d.Mailer,
 		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), routeLimit: d.RoutingLimit,
 	}
 	if s.routeLimit == nil {

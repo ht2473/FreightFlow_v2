@@ -38,6 +38,14 @@ test("реестр: фасеты, сортировка, страницы, кар
   await areaHeader.getByRole("button").click();
   await expect(areaHeader).toHaveAttribute("aria-sort", /descending|ascending/);
 
+  // Выгрузка выборки в Excel: задание, затем ссылка на файл.
+  await page.getByRole("button", { name: "Выгрузить" }).click();
+  await page.getByRole("menuitem", { name: "Excel (XLSX)" }).click();
+  const link = page.getByRole("link", { name: /^Скачать: / });
+  await expect(link).toBeVisible({ timeout: 30_000 });
+  const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
+  expect(download.suggestedFilename()).toMatch(/^objects-.*\.xlsx$/);
+
   // Следующая страница.
   await page.getByRole("button", { name: "Следующая страница" }).click();
   await expect(page.getByText(/^51–/)).toBeVisible();

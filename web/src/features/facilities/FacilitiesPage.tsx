@@ -14,6 +14,7 @@ import { useRef, useState } from "react";
 import { Dialog, DialogTrigger, Popover } from "react-aria-components";
 import { Guard } from "@/app/Guard";
 import { $api, problemMessage, type Schemas } from "@/shared/api/client";
+import { can, useMe } from "@/shared/auth";
 import { num } from "@/shared/format";
 import {
   Badge,
@@ -29,6 +30,7 @@ import {
 import { NumberField } from "@/shared/ui/fields";
 import { Pagination, SegmentedControl } from "@/shared/ui/navigation";
 import { maxCompare, useCompare } from "./compare";
+import { ExportMenu } from "./ExportMenu";
 import { FacilityDrawer } from "./FacilityDrawer";
 import s from "./facilities.module.css";
 import { area, confidenceLevel } from "./labels";
@@ -126,6 +128,7 @@ function Registry() {
   const set = (patch: Partial<FacilitySearch>) =>
     navigate({ search: (prev: FacilitySearch) => ({ ...prev, ...patch }), replace: true });
 
+  const me = useMe();
   const query = facilityQuery(search);
   const sort = formatSort(parseSort(search.sort));
   const pageKey = JSON.stringify([query, sort]);
@@ -205,7 +208,10 @@ function Registry() {
           <Section flush>
             <div className={s.tableHead}>
               <span className={s.muted}>{list.isPending ? "Загрузка…" : `Найдено объектов: ${num(total)}`}</span>
-              <ColumnsMenu visibility={visibility} onToggle={(id, on) => table.getColumn(id)?.toggleVisibility(on)} />
+              <div className={s.tableTools}>
+                {can(me.data, "exports.create") && <ExportMenu filter={query} sort={sort} />}
+                <ColumnsMenu visibility={visibility} onToggle={(id, on) => table.getColumn(id)?.toggleVisibility(on)} />
+              </div>
             </div>
             {list.error ? (
               <div className="notice notice-error" role="alert">

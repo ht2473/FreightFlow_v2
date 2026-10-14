@@ -24,6 +24,8 @@ tags:
     description: Слои карты
   - name: facilities
     description: Реестр объектов логистики
+  - name: exports
+    description: Выгрузки данных
   - name: regulation
     description: Регулирование грузового движения
   - name: routing
@@ -596,6 +598,78 @@ paths:
               schema: { $ref: "#/components/schemas/FacilityCard" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /exports:
+    get:
+      tags: [exports]
+      operationId: listExports
+      summary: Мои выгрузки за неделю
+      x-permission: exports.create
+      responses:
+        "200":
+          description: Выгрузки, новые сверху
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Export" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [exports]
+      operationId: createExport
+      summary: Выгрузить выборку
+      description: |
+        Выгрузка формируется фоновой задачей: ответ — задание со статусом `queued`; состояние —
+        `GET /exports/{id}`, файл — `GET /exports/{id}/file` (хранится неделю). Не больше 100 000
+        строк; в каждом файле — атрибуция источников.
+      x-permission: exports.create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExportRequest" }
+      responses:
+        "202":
+          description: Задание поставлено
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Export" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /exports/{exportId}:
+    get:
+      tags: [exports]
+      operationId: getExport
+      summary: Состояние выгрузки
+      x-permission: exports.create
+      parameters:
+        - $ref: "#/components/parameters/ExportId"
+      responses:
+        "200":
+          description: Выгрузка
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Export" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /exports/{exportId}/file:
+    get:
+      tags: [exports]
+      operationId: getExportFile
+      summary: Файл выгрузки
+      x-permission: exports.create
+      parameters:
+        - $ref: "#/components/parameters/ExportId"
+      responses:
+        "200":
+          description: Файл
+          headers:
+            Content-Disposition:
+              schema: { type: string }
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        default: { $ref: "#/components/responses/Problem" }
+
   /regulation:
     get:
       tags: [regulation]
@@ -836,6 +910,11 @@ components:
       required: true
       schema: { type: string, format: uuid }
 
+    ExportId:
+      name: exportId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
     FacilityQ:
       name: q
       in: query
@@ -1590,6 +1669,52 @@ components:
         lengthM: { type: number, minimum: 2, maximum: 30 }
         ecoClass: { type: integer, minimum: 0, maximum: 6 }
         hazmat: { type: boolean }
+
+    FacilityFilter:
+      type: object
+      description: "Фильтр реестра (как параметры GET /facilities)"
+      properties:
+        q: { type: string, maxLength: 200 }
+        type: { type: array, maxItems: 20, items: { type: string, maxLength: 64 } }
+        okrug: { type: array, maxItems: 20, items: { type: string, format: uuid } }
+        district: { type: array, maxItems: 200, items: { type: string, format: uuid } }
+        ring:
+          type: array
+          maxItems: 5
+          items: { type: string, enum: [sk, ttk, mkad, ckad, outside] }
+        minArea: { type: number, minimum: 0 }
+        maxArea: { type: number, minimum: 0 }
+        minConfidence: { type: number, minimum: 0, maximum: 1 }
+        status: { type: string, enum: [active, missing, excluded] }
+        bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
+        near: { type: array, minItems: 3, maxItems: 3, items: { type: number } }
+        maxMkadMin: { type: number, minimum: 0 }
+        nearRestrictions: { type: boolean }
+        hasPermit: { type: boolean }
+
+    ExportRequest:
+      type: object
+      required: [kind, format]
+      properties:
+        kind: { type: string, enum: [facilities] }
+        format: { type: string, enum: [csv, xlsx, geojson] }
+        filter: { $ref: "#/components/schemas/FacilityFilter" }
+        sort: { type: string, maxLength: 100 }
+
+    Export:
+      type: object
+      required: [id, kind, format, status, createdAt, expiresAt]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [facilities] }
+        format: { type: string, enum: [csv, xlsx, geojson] }
+        status: { type: string, enum: [queued, running, done, failed] }
+        rows: { type: integer }
+        fileSize: { type: integer, format: int64 }
+        error: { type: string }
+        createdAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
 
     FacilityItem:
       type: object

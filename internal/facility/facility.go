@@ -205,7 +205,8 @@ func (f Filter) conditions(skip string) (*where, error) {
 		}
 		w.add("f.point && ST_MakeEnvelope(%s, %s, %s, %s, 4326)", f.BBox[0], f.BBox[1], f.BBox[2], f.BBox[3])
 	}
-	if len(f.Polygon) > 0 {
+	// Пустой многоугольник после сохранения фильтра в JSON — null.
+	if len(f.Polygon) > 0 && string(f.Polygon) != "null" {
 		w.add("ST_Intersects(f.point, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326))", string(f.Polygon))
 	}
 	if c := f.Near; c != nil {
