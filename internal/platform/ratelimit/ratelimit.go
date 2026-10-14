@@ -33,7 +33,10 @@ func New(interval time.Duration, burst int) *Limiter {
 }
 
 // Allow сообщает, разрешён ли очередной запрос для ключа.
-func (l *Limiter) Allow(key string) bool {
+func (l *Limiter) Allow(key string) bool { return l.AllowN(key, 1) }
+
+// AllowN — запрос стоимостью n запросов (тяжёлые операции расходуют ведро быстрее).
+func (l *Limiter) AllowN(key string, n int) bool {
 	now := time.Now()
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -46,7 +49,7 @@ func (l *Limiter) Allow(key string) bool {
 		l.buckets[key] = b
 	}
 	b.seen = now
-	return b.lim.AllowN(now, 1)
+	return b.lim.AllowN(now, n)
 }
 
 // prune удаляет ключи, не использовавшиеся дольше времени полного восстановления ведра.

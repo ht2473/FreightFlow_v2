@@ -10,6 +10,7 @@ import (
 	"github.com/go-faster/jx"
 
 	"freightflow/internal/api/gen"
+	"freightflow/internal/platform/problem"
 	"freightflow/internal/routing"
 )
 
@@ -76,7 +77,19 @@ func zoneVerdicts(ds []routing.ZoneDecision) []gen.ZoneVerdict {
 	return out
 }
 
+// spend расходует лимит расчётов маршрутизации пользователя; cost — стоимость в расчётах.
+func (s *Server) spend(ctx context.Context, cost int) error {
+	if s.routeLimit.AllowN(principal(ctx).UserID.String(), cost) {
+		return nil
+	}
+	return problem.TooMany.WithDetail(fmt.Sprintf(
+		"Не более %d расчётов маршрутизации подряд, затем один в секунду — повторите через несколько секунд", routingBurst))
+}
+
 func (s *Server) BuildRoute(ctx context.Context, req *gen.RouteRequest) (*gen.RouteResult, error) {
+	if err := s.spend(ctx, 1); err != nil {
+		return nil, err
+	}
 	in := routing.RouteInput{
 		Profile: vehicleProfile(req.Vehicle), Passes: vehiclePasses(req.Passes), Depart: departTime(req.Depart),
 		Alternates: req.Alternates.Or(0),
@@ -118,6 +131,9 @@ func (s *Server) BuildRoute(ctx context.Context, req *gen.RouteRequest) (*gen.Ro
 }
 
 func (s *Server) BuildIsochrone(ctx context.Context, req *gen.IsochroneRequest) (*gen.IsochroneResult, error) {
+	if err := s.spend(ctx, 2); err != nil {
+		return nil, err
+	}
 	res, err := s.routing.Isochrone(ctx, routing.IsochroneInput{
 		Origin: routing.Point{Lon: req.Origin.Lon, Lat: req.Origin.Lat}, Profile: vehicleProfile(req.Vehicle),
 		Passes: vehiclePasses(req.Passes), Depart: departTime(req.Depart), Minutes: req.Minutes,
@@ -242,6 +258,10 @@ func (s *Server) GetNetworkAnalysis(ctx context.Context, params gen.GetNetworkAn
 }
 
 func (s *Server) BuildMatrix(ctx context.Context, req *gen.MatrixRequest) (*gen.MatrixResult, error) {
+	// Матрица — расчёт на каждые 100 пар.
+	if err := s.spend(ctx, 1+len(req.Sources)*len(req.Targets)/100); err != nil {
+		return nil, err
+	}
 	points := func(in []gen.LngLat) []routing.Point {
 		out := make([]routing.Point, len(in))
 		for i, p := range in {

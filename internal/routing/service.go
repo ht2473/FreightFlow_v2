@@ -2,6 +2,8 @@ package routing
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,16 +11,42 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"freightflow/internal/platform/cache"
 )
 
 // Service строит маршруты грузовиков с политикой зон и объясняет обходы.
 type Service struct {
 	pool *pgxpool.Pool
 	vh   *Client
+	// Повторы одинаковых запросов (тот же ТС, точки, пропуска и минута отправления).
+	routes     *cache.TTL[RouteOutput]
+	isochrones *cache.TTL[IsochroneOutput]
 }
 
+// Повторы запросов маршрутов и изохрон хранятся repeatTTL; записей — не больше repeatMax.
+const (
+	repeatTTL = 5 * time.Minute
+	repeatMax = 256
+)
+
 // NewService создаёт сервис.
-func NewService(pool *pgxpool.Pool, vh *Client) *Service { return &Service{pool: pool, vh: vh} }
+func NewService(pool *pgxpool.Pool, vh *Client) *Service {
+	return &Service{
+		pool: pool, vh: vh,
+		routes: cache.New[RouteOutput](repeatTTL, repeatMax), isochrones: cache.New[IsochroneOutput](repeatTTL, repeatMax),
+	}
+}
+
+// repeatKey — ключ повтора: вид запроса, параметры и минута отправления.
+func repeatKey(kind string, in any, depart time.Time) string {
+	b, _ := json.Marshal(in)
+	h := sha256.New()
+	h.Write([]byte(kind))
+	h.Write(b)
+	h.Write([]byte(depart.Truncate(time.Minute).Format(time.RFC3339)))
+	return hex.EncodeToString(h.Sum(nil))
+}
 
 // Profile — профиль ТС (ref.vehicle_profile или параметры пользователя).
 type Profile struct {
@@ -100,14 +128,26 @@ var ErrBlocked = errors.New("routing: point inside a forbidden zone")
 // Route строит маршрут: решения по зонам, исключение закрытых зон, маршрут грузовика, путь легкового
 // автомобиля без ограничений и сравнение их.
 func (s *Service) Route(ctx context.Context, in RouteInput) (RouteOutput, error) {
+	depart := in.Depart
+	if depart.IsZero() {
+		depart = time.Now()
+	}
+	key := repeatKey("route", in, depart)
+	if out, ok := s.routes.Get(key); ok {
+		return out, nil
+	}
+	out, err := s.route(ctx, in, depart)
+	if err == nil {
+		s.routes.Set(key, out)
+	}
+	return out, err
+}
+
+func (s *Service) route(ctx context.Context, in RouteInput, depart time.Time) (RouteOutput, error) {
 	var out RouteOutput
 	rules, err := LoadRules(ctx, s.pool)
 	if err != nil {
 		return out, fmt.Errorf("zone rules: %w", err)
-	}
-	depart := in.Depart
-	if depart.IsZero() {
-		depart = time.Now()
 	}
 	out.Zones = Decide(rules, in.Profile.vehicle(), in.Passes, depart)
 	closed := outermostClosed(out.Zones)
@@ -315,14 +355,26 @@ type IsochroneOutput struct {
 
 // Isochrone строит контуры доступности грузовика за заданное время с исключением закрытых зон.
 func (s *Service) Isochrone(ctx context.Context, in IsochroneInput) (IsochroneOutput, error) {
+	depart := in.Depart
+	if depart.IsZero() {
+		depart = time.Now()
+	}
+	key := repeatKey("isochrone", in, depart)
+	if out, ok := s.isochrones.Get(key); ok {
+		return out, nil
+	}
+	out, err := s.isochrone(ctx, in, depart)
+	if err == nil {
+		s.isochrones.Set(key, out)
+	}
+	return out, err
+}
+
+func (s *Service) isochrone(ctx context.Context, in IsochroneInput, depart time.Time) (IsochroneOutput, error) {
 	var out IsochroneOutput
 	rules, err := LoadRules(ctx, s.pool)
 	if err != nil {
 		return out, fmt.Errorf("zone rules: %w", err)
-	}
-	depart := in.Depart
-	if depart.IsZero() {
-		depart = time.Now()
 	}
 	out.Zones = Decide(rules, in.Profile.vehicle(), in.Passes, depart)
 	var exclude []Ring

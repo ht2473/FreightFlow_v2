@@ -85,16 +85,18 @@ func TestRouteAvoidedByTrace(t *testing.T) {
 		SELECT count(*) FROM r`).Scan(&n); err != nil || n != 1 {
 		t.Fatalf("restriction: %d, %v", n, err)
 	}
-	c, request := recorded(t, map[string]string{"/route": "route", "/trace_attributes": "trace_attributes"})
+	c, rec := recorded(t, map[string]string{"/route": "route", "/trace_attributes": "trace_attributes"})
 	svc := NewService(pool, c)
-	out, err := svc.Route(t.Context(), RouteInput{
+	in := RouteInput{
 		Points:  []Point{pointA, pointB},
 		Profile: Profile{GrossT: 20, PayloadT: 11, AxleLoadT: 10, HeightM: 4, WidthM: 2.55, LengthM: 10, EcoClass: 5},
-	})
+		Depart:  time.Date(2026, 10, 14, 10, 0, 0, 0, time.UTC),
+	}
+	out, err := svc.Route(t.Context(), in)
 	if err != nil || out.Baseline == nil {
 		t.Fatalf("route: %v", err)
 	}
-	if body := request("/trace_attributes"); body["costing"] != "auto" {
+	if body := rec.request("/trace_attributes"); body["costing"] != "auto" {
 		t.Errorf("trace costing %v", body["costing"])
 	}
 	found := false
@@ -103,5 +105,11 @@ func TestRouteAvoidedByTrace(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("avoided %+v", out.Avoided)
+	}
+	// Повтор того же запроса в ту же минуту — из памяти, без обращения к службе.
+	calls := rec.count("/route")
+	again, err := svc.Route(t.Context(), in)
+	if err != nil || rec.count("/route") != calls || len(again.Avoided) != len(out.Avoided) {
+		t.Errorf("repeat: %v, route calls %d → %d", err, calls, rec.count("/route"))
 	}
 }

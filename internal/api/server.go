@@ -20,6 +20,7 @@ import (
 	"freightflow/internal/ingest"
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/mail"
+	"freightflow/internal/platform/ratelimit"
 	"freightflow/internal/platform/session"
 	"freightflow/internal/regulation"
 	"freightflow/internal/routing"
@@ -47,7 +48,13 @@ type Deps struct {
 	// Meters и Tracers — метрики и трассы операций; nil — глобальные провайдеры OpenTelemetry.
 	Meters  metric.MeterProvider
 	Tracers trace.TracerProvider
+	// RoutingLimit — расчёты маршрутизации на пользователя; nil — routingBurst подряд, затем один
+	// в секунду.
+	RoutingLimit *ratelimit.Limiter
 }
+
+// routingBurst — расчётов маршрутизации подряд на пользователя.
+const routingBurst = 60
 
 // Server реализует обработчики и проверку безопасности ogen.
 type Server struct {
@@ -56,6 +63,7 @@ type Server struct {
 	layers     *tiles.Service
 	regulation *regulation.Service
 	routing    *routing.Service
+	routeLimit *ratelimit.Limiter
 	sessions   *session.Manager
 	mailer     Mailer
 	baseURL    string
@@ -73,7 +81,10 @@ func New(d Deps) (http.Handler, error) {
 	}
 	s := &Server{
 		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, sessions: d.Sessions, mailer: d.Mailer,
-		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops),
+		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), routeLimit: d.RoutingLimit,
+	}
+	if s.routeLimit == nil {
+		s.routeLimit = ratelimit.New(time.Second, routingBurst)
 	}
 	opts := []gen.ServerOption{
 		gen.WithPathPrefix("/api/v1"),

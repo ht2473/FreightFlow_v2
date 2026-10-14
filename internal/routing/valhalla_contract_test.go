@@ -19,12 +19,30 @@ import (
 // (testdata/valhalla, точки в Нижегородском районе); сервер отдаёт записанный ответ и сохраняет
 // запрос клиента.
 
+// recorder — последний запрос клиента и число запросов по пути.
+type recorder struct {
+	mu       sync.Mutex
+	requests map[string]map[string]any
+	calls    map[string]int
+}
+
+func (r *recorder) request(path string) map[string]any {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.requests[path]
+}
+
+func (r *recorder) count(path string) int {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.calls[path]
+}
+
 // recorded — сервер с записанными ответами: путь запроса → файл (код ответа — из поля
 // status_code ошибки).
-func recorded(t *testing.T, files map[string]string) (*Client, func(path string) map[string]any) {
+func recorded(t *testing.T, files map[string]string) (*Client, *recorder) {
 	t.Helper()
-	var mu sync.Mutex
-	requests := map[string]map[string]any{}
+	rec := &recorder{requests: map[string]map[string]any{}, calls: map[string]int{}}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name, ok := files[r.URL.Path]
 		if !ok {
@@ -33,9 +51,10 @@ func recorded(t *testing.T, files map[string]string) (*Client, func(path string)
 		}
 		var body map[string]any
 		_ = json.NewDecoder(r.Body).Decode(&body)
-		mu.Lock()
-		requests[r.URL.Path] = body
-		mu.Unlock()
+		rec.mu.Lock()
+		rec.requests[r.URL.Path] = body
+		rec.calls[r.URL.Path]++
+		rec.mu.Unlock()
 		data, err := os.ReadFile("testdata/valhalla/" + name + ".json")
 		if err != nil {
 			t.Error(err)
@@ -50,11 +69,7 @@ func recorded(t *testing.T, files map[string]string) (*Client, func(path string)
 		_, _ = w.Write(data)
 	}))
 	t.Cleanup(srv.Close)
-	return NewClient(srv.URL), func(path string) map[string]any {
-		mu.Lock()
-		defer mu.Unlock()
-		return requests[path]
-	}
+	return NewClient(srv.URL), rec
 }
 
 var (
@@ -70,7 +85,7 @@ func near(p, q Point, m float64) bool {
 
 func TestContractStatusAndRoute(t *testing.T) {
 	t.Parallel()
-	c, request := recorded(t, map[string]string{"/status": "status", "/route": "route"})
+	c, rec := recorded(t, map[string]string{"/status": "status", "/route": "route"})
 	st, err := c.Status(t.Context())
 	if err != nil || st.Version != "3.9.1" || st.Tileset == 0 {
 		t.Fatalf("status %+v, %v", st, err)
@@ -91,7 +106,7 @@ func TestContractStatusAndRoute(t *testing.T) {
 	if !near(shape[0], pointA, 30) || !near(shape[len(shape)-1], pointB, 120) {
 		t.Errorf("shape ends %v … %v", shape[0], shape[len(shape)-1])
 	}
-	body := request("/route")
+	body := rec.request("/route")
 	if body["costing"] != "truck" || body["shape_format"] != "polyline6" || body["costing_options"] == nil {
 		t.Errorf("route request %v", body)
 	}
@@ -99,7 +114,7 @@ func TestContractStatusAndRoute(t *testing.T) {
 
 func TestContractIsochroneAndMatrix(t *testing.T) {
 	t.Parallel()
-	c, request := recorded(t, map[string]string{"/isochrone": "isochrone", "/sources_to_targets": "matrix"})
+	c, rec := recorded(t, map[string]string{"/isochrone": "isochrone", "/sources_to_targets": "matrix"})
 	raw, err := c.Isochrone(t.Context(), IsochroneRequest{Origin: pointA, Costing: "truck", Truck: contractTruck, Minutes: []int{5, 10}})
 	if err != nil {
 		t.Fatal(err)
@@ -138,14 +153,14 @@ func TestContractIsochroneAndMatrix(t *testing.T) {
 	if !m[0][0].Reachable || m[0][0].Time != 445 || m[0][0].Length != 6.054 || !m[1][1].Reachable || m[1][1].Time != 0 {
 		t.Errorf("cells %+v", m)
 	}
-	if body := request("/sources_to_targets"); len(body["sources"].([]any)) != 2 || body["exclude_locations"] != nil {
+	if body := rec.request("/sources_to_targets"); len(body["sources"].([]any)) != 2 || body["exclude_locations"] != nil {
 		t.Errorf("matrix request %v", body)
 	}
 }
 
 func TestContractLocateAndTrace(t *testing.T) {
 	t.Parallel()
-	c, request := recorded(t, map[string]string{"/locate": "locate", "/trace_attributes": "trace_attributes"})
+	c, rec := recorded(t, map[string]string{"/locate": "locate", "/trace_attributes": "trace_attributes"})
 	snaps, err := c.Locate(t.Context(), []Point{pointA}, contractTruck)
 	if err != nil || len(snaps) != 1 || snaps[0] == nil {
 		t.Fatalf("locate %v, %v", snaps, err)
@@ -171,7 +186,7 @@ func TestContractLocateAndTrace(t *testing.T) {
 	if math.Abs(length-6.054) > 0.06 || !named {
 		t.Errorf("trace length %.3f km, named %v", length, named)
 	}
-	if body := request("/trace_attributes"); body["shape_match"] != "map_snap" || len(body["shape"].([]any)) != 2 {
+	if body := rec.request("/trace_attributes"); body["shape_match"] != "map_snap" || len(body["shape"].([]any)) != 2 {
 		t.Errorf("trace request %v", body)
 	}
 }
