@@ -132,8 +132,8 @@ var Datasets = []Dataset{
 	// Территория: адреса, ограничения для размещения, ввод объектов.
 	{
 		Checks: []StatCheck{{
-			Code: "addresses_geometry", Title: "Контуры есть почти у всех адресов (без контура не больше 5 %)",
-			Severity: ingest.SeverityWarning, Stat: "addresses_without_geometry_pct", Min: 0, Max: 5,
+			Code: "addresses_geometry", Title: "Контуры есть почти у всех зданий и сооружений (без контура не больше 1 %)",
+			Severity: ingest.SeverityWarning, Stat: "buildings_without_geometry_pct", Min: 0, Max: 1,
 		}},
 		ID: 60562, Code: "mos_addresses", Title: "Адресный реестр объектов недвижимости", Domains: []string{"territory"},
 		Interval: week, Geo: true, Transform: "addresses.sql", MinRecords: 300000,

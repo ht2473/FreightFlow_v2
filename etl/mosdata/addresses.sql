@@ -48,4 +48,8 @@ UNION ALL SELECT 'addresses_new', count(*) FROM territory.address WHERE first_se
 UNION ALL SELECT 'addresses_without_geometry', count(*) FROM territory.address WHERE geom IS NULL
 UNION ALL SELECT 'addresses_without_geometry_pct', coalesce(round(100.0 * count(*) FILTER (WHERE geom IS NULL) / nullif(count(*), 0)), 0)
           FROM territory.address
+-- Без контура в реестре в основном земельные участки; у зданий и сооружений контур есть почти всегда.
+UNION ALL SELECT 'buildings_without_geometry_pct',
+                 coalesce(round(100.0 * count(*) FILTER (WHERE geom IS NULL) / nullif(count(*), 0), 1), 0)
+          FROM territory.address WHERE obj_type IN ('здание', 'сооружение')
 UNION ALL SELECT 'addresses_with_key', count(*) FROM territory.address WHERE address_key NOT LIKE '|%';

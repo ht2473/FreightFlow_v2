@@ -70,6 +70,7 @@ export const statLabel: Record<string, string> = {
   facilities_with_permits: "Объектов с разрешением на ввод",
   addresses_without_geometry: "Адресов без координат",
   addresses_without_geometry_pct: "Адресов без координат, %",
+  buildings_without_geometry_pct: "Зданий и сооружений без контура, %",
   assets_active: "Объектов инфраструктуры",
   assets_new: "Новых объектов инфраструктуры",
   assets_missing: "Исчезло объектов инфраструктуры",
