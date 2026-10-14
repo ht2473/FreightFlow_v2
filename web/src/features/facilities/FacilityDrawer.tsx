@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ExternalLink, GitCompare, Map as MapIcon, Route, Timer } from "lucide-react";
+import { ExternalLink, GitCompare, Map as MapIcon, Maximize2, Route, Timer } from "lucide-react";
 import { $api, problemMessage, type Schemas } from "@/shared/api/client";
 import { date, dateTime, num } from "@/shared/format";
 import { Badge, Button, cellClass, EmptyState, Skeleton, tableClass } from "@/shared/ui";
@@ -55,23 +55,36 @@ export function FacilityDrawer({ id, onClose }: { id: string | undefined; onClos
           {problemMessage(card.error)}
         </div>
       ) : (
-        <Tabs
-          label="Разделы карточки"
-          items={[
-            { id: "overview", title: "Обзор", content: <Overview c={c} /> },
-            { id: "access", title: "Доступность", content: <Access c={c} /> },
-            { id: "restrictions", title: `Ограничения (${c.restrictions.length})`, content: <Restrictions c={c} /> },
-            { id: "works", title: `Работы (${c.works.length})`, content: <Works c={c} /> },
-            { id: "nearby", title: "Рядом", content: <Nearby c={c} /> },
-            { id: "sources", title: "Источники", content: <Sources c={c} /> },
-          ]}
-        />
+        <>
+          <CardTabs c={c} />
+          <Link to="/facilities/$facilityId" params={{ facilityId: c.facility.id }} className={s.fullLink}>
+            <Maximize2 size={13} aria-hidden /> Открыть карточку полностью
+          </Link>
+        </>
       )}
     </Drawer>
   );
 }
 
-function Actions({ f }: { f: Schemas["FacilityItem"] }) {
+/** Вкладки карточки — в ящике и на странице объекта. */
+export function CardTabs({ c }: { c: Card }) {
+  return (
+    <Tabs
+      label="Разделы карточки"
+      items={[
+        { id: "overview", title: "Обзор", content: <Overview c={c} /> },
+        { id: "access", title: "Доступность", content: <Access c={c} /> },
+        { id: "restrictions", title: `Ограничения (${c.restrictions.length})`, content: <Restrictions c={c} /> },
+        { id: "works", title: `Работы (${c.works.length})`, content: <Works c={c} /> },
+        { id: "nearby", title: "Рядом", content: <Nearby c={c} /> },
+        { id: "sources", title: "Источники", content: <Sources c={c} /> },
+      ]}
+    />
+  );
+}
+
+/** Действия карточки: маршрут и изохроны от объекта, сравнение, карта. */
+export function Actions({ f }: { f: Schemas["FacilityItem"] }) {
   const compare = useCompare();
   const inCompare = compare.ids.includes(f.id);
   const from = formatCenter(f.point.lon, f.point.lat);

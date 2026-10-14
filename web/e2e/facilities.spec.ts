@@ -63,6 +63,16 @@ test("реестр: фасеты, сортировка, страницы, кар
   await expect(drawer.getByText("OpenStreetMap", { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page).not.toHaveURL(/open=/);
+
+  // Полная карточка: те же вкладки и мини-карта объекта.
+  await table.getByRole("row").nth(1).getByRole("button").first().click();
+  await page.getByRole("dialog").getByRole("link", { name: "Открыть карточку полностью" }).click();
+  await expect(page).toHaveURL(/\/facilities\/[0-9a-f-]{36}$/);
+  await expect(page.getByRole("tab", { name: "Доступность" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("region", { name: "Карта объекта" }).locator(".maplibregl-canvas")).toBeVisible();
+  await page.waitForTimeout(2500);
+  expect(await axeViolations(page)).toEqual([]);
+  await page.screenshot({ path: info.outputPath("facility-page.png") });
   expect(errors).toEqual([]);
 });
 
