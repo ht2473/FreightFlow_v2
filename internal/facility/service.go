@@ -34,7 +34,7 @@ type cursor struct {
 }
 
 const itemColumns = `
-	f.id, f.name, f.type_code, t.name, coalesce(f.official_address, f.address), o.name, d.name, f.ring,
+	f.id, f.name, f.type_code, t.name, coalesce(f.official_address, f.address), coalesce(o.short_name, o.name), d.name, f.ring,
 	f.building_area_m2, f.floor_area_m2, f.territory_area_m2, f.buildings, f.confidence, acc.minutes::float8,
 	` + hasPermit + `, ST_X(f.point), ST_Y(f.point), f.first_seen_at`
 
@@ -104,8 +104,8 @@ func (s *Service) Facets(ctx context.Context, f Filter) (Facets, error) {
 		dst                             *[]FacetValue
 	}{
 		{"type", "f.type_code", "t.name", "f.type_code, t.name, t.ord", "t.ord", &out.Types},
-		{"okrug", "o.id::text", "o.name", "o.id, o.name", "count(*) DESC, o.name", &out.Okrugs},
-		{"ring", "f.ring", "f.ring", "f.ring", "f.ring", &out.Rings},
+		{"okrug", "o.id::text", "replace(o.name, ' административный округ', '')", "o.id, o.name", "count(*) DESC, o.name", &out.Okrugs},
+		{"ring", "f.ring", "f.ring", "f.ring", "array_position(ARRAY['sk', 'ttk', 'mkad', 'ckad', 'outside'], f.ring)", &out.Rings},
 		{
 			"confidence", confidenceBucket, confidenceBucket, confidenceBucket,
 			"min(f.confidence) DESC", &out.Confidence,

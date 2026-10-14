@@ -7,10 +7,15 @@
   display: flex;
   gap: 18px;
   border-bottom: 1px solid var(--line);
+  /* Вкладки не переносятся: в узком контейнере (ящик) список прокручивается. */
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .tab {
   position: relative;
+  flex: none;
+  white-space: nowrap;
   padding: 9px 0 10px;
   color: var(--tx2);
   font-size: 13px;
@@ -32,7 +37,8 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -1px;
+  /* Внутри прокручиваемого списка: подчёркивание не обрезается. */
+  bottom: 0;
   height: 2px;
   border-radius: 2px;
   background: var(--acc);

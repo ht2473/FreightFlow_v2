@@ -44,17 +44,6 @@ export const sections: Section[] = [
     ],
   },
   {
-    path: "/facilities",
-    title: "Объекты",
-    permission: "map.view",
-    summary: "Реестр объектов логистики: склады, терминалы, ж/д площадки, промзоны.",
-    points: [
-      "Таблица с фильтрами, фасетами и сохранёнными видами",
-      "Карточка: доступность, ограничения на подъездах, работы рядом",
-      "Выгрузка в CSV, XLSX, GeoJSON, GeoPackage",
-    ],
-  },
-  {
     path: "/analytics",
     title: "Аналитика",
     permission: "analytics.view",

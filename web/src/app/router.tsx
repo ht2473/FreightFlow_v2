@@ -1,4 +1,5 @@
 import { createRootRoute, createRoute, createRouter, lazyRouteComponent, redirect } from "@tanstack/react-router";
+import { facilitySearchSchema } from "@/features/facilities/search";
 import { mapSearchSchema } from "@/features/map/state";
 import { ErrorPage, PendingPage } from "./ErrorPage";
 import { NotFound } from "./NotFound";
@@ -43,7 +44,12 @@ const routeTree = rootRoute.addChildren([
   }),
   sectionRoute("/operations"),
   sectionRoute("/alerts"),
-  sectionRoute("/facilities"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/facilities",
+    validateSearch: (search: Record<string, unknown>) => facilitySearchSchema.parse(search),
+    component: lazyRouteComponent(() => import("@/features/facilities/FacilitiesPage"), "FacilitiesPage"),
+  }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: "/network",
