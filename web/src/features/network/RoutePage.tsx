@@ -19,6 +19,7 @@ import { Badge, Button, Checkbox, IconButton, Select, Switch, TextField } from "
 import { Tabs } from "@/shared/ui/navigation";
 import { useResolvedTheme } from "@/shared/useResolvedTheme";
 import { layerStates } from "../map/state";
+import { routeGeoJSON, routeGPX, saveFile } from "./exportRoute";
 import { passabilityFilter } from "./filters";
 import {
   difference,
@@ -501,9 +502,14 @@ function Explanation({ result, points }: { result: Result; points: number }) {
         <p className={s.muted}>Ограничений и закрытых зон на пути нет.</p>
       )}
       {main && (
-        <Button size="sm" onPress={() => download(result)}>
-          <Download size={14} aria-hidden /> GeoJSON
-        </Button>
+        <div className={s.exports}>
+          <Button size="sm" onPress={() => saveFile(routeGeoJSON(result), "route.geojson", "application/geo+json")}>
+            <Download size={14} aria-hidden /> GeoJSON
+          </Button>
+          <Button size="sm" onPress={() => saveFile(routeGPX(result), "route.gpx", "application/gpx+xml")}>
+            <Download size={14} aria-hidden /> GPX
+          </Button>
+        </div>
       )}
     </section>
   );
@@ -565,22 +571,6 @@ function extent(coords: number[][]): [number, number, number, number] | null {
     n = Math.max(n, lat);
   }
   return [w, sth, e, n];
-}
-
-/** Выгрузка маршрутов в GeoJSON. */
-function download(result: Result) {
-  const features = result.routes.map((r, i) => ({
-    type: "Feature",
-    properties: { kind: i === 0 ? "truck" : "alternate", time_s: r.timeS, length_km: r.lengthKm },
-    geometry: { type: "LineString", coordinates: r.coordinates },
-  }));
-  const blob = new Blob([JSON.stringify({ type: "FeatureCollection", features })], { type: "application/geo+json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "route.geojson";
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 function RouteMap({

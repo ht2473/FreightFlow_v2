@@ -275,3 +275,8 @@
     min-height: 45vh;
   }
 }
+
+.exports {
+  display: flex;
+  gap: 8px;
+}
