@@ -162,7 +162,7 @@ func facilityCard(c *facility.Card) (*gen.FacilityCard, error) {
 	out := &gen.FacilityCard{
 		Facility: facilityItem(c.Item), Status: gen.FacilityCardStatus(c.Status), OsmType: gen.FacilityCardOsmType(c.OSMType),
 		OsmId: c.OSMID, Attrs: gen.FacilityCardAttrs(attrs), ConfidenceReasons: reasons, LastSeen: c.LastSeen,
-		UpdatedAt: c.UpdatedAt, Sources: []gen.FacilitySource{}, Access: []gen.FacilityAccess{},
+		UpdatedAt: c.UpdatedAt, Curated: []gen.FacilityCardCuratedItem{}, Sources: []gen.FacilitySource{}, Access: []gen.FacilityAccess{},
 		Restrictions: []gen.NearbyRestriction{}, Works: []gen.NearbyWork{}, Nearby: []gen.NearbyPoi{},
 	}
 	if out.Attrs == nil {
@@ -170,6 +170,9 @@ func facilityCard(c *facility.Card) (*gen.FacilityCard, error) {
 	}
 	if out.ConfidenceReasons == nil {
 		out.ConfidenceReasons = []gen.ConfidenceReason{}
+	}
+	for _, f := range c.Curated {
+		out.Curated = append(out.Curated, gen.FacilityCardCuratedItem(f))
 	}
 	if c.Levels != nil {
 		out.Levels = gen.NewOptInt(*c.Levels)

@@ -160,11 +160,13 @@ type Card struct {
 	ConfidenceReasons json.RawMessage
 	LastSeen          time.Time
 	UpdatedAt         time.Time
-	Sources           []Source
-	Access            []Access
-	Restrictions      []Restriction
-	Works             []Work
-	Nearby            []Nearby
+	// Curated — поля, заданные редактором.
+	Curated      []string
+	Sources      []Source
+	Access       []Access
+	Restrictions []Restriction
+	Works        []Work
+	Nearby       []Nearby
 }
 
 // Source — связь объекта с официальной записью (адрес реестра, разрешение на ввод).
@@ -216,11 +218,11 @@ func (s *Service) Get(ctx context.Context, id uuid.UUID) (*Card, error) {
 	var c Card
 	var levels *int16
 	row := s.pool.QueryRow(ctx, `SELECT `+itemColumns+`, f.status, ST_AsGeoJSON(f.footprint, 6), ST_AsGeoJSON(f.territory, 6),
-		f.levels, f.osm_type, f.osm_id, f.attrs, f.confidence_reasons, f.last_seen_at, f.updated_at`+fromClause+`
+		f.levels, f.osm_type, f.osm_id, f.attrs, f.confidence_reasons, f.last_seen_at, f.updated_at, f.curated`+fromClause+`
 		WHERE f.id = $1`, id)
 	var footprint, territory *string
 	err := scanItem(row, &c.Item, &c.Status, &footprint, &territory, &levels, &c.OSMType, &c.OSMID, &c.Attrs,
-		&c.ConfidenceReasons, &c.LastSeen, &c.UpdatedAt)
+		&c.ConfidenceReasons, &c.LastSeen, &c.UpdatedAt, &c.Curated)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, ErrNotFound
 	}

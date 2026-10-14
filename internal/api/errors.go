@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	ogenerrors "github.com/ogen-go/ogen/ogenerrors"
 
@@ -77,6 +78,9 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 		return problem.New(http.StatusConflict, "export_not_ready", "Файл выгрузки ещё не готов")
 	case errors.Is(err, facility.ErrNotFound):
 		return problem.NotFound
+	case errors.Is(err, facility.ErrInvalid):
+		return problem.New(http.StatusUnprocessableEntity, "invalid_curation", "Проверьте данные").
+			WithDetail(strings.TrimPrefix(err.Error(), facility.ErrInvalid.Error()+": "))
 	case errors.Is(err, facility.ErrBadFilter):
 		return problem.BadRequest.WithDetail(err.Error())
 	case errors.Is(err, routing.ErrMatrixTooLarge):

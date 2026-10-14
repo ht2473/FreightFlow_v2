@@ -136,8 +136,50 @@ func encodeCreateUserRequest(
 	return nil
 }
 
+func encodeCurateFacilityRequest(
+	req *CurationRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeDisableTotpRequest(
 	req *PasswordConfirmation,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeReportFacilityIssueRequest(
+	req *ReportFacilityIssueReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeResolveFacilityReportRequest(
+	req *ResolveFacilityReportReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

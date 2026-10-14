@@ -38,6 +38,12 @@ func LoadDistrict(t *testing.T, pool *pgxpool.Pool) {
 	if _, err := pool.Exec(t.Context(), string(stage)); err != nil {
 		t.Fatal(err)
 	}
+	Transform(t, pool)
+}
+
+// Transform переносит загруженную стадию в домен (повторный перенос — как новая загрузка OSM).
+func Transform(t *testing.T, pool *pgxpool.Pool) {
+	t.Helper()
 	script, err := etl.FS.ReadFile("osm/transform.sql")
 	if err != nil {
 		t.Fatal(err)

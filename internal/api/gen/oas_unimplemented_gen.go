@@ -127,6 +127,17 @@ func (UnimplementedHandler) CreateUser(ctx context.Context, req *CreateUser) (r 
 	return r, ht.ErrNotImplemented
 }
 
+// CurateFacility implements curateFacility operation.
+//
+// Действует последняя неотменённая правка поля; правки
+// сохраняются при перезагрузке источников. Поля: name,
+// type_code, status (active — вернуть, excluded — исключить), address.
+//
+// POST /facilities/{facilityId}/curations
+func (UnimplementedHandler) CurateFacility(ctx context.Context, req *CurationRequest, params CurateFacilityParams) (r *Curation, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DisableTotp implements disableTotp operation.
 //
 // Отключить двухфакторную защиту.
@@ -144,6 +155,16 @@ func (UnimplementedHandler) DisableTotp(ctx context.Context, req *PasswordConfir
 //
 // GET /facilities/facets
 func (UnimplementedHandler) FacilityFacets(ctx context.Context, params FacilityFacetsParams) (r *FacilityFacets, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// FacilityHistory implements facilityHistory operation.
+//
+// История объекта — правки редактора и сообщения о
+// неточностях.
+//
+// GET /facilities/{facilityId}/history
+func (UnimplementedHandler) FacilityHistory(ctx context.Context, params FacilityHistoryParams) (r *FacilityHistory, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -309,6 +330,15 @@ func (UnimplementedHandler) ListFacilities(ctx context.Context, params ListFacil
 	return r, ht.ErrNotImplemented
 }
 
+// ListFacilityReports implements listFacilityReports operation.
+//
+// Очередь сообщений о неточностях.
+//
+// GET /facility-reports
+func (UnimplementedHandler) ListFacilityReports(ctx context.Context, params ListFacilityReportsParams) (r []FacilityReport, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListLayers implements listLayers operation.
 //
 // Слои в порядке отрисовки снизу вверх с адресами тайлов
@@ -383,12 +413,40 @@ func (UnimplementedHandler) ListVehicleProfiles(ctx context.Context) (r []Vehicl
 	return r, ht.ErrNotImplemented
 }
 
+// ReportFacilityIssue implements reportFacilityIssue operation.
+//
+// Сообщить о неточности записи.
+//
+// POST /facilities/{facilityId}/reports
+func (UnimplementedHandler) ReportFacilityIssue(ctx context.Context, req *ReportFacilityIssueReq, params ReportFacilityIssueParams) (r *FacilityReport, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ResetUserTotp implements resetUserTotp operation.
 //
 // Сбросить двухфакторную защиту пользователя.
 //
 // DELETE /admin/users/{userId}/totp
 func (UnimplementedHandler) ResetUserTotp(ctx context.Context, params ResetUserTotpParams) error {
+	return ht.ErrNotImplemented
+}
+
+// ResolveFacilityReport implements resolveFacilityReport operation.
+//
+// Закрыть сообщение о неточности.
+//
+// PATCH /facility-reports/{reportId}
+func (UnimplementedHandler) ResolveFacilityReport(ctx context.Context, req *ResolveFacilityReportReq, params ResolveFacilityReportParams) (r *FacilityReport, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RevokeCuration implements revokeCuration operation.
+//
+// Отменить правку (без действующих правок поля —
+// значение источника).
+//
+// DELETE /facilities/{facilityId}/curations/{curationId}
+func (UnimplementedHandler) RevokeCuration(ctx context.Context, params RevokeCurationParams) error {
 	return ht.ErrNotImplemented
 }
 

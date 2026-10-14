@@ -1132,6 +1132,245 @@ func (s *CriticalityStats) SetConfirmed(val int) {
 	s.Confirmed = val
 }
 
+// Ref: #/components/schemas/Curation
+type Curation struct {
+	ID        uuid.UUID     `json:"id"`
+	Field     CurationField `json:"field"`
+	Value     OptString     `json:"value"`
+	Reason    string        `json:"reason"`
+	Author    OptString     `json:"author"`
+	CreatedAt time.Time     `json:"createdAt"`
+	RevokedAt OptDateTime   `json:"revokedAt"`
+	RevokedBy OptString     `json:"revokedBy"`
+}
+
+// GetID returns the value of ID.
+func (s *Curation) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetField returns the value of Field.
+func (s *Curation) GetField() CurationField {
+	return s.Field
+}
+
+// GetValue returns the value of Value.
+func (s *Curation) GetValue() OptString {
+	return s.Value
+}
+
+// GetReason returns the value of Reason.
+func (s *Curation) GetReason() string {
+	return s.Reason
+}
+
+// GetAuthor returns the value of Author.
+func (s *Curation) GetAuthor() OptString {
+	return s.Author
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Curation) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetRevokedAt returns the value of RevokedAt.
+func (s *Curation) GetRevokedAt() OptDateTime {
+	return s.RevokedAt
+}
+
+// GetRevokedBy returns the value of RevokedBy.
+func (s *Curation) GetRevokedBy() OptString {
+	return s.RevokedBy
+}
+
+// SetID sets the value of ID.
+func (s *Curation) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetField sets the value of Field.
+func (s *Curation) SetField(val CurationField) {
+	s.Field = val
+}
+
+// SetValue sets the value of Value.
+func (s *Curation) SetValue(val OptString) {
+	s.Value = val
+}
+
+// SetReason sets the value of Reason.
+func (s *Curation) SetReason(val string) {
+	s.Reason = val
+}
+
+// SetAuthor sets the value of Author.
+func (s *Curation) SetAuthor(val OptString) {
+	s.Author = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Curation) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetRevokedAt sets the value of RevokedAt.
+func (s *Curation) SetRevokedAt(val OptDateTime) {
+	s.RevokedAt = val
+}
+
+// SetRevokedBy sets the value of RevokedBy.
+func (s *Curation) SetRevokedBy(val OptString) {
+	s.RevokedBy = val
+}
+
+type CurationField string
+
+const (
+	CurationFieldName     CurationField = "name"
+	CurationFieldTypeCode CurationField = "type_code"
+	CurationFieldStatus   CurationField = "status"
+	CurationFieldAddress  CurationField = "address"
+)
+
+// AllValues returns all CurationField values.
+func (CurationField) AllValues() []CurationField {
+	return []CurationField{
+		CurationFieldName,
+		CurationFieldTypeCode,
+		CurationFieldStatus,
+		CurationFieldAddress,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CurationField) MarshalText() ([]byte, error) {
+	switch s {
+	case CurationFieldName:
+		return []byte(s), nil
+	case CurationFieldTypeCode:
+		return []byte(s), nil
+	case CurationFieldStatus:
+		return []byte(s), nil
+	case CurationFieldAddress:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CurationField) UnmarshalText(data []byte) error {
+	switch CurationField(data) {
+	case CurationFieldName:
+		*s = CurationFieldName
+		return nil
+	case CurationFieldTypeCode:
+		*s = CurationFieldTypeCode
+		return nil
+	case CurationFieldStatus:
+		*s = CurationFieldStatus
+		return nil
+	case CurationFieldAddress:
+		*s = CurationFieldAddress
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/CurationRequest
+type CurationRequest struct {
+	Field  CurationRequestField `json:"field"`
+	Value  string               `json:"value"`
+	Reason string               `json:"reason"`
+}
+
+// GetField returns the value of Field.
+func (s *CurationRequest) GetField() CurationRequestField {
+	return s.Field
+}
+
+// GetValue returns the value of Value.
+func (s *CurationRequest) GetValue() string {
+	return s.Value
+}
+
+// GetReason returns the value of Reason.
+func (s *CurationRequest) GetReason() string {
+	return s.Reason
+}
+
+// SetField sets the value of Field.
+func (s *CurationRequest) SetField(val CurationRequestField) {
+	s.Field = val
+}
+
+// SetValue sets the value of Value.
+func (s *CurationRequest) SetValue(val string) {
+	s.Value = val
+}
+
+// SetReason sets the value of Reason.
+func (s *CurationRequest) SetReason(val string) {
+	s.Reason = val
+}
+
+type CurationRequestField string
+
+const (
+	CurationRequestFieldName     CurationRequestField = "name"
+	CurationRequestFieldTypeCode CurationRequestField = "type_code"
+	CurationRequestFieldStatus   CurationRequestField = "status"
+	CurationRequestFieldAddress  CurationRequestField = "address"
+)
+
+// AllValues returns all CurationRequestField values.
+func (CurationRequestField) AllValues() []CurationRequestField {
+	return []CurationRequestField{
+		CurationRequestFieldName,
+		CurationRequestFieldTypeCode,
+		CurationRequestFieldStatus,
+		CurationRequestFieldAddress,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CurationRequestField) MarshalText() ([]byte, error) {
+	switch s {
+	case CurationRequestFieldName:
+		return []byte(s), nil
+	case CurationRequestFieldTypeCode:
+		return []byte(s), nil
+	case CurationRequestFieldStatus:
+		return []byte(s), nil
+	case CurationRequestFieldAddress:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CurationRequestField) UnmarshalText(data []byte) error {
+	switch CurationRequestField(data) {
+	case CurationRequestFieldName:
+		*s = CurationRequestFieldName
+		return nil
+	case CurationRequestFieldTypeCode:
+		*s = CurationRequestFieldTypeCode
+		return nil
+	case CurationRequestFieldStatus:
+		*s = CurationRequestFieldStatus
+		return nil
+	case CurationRequestFieldAddress:
+		*s = CurationRequestFieldAddress
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // DisableTotpNoContent is response for DisableTotp operation.
 type DisableTotpNoContent struct{}
 
@@ -1745,11 +1984,13 @@ type FacilityCard struct {
 	ConfidenceReasons []ConfidenceReason       `json:"confidenceReasons"`
 	LastSeen          time.Time                `json:"lastSeen"`
 	UpdatedAt         time.Time                `json:"updatedAt"`
-	Sources           []FacilitySource         `json:"sources"`
-	Access            []FacilityAccess         `json:"access"`
-	Restrictions      []NearbyRestriction      `json:"restrictions"`
-	Works             []NearbyWork             `json:"works"`
-	Nearby            []NearbyPoi              `json:"nearby"`
+	// Поля, заданные редактором.
+	Curated      []FacilityCardCuratedItem `json:"curated"`
+	Sources      []FacilitySource          `json:"sources"`
+	Access       []FacilityAccess          `json:"access"`
+	Restrictions []NearbyRestriction       `json:"restrictions"`
+	Works        []NearbyWork              `json:"works"`
+	Nearby       []NearbyPoi               `json:"nearby"`
 }
 
 // GetFacility returns the value of Facility.
@@ -1805,6 +2046,11 @@ func (s *FacilityCard) GetLastSeen() time.Time {
 // GetUpdatedAt returns the value of UpdatedAt.
 func (s *FacilityCard) GetUpdatedAt() time.Time {
 	return s.UpdatedAt
+}
+
+// GetCurated returns the value of Curated.
+func (s *FacilityCard) GetCurated() []FacilityCardCuratedItem {
+	return s.Curated
 }
 
 // GetSources returns the value of Sources.
@@ -1887,6 +2133,11 @@ func (s *FacilityCard) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
 }
 
+// SetCurated sets the value of Curated.
+func (s *FacilityCard) SetCurated(val []FacilityCardCuratedItem) {
+	s.Curated = val
+}
+
 // SetSources sets the value of Sources.
 func (s *FacilityCard) SetSources(val []FacilitySource) {
 	s.Sources = val
@@ -1921,6 +2172,61 @@ func (s *FacilityCardAttrs) init() FacilityCardAttrs {
 		*s = m
 	}
 	return m
+}
+
+type FacilityCardCuratedItem string
+
+const (
+	FacilityCardCuratedItemName     FacilityCardCuratedItem = "name"
+	FacilityCardCuratedItemTypeCode FacilityCardCuratedItem = "type_code"
+	FacilityCardCuratedItemStatus   FacilityCardCuratedItem = "status"
+	FacilityCardCuratedItemAddress  FacilityCardCuratedItem = "address"
+)
+
+// AllValues returns all FacilityCardCuratedItem values.
+func (FacilityCardCuratedItem) AllValues() []FacilityCardCuratedItem {
+	return []FacilityCardCuratedItem{
+		FacilityCardCuratedItemName,
+		FacilityCardCuratedItemTypeCode,
+		FacilityCardCuratedItemStatus,
+		FacilityCardCuratedItemAddress,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityCardCuratedItem) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityCardCuratedItemName:
+		return []byte(s), nil
+	case FacilityCardCuratedItemTypeCode:
+		return []byte(s), nil
+	case FacilityCardCuratedItemStatus:
+		return []byte(s), nil
+	case FacilityCardCuratedItemAddress:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityCardCuratedItem) UnmarshalText(data []byte) error {
+	switch FacilityCardCuratedItem(data) {
+	case FacilityCardCuratedItemName:
+		*s = FacilityCardCuratedItemName
+		return nil
+	case FacilityCardCuratedItemTypeCode:
+		*s = FacilityCardCuratedItemTypeCode
+		return nil
+	case FacilityCardCuratedItemStatus:
+		*s = FacilityCardCuratedItemStatus
+		return nil
+	case FacilityCardCuratedItemAddress:
+		*s = FacilityCardCuratedItemAddress
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Контур зданий (GeoJSON).
@@ -2360,6 +2666,32 @@ func (s *FacilityFilterStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/FacilityHistory
+type FacilityHistory struct {
+	Curations []Curation       `json:"curations"`
+	Reports   []FacilityReport `json:"reports"`
+}
+
+// GetCurations returns the value of Curations.
+func (s *FacilityHistory) GetCurations() []Curation {
+	return s.Curations
+}
+
+// GetReports returns the value of Reports.
+func (s *FacilityHistory) GetReports() []FacilityReport {
+	return s.Reports
+}
+
+// SetCurations sets the value of Curations.
+func (s *FacilityHistory) SetCurations(val []Curation) {
+	s.Curations = val
+}
+
+// SetReports sets the value of Reports.
+func (s *FacilityHistory) SetReports(val []FacilityReport) {
+	s.Reports = val
+}
+
 // Ref: #/components/schemas/FacilityItem
 type FacilityItem struct {
 	ID       uuid.UUID           `json:"id"`
@@ -2652,6 +2984,168 @@ func (s *FacilityPage) SetTotal(val int) {
 // SetNext sets the value of Next.
 func (s *FacilityPage) SetNext(val OptString) {
 	s.Next = val
+}
+
+// Ref: #/components/schemas/FacilityReport
+type FacilityReport struct {
+	ID           uuid.UUID            `json:"id"`
+	FacilityId   uuid.UUID            `json:"facilityId"`
+	FacilityName string               `json:"facilityName"`
+	Message      string               `json:"message"`
+	Author       OptString            `json:"author"`
+	Status       FacilityReportStatus `json:"status"`
+	Resolution   OptString            `json:"resolution"`
+	ResolvedBy   OptString            `json:"resolvedBy"`
+	CreatedAt    time.Time            `json:"createdAt"`
+	ResolvedAt   OptDateTime          `json:"resolvedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *FacilityReport) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetFacilityId returns the value of FacilityId.
+func (s *FacilityReport) GetFacilityId() uuid.UUID {
+	return s.FacilityId
+}
+
+// GetFacilityName returns the value of FacilityName.
+func (s *FacilityReport) GetFacilityName() string {
+	return s.FacilityName
+}
+
+// GetMessage returns the value of Message.
+func (s *FacilityReport) GetMessage() string {
+	return s.Message
+}
+
+// GetAuthor returns the value of Author.
+func (s *FacilityReport) GetAuthor() OptString {
+	return s.Author
+}
+
+// GetStatus returns the value of Status.
+func (s *FacilityReport) GetStatus() FacilityReportStatus {
+	return s.Status
+}
+
+// GetResolution returns the value of Resolution.
+func (s *FacilityReport) GetResolution() OptString {
+	return s.Resolution
+}
+
+// GetResolvedBy returns the value of ResolvedBy.
+func (s *FacilityReport) GetResolvedBy() OptString {
+	return s.ResolvedBy
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *FacilityReport) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetResolvedAt returns the value of ResolvedAt.
+func (s *FacilityReport) GetResolvedAt() OptDateTime {
+	return s.ResolvedAt
+}
+
+// SetID sets the value of ID.
+func (s *FacilityReport) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetFacilityId sets the value of FacilityId.
+func (s *FacilityReport) SetFacilityId(val uuid.UUID) {
+	s.FacilityId = val
+}
+
+// SetFacilityName sets the value of FacilityName.
+func (s *FacilityReport) SetFacilityName(val string) {
+	s.FacilityName = val
+}
+
+// SetMessage sets the value of Message.
+func (s *FacilityReport) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetAuthor sets the value of Author.
+func (s *FacilityReport) SetAuthor(val OptString) {
+	s.Author = val
+}
+
+// SetStatus sets the value of Status.
+func (s *FacilityReport) SetStatus(val FacilityReportStatus) {
+	s.Status = val
+}
+
+// SetResolution sets the value of Resolution.
+func (s *FacilityReport) SetResolution(val OptString) {
+	s.Resolution = val
+}
+
+// SetResolvedBy sets the value of ResolvedBy.
+func (s *FacilityReport) SetResolvedBy(val OptString) {
+	s.ResolvedBy = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *FacilityReport) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetResolvedAt sets the value of ResolvedAt.
+func (s *FacilityReport) SetResolvedAt(val OptDateTime) {
+	s.ResolvedAt = val
+}
+
+type FacilityReportStatus string
+
+const (
+	FacilityReportStatusOpen     FacilityReportStatus = "open"
+	FacilityReportStatusResolved FacilityReportStatus = "resolved"
+	FacilityReportStatusRejected FacilityReportStatus = "rejected"
+)
+
+// AllValues returns all FacilityReportStatus values.
+func (FacilityReportStatus) AllValues() []FacilityReportStatus {
+	return []FacilityReportStatus{
+		FacilityReportStatusOpen,
+		FacilityReportStatusResolved,
+		FacilityReportStatusRejected,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FacilityReportStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case FacilityReportStatusOpen:
+		return []byte(s), nil
+	case FacilityReportStatusResolved:
+		return []byte(s), nil
+	case FacilityReportStatusRejected:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FacilityReportStatus) UnmarshalText(data []byte) error {
+	switch FacilityReportStatus(data) {
+	case FacilityReportStatusOpen:
+		*s = FacilityReportStatusOpen
+		return nil
+	case FacilityReportStatusResolved:
+		*s = FacilityReportStatusResolved
+		return nil
+	case FacilityReportStatusRejected:
+		*s = FacilityReportStatusRejected
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type FacilityRingItem string
@@ -3635,6 +4129,54 @@ func (s *LegalDocumentStatus) UnmarshalText(data []byte) error {
 		return nil
 	case LegalDocumentStatusInfo:
 		*s = LegalDocumentStatusInfo
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ListFacilityReportsStatus string
+
+const (
+	ListFacilityReportsStatusOpen     ListFacilityReportsStatus = "open"
+	ListFacilityReportsStatusResolved ListFacilityReportsStatus = "resolved"
+	ListFacilityReportsStatusRejected ListFacilityReportsStatus = "rejected"
+)
+
+// AllValues returns all ListFacilityReportsStatus values.
+func (ListFacilityReportsStatus) AllValues() []ListFacilityReportsStatus {
+	return []ListFacilityReportsStatus{
+		ListFacilityReportsStatusOpen,
+		ListFacilityReportsStatusResolved,
+		ListFacilityReportsStatusRejected,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ListFacilityReportsStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ListFacilityReportsStatusOpen:
+		return []byte(s), nil
+	case ListFacilityReportsStatusResolved:
+		return []byte(s), nil
+	case ListFacilityReportsStatusRejected:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ListFacilityReportsStatus) UnmarshalText(data []byte) error {
+	switch ListFacilityReportsStatus(data) {
+	case ListFacilityReportsStatusOpen:
+		*s = ListFacilityReportsStatusOpen
+		return nil
+	case ListFacilityReportsStatusResolved:
+		*s = ListFacilityReportsStatusResolved
+		return nil
+	case ListFacilityReportsStatusRejected:
+		*s = ListFacilityReportsStatusRejected
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -5537,6 +6079,52 @@ func (o OptLayerPropertyLabels) Or(d LayerPropertyLabels) LayerPropertyLabels {
 	return d
 }
 
+// NewOptListFacilityReportsStatus returns new OptListFacilityReportsStatus with value set to v.
+func NewOptListFacilityReportsStatus(v ListFacilityReportsStatus) OptListFacilityReportsStatus {
+	return OptListFacilityReportsStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptListFacilityReportsStatus is optional ListFacilityReportsStatus.
+type OptListFacilityReportsStatus struct {
+	Value ListFacilityReportsStatus
+	Set   bool
+}
+
+// IsSet returns true if OptListFacilityReportsStatus was set.
+func (o OptListFacilityReportsStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptListFacilityReportsStatus) Reset() {
+	var v ListFacilityReportsStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptListFacilityReportsStatus) SetTo(v ListFacilityReportsStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptListFacilityReportsStatus) Get() (v ListFacilityReportsStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptListFacilityReportsStatus) Or(d ListFacilityReportsStatus) ListFacilityReportsStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptRouteLine returns new OptRouteLine with value set to v.
 func NewOptRouteLine(v RouteLine) OptRouteLine {
 	return OptRouteLine{
@@ -6546,8 +7134,91 @@ func (s *RegulationOverview) SetCargoFrame(val CargoFrame) {
 	s.CargoFrame = val
 }
 
+type ReportFacilityIssueReq struct {
+	Message string `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *ReportFacilityIssueReq) GetMessage() string {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *ReportFacilityIssueReq) SetMessage(val string) {
+	s.Message = val
+}
+
 // ResetUserTotpNoContent is response for ResetUserTotp operation.
 type ResetUserTotpNoContent struct{}
+
+type ResolveFacilityReportReq struct {
+	Status     ResolveFacilityReportReqStatus `json:"status"`
+	Resolution OptString                      `json:"resolution"`
+}
+
+// GetStatus returns the value of Status.
+func (s *ResolveFacilityReportReq) GetStatus() ResolveFacilityReportReqStatus {
+	return s.Status
+}
+
+// GetResolution returns the value of Resolution.
+func (s *ResolveFacilityReportReq) GetResolution() OptString {
+	return s.Resolution
+}
+
+// SetStatus sets the value of Status.
+func (s *ResolveFacilityReportReq) SetStatus(val ResolveFacilityReportReqStatus) {
+	s.Status = val
+}
+
+// SetResolution sets the value of Resolution.
+func (s *ResolveFacilityReportReq) SetResolution(val OptString) {
+	s.Resolution = val
+}
+
+type ResolveFacilityReportReqStatus string
+
+const (
+	ResolveFacilityReportReqStatusResolved ResolveFacilityReportReqStatus = "resolved"
+	ResolveFacilityReportReqStatusRejected ResolveFacilityReportReqStatus = "rejected"
+)
+
+// AllValues returns all ResolveFacilityReportReqStatus values.
+func (ResolveFacilityReportReqStatus) AllValues() []ResolveFacilityReportReqStatus {
+	return []ResolveFacilityReportReqStatus{
+		ResolveFacilityReportReqStatusResolved,
+		ResolveFacilityReportReqStatusRejected,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ResolveFacilityReportReqStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ResolveFacilityReportReqStatusResolved:
+		return []byte(s), nil
+	case ResolveFacilityReportReqStatusRejected:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ResolveFacilityReportReqStatus) UnmarshalText(data []byte) error {
+	switch ResolveFacilityReportReqStatus(data) {
+	case ResolveFacilityReportReqStatusResolved:
+		*s = ResolveFacilityReportReqStatusResolved
+		return nil
+	case ResolveFacilityReportReqStatusRejected:
+		*s = ResolveFacilityReportReqStatusRejected
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// RevokeCurationNoContent is response for RevokeCuration operation.
+type RevokeCurationNoContent struct{}
 
 // RevokeTokenNoContent is response for RevokeToken operation.
 type RevokeTokenNoContent struct{}

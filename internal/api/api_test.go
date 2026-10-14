@@ -456,3 +456,56 @@ func TestAPIExports(t *testing.T) {
 		t.Errorf("audit: %d, %v", audited, err)
 	}
 }
+
+func TestAPICuration(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	osmtest.LoadDistrict(t, f.pool)
+	analyst := f.token(t, "cur-an@example.com", identity.RoleAnalyst)
+	steward := f.token(t, "cur-st@example.com", identity.RoleDataSteward)
+	var id string
+	if err := f.pool.QueryRow(t.Context(), `SELECT id::text FROM infra.facility WHERE status = 'active' ORDER BY id LIMIT 1`).Scan(&id); err != nil {
+		t.Fatal(err)
+	}
+	base := "/api/v1/facilities/" + id
+
+	// Аналитик сообщает о неточности, но не правит.
+	resp, raw := f.do(t, http.MethodPost, base+"/reports", analyst, `{"message":"Название устарело"}`)
+	var rep struct{ ID string }
+	if resp.StatusCode != http.StatusCreated || json.Unmarshal(raw, &rep) != nil {
+		t.Fatalf("report: %d %s", resp.StatusCode, raw)
+	}
+	if resp, _ := f.do(t, http.MethodPost, base+"/curations", analyst, `{"field":"name","value":"x","reason":"y"}`); resp.StatusCode != http.StatusForbidden {
+		t.Errorf("analyst curate: %d", resp.StatusCode)
+	}
+
+	// Редактор: очередь, правка, пометка в карточке, история, закрытие сообщения.
+	if resp, raw := f.do(t, http.MethodGet, "/api/v1/facility-reports", steward, ""); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(raw), rep.ID) {
+		t.Errorf("queue: %d %s", resp.StatusCode, raw)
+	}
+	if resp, raw := f.do(t, http.MethodPost, base+"/curations", steward, `{"field":"type_code","value":"factory","reason":"ошибка"}`); resp.StatusCode != http.StatusUnprocessableEntity ||
+		!strings.Contains(string(raw), "неизвестен") {
+		t.Errorf("bad type: %d %s", resp.StatusCode, raw)
+	}
+	resp, raw = f.do(t, http.MethodPost, base+"/curations", steward, `{"field":"name","value":"Склад ООО «Север»","reason":"по сообщению аналитика"}`)
+	if resp.StatusCode != http.StatusCreated {
+		t.Fatalf("curate: %d %s", resp.StatusCode, raw)
+	}
+	if resp, raw := f.do(t, http.MethodGet, base, analyst, ""); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(raw), `"curated":["name"]`) || !strings.Contains(string(raw), "Склад ООО «Север»") {
+		t.Errorf("card: %d %s", resp.StatusCode, raw)
+	}
+	if resp, raw := f.do(t, http.MethodGet, base+"/history", analyst, ""); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(raw), "по сообщению аналитика") || !strings.Contains(string(raw), "Название устарело") {
+		t.Errorf("history: %d %s", resp.StatusCode, raw)
+	}
+	if resp, raw := f.do(t, http.MethodPatch, "/api/v1/facility-reports/"+rep.ID, steward, `{"status":"resolved","resolution":"название исправлено"}`); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(raw), `"status":"resolved"`) {
+		t.Errorf("resolve: %d %s", resp.StatusCode, raw)
+	}
+	var audited int
+	if err := f.pool.QueryRow(t.Context(), `SELECT count(*) FROM core.audit_log WHERE action IN ('facility.curated', 'facility.report_resolved')`).Scan(&audited); err != nil || audited != 2 {
+		t.Errorf("audit: %d, %v", audited, err)
+	}
+}

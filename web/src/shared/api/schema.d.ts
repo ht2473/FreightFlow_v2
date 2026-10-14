@@ -397,6 +397,113 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/facilities/{facilityId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** История объекта — правки редактора и сообщения о неточностях */
+        get: operations["facilityHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facilities/{facilityId}/curations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Правка поля объекта поверх источников
+         * @description Действует последняя неотменённая правка поля; правки сохраняются при перезагрузке
+         *     источников. Поля: name, type_code, status (active — вернуть, excluded — исключить),
+         *     address.
+         */
+        post: operations["curateFacility"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facilities/{facilityId}/curations/{curationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Отменить правку (без действующих правок поля — значение источника) */
+        delete: operations["revokeCuration"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facilities/{facilityId}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Сообщить о неточности записи */
+        post: operations["reportFacilityIssue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facility-reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Очередь сообщений о неточностях */
+        get: operations["listFacilityReports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facility-reports/{reportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Закрыть сообщение о неточности */
+        patch: operations["resolveFacilityReport"];
+        trace?: never;
+    };
     "/facilities/{facilityId}": {
         parameters: {
             query?: never;
@@ -1163,6 +1270,47 @@ export interface components {
             ecoClass?: number;
             hazmat?: boolean;
         };
+        CurationRequest: {
+            /** @enum {string} */
+            field: "name" | "type_code" | "status" | "address";
+            value: string;
+            reason: string;
+        };
+        Curation: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            field: "name" | "type_code" | "status" | "address";
+            value?: string;
+            reason: string;
+            author?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            revokedAt?: string;
+            revokedBy?: string;
+        };
+        FacilityReport: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            facilityId: string;
+            facilityName: string;
+            message: string;
+            author?: string;
+            /** @enum {string} */
+            status: "open" | "resolved" | "rejected";
+            resolution?: string;
+            resolvedBy?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            resolvedAt?: string;
+        };
+        FacilityHistory: {
+            curations: components["schemas"]["Curation"][];
+            reports: components["schemas"]["FacilityReport"][];
+        };
         /** @description Фильтр реестра (как параметры GET /facilities) */
         FacilityFilter: {
             q?: string;
@@ -1327,6 +1475,8 @@ export interface components {
             lastSeen: string;
             /** Format: date-time */
             updatedAt: string;
+            /** @description Поля, заданные редактором */
+            curated: ("name" | "type_code" | "status" | "address")[];
             sources: components["schemas"]["FacilitySource"][];
             access: components["schemas"]["FacilityAccess"][];
             restrictions: components["schemas"]["NearbyRestriction"][];
@@ -1570,6 +1720,7 @@ export interface components {
         SourceCode: string;
         UserId: string;
         TokenId: string;
+        FacilityId: string;
         ExportId: string;
         /** @description Подстрока названия или адреса */
         FacilityQ: string;
@@ -2314,6 +2465,161 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FacilityCard"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    facilityHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                facilityId: components["parameters"]["FacilityId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description История */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityHistory"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    curateFacility: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                facilityId: components["parameters"]["FacilityId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CurationRequest"];
+            };
+        };
+        responses: {
+            /** @description Правка */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Curation"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    revokeCuration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                facilityId: components["parameters"]["FacilityId"];
+                curationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Отменена */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    reportFacilityIssue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                facilityId: components["parameters"]["FacilityId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    message: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Сообщение */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityReport"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFacilityReports: {
+        parameters: {
+            query?: {
+                status?: "open" | "resolved" | "rejected";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сообщения (открытые — старые сверху) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityReport"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    resolveFacilityReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    status: "resolved" | "rejected";
+                    resolution?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Сообщение */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityReport"];
                 };
             };
             default: components["responses"]["Problem"];

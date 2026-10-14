@@ -89,6 +89,14 @@ type Handler interface {
 	//
 	// POST /admin/users
 	CreateUser(ctx context.Context, req *CreateUser) (*User, error)
+	// CurateFacility implements curateFacility operation.
+	//
+	// Действует последняя неотменённая правка поля; правки
+	// сохраняются при перезагрузке источников. Поля: name,
+	// type_code, status (active — вернуть, excluded — исключить), address.
+	//
+	// POST /facilities/{facilityId}/curations
+	CurateFacility(ctx context.Context, req *CurationRequest, params CurateFacilityParams) (*Curation, error)
 	// DisableTotp implements disableTotp operation.
 	//
 	// Отключить двухфакторную защиту.
@@ -103,6 +111,13 @@ type Handler interface {
 	//
 	// GET /facilities/facets
 	FacilityFacets(ctx context.Context, params FacilityFacetsParams) (*FacilityFacets, error)
+	// FacilityHistory implements facilityHistory operation.
+	//
+	// История объекта — правки редактора и сообщения о
+	// неточностях.
+	//
+	// GET /facilities/{facilityId}/history
+	FacilityHistory(ctx context.Context, params FacilityHistoryParams) (*FacilityHistory, error)
 	// GetExport implements getExport operation.
 	//
 	// Состояние выгрузки.
@@ -217,6 +232,12 @@ type Handler interface {
 	//
 	// GET /facilities
 	ListFacilities(ctx context.Context, params ListFacilitiesParams) (*FacilityPage, error)
+	// ListFacilityReports implements listFacilityReports operation.
+	//
+	// Очередь сообщений о неточностях.
+	//
+	// GET /facility-reports
+	ListFacilityReports(ctx context.Context, params ListFacilityReportsParams) ([]FacilityReport, error)
 	// ListLayers implements listLayers operation.
 	//
 	// Слои в порядке отрисовки снизу вверх с адресами тайлов
@@ -267,12 +288,31 @@ type Handler interface {
 	//
 	// GET /routing/profiles
 	ListVehicleProfiles(ctx context.Context) ([]VehicleProfile, error)
+	// ReportFacilityIssue implements reportFacilityIssue operation.
+	//
+	// Сообщить о неточности записи.
+	//
+	// POST /facilities/{facilityId}/reports
+	ReportFacilityIssue(ctx context.Context, req *ReportFacilityIssueReq, params ReportFacilityIssueParams) (*FacilityReport, error)
 	// ResetUserTotp implements resetUserTotp operation.
 	//
 	// Сбросить двухфакторную защиту пользователя.
 	//
 	// DELETE /admin/users/{userId}/totp
 	ResetUserTotp(ctx context.Context, params ResetUserTotpParams) error
+	// ResolveFacilityReport implements resolveFacilityReport operation.
+	//
+	// Закрыть сообщение о неточности.
+	//
+	// PATCH /facility-reports/{reportId}
+	ResolveFacilityReport(ctx context.Context, req *ResolveFacilityReportReq, params ResolveFacilityReportParams) (*FacilityReport, error)
+	// RevokeCuration implements revokeCuration operation.
+	//
+	// Отменить правку (без действующих правок поля —
+	// значение источника).
+	//
+	// DELETE /facilities/{facilityId}/curations/{curationId}
+	RevokeCuration(ctx context.Context, params RevokeCurationParams) error
 	// RevokeToken implements revokeToken operation.
 	//
 	// Отозвать токен.

@@ -100,6 +100,71 @@ func decodeCompareFacilitiesParams(args [0]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
+// CurateFacilityParams is parameters of curateFacility operation.
+type CurateFacilityParams struct {
+	FacilityId uuid.UUID
+}
+
+func unpackCurateFacilityParams(packed middleware.Parameters) (params CurateFacilityParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "facilityId",
+			In:   "path",
+		}
+		params.FacilityId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeCurateFacilityParams(args [1]string, argsEscaped bool, r *http.Request) (params CurateFacilityParams, _ error) {
+	// Decode path: facilityId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "facilityId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.FacilityId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "facilityId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // FacilityFacetsParams is parameters of facilityFacets operation.
 type FacilityFacetsParams struct {
 	// Подстрока названия или адреса.
@@ -1169,6 +1234,71 @@ func decodeFacilityFacetsParams(args [0]string, argsEscaped bool, r *http.Reques
 		return params, &ogenerrors.DecodeParamError{
 			Name: "hasPermit",
 			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// FacilityHistoryParams is parameters of facilityHistory operation.
+type FacilityHistoryParams struct {
+	FacilityId uuid.UUID
+}
+
+func unpackFacilityHistoryParams(packed middleware.Parameters) (params FacilityHistoryParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "facilityId",
+			In:   "path",
+		}
+		params.FacilityId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeFacilityHistoryParams(args [1]string, argsEscaped bool, r *http.Request) (params FacilityHistoryParams, _ error) {
+	// Decode path: facilityId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "facilityId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.FacilityId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "facilityId",
+			In:   "path",
 			Err:  err,
 		}
 	}
@@ -3186,6 +3316,90 @@ func decodeListFacilitiesParams(args [0]string, argsEscaped bool, r *http.Reques
 	return params, nil
 }
 
+// ListFacilityReportsParams is parameters of listFacilityReports operation.
+type ListFacilityReportsParams struct {
+	Status OptListFacilityReportsStatus `json:",omitempty,omitzero"`
+}
+
+func unpackListFacilityReportsParams(packed middleware.Parameters) (params ListFacilityReportsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "status",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Status = v.(OptListFacilityReportsStatus)
+		}
+	}
+	return params
+}
+
+func decodeListFacilityReportsParams(args [0]string, argsEscaped bool, r *http.Request) (params ListFacilityReportsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Set default value for query: status.
+	{
+		val := ListFacilityReportsStatus("open")
+		params.Status.SetTo(val)
+	}
+	// Decode query: status.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "status",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotStatusVal ListFacilityReportsStatus
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotStatusVal = ListFacilityReportsStatus(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Status.SetTo(paramsDotStatusVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Status.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "status",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ListRunsParams is parameters of listRuns operation.
 type ListRunsParams struct {
 	Code string
@@ -3406,6 +3620,71 @@ func decodeListRunsParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 	return params, nil
 }
 
+// ReportFacilityIssueParams is parameters of reportFacilityIssue operation.
+type ReportFacilityIssueParams struct {
+	FacilityId uuid.UUID
+}
+
+func unpackReportFacilityIssueParams(packed middleware.Parameters) (params ReportFacilityIssueParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "facilityId",
+			In:   "path",
+		}
+		params.FacilityId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeReportFacilityIssueParams(args [1]string, argsEscaped bool, r *http.Request) (params ReportFacilityIssueParams, _ error) {
+	// Decode path: facilityId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "facilityId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.FacilityId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "facilityId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ResetUserTotpParams is parameters of resetUserTotp operation.
 type ResetUserTotpParams struct {
 	UserId uuid.UUID
@@ -3464,6 +3743,189 @@ func decodeResetUserTotpParams(args [1]string, argsEscaped bool, r *http.Request
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "userId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ResolveFacilityReportParams is parameters of resolveFacilityReport operation.
+type ResolveFacilityReportParams struct {
+	ReportId uuid.UUID
+}
+
+func unpackResolveFacilityReportParams(packed middleware.Parameters) (params ResolveFacilityReportParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "reportId",
+			In:   "path",
+		}
+		params.ReportId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeResolveFacilityReportParams(args [1]string, argsEscaped bool, r *http.Request) (params ResolveFacilityReportParams, _ error) {
+	// Decode path: reportId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "reportId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ReportId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "reportId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// RevokeCurationParams is parameters of revokeCuration operation.
+type RevokeCurationParams struct {
+	FacilityId uuid.UUID
+	CurationId uuid.UUID
+}
+
+func unpackRevokeCurationParams(packed middleware.Parameters) (params RevokeCurationParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "facilityId",
+			In:   "path",
+		}
+		params.FacilityId = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "curationId",
+			In:   "path",
+		}
+		params.CurationId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeRevokeCurationParams(args [2]string, argsEscaped bool, r *http.Request) (params RevokeCurationParams, _ error) {
+	// Decode path: facilityId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "facilityId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.FacilityId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "facilityId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: curationId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "curationId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.CurationId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "curationId",
 			In:   "path",
 			Err:  err,
 		}

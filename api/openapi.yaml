@@ -575,6 +575,138 @@ paths:
                 items: { $ref: "#/components/schemas/FacilityCard" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /facilities/{facilityId}/history:
+    get:
+      tags: [facilities]
+      operationId: facilityHistory
+      summary: История объекта — правки редактора и сообщения о неточностях
+      x-permission: map.view
+      parameters:
+        - $ref: "#/components/parameters/FacilityId"
+      responses:
+        "200":
+          description: История
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FacilityHistory" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /facilities/{facilityId}/curations:
+    post:
+      tags: [facilities]
+      operationId: curateFacility
+      summary: Правка поля объекта поверх источников
+      description: |
+        Действует последняя неотменённая правка поля; правки сохраняются при перезагрузке
+        источников. Поля: name, type_code, status (active — вернуть, excluded — исключить),
+        address.
+      x-permission: registry.curate
+      parameters:
+        - $ref: "#/components/parameters/FacilityId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CurationRequest" }
+      responses:
+        "201":
+          description: Правка
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Curation" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /facilities/{facilityId}/curations/{curationId}:
+    delete:
+      tags: [facilities]
+      operationId: revokeCuration
+      summary: Отменить правку (без действующих правок поля — значение источника)
+      x-permission: registry.curate
+      parameters:
+        - $ref: "#/components/parameters/FacilityId"
+        - name: curationId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: Отменена
+        default: { $ref: "#/components/responses/Problem" }
+
+  /facilities/{facilityId}/reports:
+    post:
+      tags: [facilities]
+      operationId: reportFacilityIssue
+      summary: Сообщить о неточности записи
+      x-permission: map.view
+      parameters:
+        - $ref: "#/components/parameters/FacilityId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string, minLength: 1, maxLength: 2000 }
+      responses:
+        "201":
+          description: Сообщение
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FacilityReport" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /facility-reports:
+    get:
+      tags: [facilities]
+      operationId: listFacilityReports
+      summary: Очередь сообщений о неточностях
+      x-permission: registry.curate
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, resolved, rejected], default: open }
+      responses:
+        "200":
+          description: Сообщения (открытые — старые сверху)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/FacilityReport" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /facility-reports/{reportId}:
+    patch:
+      tags: [facilities]
+      operationId: resolveFacilityReport
+      summary: Закрыть сообщение о неточности
+      x-permission: registry.curate
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [resolved, rejected] }
+                resolution: { type: string, maxLength: 2000 }
+      responses:
+        "200":
+          description: Сообщение
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FacilityReport" }
+        default: { $ref: "#/components/responses/Problem" }
+
   /facilities/{facilityId}:
     get:
       tags: [facilities]
@@ -910,6 +1042,11 @@ components:
       required: true
       schema: { type: string, format: uuid }
 
+    FacilityId:
+      name: facilityId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
     ExportId:
       name: exportId
       in: path
@@ -1670,6 +1807,49 @@ components:
         ecoClass: { type: integer, minimum: 0, maximum: 6 }
         hazmat: { type: boolean }
 
+    CurationRequest:
+      type: object
+      required: [field, value, reason]
+      properties:
+        field: { type: string, enum: [name, type_code, status, address] }
+        value: { type: string, minLength: 1, maxLength: 500 }
+        reason: { type: string, minLength: 1, maxLength: 1000 }
+
+    Curation:
+      type: object
+      required: [id, field, reason, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        field: { type: string, enum: [name, type_code, status, address] }
+        value: { type: string }
+        reason: { type: string }
+        author: { type: string }
+        createdAt: { type: string, format: date-time }
+        revokedAt: { type: string, format: date-time }
+        revokedBy: { type: string }
+
+    FacilityReport:
+      type: object
+      required: [id, facilityId, facilityName, message, status, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        facilityId: { type: string, format: uuid }
+        facilityName: { type: string }
+        message: { type: string }
+        author: { type: string }
+        status: { type: string, enum: [open, resolved, rejected] }
+        resolution: { type: string }
+        resolvedBy: { type: string }
+        createdAt: { type: string, format: date-time }
+        resolvedAt: { type: string, format: date-time }
+
+    FacilityHistory:
+      type: object
+      required: [curations, reports]
+      properties:
+        curations: { type: array, items: { $ref: "#/components/schemas/Curation" } }
+        reports: { type: array, items: { $ref: "#/components/schemas/FacilityReport" } }
+
     FacilityFilter:
       type: object
       description: "Фильтр реестра (как параметры GET /facilities)"
@@ -1838,6 +2018,7 @@ components:
         - confidenceReasons
         - lastSeen
         - updatedAt
+        - curated
         - sources
         - access
         - restrictions
@@ -1863,6 +2044,10 @@ components:
         confidenceReasons: { type: array, items: { $ref: "#/components/schemas/ConfidenceReason" } }
         lastSeen: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+        curated:
+          type: array
+          description: "Поля, заданные редактором"
+          items: { type: string, enum: [name, type_code, status, address] }
         sources: { type: array, items: { $ref: "#/components/schemas/FacilitySource" } }
         access: { type: array, items: { $ref: "#/components/schemas/FacilityAccess" } }
         restrictions: { type: array, items: { $ref: "#/components/schemas/NearbyRestriction" } }
