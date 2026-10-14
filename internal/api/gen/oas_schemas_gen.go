@@ -2120,6 +2120,141 @@ func (s *MapLayerGeometry) UnmarshalText(data []byte) error {
 	}
 }
 
+// Пустая ячейка — пути нет.
+// Ref: #/components/schemas/MatrixCell
+type MatrixCell struct {
+	TimeS    OptFloat64 `json:"timeS"`
+	LengthKm OptFloat64 `json:"lengthKm"`
+}
+
+// GetTimeS returns the value of TimeS.
+func (s *MatrixCell) GetTimeS() OptFloat64 {
+	return s.TimeS
+}
+
+// GetLengthKm returns the value of LengthKm.
+func (s *MatrixCell) GetLengthKm() OptFloat64 {
+	return s.LengthKm
+}
+
+// SetTimeS sets the value of TimeS.
+func (s *MatrixCell) SetTimeS(val OptFloat64) {
+	s.TimeS = val
+}
+
+// SetLengthKm sets the value of LengthKm.
+func (s *MatrixCell) SetLengthKm(val OptFloat64) {
+	s.LengthKm = val
+}
+
+// Ref: #/components/schemas/MatrixRequest
+type MatrixRequest struct {
+	Sources []LngLat      `json:"sources"`
+	Targets []LngLat      `json:"targets"`
+	Vehicle VehicleParams `json:"vehicle"`
+	Passes  []VehiclePass `json:"passes"`
+	Depart  OptDateTime   `json:"depart"`
+}
+
+// GetSources returns the value of Sources.
+func (s *MatrixRequest) GetSources() []LngLat {
+	return s.Sources
+}
+
+// GetTargets returns the value of Targets.
+func (s *MatrixRequest) GetTargets() []LngLat {
+	return s.Targets
+}
+
+// GetVehicle returns the value of Vehicle.
+func (s *MatrixRequest) GetVehicle() VehicleParams {
+	return s.Vehicle
+}
+
+// GetPasses returns the value of Passes.
+func (s *MatrixRequest) GetPasses() []VehiclePass {
+	return s.Passes
+}
+
+// GetDepart returns the value of Depart.
+func (s *MatrixRequest) GetDepart() OptDateTime {
+	return s.Depart
+}
+
+// SetSources sets the value of Sources.
+func (s *MatrixRequest) SetSources(val []LngLat) {
+	s.Sources = val
+}
+
+// SetTargets sets the value of Targets.
+func (s *MatrixRequest) SetTargets(val []LngLat) {
+	s.Targets = val
+}
+
+// SetVehicle sets the value of Vehicle.
+func (s *MatrixRequest) SetVehicle(val VehicleParams) {
+	s.Vehicle = val
+}
+
+// SetPasses sets the value of Passes.
+func (s *MatrixRequest) SetPasses(val []VehiclePass) {
+	s.Passes = val
+}
+
+// SetDepart sets the value of Depart.
+func (s *MatrixRequest) SetDepart(val OptDateTime) {
+	s.Depart = val
+}
+
+// Ref: #/components/schemas/MatrixResult
+type MatrixResult struct {
+	// Строка — источник, столбец — цель.
+	Rows           [][]MatrixCell `json:"rows"`
+	Zones          []ZoneVerdict  `json:"zones"`
+	BlockedSources []BlockedPoint `json:"blockedSources"`
+	BlockedTargets []BlockedPoint `json:"blockedTargets"`
+}
+
+// GetRows returns the value of Rows.
+func (s *MatrixResult) GetRows() [][]MatrixCell {
+	return s.Rows
+}
+
+// GetZones returns the value of Zones.
+func (s *MatrixResult) GetZones() []ZoneVerdict {
+	return s.Zones
+}
+
+// GetBlockedSources returns the value of BlockedSources.
+func (s *MatrixResult) GetBlockedSources() []BlockedPoint {
+	return s.BlockedSources
+}
+
+// GetBlockedTargets returns the value of BlockedTargets.
+func (s *MatrixResult) GetBlockedTargets() []BlockedPoint {
+	return s.BlockedTargets
+}
+
+// SetRows sets the value of Rows.
+func (s *MatrixResult) SetRows(val [][]MatrixCell) {
+	s.Rows = val
+}
+
+// SetZones sets the value of Zones.
+func (s *MatrixResult) SetZones(val []ZoneVerdict) {
+	s.Zones = val
+}
+
+// SetBlockedSources sets the value of BlockedSources.
+func (s *MatrixResult) SetBlockedSources(val []BlockedPoint) {
+	s.BlockedSources = val
+}
+
+// SetBlockedTargets sets the value of BlockedTargets.
+func (s *MatrixResult) SetBlockedTargets(val []BlockedPoint) {
+	s.BlockedTargets = val
+}
+
 // Ref: #/components/schemas/Me
 type Me struct {
 	ID          uuid.UUID `json:"id"`

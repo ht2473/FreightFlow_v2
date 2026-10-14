@@ -38,6 +38,7 @@ func findAuthorization(h http.Header, prefix string) (string, bool) {
 var operationRolesBearerAuth = map[string][]string{
 	BeginTotpSetupOperation:      []string{},
 	BuildIsochroneOperation:      []string{},
+	BuildMatrixOperation:         []string{},
 	BuildRouteOperation:          []string{},
 	ChangePasswordOperation:      []string{},
 	ConfirmTotpOperation:         []string{},
@@ -98,6 +99,7 @@ func GetRolesForBearerAuth(operation string) []string {
 var operationRolesCookieAuth = map[string][]string{
 	BeginTotpSetupOperation:      []string{},
 	BuildIsochroneOperation:      []string{},
+	BuildMatrixOperation:         []string{},
 	BuildRouteOperation:          []string{},
 	ChangePasswordOperation:      []string{},
 	ConfirmTotpOperation:         []string{},

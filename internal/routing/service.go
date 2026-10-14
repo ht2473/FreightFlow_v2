@@ -320,3 +320,94 @@ func (s *Service) Isochrone(ctx context.Context, in IsochroneInput) (IsochroneOu
 	})
 	return out, err
 }
+
+// MaxMatrixPairs — предел пар «источник × цель» в матрице (предел службы).
+const MaxMatrixPairs = 2500
+
+// ErrMatrixTooLarge — пар источников и целей больше MaxMatrixPairs.
+var ErrMatrixTooLarge = errors.New("matrix too large")
+
+// MatrixInput — матрица времени и расстояния грузовика: точки, ТС, пропуска, время отправления.
+type MatrixInput struct {
+	Sources, Targets []Point
+	Profile          Profile
+	Passes           []Pass
+	Depart           time.Time
+}
+
+// MatrixOutput — ячейки «источник × цель» и решения по зонам. Точки в закрытой зоне в расчёт
+// не входят: их ячейки недостижимы, а точки перечислены в BlockedSources и BlockedTargets.
+type MatrixOutput struct {
+	Cells                          [][]Cell
+	Zones                          []ZoneDecision
+	BlockedSources, BlockedTargets []BlockedPoint
+}
+
+// Matrix считает время и расстояние грузовика между точками с исключением закрытых зон.
+func (s *Service) Matrix(ctx context.Context, in MatrixInput) (MatrixOutput, error) {
+	var out MatrixOutput
+	if len(in.Sources)*len(in.Targets) > MaxMatrixPairs {
+		return out, ErrMatrixTooLarge
+	}
+	rules, err := LoadRules(ctx, s.pool)
+	if err != nil {
+		return out, fmt.Errorf("zone rules: %w", err)
+	}
+	depart := in.Depart
+	if depart.IsZero() {
+		depart = time.Now()
+	}
+	out.Zones = Decide(rules, in.Profile.vehicle(), in.Passes, depart)
+	out.Cells = make([][]Cell, len(in.Sources))
+	for i := range out.Cells {
+		out.Cells[i] = make([]Cell, len(in.Targets))
+	}
+	var exclude []Ring
+	if closed := outermostClosed(out.Zones); closed != "" {
+		if out.BlockedSources, err = s.blocked(ctx, in.Sources, out.Zones); err != nil {
+			return out, err
+		}
+		if out.BlockedTargets, err = s.blocked(ctx, in.Targets, out.Zones); err != nil {
+			return out, err
+		}
+		rings, err := ZoneRings(ctx, s.pool, []string{closed})
+		if err != nil {
+			return out, err
+		}
+		exclude = rings[closed]
+	}
+	srcIdx, srcPts := open(in.Sources, out.BlockedSources)
+	dstIdx, dstPts := open(in.Targets, out.BlockedTargets)
+	if len(srcPts) == 0 || len(dstPts) == 0 {
+		return out, nil
+	}
+	m, err := s.vh.Matrix(ctx, MatrixRequest{
+		Sources: srcPts, Targets: dstPts, Costing: "truck", Truck: in.Profile.truck(), Exclude: exclude,
+	})
+	if err != nil {
+		return out, err
+	}
+	for i, row := range m {
+		for j, c := range row {
+			out.Cells[srcIdx[i]][dstIdx[j]] = c
+		}
+	}
+	return out, nil
+}
+
+// open — точки вне закрытых зон и их номера в исходном списке.
+func open(pts []Point, blocked []BlockedPoint) ([]int, []Point) {
+	skip := make(map[int]bool, len(blocked))
+	for _, b := range blocked {
+		skip[b.Index] = true
+	}
+	var idx []int
+	var out []Point
+	for i, p := range pts {
+		if !skip[i] {
+			idx = append(idx, i)
+			out = append(out, p)
+		}
+	}
+	return idx, out
+}

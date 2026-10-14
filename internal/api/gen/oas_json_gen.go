@@ -5334,6 +5334,478 @@ func (s *MapLayerGeometry) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *MatrixCell) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *MatrixCell) encodeFields(e *jx.Encoder) {
+	{
+		if s.TimeS.Set {
+			e.FieldStart("timeS")
+			s.TimeS.Encode(e)
+		}
+	}
+	{
+		if s.LengthKm.Set {
+			e.FieldStart("lengthKm")
+			s.LengthKm.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfMatrixCell = [2]string{
+	0: "timeS",
+	1: "lengthKm",
+}
+
+// Decode decodes MatrixCell from json.
+func (s *MatrixCell) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MatrixCell to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "timeS":
+			if err := func() error {
+				s.TimeS.Reset()
+				if err := s.TimeS.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"timeS\"")
+			}
+		case "lengthKm":
+			if err := func() error {
+				s.LengthKm.Reset()
+				if err := s.LengthKm.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"lengthKm\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MatrixCell")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *MatrixCell) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MatrixCell) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *MatrixRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *MatrixRequest) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("sources")
+		e.ArrStart()
+		for _, elem := range s.Sources {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("targets")
+		e.ArrStart()
+		for _, elem := range s.Targets {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("vehicle")
+		s.Vehicle.Encode(e)
+	}
+	{
+		if s.Passes != nil {
+			e.FieldStart("passes")
+			e.ArrStart()
+			for _, elem := range s.Passes {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
+		if s.Depart.Set {
+			e.FieldStart("depart")
+			s.Depart.Encode(e, json.EncodeDateTime)
+		}
+	}
+}
+
+var jsonFieldsNameOfMatrixRequest = [5]string{
+	0: "sources",
+	1: "targets",
+	2: "vehicle",
+	3: "passes",
+	4: "depart",
+}
+
+// Decode decodes MatrixRequest from json.
+func (s *MatrixRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MatrixRequest to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "sources":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Sources = make([]LngLat, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem LngLat
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Sources = append(s.Sources, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sources\"")
+			}
+		case "targets":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Targets = make([]LngLat, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem LngLat
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Targets = append(s.Targets, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"targets\"")
+			}
+		case "vehicle":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Vehicle.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"vehicle\"")
+			}
+		case "passes":
+			if err := func() error {
+				s.Passes = make([]VehiclePass, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem VehiclePass
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Passes = append(s.Passes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"passes\"")
+			}
+		case "depart":
+			if err := func() error {
+				s.Depart.Reset()
+				if err := s.Depart.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"depart\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MatrixRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfMatrixRequest) {
+					name = jsonFieldsNameOfMatrixRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *MatrixRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MatrixRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *MatrixResult) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *MatrixResult) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("rows")
+		e.ArrStart()
+		for _, elem := range s.Rows {
+			e.ArrStart()
+			for _, elem := range elem {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("zones")
+		e.ArrStart()
+		for _, elem := range s.Zones {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("blockedSources")
+		e.ArrStart()
+		for _, elem := range s.BlockedSources {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("blockedTargets")
+		e.ArrStart()
+		for _, elem := range s.BlockedTargets {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfMatrixResult = [4]string{
+	0: "rows",
+	1: "zones",
+	2: "blockedSources",
+	3: "blockedTargets",
+}
+
+// Decode decodes MatrixResult from json.
+func (s *MatrixResult) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MatrixResult to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "rows":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Rows = make([][]MatrixCell, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem []MatrixCell
+					elem = make([]MatrixCell, 0)
+					if err := d.Arr(func(d *jx.Decoder) error {
+						var elemElem MatrixCell
+						if err := elemElem.Decode(d); err != nil {
+							return err
+						}
+						elem = append(elem, elemElem)
+						return nil
+					}); err != nil {
+						return err
+					}
+					s.Rows = append(s.Rows, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rows\"")
+			}
+		case "zones":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Zones = make([]ZoneVerdict, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ZoneVerdict
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Zones = append(s.Zones, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"zones\"")
+			}
+		case "blockedSources":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				s.BlockedSources = make([]BlockedPoint, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem BlockedPoint
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.BlockedSources = append(s.BlockedSources, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"blockedSources\"")
+			}
+		case "blockedTargets":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.BlockedTargets = make([]BlockedPoint, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem BlockedPoint
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.BlockedTargets = append(s.BlockedTargets, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"blockedTargets\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MatrixResult")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfMatrixResult) {
+					name = jsonFieldsNameOfMatrixResult[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *MatrixResult) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MatrixResult) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *Me) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)

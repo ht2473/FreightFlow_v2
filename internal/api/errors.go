@@ -69,6 +69,9 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 	case errors.Is(err, routing.ErrNoRoute):
 		return problem.New(http.StatusUnprocessableEntity, "no_route", "Маршрут для этого ТС не найден").
 			WithDetail("Между точками нет пути с учётом ограничений и закрытых зон")
+	case errors.Is(err, routing.ErrMatrixTooLarge):
+		return problem.New(http.StatusUnprocessableEntity, "matrix_too_large", "Слишком большая матрица").
+			WithDetail("Источников × целей — не более 2 500")
 	case errors.Is(err, routing.ErrNoAnalysis):
 		return problem.New(http.StatusNotFound, "no_analysis", "Сетевой анализ ещё не выполнен").
 			WithDetail("Граф анализа строится после загрузки дорожной сети")

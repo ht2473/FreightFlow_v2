@@ -23,6 +23,15 @@ type Handler interface {
 	//
 	// POST /routing/isochrone
 	BuildIsochrone(ctx context.Context, req *IsochroneRequest) (*IsochroneResult, error)
+	// BuildMatrix implements buildMatrix operation.
+	//
+	// Время и расстояние от каждого источника до каждой цели
+	// (не более 2 500 пар) с исключением зон, закрытых для ТС.
+	// Точки в закрытой зоне в расчёт не входят: их ячейки
+	// пусты, точки перечислены в `blockedSources` и `blockedTargets`.
+	//
+	// POST /routing/matrix
+	BuildMatrix(ctx context.Context, req *MatrixRequest) (*MatrixResult, error)
 	// BuildRoute implements buildRoute operation.
 	//
 	// Зоны, закрытые для ТС (масса, экологический класс,

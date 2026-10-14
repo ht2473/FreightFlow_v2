@@ -480,6 +480,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/routing/matrix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Матрица времени и расстояния грузовика
+         * @description Время и расстояние от каждого источника до каждой цели (не более 2 500 пар) с исключением
+         *     зон, закрытых для ТС. Точки в закрытой зоне в расчёт не входят: их ячейки пусты, точки
+         *     перечислены в `blockedSources` и `blockedTargets`.
+         */
+        post: operations["buildMatrix"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/routing/status": {
         parameters: {
             query?: never;
@@ -1153,6 +1175,26 @@ export interface components {
             noDetourCount: number;
             criticality: components["schemas"]["CriticalityStats"];
             critical: components["schemas"]["CriticalElement"][];
+        };
+        MatrixRequest: {
+            sources: components["schemas"]["LngLat"][];
+            targets: components["schemas"]["LngLat"][];
+            vehicle: components["schemas"]["VehicleParams"];
+            passes?: components["schemas"]["VehiclePass"][];
+            /** Format: date-time */
+            depart?: string;
+        };
+        /** @description Пустая ячейка — пути нет */
+        MatrixCell: {
+            timeS?: number;
+            lengthKm?: number;
+        };
+        MatrixResult: {
+            /** @description Строка — источник, столбец — цель */
+            rows: components["schemas"]["MatrixCell"][][];
+            zones: components["schemas"]["ZoneVerdict"][];
+            blockedSources: components["schemas"]["BlockedPoint"][];
+            blockedTargets: components["schemas"]["BlockedPoint"][];
         };
         IsochroneRequest: {
             origin: components["schemas"]["LngLat"];
@@ -1955,6 +1997,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IsochroneResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    buildMatrix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MatrixRequest"];
+            };
+        };
+        responses: {
+            /** @description Матрица и решения по зонам */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatrixResult"];
                 };
             };
             default: components["responses"]["Problem"];

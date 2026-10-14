@@ -240,3 +240,40 @@ func (s *Server) GetNetworkAnalysis(ctx context.Context, params gen.GetNetworkAn
 	}
 	return out, nil
 }
+
+func (s *Server) BuildMatrix(ctx context.Context, req *gen.MatrixRequest) (*gen.MatrixResult, error) {
+	points := func(in []gen.LngLat) []routing.Point {
+		out := make([]routing.Point, len(in))
+		for i, p := range in {
+			out[i] = routing.Point{Lon: p.Lon, Lat: p.Lat}
+		}
+		return out
+	}
+	res, err := s.routing.Matrix(ctx, routing.MatrixInput{
+		Sources: points(req.Sources), Targets: points(req.Targets), Profile: vehicleProfile(req.Vehicle),
+		Passes: vehiclePasses(req.Passes), Depart: departTime(req.Depart),
+	})
+	if err != nil {
+		return nil, err
+	}
+	blocked := func(in []routing.BlockedPoint) []gen.BlockedPoint {
+		out := make([]gen.BlockedPoint, len(in))
+		for i, b := range in {
+			out[i] = gen.BlockedPoint{Index: b.Index, Zone: gen.BlockedPointZone(b.Zone)}
+		}
+		return out
+	}
+	out := &gen.MatrixResult{
+		Rows: make([][]gen.MatrixCell, len(res.Cells)), Zones: zoneVerdicts(res.Zones),
+		BlockedSources: blocked(res.BlockedSources), BlockedTargets: blocked(res.BlockedTargets),
+	}
+	for i, row := range res.Cells {
+		out.Rows[i] = make([]gen.MatrixCell, len(row))
+		for j, c := range row {
+			if c.Reachable {
+				out.Rows[i][j] = gen.MatrixCell{TimeS: gen.NewOptFloat64(c.Time), LengthKm: gen.NewOptFloat64(c.Length)}
+			}
+		}
+	}
+	return out, nil
+}
