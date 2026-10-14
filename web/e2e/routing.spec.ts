@@ -59,9 +59,13 @@ test("маршрут грузовика: точки на карте, пропу�
   // Изохроны от точки A: контуры по выбранному времени.
   await page.getByRole("tab", { name: "Изохроны" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Изохроны доступности" })).toBeVisible();
+  // Сравнение с фургоном — его контуры пунктиром.
+  await page.getByRole("button", { name: /Сравнить с профилем/ }).click();
+  await page.getByRole("option", { name: "Фургон до 3,5 т" }).click();
   await page.getByRole("button", { name: "Построить изохроны" }).click();
   await expect(page.getByText("до 15 мин")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("до 60 мин")).toBeVisible();
+  await expect(page.getByText("Пунктир — «Фургон до 3,5 т»")).toBeVisible({ timeout: 30_000 });
   await page.waitForTimeout(1000);
   await page.screenshot({ path: info.outputPath("isochrones.png") });
   expect(errors).toEqual([]);

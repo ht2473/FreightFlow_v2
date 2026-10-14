@@ -288,3 +288,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.compareNote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.compareSwatch {
+  width: 18px;
+  flex: none;
+  border-top: 2px dashed var(--cat2);
+}

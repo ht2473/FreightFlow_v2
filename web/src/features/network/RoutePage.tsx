@@ -54,6 +54,20 @@ export function RoutePage() {
   );
 }
 
+/** Параметры ТС типового профиля. */
+function profileVehicle(p: Schemas["VehicleProfile"]): Vehicle {
+  return {
+    grossT: p.grossT,
+    payloadT: p.payloadT,
+    axleLoadT: p.axleLoadT,
+    heightM: p.heightM,
+    widthM: p.widthM,
+    lengthM: p.lengthM,
+    ecoClass: p.ecoClass,
+    hazmat: p.hazmat,
+  };
+}
+
 /** Значение поля ввода по-русски («3,5») в число. */
 function parseNum(v: string): number | undefined {
   const n = Number(v.replace(",", ".").trim());
@@ -77,6 +91,10 @@ function RouteWorkspace() {
   const [mode, setMode] = useState<Mode>("route");
   const [minutes, setMinutes] = useState<Set<number>>(new Set([15, 30, 60]));
   const [isoResult, setIsoResult] = useState<IsoResult | null>(null);
+  // Сравнение изохрон с другим типовым профилем ТС.
+  const isoCompare = $api.useMutation("post", "/routing/isochrone");
+  const [compareCode, setCompareCode] = useState("none");
+  const [compareResult, setCompareResult] = useState<IsoResult | null>(null);
   const [onlyBlocking, setOnlyBlocking] = useState(true);
 
   const [points, setPoints] = useState<[number, number][]>([]);
@@ -117,6 +135,7 @@ function RouteWorkspace() {
 
   function selectProfile(p: Schemas["VehicleProfile"]) {
     setProfileCode(p.code);
+    setCompareCode((c) => (c === p.code ? "none" : c));
     setFields({
       grossT: String(p.grossT).replace(".", ","),
       payloadT: String(p.payloadT).replace(".", ","),
@@ -162,18 +181,22 @@ function RouteWorkspace() {
       return;
     }
     if (mode === "isochrone") {
-      iso.mutate(
-        {
-          body: {
-            origin: { lon: first[0], lat: first[1] },
-            vehicle,
-            passes: passList(),
-            depart: new Date(depart).toISOString(),
-            minutes: [...minutes].sort((a, b) => a - b),
-          },
-        },
-        { onSuccess: setIsoResult, onError: () => setIsoResult(null) },
-      );
+      const body = (v: Vehicle) => ({
+        origin: { lon: first[0], lat: first[1] },
+        vehicle: v,
+        passes: passList(),
+        depart: new Date(depart).toISOString(),
+        minutes: [...minutes].sort((a, b) => a - b),
+      });
+      iso.mutate({ body: body(vehicle) }, { onSuccess: setIsoResult, onError: () => setIsoResult(null) });
+      const other = profiles.data?.find((x) => x.code === compareCode);
+      setCompareResult(null);
+      if (other) {
+        isoCompare.mutate(
+          { body: body(profileVehicle(other)) },
+          { onSuccess: setCompareResult, onError: () => setCompareResult(null) },
+        );
+      }
       return;
     }
     build.mutate(
@@ -194,8 +217,10 @@ function RouteWorkspace() {
   const reset = () => {
     setResult(null);
     setIsoResult(null);
+    setCompareResult(null);
     build.reset();
     iso.reset();
+    isoCompare.reset();
   };
 
   return (
@@ -390,6 +415,20 @@ function RouteWorkspace() {
                 </Checkbox>
               ))}
             </fieldset>
+            <Select
+              label="Сравнить с профилем"
+              options={[
+                { id: "none", label: "Не сравнивать" },
+                ...(profiles.data ?? [])
+                  .filter((p) => p.code !== profileCode)
+                  .map((p) => ({ id: p.code, label: p.name })),
+              ]}
+              value={compareCode}
+              onChange={(code) => {
+                setCompareCode(code);
+                setCompareResult(null);
+              }}
+            />
           </section>
         )}
 
@@ -412,7 +451,13 @@ function RouteWorkspace() {
           </div>
         )}
         {mode === "route" && result && <Explanation result={result} points={points.length} />}
-        {mode === "isochrone" && isoResult && <IsochroneExplanation result={isoResult} />}
+        {mode === "isochrone" && isoResult && (
+          <IsochroneExplanation
+            result={isoResult}
+            compare={compareResult}
+            compareName={profiles.data?.find((x) => x.code === compareCode)?.name}
+          />
+        )}
       </aside>
       <RouteMap
         theme={theme}
@@ -421,6 +466,7 @@ function RouteWorkspace() {
         points={points}
         result={mode === "route" ? result : null}
         isochrones={mode === "isochrone" ? isoResult : null}
+        compare={mode === "isochrone" ? compareResult : null}
         restrictionFilter={onlyBlocking && vehicle ? passabilityFilter(vehicle) : undefined}
         focus={focus}
         onAdd={addPoint}
@@ -535,7 +581,15 @@ function Explanation({ result, points }: { result: Result; points: number }) {
   );
 }
 
-function IsochroneExplanation({ result }: { result: IsoResult }) {
+function IsochroneExplanation({
+  result,
+  compare,
+  compareName,
+}: {
+  result: IsoResult;
+  compare: IsoResult | null;
+  compareName: string | undefined;
+}) {
   const closed = result.zones.filter((z) => z.forbidden);
   return (
     <section className={s.result} aria-label="Результат">
@@ -561,6 +615,14 @@ function IsochroneExplanation({ result }: { result: IsoResult }) {
           ? `Закрытые зоны исключены: ${closed.map((z) => `«${zoneName[z.zone]}»`).join(", ")}.`
           : "Закрытых зон для этого ТС нет."}
       </p>
+      {compare && compareName && (
+        <p className={s.compareNote}>
+          <span className={s.compareSwatch} aria-hidden /> Пунктир — «{compareName}»
+          {compare.blocked
+            ? `: точка отправления в зоне «${zoneName[compare.blocked.zone]}», закрытой для этого ТС.`
+            : `, те же ${compare.contours.length === 1 ? "время" : "времена"} в пути.`}
+        </p>
+      )}
     </section>
   );
 }
@@ -600,6 +662,7 @@ function RouteMap({
   points,
   result,
   isochrones,
+  compare,
   restrictionFilter,
   focus,
   onAdd,
@@ -610,6 +673,7 @@ function RouteMap({
   points: [number, number][];
   result: Result | null;
   isochrones: IsoResult | null;
+  compare: IsoResult | null;
   restrictionFilter: ExpressionSpecification | undefined;
   focus: [number, number] | null;
   onAdd: (p: [number, number]) => void;
@@ -630,8 +694,8 @@ function RouteMap({
       ? { restrictions: restrictionFilter }
       : {};
     const data = buildDataLayers(catalog, layerStates(catalog, contextLayers, {}, filters), palette);
-    return fullStyle(base, catalog, data, overlay(points, result, isochrones, palette));
-  }, [basemap, theme, palette, catalog, points, result, isochrones, restrictionFilter]);
+    return fullStyle(base, catalog, data, overlay(points, result, isochrones, compare, palette));
+  }, [basemap, theme, palette, catalog, points, result, isochrones, compare, restrictionFilter]);
 
   const latest = useRef(style);
   latest.current = style;
@@ -712,6 +776,12 @@ function RouteMap({
         <div className={s.legend} aria-hidden>
           <span className={s.isoSwatch} style={{ opacity: 0.4 }} /> ближе{" "}
           <span className={s.isoSwatch} style={{ opacity: 0.15 }} /> дальше
+          {compare && compare.contours.length > 0 && (
+            <>
+              {" "}
+              <span className={s.compareSwatch} /> сравнение
+            </>
+          )}
         </div>
       ) : (
         <div className={s.legend} aria-hidden>
@@ -727,8 +797,17 @@ function overlay(
   points: [number, number][],
   result: Result | null,
   isochrones: IsoResult | null,
+  compare: IsoResult | null,
   p: ReturnType<typeof readPalette>,
 ) {
+  const compared = {
+    type: "FeatureCollection" as const,
+    features: (compare?.contours ?? []).map((c) => ({
+      type: "Feature" as const,
+      properties: { minutes: c.minutes },
+      geometry: c.geometry as unknown as Geometry,
+    })),
+  };
   const contours = {
     type: "FeatureCollection" as const,
     // Дальние контуры снизу, ближние поверх.
@@ -770,6 +849,7 @@ function overlay(
   };
   const sources: Record<string, GeoJSONSourceSpecification> = {
     "route:iso": { type: "geojson", data: contours },
+    "route:iso-compare": { type: "geojson", data: compared },
     "route:lines": { type: "geojson", data: lines },
     "route:points": { type: "geojson", data: marks },
   };
@@ -785,6 +865,12 @@ function overlay(
       type: "line",
       source: "route:iso",
       paint: { "line-color": color(p, "acc"), "line-width": 1.2, "line-opacity": 0.8 },
+    },
+    {
+      id: "route:iso-compare",
+      type: "line",
+      source: "route:iso-compare",
+      paint: { "line-color": color(p, "cat2"), "line-width": 2, "line-dasharray": [2, 1.5] },
     },
     {
       id: "route:baseline",
