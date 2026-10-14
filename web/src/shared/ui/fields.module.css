@@ -85,6 +85,17 @@
   color: var(--tx2);
 }
 
+.suggestion {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.suggestionNote {
+  color: var(--tx2);
+  font-size: 12px;
+}
+
 .radioGroup {
   border: 0;
 }

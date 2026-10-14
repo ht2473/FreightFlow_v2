@@ -221,6 +221,14 @@ type Handler interface {
 	//
 	// DELETE /me/tokens/{tokenId}
 	RevokeToken(ctx context.Context, params RevokeTokenParams) error
+	// SearchPlaces implements searchPlaces operation.
+	//
+	// Объекты реестра по названию и адреса адресного
+	// реестра Москвы по словам запроса; адреса с номером
+	// дома из запроса — выше.
+	//
+	// GET /routing/places
+	SearchPlaces(ctx context.Context, params SearchPlacesParams) ([]Place, error)
 	// StartRun implements startRun operation.
 	//
 	// Запустить загрузку.

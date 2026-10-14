@@ -42,9 +42,10 @@ test("маршрут грузовика: точки на карте, пропу�
     .click();
   await expect(page.getByRole("checkbox", { name: "дневной пропуск зоны «СК»" })).toBeChecked();
   await page.getByRole("button", { name: "Построить маршрут" }).click();
-  await expect(page.getByText("Маршрут грузовика", { exact: true })).toBeVisible({ timeout: 20_000 });
+  const resultRegion = page.getByRole("region", { name: "Результат" });
+  await expect(resultRegion.getByText("Маршрут грузовика", { exact: true })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Без ограничений (легковой)")).toBeVisible();
-  const zones = page.getByRole("region", { name: "Результат" }).getByRole("listitem");
+  const zones = resultRegion.getByRole("listitem");
   await expect(zones.filter({ hasText: "МКАД" }).getByText("открыта")).toBeVisible();
   await expect(page.getByRole("button", { name: "GeoJSON" })).toBeVisible();
 
@@ -63,5 +64,24 @@ test("маршрут грузовика: точки на карте, пропу�
   await expect(page.getByText("до 60 мин")).toBeVisible();
   await page.waitForTimeout(1000);
   await page.screenshot({ path: info.outputPath("isochrones.png") });
+  expect(errors).toEqual([]);
+});
+
+test("точка маршрута по адресу и объекту", async ({ page }, info) => {
+  test.setTimeout(60_000);
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await login(page, analyst, "/network");
+  await expect(page.getByRole("heading", { level: 1, name: "Маршрут грузовика" })).toBeVisible({ timeout: 30_000 });
+  const field = page.getByRole("combobox", { name: "Добавить точку по адресу или объекту" });
+  await field.fill("Газгольдерная 10");
+  const option = page.getByRole("option").filter({ hasText: "Газгольдерная улица, дом 10" }).first();
+  await expect(option).toBeVisible({ timeout: 15_000 });
+  await page.screenshot({ path: info.outputPath("place-search.png") });
+  await option.click();
+  await expect(page.getByRole("listitem").filter({ hasText: "Газгольдерная улица, дом 10" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Убрать точку A" })).toBeVisible();
+  await expect(field).toHaveValue("");
+  expect(await axeViolations(page)).toEqual([]);
   expect(errors).toEqual([]);
 });

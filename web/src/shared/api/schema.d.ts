@@ -436,6 +436,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/routing/places": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Поиск точки маршрута по адресу или объекту реестра
+         * @description Объекты реестра по названию и адреса адресного реестра Москвы по словам запроса; адреса с
+         *     номером дома из запроса — выше.
+         */
+        get: operations["searchPlaces"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/routing/route": {
         parameters: {
             query?: never;
@@ -1175,6 +1196,15 @@ export interface components {
             noDetourCount: number;
             criticality: components["schemas"]["CriticalityStats"];
             critical: components["schemas"]["CriticalElement"][];
+        };
+        Place: {
+            /** @enum {string} */
+            kind: "facility" | "address";
+            id: string;
+            title: string;
+            /** @description Адрес объекта или вид адресного объекта */
+            subtitle: string;
+            point: components["schemas"]["LngLat"];
         };
         MatrixRequest: {
             sources: components["schemas"]["LngLat"][];
@@ -1947,6 +1977,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VehicleProfile"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    searchPlaces: {
+        parameters: {
+            query: {
+                q: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Найденные места */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Place"][];
                 };
             };
             default: components["responses"]["Problem"];

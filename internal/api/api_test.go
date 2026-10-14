@@ -336,6 +336,10 @@ func TestAPIRouting(t *testing.T) {
 	if resp, body := f.do(t, http.MethodPost, "/api/v1/routing/isochrone", analyst, iso); resp.StatusCode != http.StatusServiceUnavailable {
 		t.Errorf("isochrone: %d %s", resp.StatusCode, body)
 	}
+	if resp, body := f.do(t, http.MethodGet, "/api/v1/routing/places?q=%D0%93%D0%B0%D0%B7%D0%B3%D0%BE%D0%BB%D1%8C%D0%B4%D0%B5%D1%80%D0%BD%D0%B0%D1%8F", analyst, ""); resp.StatusCode != http.StatusOK ||
+		string(body) != "[]\n" && string(body) != "[]" {
+		t.Errorf("places: %d %s", resp.StatusCode, body)
+	}
 	matrix := `{"sources":[{"lon":37.6,"lat":55.7}],"targets":[{"lon":37.7,"lat":55.8}],"vehicle":{"grossT":20,"heightM":4,"widthM":2.55,"lengthM":10}}`
 	if resp, body := f.do(t, http.MethodPost, "/api/v1/routing/matrix", analyst, matrix); resp.StatusCode != http.StatusServiceUnavailable {
 		t.Errorf("matrix: %d %s", resp.StatusCode, body)

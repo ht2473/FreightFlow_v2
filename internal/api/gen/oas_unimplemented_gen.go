@@ -319,6 +319,17 @@ func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenP
 	return ht.ErrNotImplemented
 }
 
+// SearchPlaces implements searchPlaces operation.
+//
+// Объекты реестра по названию и адреса адресного
+// реестра Москвы по словам запроса; адреса с номером
+// дома из запроса — выше.
+//
+// GET /routing/places
+func (UnimplementedHandler) SearchPlaces(ctx context.Context, params SearchPlacesParams) (r []Place, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // StartRun implements startRun operation.
 //
 // Запустить загрузку.

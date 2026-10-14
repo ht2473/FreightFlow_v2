@@ -37,6 +37,7 @@ const (
 	ListVehicleProfilesOperation OperationName = "ListVehicleProfiles"
 	ResetUserTotpOperation       OperationName = "ResetUserTotp"
 	RevokeTokenOperation         OperationName = "RevokeToken"
+	SearchPlacesOperation        OperationName = "SearchPlaces"
 	StartRunOperation            OperationName = "StartRun"
 	UpdateMeOperation            OperationName = "UpdateMe"
 	UpdateSettingsOperation      OperationName = "UpdateSettings"

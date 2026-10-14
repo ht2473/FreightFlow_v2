@@ -96,6 +96,9 @@ var (
 	rn5AllowedHeaders = map[string]string{
 		"POST": "Authorization,Content-Type",
 	}
+	rn44AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
 	rn39AllowedHeaders = map[string]string{
 		"GET": "Authorization",
 	}
@@ -990,29 +993,68 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 
-					case 'p': // Prefix: "profiles"
+					case 'p': // Prefix: "p"
 
-						if l := len("profiles"); len(elem) >= l && elem[0:l] == "profiles" {
+						if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleListVehicleProfilesRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, notAllowedParams{
-									allowedMethods: "GET",
-									allowedHeaders: rn39AllowedHeaders,
-									acceptPost:     "",
-									acceptPatch:    "",
-								})
+							break
+						}
+						switch elem[0] {
+						case 'l': // Prefix: "laces"
+
+							if l := len("laces"); len(elem) >= l && elem[0:l] == "laces" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleSearchPlacesRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "GET",
+										allowedHeaders: rn44AllowedHeaders,
+										acceptPost:     "",
+										acceptPatch:    "",
+									})
+								}
+
+								return
+							}
+
+						case 'r': // Prefix: "rofiles"
+
+							if l := len("rofiles"); len(elem) >= l && elem[0:l] == "rofiles" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleListVehicleProfilesRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "GET",
+										allowedHeaders: rn39AllowedHeaders,
+										acceptPost:     "",
+										acceptPatch:    "",
+									})
+								}
+
+								return
+							}
+
 						}
 
 					case 'r': // Prefix: "route"
@@ -2034,29 +2076,68 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 						}
 
-					case 'p': // Prefix: "profiles"
+					case 'p': // Prefix: "p"
 
-						if l := len("profiles"); len(elem) >= l && elem[0:l] == "profiles" {
+						if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = ListVehicleProfilesOperation
-								r.summary = "Типовые профили ТС"
-								r.operationID = "listVehicleProfiles"
-								r.operationGroup = ""
-								r.pathPattern = "/routing/profiles"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'l': // Prefix: "laces"
+
+							if l := len("laces"); len(elem) >= l && elem[0:l] == "laces" {
+								elem = elem[l:]
+							} else {
+								break
 							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = SearchPlacesOperation
+									r.summary = "Поиск точки маршрута по адресу или объекту реестра"
+									r.operationID = "searchPlaces"
+									r.operationGroup = ""
+									r.pathPattern = "/routing/places"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+						case 'r': // Prefix: "rofiles"
+
+							if l := len("rofiles"); len(elem) >= l && elem[0:l] == "rofiles" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = ListVehicleProfilesOperation
+									r.summary = "Типовые профили ТС"
+									r.operationID = "listVehicleProfiles"
+									r.operationGroup = ""
+									r.pathPattern = "/routing/profiles"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
 						}
 
 					case 'r': // Prefix: "route"

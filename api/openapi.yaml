@@ -553,6 +553,33 @@ paths:
                 items: { $ref: "#/components/schemas/VehicleProfile" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /routing/places:
+    get:
+      tags: [routing]
+      operationId: searchPlaces
+      summary: Поиск точки маршрута по адресу или объекту реестра
+      description: |
+        Объекты реестра по названию и адреса адресного реестра Москвы по словам запроса; адреса с
+        номером дома из запроса — выше.
+      x-permission: routing.use
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 2, maxLength: 200 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 20, default: 8 }
+      responses:
+        "200":
+          description: Найденные места
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Place" }
+        default: { $ref: "#/components/responses/Problem" }
+
   /routing/route:
     post:
       tags: [routing]
@@ -1613,6 +1640,16 @@ components:
         critical:
           type: array
           items: { $ref: "#/components/schemas/CriticalElement" }
+
+    Place:
+      type: object
+      required: [kind, id, title, subtitle, point]
+      properties:
+        kind: { type: string, enum: [facility, address] }
+        id: { type: string }
+        title: { type: string }
+        subtitle: { type: string, description: "Адрес объекта или вид адресного объекта" }
+        point: { $ref: "#/components/schemas/LngLat" }
 
     MatrixRequest:
       type: object

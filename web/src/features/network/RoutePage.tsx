@@ -31,6 +31,7 @@ import {
   ruleHint,
   zoneName,
 } from "./labels";
+import { PlaceSearch } from "./PlaceSearch";
 import s from "./route.module.css";
 
 type Result = Schemas["RouteResult"];
@@ -79,6 +80,9 @@ function RouteWorkspace() {
   const [onlyBlocking, setOnlyBlocking] = useState(true);
 
   const [points, setPoints] = useState<[number, number][]>([]);
+  // Названия точек, найденных поиском: «долгота,широта» → адрес или объект.
+  const [pointNames, setPointNames] = useState<Record<string, string>>({});
+  const [focus, setFocus] = useState<[number, number] | null>(null);
   const [profileCode, setProfileCode] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<keyof Vehicle, string>>({
     grossT: "",
@@ -105,6 +109,11 @@ function RouteWorkspace() {
       selectProfile(p);
     }
   });
+
+  function addPoint(p: [number, number]) {
+    setPoints((ps) => (mode === "isochrone" ? [p] : ps.length >= maxPoints ? ps : [...ps, p]));
+    reset();
+  }
 
   function selectProfile(p: Schemas["VehicleProfile"]) {
     setProfileCode(p.code);
@@ -229,9 +238,13 @@ function RouteWorkspace() {
               {points.map(([lon, lat], i) => (
                 <li key={`${lon},${lat}`}>
                   <span className={s.pointMark}>{pointLabel(i, points.length)}</span>
-                  <span className="num">
-                    {num(lat, 5)}, {num(lon, 5)}
-                  </span>
+                  {pointNames[`${lon},${lat}`] ? (
+                    <span className={s.pointName}>{pointNames[`${lon},${lat}`]}</span>
+                  ) : (
+                    <span className="num">
+                      {num(lat, 5)}, {num(lon, 5)}
+                    </span>
+                  )}
                   <IconButton
                     label={`Убрать точку ${pointLabel(i, points.length)}`}
                     onPress={() => {
@@ -245,6 +258,15 @@ function RouteWorkspace() {
               ))}
             </ol>
           )}
+          <PlaceSearch
+            label={mode === "route" ? "Добавить точку по адресу или объекту" : "Точка по адресу или объекту"}
+            onSelect={(p) => {
+              const pt: [number, number] = [p.point.lon, p.point.lat];
+              setPointNames((n) => ({ ...n, [`${pt[0]},${pt[1]}`]: p.title }));
+              addPoint(pt);
+              setFocus(pt);
+            }}
+          />
           {points.length > 0 && (
             <Button
               size="sm"
@@ -400,10 +422,8 @@ function RouteWorkspace() {
         result={mode === "route" ? result : null}
         isochrones={mode === "isochrone" ? isoResult : null}
         restrictionFilter={onlyBlocking && vehicle ? passabilityFilter(vehicle) : undefined}
-        onAdd={(p) => {
-          setPoints((ps) => (mode === "isochrone" ? [p] : ps.length >= maxPoints ? ps : [...ps, p]));
-          reset();
-        }}
+        focus={focus}
+        onAdd={addPoint}
       />
     </div>
   );
@@ -581,6 +601,7 @@ function RouteMap({
   result,
   isochrones,
   restrictionFilter,
+  focus,
   onAdd,
 }: {
   theme: "light" | "dark";
@@ -590,6 +611,7 @@ function RouteMap({
   result: Result | null;
   isochrones: IsoResult | null;
   restrictionFilter: ExpressionSpecification | undefined;
+  focus: [number, number] | null;
   onAdd: (p: [number, number]) => void;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -647,6 +669,13 @@ function RouteMap({
       map.getCanvas().style.cursor = "";
     };
   }, [map]);
+
+  // Точка, найденная поиском, — в центр карты.
+  useEffect(() => {
+    if (map && focus) {
+      map.flyTo({ center: focus, zoom: Math.max(map.getZoom(), 14), duration: 600 });
+    }
+  }, [map, focus]);
 
   // Новый маршрут или изохроны — в видимую область (изохроны — по самому дальнему контуру).
   useEffect(() => {
