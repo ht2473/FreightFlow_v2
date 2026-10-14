@@ -46,7 +46,7 @@ test("реестр: фасеты, сортировка, страницы, кар
   await table.getByRole("row").nth(1).getByRole("button").first().click();
   const drawer = page.getByRole("dialog");
   await expect(drawer.getByRole("tab", { name: "Обзор" })).toBeVisible();
-  await expect(drawer.getByText("Площадь застройки")).toBeVisible();
+  await expect(drawer.getByText("Площадь застройки", { exact: true })).toBeVisible();
   await drawer.getByRole("tab", { name: "Доступность" }).click();
   await expect(drawer.getByRole("columnheader", { name: /МКАД/ })).toBeVisible();
   await page.screenshot({ path: info.outputPath("registry-card.png") });

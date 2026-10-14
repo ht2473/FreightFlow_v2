@@ -20,6 +20,7 @@ import { emptyStyle, fullStyle, useBasemapAvailable } from "@/shared/map/style";
 import { IconButton } from "@/shared/ui";
 import { Tabs } from "@/shared/ui/navigation";
 import { useResolvedTheme } from "@/shared/useResolvedTheme";
+import { FacilityDrawer } from "../facilities/FacilityDrawer";
 import { FeatureCard, type Selection } from "./FeatureCard";
 import { LayersPanel } from "./LayersPanel";
 import { Legend } from "./Legend";
@@ -328,7 +329,12 @@ function MapWorkspace() {
           </div>
         )}
       </section>
-      {selection && <FeatureCard selection={selection} onClose={() => setSelection(null)} />}
+      {selection &&
+        (facilityId(selection) ? (
+          <FacilityDrawer id={facilityId(selection)} onClose={() => setSelection(null)} />
+        ) : (
+          <FeatureCard selection={selection} onClose={() => setSelection(null)} />
+        ))}
     </div>
   );
 }
@@ -355,4 +361,12 @@ function describe(f: MapGeoJSONFeature, layer: MapLayer | undefined): { title: s
   const label = typeof p.name === "string" && p.name ? p.name : typeof p.address === "string" ? p.address : undefined;
   const name = label ?? enumLabel ?? layer?.title ?? "";
   return { title: name, subtitle: layer?.title ?? "" };
+}
+
+/** Объект реестра под выбранным элементом карты — карточка та же, что в реестре. */
+function facilityId(sel: Selection): string | undefined {
+  const id = (sel.feature.properties as Record<string, unknown>).id;
+  return (sel.layer.code === "facilities" || sel.layer.code === "facility_areas") && typeof id === "string"
+    ? id
+    : undefined;
 }

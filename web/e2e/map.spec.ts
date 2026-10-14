@@ -45,13 +45,15 @@ test("карта: подложка, объекты в видимой облас�
   await expect(page.getByRole("region", { name: "Легенда" }).getByText("АЗС")).toBeVisible();
   await page.screenshot({ path: info.outputPath("map-layers.png") });
 
-  // Выбор объекта из списка открывает карточку.
+  // Выбор объекта из списка открывает карточку реестра — ту же, что в разделе «Объекты».
   await page.getByRole("tab", { name: "Объекты" }).click();
   await objects.getByRole("button").first().click();
   const card = page.getByRole("dialog");
   await expect(card).toBeVisible();
-  await expect(card.getByText("Объекты логистики")).toBeVisible();
-  await expect(card.getByText("© участники OpenStreetMap")).toBeVisible();
+  await expect(card.getByRole("tab", { name: "Обзор" })).toBeVisible();
+  await expect(card.getByText("Площадь застройки", { exact: true })).toBeVisible();
+  await card.getByRole("tab", { name: "Источники" }).click();
+  await expect(card.getByText("OpenStreetMap", { exact: true })).toBeVisible();
   expect(await axeViolations(page)).toEqual([]);
   await page.screenshot({ path: info.outputPath("map-card.png") });
   await page.keyboard.press("Escape");
