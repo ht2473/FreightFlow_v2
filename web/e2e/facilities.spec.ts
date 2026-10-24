@@ -109,3 +109,19 @@ test("карточка: сравнение объектов и маршрут о
   await expect(page.getByRole("button", { name: "Убрать точку A" })).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("реестр → карта: фильтр объектов переносится на карту", async ({ page }) => {
+  test.setTimeout(60_000);
+  await login(page, analyst, "/facilities?type=warehouse");
+  await expect(page.getByRole("table", { name: "Реестр объектов" }).getByRole("row").nth(1)).toBeVisible({
+    timeout: 30_000,
+  });
+  await page.getByRole("link", { name: "На карте" }).click();
+  await expect(page).toHaveURL(/\/map\?.*ft=warehouse/);
+  await expect(page.getByText("Объекты — по фильтру реестра")).toBeVisible();
+  const objects = page.getByRole("tabpanel", { name: "Объекты" });
+  await expect(objects.getByText(/В видимой области · [1-9]/)).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("button", { name: "Снять фильтр реестра" }).click();
+  await expect(page).not.toHaveURL(/ft=/);
+  await expect(page.getByText("Объекты — по фильтру реестра")).toHaveCount(0);
+});

@@ -203,7 +203,16 @@ function Registry() {
               params={{ ...search, open: undefined }}
               onApply={(p) => navigate({ search: p as FacilitySearch, replace: true })}
             />
-            <Link to="/map" search={{ l: "facility_areas,facilities" }} className="btn btn-sm">
+            <Link
+              to="/map"
+              search={{
+                l: "facility_areas,facilities",
+                ft: search.type,
+                fc: query.minConfidence,
+                fm: search.mkad,
+              }}
+              className="btn btn-sm"
+            >
               <MapIcon size={14} aria-hidden /> На карте
             </Link>
           </>

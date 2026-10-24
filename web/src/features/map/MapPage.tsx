@@ -33,7 +33,16 @@ import { Legend } from "./Legend";
 import s from "./map.module.css";
 import { m } from "./messages";
 import { type ObjectItem, ObjectsPanel } from "./ObjectsPanel";
-import { formatCenter, layerStates, type MapSearch, parseCenter, useOpacity, visibleLayers } from "./state";
+import {
+  facilityFilters,
+  formatCenter,
+  hasFacilityFilter,
+  layerStates,
+  type MapSearch,
+  parseCenter,
+  useOpacity,
+  visibleLayers,
+} from "./state";
 import { WorkDate } from "./WorkDate";
 
 export function MapPage() {
@@ -82,9 +91,9 @@ function MapWorkspace() {
   const data = useMemo(() => {
     const day = new Date();
     day.setDate(day.getDate() + workOffset);
-    const filters = { road_works: workDayFilter(dayNumber(day)) };
+    const filters = { road_works: workDayFilter(dayNumber(day)), ...facilityFilters(search) };
     return buildDataLayers(catalog, layerStates(catalog, visible, opacity, filters), palette);
-  }, [catalog, visible, opacity, palette, workOffset]);
+  }, [catalog, visible, opacity, palette, workOffset, search]);
   const style = useMemo(() => {
     if (basemap.data === undefined) {
       return null;
@@ -272,9 +281,26 @@ function MapWorkspace() {
     <div className={s.workspace}>
       <aside className={s.panel} aria-label={m.panelTabs}>
         <div className={s.viewsRow}>
+          {hasFacilityFilter(search) && (
+            <span className={s.registryChip}>
+              Объекты — по фильтру реестра
+              <button
+                type="button"
+                aria-label="Снять фильтр реестра"
+                onClick={() =>
+                  void navigate({
+                    search: (prev: MapSearch) => ({ ...prev, ft: undefined, fc: undefined, fm: undefined }),
+                    replace: true,
+                  })
+                }
+              >
+                <X size={12} aria-hidden />
+              </button>
+            </span>
+          )}
           <ViewsMenu
             page="map"
-            params={{ c: search.c, z: search.z, l: search.l }}
+            params={{ c: search.c, z: search.z, l: search.l, ft: search.ft, fc: search.fc, fm: search.fm }}
             onApply={(p) => {
               const c = parseCenter(typeof p.c === "string" ? p.c : undefined);
               const z = typeof p.z === "number" ? p.z : undefined;
@@ -286,6 +312,9 @@ function MapWorkspace() {
                   c: typeof p.c === "string" ? p.c : undefined,
                   z,
                   l: typeof p.l === "string" ? p.l : undefined,
+                  ft: typeof p.ft === "string" ? p.ft : undefined,
+                  fc: typeof p.fc === "number" ? p.fc : undefined,
+                  fm: typeof p.fm === "number" ? p.fm : undefined,
                 },
                 replace: true,
               });

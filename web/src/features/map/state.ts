@@ -11,6 +11,10 @@ export const mapSearchSchema = z.object({
   c: z.string().optional().catch(undefined),
   z: z.number().min(0).max(22).optional().catch(undefined),
   l: z.string().optional().catch(undefined),
+  // Фильтр объектов из реестра: типы через запятую, достоверность от, время до МКАД не больше.
+  ft: z.string().optional().catch(undefined),
+  fc: z.number().min(0).max(1).optional().catch(undefined),
+  fm: z.number().min(1).max(300).optional().catch(undefined),
 });
 
 export type MapSearch = z.infer<typeof mapSearchSchema>;
@@ -59,6 +63,35 @@ export function layerStates(
   const out: Record<string, LayerState> = {};
   for (const l of catalog) {
     out[l.code] = { visible: visible.has(l.code), opacity: opacity[l.code] ?? 1, filter: filters[l.code] };
+  }
+  return out;
+}
+
+/** Есть ли фильтр объектов из реестра. */
+export function hasFacilityFilter(s: MapSearch): boolean {
+  return Boolean(s.ft || s.fc !== undefined || s.fm !== undefined);
+}
+
+/**
+ * Фильтр слоёв объектов по параметрам реестра (типы, достоверность, время до МКАД); контуры
+ * объектов — только по типу (других свойств в их тайлах нет).
+ */
+export function facilityFilters(s: MapSearch): Record<string, ExpressionSpecification> {
+  if (!hasFacilityFilter(s)) {
+    return {};
+  }
+  const types = s.ft ? s.ft.split(",").filter(Boolean) : [];
+  const byType: ExpressionSpecification[] = types.length > 0 ? [["in", ["get", "type"], ["literal", types]]] : [];
+  const points: ExpressionSpecification[] = [...byType];
+  if (s.fc !== undefined) {
+    points.push([">=", ["coalesce", ["get", "confidence"], 0], s.fc]);
+  }
+  if (s.fm !== undefined) {
+    points.push(["<=", ["coalesce", ["get", "mkad_min"], 100000], s.fm]);
+  }
+  const out: Record<string, ExpressionSpecification> = { facilities: ["all", true, ...points] };
+  if (byType.length > 0) {
+    out.facility_areas = ["all", true, ...byType];
   }
   return out;
 }
