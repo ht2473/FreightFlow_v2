@@ -233,6 +233,13 @@ type Handler interface {
 	//
 	// GET /regulation/signs
 	GetSignQuality(ctx context.Context) (*SignQuality, error)
+	// GetTerritory implements getTerritory operation.
+	//
+	// Профиль территории — показатели, граница, население,
+	// районы, сводка.
+	//
+	// GET /territories/{territoryId}
+	GetTerritory(ctx context.Context, params GetTerritoryParams) (*TerritoryProfile, error)
 	// GetUser implements getUser operation.
 	//
 	// Пользователь.
@@ -297,6 +304,12 @@ type Handler interface {
 	//
 	// GET /data/sources
 	ListSources(ctx context.Context) ([]SourceInfo, error)
+	// ListTerritories implements listTerritories operation.
+	//
+	// Округа и районы Москвы с показателями.
+	//
+	// GET /territories
+	ListTerritories(ctx context.Context, params ListTerritoriesParams) ([]TerritoryRow, error)
 	// ListTokens implements listTokens operation.
 	//
 	// Токены API пользователя.

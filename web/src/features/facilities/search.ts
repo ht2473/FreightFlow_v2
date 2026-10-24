@@ -8,6 +8,7 @@ export const facilitySearchSchema = z.object({
   q: z.string().optional().catch(undefined),
   type: z.string().optional().catch(undefined),
   okrug: z.string().optional().catch(undefined),
+  district: z.string().optional().catch(undefined),
   ring: z.string().optional().catch(undefined),
   conf: z.enum(["medium", "high"]).optional().catch(undefined),
   restr: z.enum(["yes", "no"]).optional().catch(undefined),
@@ -38,6 +39,7 @@ export function facilityQuery(s: FacilitySearch) {
     q: s.q?.trim() || undefined,
     type: list(s.type),
     okrug: list(s.okrug),
+    district: list(s.district),
     ring: list(s.ring) as Ring[],
     minConfidence: s.conf ? minConfidence[s.conf] : undefined,
     nearRestrictions: s.restr ? s.restr === "yes" : undefined,
@@ -48,7 +50,7 @@ export function facilityQuery(s: FacilitySearch) {
 
 /** Есть ли в выборке хоть один фильтр. */
 export function hasFilters(s: FacilitySearch): boolean {
-  return Boolean(s.q || s.type || s.okrug || s.ring || s.conf || s.restr || s.permit || s.mkad);
+  return Boolean(s.q || s.type || s.okrug || s.district || s.ring || s.conf || s.restr || s.permit || s.mkad);
 }
 
 export interface SortItem {

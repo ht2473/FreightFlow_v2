@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { MapGeoJSONFeature } from "maplibre-gl";
 import type { Schemas } from "@/shared/api/client";
 import { num } from "@/shared/format";
@@ -63,7 +64,13 @@ export function FeatureCard({ selection, onClose }: { selection: Selection; onCl
           <dd>{layer.attribution}</dd>
         </div>
       </dl>
-      <p className={s.cardNote}>{m.cardTemporary}</p>
+      {layer.code === "boundaries" && (p.kind === "okrug" || p.kind === "district") && typeof p.id === "string" ? (
+        <Link to="/territories/$territoryId" params={{ territoryId: p.id }} className="btn btn-sm">
+          Профиль территории
+        </Link>
+      ) : (
+        <p className={s.cardNote}>{m.cardTemporary}</p>
+      )}
     </Drawer>
   );
 }

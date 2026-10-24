@@ -31,6 +31,7 @@ import (
 	"freightflow/internal/regulation"
 	"freightflow/internal/report"
 	"freightflow/internal/routing"
+	"freightflow/internal/territory"
 	"freightflow/internal/tiles"
 	"freightflow/internal/views"
 )
@@ -104,7 +105,7 @@ func newFixture(t *testing.T) *fixture {
 	h, err := New(Deps{
 		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
 		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facilities,
-		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Sessions: sessions, Mailer: mailer,
+		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Territories: territory.New(pool, facilities), Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
@@ -536,5 +537,50 @@ func TestAPIViews(t *testing.T) {
 	}
 	if resp, _ := f.do(t, http.MethodPost, "/api/v1/views", analyst, `{"page":"map","name":"x","params":{},"role":"admin"}`); resp.StatusCode != http.StatusUnprocessableEntity {
 		t.Errorf("foreign role: %d", resp.StatusCode)
+	}
+}
+
+func TestAPITerritories(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	osmtest.LoadDistrict(t, f.pool)
+	analyst := f.token(t, "terr@example.com", identity.RoleAnalyst)
+
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/territories", "", ""); resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("без входа: %d", resp.StatusCode)
+	}
+	resp, body := f.do(t, http.MethodGet, "/api/v1/territories?kind=district", analyst, "")
+	var list []struct {
+		ID         string
+		Kind       string
+		Facilities int
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &list) != nil || len(list) == 0 {
+		t.Fatalf("list: %d %s", resp.StatusCode, body)
+	}
+	id := ""
+	for _, r := range list {
+		if r.Kind != "district" {
+			t.Fatalf("kind %q", r.Kind)
+		}
+		if r.Facilities > 0 {
+			id = r.ID
+		}
+	}
+	resp, body = f.do(t, http.MethodGet, "/api/v1/territories/"+id, analyst, "")
+	var p struct {
+		Geometry struct{ Type string }
+		Bbox     []float64
+		Summary  struct{ Facilities int }
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &p) != nil || p.Summary.Facilities == 0 || len(p.Bbox) != 4 ||
+		p.Geometry.Type == "" {
+		t.Errorf("profile: %d %s", resp.StatusCode, body)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/territories/"+uuid.NewString(), analyst, ""); resp.StatusCode != http.StatusNotFound {
+		t.Errorf("нет территории: %d", resp.StatusCode)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/territories?kind=region", analyst, ""); resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("неверный уровень: %d", resp.StatusCode)
 	}
 }

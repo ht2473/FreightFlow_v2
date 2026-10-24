@@ -1724,6 +1724,71 @@ func decodeGetRunParams(args [1]string, argsEscaped bool, r *http.Request) (para
 	return params, nil
 }
 
+// GetTerritoryParams is parameters of getTerritory operation.
+type GetTerritoryParams struct {
+	TerritoryId uuid.UUID
+}
+
+func unpackGetTerritoryParams(packed middleware.Parameters) (params GetTerritoryParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "territoryId",
+			In:   "path",
+		}
+		params.TerritoryId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetTerritoryParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTerritoryParams, _ error) {
+	// Decode path: territoryId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "territoryId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.TerritoryId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "territoryId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetUserParams is parameters of getUser operation.
 type GetUserParams struct {
 	UserId uuid.UUID
@@ -3678,6 +3743,85 @@ func decodeListRunsParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListTerritoriesParams is parameters of listTerritories operation.
+type ListTerritoriesParams struct {
+	Kind OptListTerritoriesKind `json:",omitempty,omitzero"`
+}
+
+func unpackListTerritoriesParams(packed middleware.Parameters) (params ListTerritoriesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "kind",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Kind = v.(OptListTerritoriesKind)
+		}
+	}
+	return params
+}
+
+func decodeListTerritoriesParams(args [0]string, argsEscaped bool, r *http.Request) (params ListTerritoriesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: kind.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "kind",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotKindVal ListTerritoriesKind
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotKindVal = ListTerritoriesKind(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Kind.SetTo(paramsDotKindVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Kind.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "kind",
 			In:   "query",
 			Err:  err,
 		}

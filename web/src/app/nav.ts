@@ -7,6 +7,7 @@ import {
   FileText,
   GitBranch,
   KeyRound,
+  Landmark,
   LayoutDashboard,
   type LucideIcon,
   Map as MapIcon,
@@ -45,6 +46,7 @@ export const navGroups: NavGroup[] = [
     title: "Анализ",
     items: [
       { to: "/facilities", title: "Объекты", icon: Building2, permission: "map.view" },
+      { to: "/territories", title: "Территории", icon: Landmark, permission: "map.view" },
       { to: "/network", title: "Транспортная сеть", icon: Route, permission: "routing.use" },
       { to: "/regulation", title: "Регулирование", icon: Scale, permission: "map.view" },
       { to: "/analytics", title: "Аналитика", icon: ChartLine, permission: "analytics.view" },

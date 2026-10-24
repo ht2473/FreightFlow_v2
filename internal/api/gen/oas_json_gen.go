@@ -18641,6 +18641,1003 @@ func (s *StreetRank) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *TerritoryProfile) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *TerritoryProfile) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
+		e.FieldStart("kind")
+		s.Kind.Encode(e)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		if s.ShortName.Set {
+			e.FieldStart("shortName")
+			s.ShortName.Encode(e)
+		}
+	}
+	{
+		if s.ParentId.Set {
+			e.FieldStart("parentId")
+			s.ParentId.Encode(e)
+		}
+	}
+	{
+		if s.ParentName.Set {
+			e.FieldStart("parentName")
+			s.ParentName.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("areaKm2")
+		e.Float64(s.AreaKm2)
+	}
+	{
+		if s.Population.Set {
+			e.FieldStart("population")
+			s.Population.Encode(e)
+		}
+	}
+	{
+		if s.PopulationYear.Set {
+			e.FieldStart("populationYear")
+			s.PopulationYear.Encode(e)
+		}
+	}
+	{
+		if s.Density.Set {
+			e.FieldStart("density")
+			s.Density.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("facilities")
+		e.Int(s.Facilities)
+	}
+	{
+		e.FieldStart("buildingAreaM2")
+		e.Float64(s.BuildingAreaM2)
+	}
+	{
+		e.FieldStart("poi")
+		e.Int(s.Poi)
+	}
+	{
+		e.FieldStart("worksActive")
+		e.Int(s.WorksActive)
+	}
+	{
+		e.FieldStart("geometry")
+		s.Geometry.Encode(e)
+	}
+	{
+		e.FieldStart("bbox")
+		e.ArrStart()
+		for _, elem := range s.Bbox {
+			e.Float64(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("population_series")
+		e.ArrStart()
+		for _, elem := range s.PopulationSeries {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("children")
+		e.ArrStart()
+		for _, elem := range s.Children {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("summary")
+		s.Summary.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfTerritoryProfile = [19]string{
+	0:  "id",
+	1:  "kind",
+	2:  "name",
+	3:  "shortName",
+	4:  "parentId",
+	5:  "parentName",
+	6:  "areaKm2",
+	7:  "population",
+	8:  "populationYear",
+	9:  "density",
+	10: "facilities",
+	11: "buildingAreaM2",
+	12: "poi",
+	13: "worksActive",
+	14: "geometry",
+	15: "bbox",
+	16: "population_series",
+	17: "children",
+	18: "summary",
+}
+
+// Decode decodes TerritoryProfile from json.
+func (s *TerritoryProfile) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TerritoryProfile to nil")
+	}
+	var requiredBitSet [3]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "kind":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Kind.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"kind\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "shortName":
+			if err := func() error {
+				s.ShortName.Reset()
+				if err := s.ShortName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"shortName\"")
+			}
+		case "parentId":
+			if err := func() error {
+				s.ParentId.Reset()
+				if err := s.ParentId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"parentId\"")
+			}
+		case "parentName":
+			if err := func() error {
+				s.ParentName.Reset()
+				if err := s.ParentName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"parentName\"")
+			}
+		case "areaKm2":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Float64()
+				s.AreaKm2 = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"areaKm2\"")
+			}
+		case "population":
+			if err := func() error {
+				s.Population.Reset()
+				if err := s.Population.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"population\"")
+			}
+		case "populationYear":
+			if err := func() error {
+				s.PopulationYear.Reset()
+				if err := s.PopulationYear.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"populationYear\"")
+			}
+		case "density":
+			if err := func() error {
+				s.Density.Reset()
+				if err := s.Density.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"density\"")
+			}
+		case "facilities":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.Facilities = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"facilities\"")
+			}
+		case "buildingAreaM2":
+			requiredBitSet[1] |= 1 << 3
+			if err := func() error {
+				v, err := d.Float64()
+				s.BuildingAreaM2 = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"buildingAreaM2\"")
+			}
+		case "poi":
+			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int()
+				s.Poi = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"poi\"")
+			}
+		case "worksActive":
+			requiredBitSet[1] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int()
+				s.WorksActive = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"worksActive\"")
+			}
+		case "geometry":
+			requiredBitSet[1] |= 1 << 6
+			if err := func() error {
+				if err := s.Geometry.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"geometry\"")
+			}
+		case "bbox":
+			requiredBitSet[1] |= 1 << 7
+			if err := func() error {
+				s.Bbox = make([]float64, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem float64
+					v, err := d.Float64()
+					elem = float64(v)
+					if err != nil {
+						return err
+					}
+					s.Bbox = append(s.Bbox, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"bbox\"")
+			}
+		case "population_series":
+			requiredBitSet[2] |= 1 << 0
+			if err := func() error {
+				s.PopulationSeries = make([]TerritoryProfilePopulationSeriesItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem TerritoryProfilePopulationSeriesItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.PopulationSeries = append(s.PopulationSeries, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"population_series\"")
+			}
+		case "children":
+			requiredBitSet[2] |= 1 << 1
+			if err := func() error {
+				s.Children = make([]TerritoryRow, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem TerritoryRow
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Children = append(s.Children, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"children\"")
+			}
+		case "summary":
+			requiredBitSet[2] |= 1 << 2
+			if err := func() error {
+				if err := s.Summary.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"summary\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TerritoryProfile")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [3]uint8{
+		0b01000111,
+		0b11111100,
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTerritoryProfile) {
+					name = jsonFieldsNameOfTerritoryProfile[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *TerritoryProfile) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TerritoryProfile) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TerritoryProfileGeometry) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TerritoryProfileGeometry) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes TerritoryProfileGeometry from json.
+func (s *TerritoryProfileGeometry) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TerritoryProfileGeometry to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TerritoryProfileGeometry")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TerritoryProfileGeometry) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TerritoryProfileGeometry) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TerritoryProfileKind as json.
+func (s TerritoryProfileKind) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes TerritoryProfileKind from json.
+func (s *TerritoryProfileKind) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TerritoryProfileKind to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch TerritoryProfileKind(v) {
+	case TerritoryProfileKindOkrug:
+		*s = TerritoryProfileKindOkrug
+	case TerritoryProfileKindDistrict:
+		*s = TerritoryProfileKindDistrict
+	default:
+		*s = TerritoryProfileKind(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TerritoryProfileKind) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TerritoryProfileKind) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *TerritoryProfilePopulationSeriesItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *TerritoryProfilePopulationSeriesItem) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("year")
+		e.Int(s.Year)
+	}
+	{
+		e.FieldStart("value")
+		e.Int(s.Value)
+	}
+}
+
+var jsonFieldsNameOfTerritoryProfilePopulationSeriesItem = [2]string{
+	0: "year",
+	1: "value",
+}
+
+// Decode decodes TerritoryProfilePopulationSeriesItem from json.
+func (s *TerritoryProfilePopulationSeriesItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TerritoryProfilePopulationSeriesItem to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "year":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Year = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"year\"")
+			}
+		case "value":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.Value = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"value\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TerritoryProfilePopulationSeriesItem")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTerritoryProfilePopulationSeriesItem) {
+					name = jsonFieldsNameOfTerritoryProfilePopulationSeriesItem[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *TerritoryProfilePopulationSeriesItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TerritoryProfilePopulationSeriesItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *TerritoryRow) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *TerritoryRow) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
+		e.FieldStart("kind")
+		s.Kind.Encode(e)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		if s.ShortName.Set {
+			e.FieldStart("shortName")
+			s.ShortName.Encode(e)
+		}
+	}
+	{
+		if s.ParentId.Set {
+			e.FieldStart("parentId")
+			s.ParentId.Encode(e)
+		}
+	}
+	{
+		if s.ParentName.Set {
+			e.FieldStart("parentName")
+			s.ParentName.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("areaKm2")
+		e.Float64(s.AreaKm2)
+	}
+	{
+		if s.Population.Set {
+			e.FieldStart("population")
+			s.Population.Encode(e)
+		}
+	}
+	{
+		if s.PopulationYear.Set {
+			e.FieldStart("populationYear")
+			s.PopulationYear.Encode(e)
+		}
+	}
+	{
+		if s.Density.Set {
+			e.FieldStart("density")
+			s.Density.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("facilities")
+		e.Int(s.Facilities)
+	}
+	{
+		e.FieldStart("buildingAreaM2")
+		e.Float64(s.BuildingAreaM2)
+	}
+	{
+		e.FieldStart("poi")
+		e.Int(s.Poi)
+	}
+	{
+		e.FieldStart("worksActive")
+		e.Int(s.WorksActive)
+	}
+}
+
+var jsonFieldsNameOfTerritoryRow = [14]string{
+	0:  "id",
+	1:  "kind",
+	2:  "name",
+	3:  "shortName",
+	4:  "parentId",
+	5:  "parentName",
+	6:  "areaKm2",
+	7:  "population",
+	8:  "populationYear",
+	9:  "density",
+	10: "facilities",
+	11: "buildingAreaM2",
+	12: "poi",
+	13: "worksActive",
+}
+
+// Decode decodes TerritoryRow from json.
+func (s *TerritoryRow) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TerritoryRow to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "kind":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Kind.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"kind\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "shortName":
+			if err := func() error {
+				s.ShortName.Reset()
+				if err := s.ShortName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"shortName\"")
+			}
+		case "parentId":
+			if err := func() error {
+				s.ParentId.Reset()
+				if err := s.ParentId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"parentId\"")
+			}
+		case "parentName":
+			if err := func() error {
+				s.ParentName.Reset()
+				if err := s.ParentName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"parentName\"")
+			}
+		case "areaKm2":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Float64()
+				s.AreaKm2 = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"areaKm2\"")
+			}
+		case "population":
+			if err := func() error {
+				s.Population.Reset()
+				if err := s.Population.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"population\"")
+			}
+		case "populationYear":
+			if err := func() error {
+				s.PopulationYear.Reset()
+				if err := s.PopulationYear.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"populationYear\"")
+			}
+		case "density":
+			if err := func() error {
+				s.Density.Reset()
+				if err := s.Density.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"density\"")
+			}
+		case "facilities":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.Facilities = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"facilities\"")
+			}
+		case "buildingAreaM2":
+			requiredBitSet[1] |= 1 << 3
+			if err := func() error {
+				v, err := d.Float64()
+				s.BuildingAreaM2 = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"buildingAreaM2\"")
+			}
+		case "poi":
+			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int()
+				s.Poi = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"poi\"")
+			}
+		case "worksActive":
+			requiredBitSet[1] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int()
+				s.WorksActive = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"worksActive\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TerritoryRow")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b01000111,
+		0b00111100,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTerritoryRow) {
+					name = jsonFieldsNameOfTerritoryRow[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *TerritoryRow) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TerritoryRow) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TerritoryRowKind as json.
+func (s TerritoryRowKind) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes TerritoryRowKind from json.
+func (s *TerritoryRowKind) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TerritoryRowKind to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch TerritoryRowKind(v) {
+	case TerritoryRowKindOkrug:
+		*s = TerritoryRowKindOkrug
+	case TerritoryRowKindDistrict:
+		*s = TerritoryRowKindDistrict
+	default:
+		*s = TerritoryRowKind(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TerritoryRowKind) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TerritoryRowKind) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *TotpCode) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)

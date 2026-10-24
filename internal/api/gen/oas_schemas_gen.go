@@ -4535,6 +4535,47 @@ func (s *ListFacilityReportsStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+type ListTerritoriesKind string
+
+const (
+	ListTerritoriesKindOkrug    ListTerritoriesKind = "okrug"
+	ListTerritoriesKindDistrict ListTerritoriesKind = "district"
+)
+
+// AllValues returns all ListTerritoriesKind values.
+func (ListTerritoriesKind) AllValues() []ListTerritoriesKind {
+	return []ListTerritoriesKind{
+		ListTerritoriesKindOkrug,
+		ListTerritoriesKindDistrict,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ListTerritoriesKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ListTerritoriesKindOkrug:
+		return []byte(s), nil
+	case ListTerritoriesKindDistrict:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ListTerritoriesKind) UnmarshalText(data []byte) error {
+	switch ListTerritoriesKind(data) {
+	case ListTerritoriesKindOkrug:
+		*s = ListTerritoriesKindOkrug
+		return nil
+	case ListTerritoriesKindDistrict:
+		*s = ListTerritoriesKindDistrict
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type ListViewsPage string
 
 const (
@@ -6512,6 +6553,52 @@ func (o OptListFacilityReportsStatus) Get() (v ListFacilityReportsStatus, ok boo
 
 // Or returns value if set, or given parameter if does not.
 func (o OptListFacilityReportsStatus) Or(d ListFacilityReportsStatus) ListFacilityReportsStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptListTerritoriesKind returns new OptListTerritoriesKind with value set to v.
+func NewOptListTerritoriesKind(v ListTerritoriesKind) OptListTerritoriesKind {
+	return OptListTerritoriesKind{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptListTerritoriesKind is optional ListTerritoriesKind.
+type OptListTerritoriesKind struct {
+	Value ListTerritoriesKind
+	Set   bool
+}
+
+// IsSet returns true if OptListTerritoriesKind was set.
+func (o OptListTerritoriesKind) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptListTerritoriesKind) Reset() {
+	var v ListTerritoriesKind
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptListTerritoriesKind) SetTo(v ListTerritoriesKind) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptListTerritoriesKind) Get() (v ListTerritoriesKind, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptListTerritoriesKind) Or(d ListTerritoriesKind) ListTerritoriesKind {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9056,6 +9143,504 @@ func (s *StreetRank) SetTopKm(val float64) {
 // SetPoint sets the value of Point.
 func (s *StreetRank) SetPoint(val LngLat) {
 	s.Point = val
+}
+
+// Merged schema.
+// Ref: #/components/schemas/TerritoryProfile
+type TerritoryProfile struct {
+	ID         uuid.UUID            `json:"id"`
+	Kind       TerritoryProfileKind `json:"kind"`
+	Name       string               `json:"name"`
+	ShortName  OptString            `json:"shortName"`
+	ParentId   OptUUID              `json:"parentId"`
+	ParentName OptString            `json:"parentName"`
+	AreaKm2    float64              `json:"areaKm2"`
+	// Население на 1 января; у округа — сумма районов.
+	Population     OptInt `json:"population"`
+	PopulationYear OptInt `json:"populationYear"`
+	// Чел./км².
+	Density        OptFloat64 `json:"density"`
+	Facilities     int        `json:"facilities"`
+	BuildingAreaM2 float64    `json:"buildingAreaM2"`
+	// Точек инфраструктуры.
+	Poi         int `json:"poi"`
+	WorksActive int `json:"worksActive"`
+	// Граница (GeoJSON, упрощённая).
+	Geometry         TerritoryProfileGeometry               `json:"geometry"`
+	Bbox             []float64                              `json:"bbox"`
+	PopulationSeries []TerritoryProfilePopulationSeriesItem `json:"population_series"`
+	Children         []TerritoryRow                         `json:"children"`
+	Summary          AreaSummary                            `json:"summary"`
+}
+
+// GetID returns the value of ID.
+func (s *TerritoryProfile) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetKind returns the value of Kind.
+func (s *TerritoryProfile) GetKind() TerritoryProfileKind {
+	return s.Kind
+}
+
+// GetName returns the value of Name.
+func (s *TerritoryProfile) GetName() string {
+	return s.Name
+}
+
+// GetShortName returns the value of ShortName.
+func (s *TerritoryProfile) GetShortName() OptString {
+	return s.ShortName
+}
+
+// GetParentId returns the value of ParentId.
+func (s *TerritoryProfile) GetParentId() OptUUID {
+	return s.ParentId
+}
+
+// GetParentName returns the value of ParentName.
+func (s *TerritoryProfile) GetParentName() OptString {
+	return s.ParentName
+}
+
+// GetAreaKm2 returns the value of AreaKm2.
+func (s *TerritoryProfile) GetAreaKm2() float64 {
+	return s.AreaKm2
+}
+
+// GetPopulation returns the value of Population.
+func (s *TerritoryProfile) GetPopulation() OptInt {
+	return s.Population
+}
+
+// GetPopulationYear returns the value of PopulationYear.
+func (s *TerritoryProfile) GetPopulationYear() OptInt {
+	return s.PopulationYear
+}
+
+// GetDensity returns the value of Density.
+func (s *TerritoryProfile) GetDensity() OptFloat64 {
+	return s.Density
+}
+
+// GetFacilities returns the value of Facilities.
+func (s *TerritoryProfile) GetFacilities() int {
+	return s.Facilities
+}
+
+// GetBuildingAreaM2 returns the value of BuildingAreaM2.
+func (s *TerritoryProfile) GetBuildingAreaM2() float64 {
+	return s.BuildingAreaM2
+}
+
+// GetPoi returns the value of Poi.
+func (s *TerritoryProfile) GetPoi() int {
+	return s.Poi
+}
+
+// GetWorksActive returns the value of WorksActive.
+func (s *TerritoryProfile) GetWorksActive() int {
+	return s.WorksActive
+}
+
+// GetGeometry returns the value of Geometry.
+func (s *TerritoryProfile) GetGeometry() TerritoryProfileGeometry {
+	return s.Geometry
+}
+
+// GetBbox returns the value of Bbox.
+func (s *TerritoryProfile) GetBbox() []float64 {
+	return s.Bbox
+}
+
+// GetPopulationSeries returns the value of PopulationSeries.
+func (s *TerritoryProfile) GetPopulationSeries() []TerritoryProfilePopulationSeriesItem {
+	return s.PopulationSeries
+}
+
+// GetChildren returns the value of Children.
+func (s *TerritoryProfile) GetChildren() []TerritoryRow {
+	return s.Children
+}
+
+// GetSummary returns the value of Summary.
+func (s *TerritoryProfile) GetSummary() AreaSummary {
+	return s.Summary
+}
+
+// SetID sets the value of ID.
+func (s *TerritoryProfile) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetKind sets the value of Kind.
+func (s *TerritoryProfile) SetKind(val TerritoryProfileKind) {
+	s.Kind = val
+}
+
+// SetName sets the value of Name.
+func (s *TerritoryProfile) SetName(val string) {
+	s.Name = val
+}
+
+// SetShortName sets the value of ShortName.
+func (s *TerritoryProfile) SetShortName(val OptString) {
+	s.ShortName = val
+}
+
+// SetParentId sets the value of ParentId.
+func (s *TerritoryProfile) SetParentId(val OptUUID) {
+	s.ParentId = val
+}
+
+// SetParentName sets the value of ParentName.
+func (s *TerritoryProfile) SetParentName(val OptString) {
+	s.ParentName = val
+}
+
+// SetAreaKm2 sets the value of AreaKm2.
+func (s *TerritoryProfile) SetAreaKm2(val float64) {
+	s.AreaKm2 = val
+}
+
+// SetPopulation sets the value of Population.
+func (s *TerritoryProfile) SetPopulation(val OptInt) {
+	s.Population = val
+}
+
+// SetPopulationYear sets the value of PopulationYear.
+func (s *TerritoryProfile) SetPopulationYear(val OptInt) {
+	s.PopulationYear = val
+}
+
+// SetDensity sets the value of Density.
+func (s *TerritoryProfile) SetDensity(val OptFloat64) {
+	s.Density = val
+}
+
+// SetFacilities sets the value of Facilities.
+func (s *TerritoryProfile) SetFacilities(val int) {
+	s.Facilities = val
+}
+
+// SetBuildingAreaM2 sets the value of BuildingAreaM2.
+func (s *TerritoryProfile) SetBuildingAreaM2(val float64) {
+	s.BuildingAreaM2 = val
+}
+
+// SetPoi sets the value of Poi.
+func (s *TerritoryProfile) SetPoi(val int) {
+	s.Poi = val
+}
+
+// SetWorksActive sets the value of WorksActive.
+func (s *TerritoryProfile) SetWorksActive(val int) {
+	s.WorksActive = val
+}
+
+// SetGeometry sets the value of Geometry.
+func (s *TerritoryProfile) SetGeometry(val TerritoryProfileGeometry) {
+	s.Geometry = val
+}
+
+// SetBbox sets the value of Bbox.
+func (s *TerritoryProfile) SetBbox(val []float64) {
+	s.Bbox = val
+}
+
+// SetPopulationSeries sets the value of PopulationSeries.
+func (s *TerritoryProfile) SetPopulationSeries(val []TerritoryProfilePopulationSeriesItem) {
+	s.PopulationSeries = val
+}
+
+// SetChildren sets the value of Children.
+func (s *TerritoryProfile) SetChildren(val []TerritoryRow) {
+	s.Children = val
+}
+
+// SetSummary sets the value of Summary.
+func (s *TerritoryProfile) SetSummary(val AreaSummary) {
+	s.Summary = val
+}
+
+// Граница (GeoJSON, упрощённая).
+type TerritoryProfileGeometry map[string]jx.Raw
+
+func (s *TerritoryProfileGeometry) init() TerritoryProfileGeometry {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type TerritoryProfileKind string
+
+const (
+	TerritoryProfileKindOkrug    TerritoryProfileKind = "okrug"
+	TerritoryProfileKindDistrict TerritoryProfileKind = "district"
+)
+
+// AllValues returns all TerritoryProfileKind values.
+func (TerritoryProfileKind) AllValues() []TerritoryProfileKind {
+	return []TerritoryProfileKind{
+		TerritoryProfileKindOkrug,
+		TerritoryProfileKindDistrict,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TerritoryProfileKind) MarshalText() ([]byte, error) {
+	switch s {
+	case TerritoryProfileKindOkrug:
+		return []byte(s), nil
+	case TerritoryProfileKindDistrict:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TerritoryProfileKind) UnmarshalText(data []byte) error {
+	switch TerritoryProfileKind(data) {
+	case TerritoryProfileKindOkrug:
+		*s = TerritoryProfileKindOkrug
+		return nil
+	case TerritoryProfileKindDistrict:
+		*s = TerritoryProfileKindDistrict
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type TerritoryProfilePopulationSeriesItem struct {
+	Year  int `json:"year"`
+	Value int `json:"value"`
+}
+
+// GetYear returns the value of Year.
+func (s *TerritoryProfilePopulationSeriesItem) GetYear() int {
+	return s.Year
+}
+
+// GetValue returns the value of Value.
+func (s *TerritoryProfilePopulationSeriesItem) GetValue() int {
+	return s.Value
+}
+
+// SetYear sets the value of Year.
+func (s *TerritoryProfilePopulationSeriesItem) SetYear(val int) {
+	s.Year = val
+}
+
+// SetValue sets the value of Value.
+func (s *TerritoryProfilePopulationSeriesItem) SetValue(val int) {
+	s.Value = val
+}
+
+// Ref: #/components/schemas/TerritoryRow
+type TerritoryRow struct {
+	ID         uuid.UUID        `json:"id"`
+	Kind       TerritoryRowKind `json:"kind"`
+	Name       string           `json:"name"`
+	ShortName  OptString        `json:"shortName"`
+	ParentId   OptUUID          `json:"parentId"`
+	ParentName OptString        `json:"parentName"`
+	AreaKm2    float64          `json:"areaKm2"`
+	// Население на 1 января; у округа — сумма районов.
+	Population     OptInt `json:"population"`
+	PopulationYear OptInt `json:"populationYear"`
+	// Чел./км².
+	Density        OptFloat64 `json:"density"`
+	Facilities     int        `json:"facilities"`
+	BuildingAreaM2 float64    `json:"buildingAreaM2"`
+	// Точек инфраструктуры.
+	Poi         int `json:"poi"`
+	WorksActive int `json:"worksActive"`
+}
+
+// GetID returns the value of ID.
+func (s *TerritoryRow) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetKind returns the value of Kind.
+func (s *TerritoryRow) GetKind() TerritoryRowKind {
+	return s.Kind
+}
+
+// GetName returns the value of Name.
+func (s *TerritoryRow) GetName() string {
+	return s.Name
+}
+
+// GetShortName returns the value of ShortName.
+func (s *TerritoryRow) GetShortName() OptString {
+	return s.ShortName
+}
+
+// GetParentId returns the value of ParentId.
+func (s *TerritoryRow) GetParentId() OptUUID {
+	return s.ParentId
+}
+
+// GetParentName returns the value of ParentName.
+func (s *TerritoryRow) GetParentName() OptString {
+	return s.ParentName
+}
+
+// GetAreaKm2 returns the value of AreaKm2.
+func (s *TerritoryRow) GetAreaKm2() float64 {
+	return s.AreaKm2
+}
+
+// GetPopulation returns the value of Population.
+func (s *TerritoryRow) GetPopulation() OptInt {
+	return s.Population
+}
+
+// GetPopulationYear returns the value of PopulationYear.
+func (s *TerritoryRow) GetPopulationYear() OptInt {
+	return s.PopulationYear
+}
+
+// GetDensity returns the value of Density.
+func (s *TerritoryRow) GetDensity() OptFloat64 {
+	return s.Density
+}
+
+// GetFacilities returns the value of Facilities.
+func (s *TerritoryRow) GetFacilities() int {
+	return s.Facilities
+}
+
+// GetBuildingAreaM2 returns the value of BuildingAreaM2.
+func (s *TerritoryRow) GetBuildingAreaM2() float64 {
+	return s.BuildingAreaM2
+}
+
+// GetPoi returns the value of Poi.
+func (s *TerritoryRow) GetPoi() int {
+	return s.Poi
+}
+
+// GetWorksActive returns the value of WorksActive.
+func (s *TerritoryRow) GetWorksActive() int {
+	return s.WorksActive
+}
+
+// SetID sets the value of ID.
+func (s *TerritoryRow) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetKind sets the value of Kind.
+func (s *TerritoryRow) SetKind(val TerritoryRowKind) {
+	s.Kind = val
+}
+
+// SetName sets the value of Name.
+func (s *TerritoryRow) SetName(val string) {
+	s.Name = val
+}
+
+// SetShortName sets the value of ShortName.
+func (s *TerritoryRow) SetShortName(val OptString) {
+	s.ShortName = val
+}
+
+// SetParentId sets the value of ParentId.
+func (s *TerritoryRow) SetParentId(val OptUUID) {
+	s.ParentId = val
+}
+
+// SetParentName sets the value of ParentName.
+func (s *TerritoryRow) SetParentName(val OptString) {
+	s.ParentName = val
+}
+
+// SetAreaKm2 sets the value of AreaKm2.
+func (s *TerritoryRow) SetAreaKm2(val float64) {
+	s.AreaKm2 = val
+}
+
+// SetPopulation sets the value of Population.
+func (s *TerritoryRow) SetPopulation(val OptInt) {
+	s.Population = val
+}
+
+// SetPopulationYear sets the value of PopulationYear.
+func (s *TerritoryRow) SetPopulationYear(val OptInt) {
+	s.PopulationYear = val
+}
+
+// SetDensity sets the value of Density.
+func (s *TerritoryRow) SetDensity(val OptFloat64) {
+	s.Density = val
+}
+
+// SetFacilities sets the value of Facilities.
+func (s *TerritoryRow) SetFacilities(val int) {
+	s.Facilities = val
+}
+
+// SetBuildingAreaM2 sets the value of BuildingAreaM2.
+func (s *TerritoryRow) SetBuildingAreaM2(val float64) {
+	s.BuildingAreaM2 = val
+}
+
+// SetPoi sets the value of Poi.
+func (s *TerritoryRow) SetPoi(val int) {
+	s.Poi = val
+}
+
+// SetWorksActive sets the value of WorksActive.
+func (s *TerritoryRow) SetWorksActive(val int) {
+	s.WorksActive = val
+}
+
+type TerritoryRowKind string
+
+const (
+	TerritoryRowKindOkrug    TerritoryRowKind = "okrug"
+	TerritoryRowKindDistrict TerritoryRowKind = "district"
+)
+
+// AllValues returns all TerritoryRowKind values.
+func (TerritoryRowKind) AllValues() []TerritoryRowKind {
+	return []TerritoryRowKind{
+		TerritoryRowKindOkrug,
+		TerritoryRowKindDistrict,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TerritoryRowKind) MarshalText() ([]byte, error) {
+	switch s {
+	case TerritoryRowKindOkrug:
+		return []byte(s), nil
+	case TerritoryRowKindDistrict:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TerritoryRowKind) UnmarshalText(data []byte) error {
+	switch TerritoryRowKind(data) {
+	case TerritoryRowKindOkrug:
+		*s = TerritoryRowKindOkrug
+		return nil
+	case TerritoryRowKindDistrict:
+		*s = TerritoryRowKindDistrict
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/TotpCode

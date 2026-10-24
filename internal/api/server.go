@@ -26,6 +26,7 @@ import (
 	"freightflow/internal/regulation"
 	"freightflow/internal/report"
 	"freightflow/internal/routing"
+	"freightflow/internal/territory"
 	"freightflow/internal/tiles"
 	"freightflow/internal/views"
 )
@@ -44,8 +45,10 @@ type Deps struct {
 	// Reports — выгрузки и отчёты.
 	Reports *report.Service
 	// Views — сохранённые виды.
-	Views  *views.Service
-	Layers *tiles.Service
+	Views *views.Service
+	// Territories — округа и районы.
+	Territories *territory.Service
+	Layers      *tiles.Service
 	// Regulation — зоны, правила и статистика регулирования.
 	Regulation *regulation.Service
 	// Routing — маршруты грузовиков.
@@ -67,20 +70,21 @@ const routingBurst = 60
 
 // Server реализует обработчики и проверку безопасности ogen.
 type Server struct {
-	identity   *identity.Service
-	ingest     *ingest.Service
-	layers     *tiles.Service
-	regulation *regulation.Service
-	routing    *routing.Service
-	facilities *facility.Service
-	reports    *report.Service
-	views      *views.Service
-	routeLimit *ratelimit.Limiter
-	sessions   *session.Manager
-	mailer     Mailer
-	baseURL    string
-	log        *slog.Logger
-	perms      map[string]string
+	identity    *identity.Service
+	ingest      *ingest.Service
+	layers      *tiles.Service
+	regulation  *regulation.Service
+	routing     *routing.Service
+	facilities  *facility.Service
+	reports     *report.Service
+	views       *views.Service
+	territories *territory.Service
+	routeLimit  *ratelimit.Limiter
+	sessions    *session.Manager
+	mailer      Mailer
+	baseURL     string
+	log         *slog.Logger
+	perms       map[string]string
 }
 
 var _ gen.Handler = (*Server)(nil)
@@ -92,7 +96,7 @@ func New(d Deps) (http.Handler, error) {
 		return nil, err
 	}
 	s := &Server{
-		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, facilities: d.Facilities, reports: d.Reports, views: d.Views, sessions: d.Sessions, mailer: d.Mailer,
+		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, facilities: d.Facilities, reports: d.Reports, views: d.Views, territories: d.Territories, sessions: d.Sessions, mailer: d.Mailer,
 		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), routeLimit: d.RoutingLimit,
 	}
 	if s.routeLimit == nil {

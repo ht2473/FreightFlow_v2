@@ -26,6 +26,8 @@ tags:
     description: Реестр объектов логистики
   - name: exports
     description: Выгрузки данных
+  - name: territories
+    description: Территории
   - name: views
     description: Сохранённые виды
   - name: regulation
@@ -847,6 +849,45 @@ paths:
           content:
             application/octet-stream:
               schema: { type: string, format: binary }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /territories:
+    get:
+      tags: [territories]
+      operationId: listTerritories
+      summary: Округа и районы Москвы с показателями
+      x-permission: map.view
+      parameters:
+        - name: kind
+          in: query
+          schema: { type: string, enum: [okrug, district] }
+      responses:
+        "200":
+          description: Территории
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TerritoryRow" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /territories/{territoryId}:
+    get:
+      tags: [territories]
+      operationId: getTerritory
+      summary: Профиль территории — показатели, граница, население, районы, сводка
+      x-permission: map.view
+      parameters:
+        - name: territoryId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Профиль
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TerritoryProfile" }
         default: { $ref: "#/components/responses/Problem" }
 
   /views:
@@ -2057,6 +2098,53 @@ components:
         area: { type: number, description: "Площадь застройки, м²" }
         confidence: { type: number }
         mkadMin: { type: number, description: "До МКАД, грузовик 20 т, мин" }
+
+    TerritoryRow:
+      type: object
+      required: [id, kind, name, areaKm2, facilities, buildingAreaM2, poi, worksActive]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [okrug, district] }
+        name: { type: string }
+        shortName: { type: string }
+        parentId: { type: string, format: uuid }
+        parentName: { type: string }
+        areaKm2: { type: number }
+        population: { type: integer, description: "Население на 1 января; у округа — сумма районов" }
+        populationYear: { type: integer }
+        density: { type: number, description: "чел./км²" }
+        facilities: { type: integer }
+        buildingAreaM2: { type: number }
+        poi: { type: integer, description: "Точек инфраструктуры" }
+        worksActive: { type: integer }
+
+    TerritoryProfile:
+      allOf:
+        - $ref: "#/components/schemas/TerritoryRow"
+        - type: object
+          required: [geometry, bbox, population_series, children, summary]
+          properties:
+            geometry:
+              type: object
+              description: Граница (GeoJSON, упрощённая)
+              additionalProperties: {}
+            bbox:
+              type: array
+              items: { type: number }
+              minItems: 4
+              maxItems: 4
+            population_series:
+              type: array
+              items:
+                type: object
+                required: [year, value]
+                properties:
+                  year: { type: integer }
+                  value: { type: integer }
+            children:
+              type: array
+              items: { $ref: "#/components/schemas/TerritoryRow" }
+            summary: { $ref: "#/components/schemas/AreaSummary" }
 
     SavedView:
       type: object

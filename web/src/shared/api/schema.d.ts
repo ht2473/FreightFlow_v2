@@ -621,6 +621,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/territories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Округа и районы Москвы с показателями */
+        get: operations["listTerritories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/territories/{territoryId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Профиль территории — показатели, граница, население, районы, сводка */
+        get: operations["getTerritory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/views": {
         parameters: {
             query?: never;
@@ -1481,6 +1515,41 @@ export interface components {
             confidence: number;
             /** @description До МКАД, грузовик 20 т, мин */
             mkadMin?: number;
+        };
+        TerritoryRow: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "okrug" | "district";
+            name: string;
+            shortName?: string;
+            /** Format: uuid */
+            parentId?: string;
+            parentName?: string;
+            areaKm2: number;
+            /** @description Население на 1 января; у округа — сумма районов */
+            population?: number;
+            populationYear?: number;
+            /** @description чел./км² */
+            density?: number;
+            facilities: number;
+            buildingAreaM2: number;
+            /** @description Точек инфраструктуры */
+            poi: number;
+            worksActive: number;
+        };
+        TerritoryProfile: components["schemas"]["TerritoryRow"] & {
+            /** @description Граница (GeoJSON, упрощённая) */
+            geometry: {
+                [key: string]: unknown;
+            };
+            bbox: number[];
+            population_series: {
+                year: number;
+                value: number;
+            }[];
+            children: components["schemas"]["TerritoryRow"][];
+            summary: components["schemas"]["AreaSummary"];
         };
         SavedView: {
             /** Format: uuid */
@@ -2902,6 +2971,52 @@ export interface operations {
                 };
                 content: {
                     "application/octet-stream": string;
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listTerritories: {
+        parameters: {
+            query?: {
+                kind?: "okrug" | "district";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Территории */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TerritoryRow"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getTerritory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                territoryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Профиль */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TerritoryProfile"];
                 };
             };
             default: components["responses"]["Problem"];

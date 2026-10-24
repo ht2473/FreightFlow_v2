@@ -355,6 +355,7 @@ function SearchBar({ search, set }: { search: FacilitySearch; set: (p: Partial<F
                   q: undefined,
                   type: undefined,
                   okrug: undefined,
+                  district: undefined,
                   ring: undefined,
                   conf: undefined,
                   restr: undefined,
@@ -378,6 +379,7 @@ function activeChips(sr: FacilitySearch): { key: string; label: string; clear: P
   const count = (v: string | undefined) => (v ? v.split(",").length : 0);
   if (sr.type) out.push({ key: "type", label: `Тип: ${count(sr.type)}`, clear: { type: undefined } });
   if (sr.okrug) out.push({ key: "okrug", label: `Округ: ${count(sr.okrug)}`, clear: { okrug: undefined } });
+  if (sr.district) out.push({ key: "district", label: `Район: ${count(sr.district)}`, clear: { district: undefined } });
   if (sr.ring) out.push({ key: "ring", label: `Пояс: ${count(sr.ring)}`, clear: { ring: undefined } });
   if (sr.conf)
     out.push({

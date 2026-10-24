@@ -331,6 +331,16 @@ func (UnimplementedHandler) GetSignQuality(ctx context.Context) (r *SignQuality,
 	return r, ht.ErrNotImplemented
 }
 
+// GetTerritory implements getTerritory operation.
+//
+// Профиль территории — показатели, граница, население,
+// районы, сводка.
+//
+// GET /territories/{territoryId}
+func (UnimplementedHandler) GetTerritory(ctx context.Context, params GetTerritoryParams) (r *TerritoryProfile, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetUser implements getUser operation.
 //
 // Пользователь.
@@ -422,6 +432,15 @@ func (UnimplementedHandler) ListRuns(ctx context.Context, params ListRunsParams)
 //
 // GET /data/sources
 func (UnimplementedHandler) ListSources(ctx context.Context) (r []SourceInfo, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListTerritories implements listTerritories operation.
+//
+// Округа и районы Москвы с показателями.
+//
+// GET /territories
+func (UnimplementedHandler) ListTerritories(ctx context.Context, params ListTerritoriesParams) (r []TerritoryRow, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -261,6 +261,10 @@ func (s *Server) FacilityArea(ctx context.Context, req *gen.FacilityAreaReq) (*g
 	if err != nil {
 		return nil, err
 	}
+	return areaSummary(a), nil
+}
+
+func areaSummary(a *facility.AreaSummary) *gen.AreaSummary {
 	conv := func(in []facility.FacetValue) []gen.FacetValue {
 		out := make([]gen.FacetValue, len(in))
 		for i, v := range in {
@@ -276,5 +280,5 @@ func (s *Server) FacilityArea(ctx context.Context, req *gen.FacilityAreaReq) (*g
 	for i, it := range a.Top {
 		out.Top[i] = facilityItem(it)
 	}
-	return out, nil
+	return out
 }

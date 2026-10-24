@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter, lazyRouteComponent, redirec
 import { compareSearchSchema, facilitySearchSchema } from "@/features/facilities/search";
 import { mapSearchSchema } from "@/features/map/state";
 import { networkSearchSchema } from "@/features/network/search";
+import { territorySearchSchema } from "@/features/territories/search";
 import { ErrorPage, PendingPage } from "./ErrorPage";
 import { NotFound } from "./NotFound";
 import { SectionPage } from "./SectionPage";
@@ -66,6 +67,17 @@ const routeTree = rootRoute.addChildren([
     getParentRoute: () => rootRoute,
     path: "/facilities/$facilityId",
     component: lazyRouteComponent(() => import("@/features/facilities/FacilityPage"), "FacilityPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/territories",
+    validateSearch: (search: Record<string, unknown>) => territorySearchSchema.parse(search),
+    component: lazyRouteComponent(() => import("@/features/territories/TerritoriesPage"), "TerritoriesPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/territories/$territoryId",
+    component: lazyRouteComponent(() => import("@/features/territories/TerritoryPage"), "TerritoryPage"),
   }),
   createRoute({
     getParentRoute: () => rootRoute,
