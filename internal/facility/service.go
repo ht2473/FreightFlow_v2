@@ -287,15 +287,20 @@ func (s *Service) access(ctx context.Context, id uuid.UUID) ([]Access, error) {
 }
 
 func (s *Service) restrictions(ctx context.Context, id uuid.UUID) ([]Restriction, error) {
+	// Участки — отдельно, представлению — их список: условие на ключ DISTINCT ON уходит внутрь
+	// представления, иначе оно считается целиком для каждого участка (секунды вместо миллисекунд).
 	rows, err := s.pool.Query(ctx, `
-		SELECT e.kind, e.value::float8, e.condition, s.name, coalesce(e.origins, '{}'),
-		       min(ST_Distance(s.geom::geography, f.point::geography))::float8 AS dist
-		FROM infra.facility f
-		JOIN network.road_segment s ON s.geom && ST_Expand(f.point, 0.008)
-		                            AND ST_DWithin(s.geom::geography, f.point::geography, 500)
-		JOIN network.restriction_effective e ON e.segment_id = s.id
-		WHERE f.id = $1
-		GROUP BY e.kind, e.value, e.condition, s.name, e.origins
+		WITH seg AS MATERIALIZED (
+			SELECT s.id, s.name, ST_Distance(s.geom::geography, f.point::geography) AS dist
+			FROM infra.facility f
+			JOIN network.road_segment s ON s.geom && ST_Expand(f.point, 0.008)
+			                            AND ST_DWithin(s.geom::geography, f.point::geography, 500)
+			WHERE f.id = $1
+		)
+		SELECT e.kind, e.value::float8, e.condition, seg.name, coalesce(e.origins, '{}'), min(seg.dist)::float8 AS dist
+		FROM network.restriction_effective e JOIN seg ON seg.id = e.segment_id
+		WHERE e.segment_id = ANY (ARRAY(SELECT id FROM seg))
+		GROUP BY e.kind, e.value, e.condition, seg.name, e.origins
 		ORDER BY dist LIMIT 30`, id)
 	if err != nil {
 		return nil, err

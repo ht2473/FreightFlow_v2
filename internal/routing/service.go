@@ -262,11 +262,13 @@ func (s *Service) avoided(ctx context.Context, baseline Route, p Profile) ([]Avo
 		path = string(line)
 	}
 	rows, err := s.pool.Query(ctx, `
-		WITH seg AS (`+segments+`
+		WITH seg AS MATERIALIZED (`+segments+`
 		)
 		SELECT e.kind, coalesce(seg.name, ''), e.value::float8, coalesce(e.origins, '{}'), count(*), sum(seg.length_m)
 		FROM seg JOIN network.restriction_effective e ON e.segment_id = seg.id
-		WHERE (e.condition IS NULL OR NOT network.time_based(e.condition))
+		-- Список участков — внутрь представления (см. facility.restrictions).
+		WHERE e.segment_id = ANY (ARRAY(SELECT id FROM seg))
+		  AND (e.condition IS NULL OR NOT network.time_based(e.condition))
 		  AND ((e.kind IN ('hgv_ban', 'motor_vehicle_ban') AND coalesce(e.condition, '') NOT ILIKE '%destination%'
 		        AND coalesce(e.condition, '') NOT ILIKE '%въезд%')
 		       OR (e.kind = 'hazmat_ban' AND $2)
