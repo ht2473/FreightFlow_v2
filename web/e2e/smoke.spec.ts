@@ -8,7 +8,7 @@ test.skip(!analyst.email || !analyst.password, "нужны FF_E2E_EMAIL и FF_E2
 const login = (page: Page, next = "/") => loginAs(page, analyst, next);
 
 test("вход, оболочка, палитра команд, тема и выход", async ({ page }) => {
-  await login(page);
+  await loginAs(page, analyst, "/", { fresh: true });
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole("heading", { name: "Дашборд" })).toBeVisible();
 

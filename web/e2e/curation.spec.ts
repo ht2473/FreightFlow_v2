@@ -9,6 +9,8 @@ test.skip(
   "нужны FF_E2E_* и FF_DEV_STEWARD_*",
 );
 
+const reason = `проверка уточнения ${Date.now()}`;
+
 test("неточность: сообщение аналитика, правка и закрытие редактором", async ({ page, browser }, info) => {
   test.setTimeout(120_000);
   const message = `Проверка e2e ${Date.now()}: название устарело`;
@@ -42,12 +44,12 @@ test("неточность: сообщение аналитика, правка 
   await drawer.getByRole("button", { name: "Уточнить" }).click();
   const edit = e.getByRole("dialog", { name: "Уточнить запись" });
   await edit.getByRole("textbox", { name: "Название" }).fill("Склад (уточнено e2e)");
-  await edit.getByRole("textbox", { name: "Причина" }).fill("проверка уточнения");
+  await edit.getByRole("textbox", { name: "Причина" }).fill(reason);
   await edit.getByRole("button", { name: "Сохранить" }).click();
   await expect(drawer.getByText("Уточнено редактором: название")).toBeVisible({ timeout: 15_000 });
   await expect(drawer.getByRole("heading", { name: "Склад (уточнено e2e)" })).toBeVisible();
   await drawer.getByRole("tab", { name: "История" }).click();
-  await expect(drawer.getByText("проверка уточнения", { exact: false })).toBeVisible();
+  await expect(drawer.getByText(reason, { exact: false })).toBeVisible();
   await e.screenshot({ path: info.outputPath("curation-history.png") });
   await drawer.getByRole("button", { name: "Отменить" }).first().click();
   await expect(e.getByText("Правка отменена")).toBeVisible();
