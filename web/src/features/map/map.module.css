@@ -417,6 +417,11 @@
   gap: 2px;
 }
 
+.exportTool {
+  top: 180px;
+  right: 12px;
+}
+
 .measure {
   top: 12px;
   left: 50%;

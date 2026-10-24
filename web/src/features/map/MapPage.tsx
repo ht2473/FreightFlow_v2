@@ -1,6 +1,6 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { Feature, FeatureCollection, Point } from "geojson";
-import { Minus, Plus, X } from "lucide-react";
+import { ImageDown, Minus, Plus, X } from "lucide-react";
 import type { ExpressionSpecification, GeoJSONSource, MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Guard } from "@/app/Guard";
@@ -26,11 +26,13 @@ import { DEFAULT_VIEW, mountMap, onStyleReady, unmountMap } from "@/shared/map/i
 import { emptyStyle, fullStyle, useBasemapAvailable } from "@/shared/map/style";
 import { IconButton } from "@/shared/ui";
 import { Tabs } from "@/shared/ui/navigation";
+import { toast } from "@/shared/ui/toast";
 import { useResolvedTheme } from "@/shared/useResolvedTheme";
 import { ViewsMenu } from "@/shared/ViewsMenu";
 import { FacilityDrawer } from "../facilities/FacilityDrawer";
 import { AreaSummary } from "./AreaSummary";
 import { AreaTool, type DrawMode, type Drawn, isPolygon, lineLength } from "./AreaTool";
+import { mapImage } from "./exportImage";
 import { FeatureCard, type Selection } from "./FeatureCard";
 import { LayersPanel } from "./LayersPanel";
 import { Legend } from "./Legend";
@@ -303,6 +305,35 @@ function MapWorkspace() {
     void navigate({ search: (prev: MapSearch) => ({ ...prev, l: l.join(",") }), replace: true });
   };
 
+  // Изображение карты с легендой и источниками.
+  const [saving, setSaving] = useState(false);
+  const saveImage = async () => {
+    if (!map) {
+      return;
+    }
+    setSaving(true);
+    try {
+      const day = new Date();
+      const layers = [...catalog].reverse().filter((l) => visible.has(l.code));
+      const blob = await mapImage(map, {
+        title: `FreightFlow · Карта Москвы · ${day.toLocaleDateString("ru-RU")}`,
+        layers,
+        palette,
+        basemap: Boolean(basemap.data),
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `map-${day.toISOString().slice(0, 10)}.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      toast.error("Не удалось сохранить изображение карты");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const focusObject = (o: ObjectItem) => {
     if (!map) {
       return;
@@ -407,6 +438,11 @@ function MapWorkspace() {
           </IconButton>
           <IconButton label={m.zoomOut} onPress={() => map?.zoomOut()}>
             <Minus size={17} />
+          </IconButton>
+        </div>
+        <div className={`${s.float} ${s.exportTool}`}>
+          <IconButton label="Сохранить изображение карты" onPress={() => void saveImage()} isDisabled={saving || !map}>
+            <ImageDown size={17} />
           </IconButton>
         </div>
         <AreaTool

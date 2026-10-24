@@ -143,3 +143,30 @@ test("карта: кластеры объектов на мелком масшт
   await page.mouse.click(found?.x ?? 0, found?.y ?? 0);
   await expect(page).toHaveURL(/z=(1[0-9]|9\.[1-9])/, { timeout: 5000 });
 });
+
+test("карта: изображение с легендой и источниками", async ({ page }, info) => {
+  test.setTimeout(60_000);
+  await login(page, analyst, view);
+  const objects = page.getByRole("tabpanel", { name: "Объекты" });
+  await expect(objects.getByText(/В видимой области · [1-9]/)).toBeVisible({ timeout: 20_000 });
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Сохранить изображение карты" }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^map-\d{4}-\d{2}-\d{2}\.png$/);
+  const file = info.outputPath("map-image.png");
+  await download.saveAs(file);
+  const size = await page.evaluate(
+    async (b64) => {
+      const img = new Image();
+      img.src = `data:image/png;base64,${b64}`;
+      await img.decode();
+      return { w: img.naturalWidth, h: img.naturalHeight };
+    },
+    (await import("node:fs")).readFileSync(file).toString("base64"),
+  );
+  const canvas = await page.locator(".maplibregl-canvas").boundingBox();
+  // Подпись с источниками добавляется под кадром карты.
+  expect(size.w).toBeGreaterThanOrEqual(Math.floor(canvas?.width ?? 0));
+  expect(size.h).toBeGreaterThan(Math.floor(canvas?.height ?? 0));
+});

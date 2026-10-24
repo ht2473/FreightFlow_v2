@@ -9,7 +9,9 @@ test("сохранённый вид реестра: сохранить, прим
   test.setTimeout(60_000);
   const name = `Склады e2e ${Date.now()}`;
   await login(page, analyst, "/facilities?type=warehouse&sort=-area");
-  await expect(page.getByRole("table", { name: "Реестр объектов" }).getByRole("row").nth(1)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("table", { name: "Реестр объектов" }).getByRole("row").nth(1)).toBeVisible({
+    timeout: 30_000,
+  });
 
   await page.getByRole("button", { name: "Виды" }).click();
   await page.getByRole("button", { name: "Сохранить текущий вид" }).click();
