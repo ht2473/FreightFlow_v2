@@ -110,3 +110,36 @@ test("карта: выделение области со сводкой и из�
   await expect(page.getByText(/^Расстояние: [\d, ]+ (м|км)/)).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("карта: кластеры объектов на мелком масштабе", async ({ page }, info) => {
+  test.setTimeout(60_000);
+  await login(page, analyst, "/map?c=37.62000,55.75000&z=9");
+  const objects = page.getByRole("tabpanel", { name: "Объекты" });
+  await expect(objects.getByText(/В видимой области · [1-9]/)).toBeVisible({ timeout: 20_000 });
+  await page.waitForTimeout(1000);
+  await page.screenshot({ path: info.outputPath("map-clusters.png") });
+
+  // Кластер находится наведением: подсказка с числом объектов; щелчок приближает карту.
+  const box = await page.locator(".maplibregl-canvas").boundingBox();
+  if (!box) {
+    throw new Error("нет холста карты");
+  }
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  const tip = page.getByText(/^Объектов: \d/);
+  let found: { x: number; y: number } | null = null;
+  search: for (let r = 0; r < 300; r += 12) {
+    for (let a = 0; a < 360; a += r === 0 ? 360 : Math.max(8, 600 / Math.max(r, 1))) {
+      const x = cx + r * Math.cos((a * Math.PI) / 180);
+      const y = cy + r * Math.sin((a * Math.PI) / 180);
+      await page.mouse.move(x, y);
+      if (await tip.isVisible()) {
+        found = { x, y };
+        break search;
+      }
+    }
+  }
+  expect(found, "кластер не найден").not.toBeNull();
+  await page.mouse.click(found?.x ?? 0, found?.y ?? 0);
+  await expect(page).toHaveURL(/z=(1[0-9]|9\.[1-9])/, { timeout: 5000 });
+});

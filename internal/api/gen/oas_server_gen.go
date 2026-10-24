@@ -139,6 +139,12 @@ type Handler interface {
 	//
 	// GET /facilities/{facilityId}/history
 	FacilityHistory(ctx context.Context, params FacilityHistoryParams) (*FacilityHistory, error)
+	// FacilityPoints implements facilityPoints operation.
+	//
+	// Точки действующих объектов для кластеров карты.
+	//
+	// GET /facilities/points
+	FacilityPoints(ctx context.Context) ([]FacilityPoint, error)
 	// GetExport implements getExport operation.
 	//
 	// Состояние выгрузки.

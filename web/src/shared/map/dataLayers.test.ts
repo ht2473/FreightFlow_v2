@@ -1,5 +1,14 @@
+import type { ExpressionSpecification } from "maplibre-gl";
 import { describe, expect, it } from "vitest";
-import { buildDataLayers, codeOf, interactiveLayerIds, type MapLayer } from "./dataLayers";
+import {
+  buildDataLayers,
+  CLUSTER_UNTIL,
+  codeOf,
+  interactiveLayerIds,
+  isClusterLayer,
+  type MapLayer,
+  POINTS_SOURCE,
+} from "./dataLayers";
 
 const base = {
   description: "",
@@ -111,5 +120,41 @@ describe("buildDataLayers", () => {
     ]);
     expect(codeOf("data:facilities:circle")).toBe("facilities");
     expect(codeOf("water")).toBeUndefined();
+  });
+
+  it("объекты на мелких масштабах — кластерами с отбором до группировки", () => {
+    const points = {
+      type: "FeatureCollection" as const,
+      features: [
+        {
+          type: "Feature" as const,
+          id: "a",
+          properties: { id: "a" },
+          geometry: { type: "Point" as const, coordinates: [37.6, 55.7] },
+        },
+      ],
+    };
+    const filter: ExpressionSpecification = ["in", ["get", "type"], ["literal", ["warehouse"]]];
+    const { sources, layers } = buildDataLayers(
+      catalog,
+      { facilities: { visible: true, opacity: 1, filter } },
+      palette,
+      "http://test",
+      points,
+    );
+    expect(sources[POINTS_SOURCE]).toMatchObject({
+      type: "geojson",
+      cluster: true,
+      clusterMaxZoom: CLUSTER_UNTIL - 1,
+      filter,
+    });
+    expect(layers.find((l) => l.id === "data:facilities:circle")?.minzoom).toBe(CLUSTER_UNTIL);
+    expect(layers.filter((l) => "source" in l && l.source === POINTS_SOURCE).map((l) => [l.id, l.maxzoom])).toEqual([
+      ["data:facilities:cluster:circle", CLUSTER_UNTIL],
+      ["data:facilities:cluster:count", CLUSTER_UNTIL],
+      ["data:facilities:low:circle", CLUSTER_UNTIL],
+    ]);
+    expect(isClusterLayer("data:facilities:cluster:circle")).toBe(true);
+    expect(interactiveLayerIds(layers)).toContain("data:facilities:low:circle");
   });
 });

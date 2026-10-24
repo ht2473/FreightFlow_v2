@@ -503,8 +503,9 @@
   cursor: pointer;
 }
 
-.viewsRow {
-  display: flex;
+.panel > .viewsRow {
+  flex: none;
+  flex-direction: row;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;

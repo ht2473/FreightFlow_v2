@@ -519,6 +519,22 @@ paths:
               schema: { $ref: "#/components/schemas/FacilityPage" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /facilities/points:
+    get:
+      tags: [facilities]
+      operationId: facilityPoints
+      summary: Точки действующих объектов для кластеров карты
+      x-permission: map.view
+      responses:
+        "200":
+          description: Точки
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/FacilityPoint" }
+        default: { $ref: "#/components/responses/Problem" }
+
   /facilities/facets:
     get:
       tags: [facilities]
@@ -2028,6 +2044,19 @@ components:
         worksActive: { type: integer }
         worksPlanned: { type: integer }
         top: { type: array, items: { $ref: "#/components/schemas/FacilityItem" } }
+
+    FacilityPoint:
+      type: object
+      required: [id, type, lon, lat, confidence]
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string }
+        name: { type: string }
+        lon: { type: number }
+        lat: { type: number }
+        area: { type: number, description: "Площадь застройки, м²" }
+        confidence: { type: number }
+        mkadMin: { type: number, description: "До МКАД, грузовик 20 т, мин" }
 
     SavedView:
       type: object

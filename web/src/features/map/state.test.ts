@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MapLayer } from "@/shared/map/dataLayers";
-import { formatCenter, mapSearchSchema, parseCenter, visibleLayers } from "./state";
+import { formatCenter, mapSearchSchema, matchesFacilityFilter, parseCenter, visibleLayers } from "./state";
 
 const layer = (code: string, visible: boolean) => ({ code, visible }) as MapLayer;
 const catalog = [layer("facilities", true), layer("fuel_stations", false), layer("rings", true)];
@@ -24,5 +24,14 @@ describe("состояние карты в адресе", () => {
   it("схема отбрасывает неверные значения, не ломая страницу", () => {
     expect(mapSearchSchema.parse({ z: 12, c: "37,55" })).toEqual({ z: 12, c: "37,55" });
     expect(mapSearchSchema.parse({ z: 40, l: 5 })).toEqual({ z: undefined, l: undefined, c: undefined });
+  });
+
+  it("фильтр реестра на карте: тип, достоверность, время до МКАД", () => {
+    const f = { ft: "warehouse,terminal", fc: 0.5, fm: 30 };
+    expect(matchesFacilityFilter(f, { type: "warehouse", confidence: 0.8, mkad_min: 12 })).toBe(true);
+    expect(matchesFacilityFilter(f, { type: "port", confidence: 0.8, mkad_min: 12 })).toBe(false);
+    expect(matchesFacilityFilter(f, { type: "warehouse", confidence: 0.3, mkad_min: 12 })).toBe(false);
+    expect(matchesFacilityFilter(f, { type: "warehouse", confidence: 0.8 })).toBe(false);
+    expect(matchesFacilityFilter({}, { type: "port" })).toBe(true);
   });
 });

@@ -1,4 +1,6 @@
+import type { FeatureCollection } from "geojson";
 import type {
+  CircleLayerSpecification,
   DataDrivenPropertyValueSpecification,
   ExpressionSpecification,
   LayerSpecification,
@@ -102,28 +104,107 @@ const facilityRadius: ExpressionSpecification = [
   facilitySize,
 ];
 
-function pointLayers(l: MapLayer, p: Palette, op: number): LayerSpecification[] {
+function pointPaint(l: MapLayer, p: Palette, op: number): CircleLayerSpecification["paint"] {
   const facilities = l.code === "facilities";
   // Низкая достоверность — бледнее (правило в легенде слоя).
   const fillOpacity: DataDrivenPropertyValueSpecification<number> = facilities
     ? ["*", op, ["case", ["<", ["coalesce", ["get", "confidence"], 1], 0.5], 0.5, 0.95]]
     : op * 0.95;
+  return {
+    "circle-color": colorExpr(l, p),
+    "circle-opacity": fillOpacity,
+    "circle-radius": facilities ? facilityRadius : ["interpolate", ["linear"], ["zoom"], 9, 3.5, 13, 5, 16, 6.5],
+    "circle-stroke-color": ["case", selected, color(p, "acc-ring"), hovered, color(p, "tx"), color(p, "panel")],
+    "circle-stroke-width": ["case", selected, 4, hovered, 2, 1.5],
+    "circle-stroke-opacity": op,
+  };
+}
+
+function pointLayers(l: MapLayer, p: Palette, op: number): LayerSpecification[] {
   return [
     {
       id: layerId(l.code, "circle"),
       type: "circle",
       source: l.code,
       "source-layer": l.code,
-      paint: {
-        "circle-color": colorExpr(l, p),
-        "circle-opacity": fillOpacity,
-        "circle-radius": facilities ? facilityRadius : ["interpolate", ["linear"], ["zoom"], 9, 3.5, 13, 5, 16, 6.5],
-        "circle-stroke-color": ["case", selected, color(p, "acc-ring"), hovered, color(p, "tx"), color(p, "panel")],
-        "circle-stroke-width": ["case", selected, 4, hovered, 2, 1.5],
-        "circle-stroke-opacity": op,
-      },
+      paint: pointPaint(l, p, op),
     },
   ];
+}
+
+/** До этого масштаба (не включая) объекты показываются кластерами. */
+export const CLUSTER_UNTIL = 12;
+
+/** Источник точек объектов для кластеров. */
+export const POINTS_SOURCE = "facilities:points";
+
+/** Слой кластера по идентификатору слоя MapLibre. */
+export const isClusterLayer = (id: string) => id === layerId("facilities", "cluster:circle");
+
+/**
+ * Кластеры объектов на мелких масштабах: точки реестра собираются в группы на стороне карты,
+ * отбор реестра применяется до группировки — число в кластере точное.
+ */
+function clusterLayers(
+  l: MapLayer,
+  points: FeatureCollection,
+  p: Palette,
+  op: number,
+  filter: ExpressionSpecification | undefined,
+): { source: SourceSpecification; layers: LayerSpecification[] } {
+  const isCluster: ExpressionSpecification = ["has", "point_count"];
+  const zooms = { minzoom: l.minzoom, maxzoom: CLUSTER_UNTIL };
+  return {
+    source: {
+      type: "geojson",
+      data: points,
+      cluster: true,
+      clusterMaxZoom: CLUSTER_UNTIL - 1,
+      clusterRadius: 44,
+      promoteId: "id",
+      attribution: l.attribution,
+      ...(filter ? { filter } : {}),
+    },
+    layers: [
+      {
+        id: layerId(l.code, "cluster:circle"),
+        type: "circle",
+        source: POINTS_SOURCE,
+        filter: isCluster,
+        ...zooms,
+        paint: {
+          "circle-color": color(p, "acc"),
+          "circle-opacity": op * 0.88,
+          "circle-radius": ["step", ["get", "point_count"], 11, 10, 14, 50, 18, 200, 23],
+          "circle-stroke-color": ["case", hovered, color(p, "tx"), color(p, "panel")],
+          "circle-stroke-width": ["case", hovered, 2.5, 2],
+          "circle-stroke-opacity": op,
+        },
+      },
+      {
+        id: layerId(l.code, "cluster:count"),
+        type: "symbol",
+        source: POINTS_SOURCE,
+        filter: isCluster,
+        ...zooms,
+        layout: {
+          "text-field": ["get", "point_count_abbreviated"],
+          "text-font": ["Noto Sans Medium"],
+          "text-size": 11.5,
+          "text-allow-overlap": true,
+        },
+        paint: { "text-color": color(p, "acc-on"), "text-opacity": op },
+      },
+      {
+        id: layerId(l.code, "low:circle"),
+        type: "circle",
+        source: POINTS_SOURCE,
+        filter: ["!", isCluster],
+        ...zooms,
+        paint: pointPaint(l, p, op),
+      },
+    ],
+  };
 }
 
 function lineWidth(code: string): DataDrivenPropertyValueSpecification<number> {
@@ -260,6 +341,7 @@ export function buildDataLayers(
   state: Record<string, LayerState>,
   palette: Palette,
   origin = window.location.origin,
+  facilityPoints?: FeatureCollection,
 ): { sources: Record<string, SourceSpecification>; layers: LayerSpecification[] } {
   const sources: Record<string, SourceSpecification> = {};
   const layers: LayerSpecification[] = [];
@@ -282,8 +364,16 @@ export function buildDataLayers(
         : l.geometry === "line"
           ? lineLayers(l, palette, op)
           : polygonLayers(l, palette, op);
+    // Точки объектов на мелких масштабах — кластерами, тайлы — с масштаба CLUSTER_UNTIL.
+    const clustered = l.code === "facilities" && facilityPoints !== undefined;
     for (const x of ls) {
-      layers.push(withFilter({ ...x, minzoom: l.minzoom } as LayerSpecification, st.filter));
+      const minzoom = clustered ? CLUSTER_UNTIL : l.minzoom;
+      layers.push(withFilter({ ...x, minzoom } as LayerSpecification, st.filter));
+    }
+    if (clustered) {
+      const c = clusterLayers(l, facilityPoints, palette, op, st.filter);
+      sources[POINTS_SOURCE] = c.source;
+      layers.push(...c.layers);
     }
   }
   return { sources, layers };

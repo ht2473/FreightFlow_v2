@@ -198,6 +198,15 @@ func (UnimplementedHandler) FacilityHistory(ctx context.Context, params Facility
 	return r, ht.ErrNotImplemented
 }
 
+// FacilityPoints implements facilityPoints operation.
+//
+// Точки действующих объектов для кластеров карты.
+//
+// GET /facilities/points
+func (UnimplementedHandler) FacilityPoints(ctx context.Context) (r []FacilityPoint, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetExport implements getExport operation.
 //
 // Состояние выгрузки.

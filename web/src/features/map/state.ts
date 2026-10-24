@@ -67,6 +67,18 @@ export function layerStates(
   return out;
 }
 
+/** Подходит ли объект под фильтр реестра — то же правило, что у слоёв в facilityFilters. */
+export function matchesFacilityFilter(s: MapSearch, p: { type?: unknown; confidence?: unknown; mkad_min?: unknown }) {
+  const types = s.ft ? s.ft.split(",").filter(Boolean) : [];
+  if (types.length > 0 && !types.includes(String(p.type))) {
+    return false;
+  }
+  if (s.fc !== undefined && (typeof p.confidence === "number" ? p.confidence : 0) < s.fc) {
+    return false;
+  }
+  return !(s.fm !== undefined && (typeof p.mkad_min === "number" ? p.mkad_min : 100000) > s.fm);
+}
+
 /** Есть ли фильтр объектов из реестра. */
 export function hasFacilityFilter(s: MapSearch): boolean {
   return Boolean(s.ft || s.fc !== undefined || s.fm !== undefined);

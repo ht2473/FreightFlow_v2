@@ -24,6 +24,7 @@ const (
 	FacilityAreaOperation          OperationName = "FacilityArea"
 	FacilityFacetsOperation        OperationName = "FacilityFacets"
 	FacilityHistoryOperation       OperationName = "FacilityHistory"
+	FacilityPointsOperation        OperationName = "FacilityPoints"
 	GetExportOperation             OperationName = "GetExport"
 	GetExportFileOperation         OperationName = "GetExportFile"
 	GetFacilityOperation           OperationName = "GetFacility"

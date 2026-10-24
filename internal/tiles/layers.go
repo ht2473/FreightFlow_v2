@@ -529,7 +529,7 @@ var Registry = []Layer{
 		Attribution: osmAttribution, Visible: true,
 		Style: Style{
 			Kind: "single", Color: "acc",
-			Note: "Размер — площадь застройки; бледнее — достоверность ниже 0,5",
+			Note: "Размер — площадь застройки; бледнее — достоверность ниже 0,5; на мелких масштабах — группы с числом объектов",
 		},
 		Properties: []Property{
 			{Name: "name", Title: "Название", Kind: "text"},

@@ -160,6 +160,12 @@ type Invoker interface {
 	//
 	// GET /facilities/{facilityId}/history
 	FacilityHistory(ctx context.Context, params FacilityHistoryParams) (*FacilityHistory, error)
+	// FacilityPoints invokes facilityPoints operation.
+	//
+	// Точки действующих объектов для кластеров карты.
+	//
+	// GET /facilities/points
+	FacilityPoints(ctx context.Context) ([]FacilityPoint, error)
 	// GetExport invokes getExport operation.
 	//
 	// Состояние выгрузки.
@@ -3133,6 +3139,131 @@ func (c *Client) sendFacilityHistory(ctx context.Context, params FacilityHistory
 
 	stage = "DecodeResponse"
 	result, err := decodeFacilityHistoryResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// FacilityPoints invokes facilityPoints operation.
+//
+// Точки действующих объектов для кластеров карты.
+//
+// GET /facilities/points
+func (c *Client) FacilityPoints(ctx context.Context) ([]FacilityPoint, error) {
+	res, err := c.sendFacilityPoints(ctx)
+	return res, err
+}
+
+func (c *Client) sendFacilityPoints(ctx context.Context) (res []FacilityPoint, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("facilityPoints"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/facilities/points"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, FacilityPointsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/facilities/points"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, FacilityPointsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, FacilityPointsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeFacilityPointsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

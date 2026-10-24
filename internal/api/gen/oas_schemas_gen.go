@@ -3244,6 +3244,100 @@ func (s *FacilityPage) SetNext(val OptString) {
 	s.Next = val
 }
 
+// Ref: #/components/schemas/FacilityPoint
+type FacilityPoint struct {
+	ID   uuid.UUID `json:"id"`
+	Type string    `json:"type"`
+	Name OptString `json:"name"`
+	Lon  float64   `json:"lon"`
+	Lat  float64   `json:"lat"`
+	// Площадь застройки, м².
+	Area       OptFloat64 `json:"area"`
+	Confidence float64    `json:"confidence"`
+	// До МКАД, грузовик 20 т, мин.
+	MkadMin OptFloat64 `json:"mkadMin"`
+}
+
+// GetID returns the value of ID.
+func (s *FacilityPoint) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetType returns the value of Type.
+func (s *FacilityPoint) GetType() string {
+	return s.Type
+}
+
+// GetName returns the value of Name.
+func (s *FacilityPoint) GetName() OptString {
+	return s.Name
+}
+
+// GetLon returns the value of Lon.
+func (s *FacilityPoint) GetLon() float64 {
+	return s.Lon
+}
+
+// GetLat returns the value of Lat.
+func (s *FacilityPoint) GetLat() float64 {
+	return s.Lat
+}
+
+// GetArea returns the value of Area.
+func (s *FacilityPoint) GetArea() OptFloat64 {
+	return s.Area
+}
+
+// GetConfidence returns the value of Confidence.
+func (s *FacilityPoint) GetConfidence() float64 {
+	return s.Confidence
+}
+
+// GetMkadMin returns the value of MkadMin.
+func (s *FacilityPoint) GetMkadMin() OptFloat64 {
+	return s.MkadMin
+}
+
+// SetID sets the value of ID.
+func (s *FacilityPoint) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetType sets the value of Type.
+func (s *FacilityPoint) SetType(val string) {
+	s.Type = val
+}
+
+// SetName sets the value of Name.
+func (s *FacilityPoint) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetLon sets the value of Lon.
+func (s *FacilityPoint) SetLon(val float64) {
+	s.Lon = val
+}
+
+// SetLat sets the value of Lat.
+func (s *FacilityPoint) SetLat(val float64) {
+	s.Lat = val
+}
+
+// SetArea sets the value of Area.
+func (s *FacilityPoint) SetArea(val OptFloat64) {
+	s.Area = val
+}
+
+// SetConfidence sets the value of Confidence.
+func (s *FacilityPoint) SetConfidence(val float64) {
+	s.Confidence = val
+}
+
+// SetMkadMin sets the value of MkadMin.
+func (s *FacilityPoint) SetMkadMin(val OptFloat64) {
+	s.MkadMin = val
+}
+
 // Ref: #/components/schemas/FacilityReport
 type FacilityReport struct {
 	ID           uuid.UUID            `json:"id"`

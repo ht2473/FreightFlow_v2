@@ -82,6 +82,21 @@ func (s *Server) FacilityFacets(ctx context.Context, p gen.FacilityFacetsParams)
 	}, nil
 }
 
+func (s *Server) FacilityPoints(ctx context.Context) ([]gen.FacilityPoint, error) {
+	pts, err := s.facilities.Points(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]gen.FacilityPoint, len(pts))
+	for i, p := range pts {
+		out[i] = gen.FacilityPoint{
+			ID: p.ID, Type: p.Type, Name: optStr(p.Name), Lon: p.Lon, Lat: p.Lat, Area: optNum(p.Area),
+			Confidence: p.Confidence, MkadMin: optNum(p.MkadMin),
+		}
+	}
+	return out, nil
+}
+
 func (s *Server) GetFacility(ctx context.Context, p gen.GetFacilityParams) (*gen.FacilityCard, error) {
 	c, err := s.facilities.Get(ctx, p.FacilityId)
 	if err != nil {

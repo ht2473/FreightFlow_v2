@@ -359,6 +359,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/facilities/points": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Точки действующих объектов для кластеров карты */
+        get: operations["facilityPoints"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/facilities/facets": {
         parameters: {
             query?: never;
@@ -1452,6 +1469,19 @@ export interface components {
             worksPlanned: number;
             top: components["schemas"]["FacilityItem"][];
         };
+        FacilityPoint: {
+            /** Format: uuid */
+            id: string;
+            type: string;
+            name?: string;
+            lon: number;
+            lat: number;
+            /** @description Площадь застройки, м² */
+            area?: number;
+            confidence: number;
+            /** @description До МКАД, грузовик 20 т, мин */
+            mkadMin?: number;
+        };
         SavedView: {
             /** Format: uuid */
             id: string;
@@ -2484,6 +2514,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FacilityPage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    facilityPoints: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Точки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityPoint"][];
                 };
             };
             default: components["responses"]["Problem"];

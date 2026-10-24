@@ -115,6 +115,26 @@ func TestListFacetsCard(t *testing.T) {
 	}
 }
 
+func TestPoints(t *testing.T) {
+	t.Parallel()
+	pool := dbtest.New(t)
+	osmtest.LoadDistrict(t, pool)
+	pts, err := New(pool).Points(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var active int
+	_ = pool.QueryRow(t.Context(), `SELECT count(*) FROM infra.facility WHERE status = 'active'`).Scan(&active)
+	if len(pts) != active || active == 0 {
+		t.Fatalf("points %d of %d", len(pts), active)
+	}
+	for _, p := range pts {
+		if p.Lon < 36 || p.Lon > 39 || p.Lat < 55 || p.Lat > 57 || p.Type == "" {
+			t.Fatalf("point %+v", p)
+		}
+	}
+}
+
 func TestArea(t *testing.T) {
 	t.Parallel()
 	pool := dbtest.New(t)

@@ -1,20 +1,24 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import type { Feature, FeatureCollection, Point } from "geojson";
 import { Minus, Plus, X } from "lucide-react";
-import type { ExpressionSpecification, MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
+import type { ExpressionSpecification, GeoJSONSource, MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Guard } from "@/app/Guard";
-import { $api } from "@/shared/api/client";
+import { $api, type Schemas } from "@/shared/api/client";
 import { num } from "@/shared/format";
 import { basemapStyle } from "@/shared/map/basemap";
 import {
   buildDataLayers,
+  CLUSTER_UNTIL,
   codeOf,
   color,
   dayNumber,
   interactiveLayerIds,
+  isClusterLayer,
   layerId,
   type MapLayer,
   type Palette,
+  POINTS_SOURCE,
   readPalette,
   workDayFilter,
 } from "@/shared/map/dataLayers";
@@ -39,6 +43,7 @@ import {
   hasFacilityFilter,
   layerStates,
   type MapSearch,
+  matchesFacilityFilter,
   parseCenter,
   useOpacity,
   visibleLayers,
@@ -88,12 +93,20 @@ function MapWorkspace() {
     return readPalette();
   }, [theme]);
 
+  // Точки объектов для кластеров на мелких масштабах.
+  const pointsQuery = $api.useQuery("get", "/facilities/points", {}, { staleTime: 300_000 });
+  const points = useMemo(() => (pointsQuery.data ? toPoints(pointsQuery.data) : undefined), [pointsQuery.data]);
+  const pointsRef = useRef(points);
+  pointsRef.current = points;
+  const searchRef = useRef(search);
+  searchRef.current = search;
+
   const data = useMemo(() => {
     const day = new Date();
     day.setDate(day.getDate() + workOffset);
     const filters = { road_works: workDayFilter(dayNumber(day)), ...facilityFilters(search) };
-    return buildDataLayers(catalog, layerStates(catalog, visible, opacity, filters), palette);
-  }, [catalog, visible, opacity, palette, workOffset, search]);
+    return buildDataLayers(catalog, layerStates(catalog, visible, opacity, filters), palette, undefined, points);
+  }, [catalog, visible, opacity, palette, workOffset, search, points]);
   const style = useMemo(() => {
     if (basemap.data === undefined) {
       return null;
@@ -163,6 +176,17 @@ function MapWorkspace() {
         setObjects([]);
         return;
       }
+      // На мелких масштабах точки собраны в кластеры — список строится по самим точкам.
+      const pts = pointsRef.current;
+      if (pts && map.getZoom() < CLUSTER_UNTIL) {
+        const b = map.getBounds();
+        const items = pts.features
+          .filter((f) => b.contains(f.geometry.coordinates as [number, number]))
+          .filter((f) => matchesFacilityFilter(searchRef.current, f.properties ?? {}))
+          .map((f) => toObject({ ...f, id: f.id, source: POINTS_SOURCE } as unknown as MapGeoJSONFeature));
+        setObjects(items);
+        return;
+      }
       const seen = new Map<string, ObjectItem>();
       for (const f of map.queryRenderedFeatures({ layers: [id] })) {
         const key = String(f.id);
@@ -210,6 +234,11 @@ function MapWorkspace() {
       }
       hovered = f;
       setState(f, { hover: true });
+      if (isClusterLayer(f.layer.id)) {
+        const n = Number((f.properties as Record<string, unknown>).point_count ?? 0);
+        setHover({ x: e.point.x, y: e.point.y, title: `Объектов: ${num(n)}`, subtitle: "Щёлкните, чтобы приблизить" });
+        return;
+      }
       const layer = catalogRef.current.find((l) => l.code === codeOf(f.layer.id));
       setHover({ x: e.point.x, y: e.point.y, ...describe(f, layer) });
     };
@@ -224,6 +253,14 @@ function MapWorkspace() {
         return;
       }
       const f = pick(e.point, true);
+      // Кластер — приблизить до масштаба, где он распадается.
+      if (f && isClusterLayer(f.layer.id)) {
+        const src = map.getSource<GeoJSONSource>(POINTS_SOURCE);
+        const clusterId = Number((f.properties as Record<string, unknown>).cluster_id);
+        const center = f.geometry.type === "Point" ? (f.geometry.coordinates as [number, number]) : undefined;
+        void src?.getClusterExpansionZoom(clusterId).then((z) => map.easeTo({ center, zoom: z + 0.1, duration: 500 }));
+        return;
+      }
       const layer = f ? catalogRef.current.find((l) => l.code === codeOf(f.layer.id)) : undefined;
       if (!f || !layer) {
         return;
@@ -463,6 +500,28 @@ function facilityId(sel: Selection): string | undefined {
 /** Расстояние измерения: «850 м», «12,4 км». */
 function distanceText(m: number): string {
   return m < 1000 ? `${num(Math.round(m))} м` : `${num(m / 1000, m < 10_000 ? 2 : 1)} км`;
+}
+
+/** Точки объектов — GeoJSON со свойствами тех же имён, что в тайлах слоя (для общего отбора). */
+function toPoints(list: Schemas["FacilityPoint"][]): FeatureCollection<Point> {
+  return {
+    type: "FeatureCollection",
+    features: list.map(
+      (p): Feature<Point> => ({
+        type: "Feature",
+        id: p.id,
+        geometry: { type: "Point", coordinates: [p.lon, p.lat] },
+        properties: {
+          id: p.id,
+          type: p.type,
+          name: p.name,
+          area: p.area,
+          confidence: p.confidence,
+          mkad_min: p.mkadMin,
+        },
+      }),
+    ),
+  };
 }
 
 /** Нарисованное — слоем страницы поверх данных. */

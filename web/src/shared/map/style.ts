@@ -39,8 +39,10 @@ export function fullStyle(
 ) {
   const firstLabel = base.layers.findIndex((x) => x.type === "symbol");
   const split = firstLabel < 0 ? base.layers.length : firstLabel;
-  const points = data.layers.filter((x) => x.type === "circle");
-  const shapes = data.layers.filter((x) => x.type !== "circle");
+  // Точки и подписи кластеров — поверх подписей подложки.
+  const onTop = (x: { id: string; type: string }) => x.type === "circle" || x.id.endsWith(":count");
+  const points = data.layers.filter(onTop);
+  const shapes = data.layers.filter((x) => !onTop(x));
   return {
     ...base,
     sources: { ...base.sources, ...data.sources, ...overlay.sources },

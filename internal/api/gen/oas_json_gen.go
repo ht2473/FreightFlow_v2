@@ -7151,6 +7151,221 @@ func (s *FacilityPage) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *FacilityPoint) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *FacilityPoint) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
+		e.FieldStart("type")
+		e.Str(s.Type)
+	}
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("lon")
+		e.Float64(s.Lon)
+	}
+	{
+		e.FieldStart("lat")
+		e.Float64(s.Lat)
+	}
+	{
+		if s.Area.Set {
+			e.FieldStart("area")
+			s.Area.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("confidence")
+		e.Float64(s.Confidence)
+	}
+	{
+		if s.MkadMin.Set {
+			e.FieldStart("mkadMin")
+			s.MkadMin.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfFacilityPoint = [8]string{
+	0: "id",
+	1: "type",
+	2: "name",
+	3: "lon",
+	4: "lat",
+	5: "area",
+	6: "confidence",
+	7: "mkadMin",
+}
+
+// Decode decodes FacilityPoint from json.
+func (s *FacilityPoint) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FacilityPoint to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "lon":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Float64()
+				s.Lon = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"lon\"")
+			}
+		case "lat":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Float64()
+				s.Lat = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"lat\"")
+			}
+		case "area":
+			if err := func() error {
+				s.Area.Reset()
+				if err := s.Area.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"area\"")
+			}
+		case "confidence":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Float64()
+				s.Confidence = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"confidence\"")
+			}
+		case "mkadMin":
+			if err := func() error {
+				s.MkadMin.Reset()
+				if err := s.MkadMin.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"mkadMin\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode FacilityPoint")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b01011011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfFacilityPoint) {
+					name = jsonFieldsNameOfFacilityPoint[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *FacilityPoint) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FacilityPoint) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *FacilityReport) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
