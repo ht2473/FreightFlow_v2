@@ -44,8 +44,8 @@ type Deps struct {
 	// Reports — выгрузки и отчёты.
 	Reports *report.Service
 	// Views — сохранённые виды.
-	Views *views.Service
-	Layers  *tiles.Service
+	Views  *views.Service
+	Layers *tiles.Service
 	// Regulation — зоны, правила и статистика регулирования.
 	Regulation *regulation.Service
 	// Routing — маршруты грузовиков.
