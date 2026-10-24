@@ -604,7 +604,7 @@ func TestAPIWorkspaceContract(t *testing.T) {
 
 	cases := []struct {
 		name, method, path, token, body string
-		want                             int
+		want                            int
 	}{
 		// Права: просмотр — всем ролям, выгрузки и виды — с аналитика, уточнение — редактору.
 		{"viewer lists registry", http.MethodGet, "/api/v1/facilities?limit=1", viewer, "", http.StatusOK},
@@ -640,8 +640,10 @@ func TestAPIWorkspaceContract(t *testing.T) {
 		{"unknown sort", http.MethodGet, "/api/v1/facilities?sort=salary", analyst, "", http.StatusBadRequest},
 		{"bad cursor", http.MethodGet, "/api/v1/facilities?cursor=%21%21", analyst, "", http.StatusBadRequest},
 		{"district not uuid", http.MethodGet, "/api/v1/facilities?district=ЮВАО", analyst, "", http.StatusBadRequest},
-		{"area is a point", http.MethodPost, "/api/v1/facilities/area", analyst,
-			`{"polygon":{"type":"Point","coordinates":[37.6,55.7]}}`, http.StatusBadRequest},
+		{
+			"area is a point", http.MethodPost, "/api/v1/facilities/area", analyst,
+			`{"polygon":{"type":"Point","coordinates":[37.6,55.7]}}`, http.StatusBadRequest,
+		},
 		{"compare one", http.MethodGet, "/api/v1/facilities/compare?ids=" + id, analyst, "", http.StatusBadRequest},
 		{"unknown facility", http.MethodGet, "/api/v1/facilities/" + uuid.NewString(), analyst, "", http.StatusNotFound},
 		{"unknown territory kind", http.MethodGet, "/api/v1/territories?kind=planet", analyst, "", http.StatusBadRequest},
