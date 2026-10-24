@@ -1,17 +1,20 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Minus, Plus } from "lucide-react";
-import type { MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
+import { Minus, Plus, X } from "lucide-react";
+import type { ExpressionSpecification, MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Guard } from "@/app/Guard";
 import { $api } from "@/shared/api/client";
+import { num } from "@/shared/format";
 import { basemapStyle } from "@/shared/map/basemap";
 import {
   buildDataLayers,
   codeOf,
+  color,
   dayNumber,
   interactiveLayerIds,
   layerId,
   type MapLayer,
+  type Palette,
   readPalette,
   workDayFilter,
 } from "@/shared/map/dataLayers";
@@ -21,6 +24,8 @@ import { IconButton } from "@/shared/ui";
 import { Tabs } from "@/shared/ui/navigation";
 import { useResolvedTheme } from "@/shared/useResolvedTheme";
 import { FacilityDrawer } from "../facilities/FacilityDrawer";
+import { AreaSummary } from "./AreaSummary";
+import { AreaTool, type DrawMode, type Drawn, isPolygon, lineLength } from "./AreaTool";
 import { FeatureCard, type Selection } from "./FeatureCard";
 import { LayersPanel } from "./LayersPanel";
 import { Legend } from "./Legend";
@@ -55,6 +60,14 @@ function MapWorkspace() {
   const [objects, setObjects] = useState<ObjectItem[]>([]);
   // Шкала времени работ: смещение в днях от сегодняшнего дня.
   const [workOffset, setWorkOffset] = useState(0);
+  // Рисование: режим инструмента, нарисованное, объект из сводки области.
+  const [drawMode, setDrawMode] = useState<DrawMode | null>(null);
+  const [drawn, setDrawn] = useState<Drawn | null>(null);
+  const [areaFacility, setAreaFacility] = useState<string | undefined>();
+  const drawing = useRef(false);
+  drawing.current = drawMode !== null;
+  // Замыкающий щелчок рисования не должен выбирать объект под ним.
+  const drawnAt = useRef(0);
 
   const catalog = useMemo(() => catalogQuery.data?.layers ?? [], [catalogQuery.data]);
   const visible = useMemo(() => visibleLayers(catalog, search.l), [catalog, search.l]);
@@ -76,8 +89,8 @@ function MapWorkspace() {
       return null;
     }
     const base = basemap.data ? basemapStyle(theme) : emptyStyle(theme, palette);
-    return fullStyle(base, catalog, data);
-  }, [basemap.data, theme, palette, catalog, data]);
+    return fullStyle(base, catalog, data, drawnOverlay(drawn, palette));
+  }, [basemap.data, theme, palette, catalog, data, drawn]);
 
   const interactive = useRef<string[]>([]);
   interactive.current = interactiveLayerIds(data.layers);
@@ -196,6 +209,10 @@ function MapWorkspace() {
       setHover(null);
     };
     const onClick = (e: { point: { x: number; y: number }; lngLat: { lng: number; lat: number } }) => {
+      // Во время рисования щелчки — вершины, а не выбор объекта.
+      if (drawing.current || Date.now() - drawnAt.current < 500) {
+        return;
+      }
       const f = pick(e.point, true);
       const layer = f ? catalogRef.current.find((l) => l.code === codeOf(f.layer.id)) : undefined;
       if (!f || !layer) {
@@ -304,6 +321,26 @@ function MapWorkspace() {
             <Minus size={17} />
           </IconButton>
         </div>
+        <AreaTool
+          map={map}
+          mode={drawMode}
+          onMode={setDrawMode}
+          onDrawn={(d) => {
+            drawnAt.current = Date.now();
+            setDrawn(d);
+          }}
+        />
+        {drawn && drawn.mode === "measure" && drawn.geometry.type === "LineString" && (
+          <div className={`${s.float} ${s.measure}`} role="status">
+            Расстояние: {distanceText(lineLength(drawn.geometry.coordinates))}
+            <IconButton label="Убрать измерение" onPress={() => setDrawn(null)}>
+              <X size={14} />
+            </IconButton>
+          </div>
+        )}
+        {drawn && drawn.mode === "area" && isPolygon(drawn.geometry) && (
+          <AreaSummary polygon={drawn.geometry} onOpen={setAreaFacility} onClose={() => setDrawn(null)} />
+        )}
         <Legend catalog={catalog} visible={visible} palette={palette} />
         <div className={s.attribution}>
           {basemap.data && (
@@ -329,6 +366,7 @@ function MapWorkspace() {
           </div>
         )}
       </section>
+      {areaFacility && <FacilityDrawer id={areaFacility} onClose={() => setAreaFacility(undefined)} />}
       {selection &&
         (facilityId(selection) ? (
           <FacilityDrawer id={facilityId(selection)} onClose={() => setSelection(null)} />
@@ -369,4 +407,35 @@ function facilityId(sel: Selection): string | undefined {
   return (sel.layer.code === "facilities" || sel.layer.code === "facility_areas") && typeof id === "string"
     ? id
     : undefined;
+}
+
+/** Расстояние измерения: «850 м», «12,4 км». */
+function distanceText(m: number): string {
+  return m < 1000 ? `${num(Math.round(m))} м` : `${num(m / 1000, m < 10_000 ? 2 : 1)} км`;
+}
+
+/** Нарисованное — слоем страницы поверх данных. */
+function drawnOverlay(d: Drawn | null, p: Palette) {
+  const data = {
+    type: "FeatureCollection" as const,
+    features: d ? [{ type: "Feature" as const, properties: {}, geometry: d.geometry }] : [],
+  };
+  return {
+    sources: { "draw:result": { type: "geojson" as const, data } },
+    layers: [
+      {
+        id: "draw:fill",
+        type: "fill" as const,
+        source: "draw:result",
+        filter: ["==", ["geometry-type"], "Polygon"] as ExpressionSpecification,
+        paint: { "fill-color": color(p, "acc"), "fill-opacity": 0.1 },
+      },
+      {
+        id: "draw:line",
+        type: "line" as const,
+        source: "draw:result",
+        paint: { "line-color": color(p, "acc"), "line-width": 2, "line-dasharray": [2, 1] },
+      },
+    ],
+  };
 }

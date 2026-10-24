@@ -242,6 +242,303 @@ func (s *ApiToken) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *AreaSummary) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AreaSummary) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("areaKm2")
+		e.Float64(s.AreaKm2)
+	}
+	{
+		e.FieldStart("facilities")
+		e.Int(s.Facilities)
+	}
+	{
+		e.FieldStart("buildingAreaM2")
+		e.Float64(s.BuildingAreaM2)
+	}
+	{
+		e.FieldStart("floorAreaM2")
+		e.Float64(s.FloorAreaM2)
+	}
+	{
+		e.FieldStart("types")
+		e.ArrStart()
+		for _, elem := range s.Types {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("poi")
+		e.ArrStart()
+		for _, elem := range s.Poi {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("restrictions")
+		e.Int(s.Restrictions)
+	}
+	{
+		e.FieldStart("restrictedKm")
+		e.Float64(s.RestrictedKm)
+	}
+	{
+		e.FieldStart("worksActive")
+		e.Int(s.WorksActive)
+	}
+	{
+		e.FieldStart("worksPlanned")
+		e.Int(s.WorksPlanned)
+	}
+	{
+		e.FieldStart("top")
+		e.ArrStart()
+		for _, elem := range s.Top {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfAreaSummary = [11]string{
+	0:  "areaKm2",
+	1:  "facilities",
+	2:  "buildingAreaM2",
+	3:  "floorAreaM2",
+	4:  "types",
+	5:  "poi",
+	6:  "restrictions",
+	7:  "restrictedKm",
+	8:  "worksActive",
+	9:  "worksPlanned",
+	10: "top",
+}
+
+// Decode decodes AreaSummary from json.
+func (s *AreaSummary) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AreaSummary to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "areaKm2":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Float64()
+				s.AreaKm2 = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"areaKm2\"")
+			}
+		case "facilities":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.Facilities = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"facilities\"")
+			}
+		case "buildingAreaM2":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Float64()
+				s.BuildingAreaM2 = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"buildingAreaM2\"")
+			}
+		case "floorAreaM2":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Float64()
+				s.FloorAreaM2 = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"floorAreaM2\"")
+			}
+		case "types":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				s.Types = make([]FacetValue, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem FacetValue
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Types = append(s.Types, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"types\"")
+			}
+		case "poi":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				s.Poi = make([]FacetValue, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem FacetValue
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Poi = append(s.Poi, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"poi\"")
+			}
+		case "restrictions":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int()
+				s.Restrictions = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"restrictions\"")
+			}
+		case "restrictedKm":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Float64()
+				s.RestrictedKm = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"restrictedKm\"")
+			}
+		case "worksActive":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.WorksActive = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"worksActive\"")
+			}
+		case "worksPlanned":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.WorksPlanned = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"worksPlanned\"")
+			}
+		case "top":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				s.Top = make([]FacilityItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem FacilityItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Top = append(s.Top, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"top\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AreaSummary")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAreaSummary) {
+					name = jsonFieldsNameOfAreaSummary[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AreaSummary) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AreaSummary) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *AuditPage) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -4400,6 +4697,158 @@ func (s FacilityAccessTarget) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *FacilityAccessTarget) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *FacilityAreaReq) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *FacilityAreaReq) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("polygon")
+		s.Polygon.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfFacilityAreaReq = [1]string{
+	0: "polygon",
+}
+
+// Decode decodes FacilityAreaReq from json.
+func (s *FacilityAreaReq) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FacilityAreaReq to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "polygon":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Polygon.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"polygon\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode FacilityAreaReq")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfFacilityAreaReq) {
+					name = jsonFieldsNameOfFacilityAreaReq[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *FacilityAreaReq) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FacilityAreaReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s FacilityAreaReqPolygon) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s FacilityAreaReqPolygon) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes FacilityAreaReqPolygon from json.
+func (s *FacilityAreaReqPolygon) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FacilityAreaReqPolygon to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode FacilityAreaReqPolygon")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s FacilityAreaReqPolygon) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FacilityAreaReqPolygon) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

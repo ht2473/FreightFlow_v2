@@ -108,6 +108,132 @@ func (s *ApiToken) SetRevokedAt(val OptDateTime) {
 	s.RevokedAt = val
 }
 
+// Ref: #/components/schemas/AreaSummary
+type AreaSummary struct {
+	AreaKm2        float64      `json:"areaKm2"`
+	Facilities     int          `json:"facilities"`
+	BuildingAreaM2 float64      `json:"buildingAreaM2"`
+	FloorAreaM2    float64      `json:"floorAreaM2"`
+	Types          []FacetValue `json:"types"`
+	Poi            []FacetValue `json:"poi"`
+	// Участков с запретом или пределом для грузовиков.
+	Restrictions int            `json:"restrictions"`
+	RestrictedKm float64        `json:"restrictedKm"`
+	WorksActive  int            `json:"worksActive"`
+	WorksPlanned int            `json:"worksPlanned"`
+	Top          []FacilityItem `json:"top"`
+}
+
+// GetAreaKm2 returns the value of AreaKm2.
+func (s *AreaSummary) GetAreaKm2() float64 {
+	return s.AreaKm2
+}
+
+// GetFacilities returns the value of Facilities.
+func (s *AreaSummary) GetFacilities() int {
+	return s.Facilities
+}
+
+// GetBuildingAreaM2 returns the value of BuildingAreaM2.
+func (s *AreaSummary) GetBuildingAreaM2() float64 {
+	return s.BuildingAreaM2
+}
+
+// GetFloorAreaM2 returns the value of FloorAreaM2.
+func (s *AreaSummary) GetFloorAreaM2() float64 {
+	return s.FloorAreaM2
+}
+
+// GetTypes returns the value of Types.
+func (s *AreaSummary) GetTypes() []FacetValue {
+	return s.Types
+}
+
+// GetPoi returns the value of Poi.
+func (s *AreaSummary) GetPoi() []FacetValue {
+	return s.Poi
+}
+
+// GetRestrictions returns the value of Restrictions.
+func (s *AreaSummary) GetRestrictions() int {
+	return s.Restrictions
+}
+
+// GetRestrictedKm returns the value of RestrictedKm.
+func (s *AreaSummary) GetRestrictedKm() float64 {
+	return s.RestrictedKm
+}
+
+// GetWorksActive returns the value of WorksActive.
+func (s *AreaSummary) GetWorksActive() int {
+	return s.WorksActive
+}
+
+// GetWorksPlanned returns the value of WorksPlanned.
+func (s *AreaSummary) GetWorksPlanned() int {
+	return s.WorksPlanned
+}
+
+// GetTop returns the value of Top.
+func (s *AreaSummary) GetTop() []FacilityItem {
+	return s.Top
+}
+
+// SetAreaKm2 sets the value of AreaKm2.
+func (s *AreaSummary) SetAreaKm2(val float64) {
+	s.AreaKm2 = val
+}
+
+// SetFacilities sets the value of Facilities.
+func (s *AreaSummary) SetFacilities(val int) {
+	s.Facilities = val
+}
+
+// SetBuildingAreaM2 sets the value of BuildingAreaM2.
+func (s *AreaSummary) SetBuildingAreaM2(val float64) {
+	s.BuildingAreaM2 = val
+}
+
+// SetFloorAreaM2 sets the value of FloorAreaM2.
+func (s *AreaSummary) SetFloorAreaM2(val float64) {
+	s.FloorAreaM2 = val
+}
+
+// SetTypes sets the value of Types.
+func (s *AreaSummary) SetTypes(val []FacetValue) {
+	s.Types = val
+}
+
+// SetPoi sets the value of Poi.
+func (s *AreaSummary) SetPoi(val []FacetValue) {
+	s.Poi = val
+}
+
+// SetRestrictions sets the value of Restrictions.
+func (s *AreaSummary) SetRestrictions(val int) {
+	s.Restrictions = val
+}
+
+// SetRestrictedKm sets the value of RestrictedKm.
+func (s *AreaSummary) SetRestrictedKm(val float64) {
+	s.RestrictedKm = val
+}
+
+// SetWorksActive sets the value of WorksActive.
+func (s *AreaSummary) SetWorksActive(val int) {
+	s.WorksActive = val
+}
+
+// SetWorksPlanned sets the value of WorksPlanned.
+func (s *AreaSummary) SetWorksPlanned(val int) {
+	s.WorksPlanned = val
+}
+
+// SetTop sets the value of Top.
+func (s *AreaSummary) SetTop(val []FacilityItem) {
+	s.Top = val
+}
+
 // Ref: #/components/schemas/AuditPage
 type AuditPage struct {
 	Items      []AuditRecord `json:"items"`
@@ -1967,6 +2093,33 @@ func (s *FacilityAccessTarget) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+type FacilityAreaReq struct {
+	// Многоугольник GeoJSON.
+	Polygon FacilityAreaReqPolygon `json:"polygon"`
+}
+
+// GetPolygon returns the value of Polygon.
+func (s *FacilityAreaReq) GetPolygon() FacilityAreaReqPolygon {
+	return s.Polygon
+}
+
+// SetPolygon sets the value of Polygon.
+func (s *FacilityAreaReq) SetPolygon(val FacilityAreaReqPolygon) {
+	s.Polygon = val
+}
+
+// Многоугольник GeoJSON.
+type FacilityAreaReqPolygon map[string]jx.Raw
+
+func (s *FacilityAreaReqPolygon) init() FacilityAreaReqPolygon {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/FacilityCard

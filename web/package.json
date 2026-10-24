@@ -28,6 +28,8 @@
     "react-aria-components": "1.22.1",
     "react-dom": "19.3.0",
     "react-hook-form": "7.90.0",
+    "terra-draw": "1.37.0",
+    "terra-draw-maplibre-gl-adapter": "1.5.0",
     "zod": "4.6.7",
     "zustand": "5.0.15"
   },

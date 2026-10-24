@@ -65,3 +65,48 @@ test("карта: подложка, объекты в видимой облас�
   await expect(page.getByRole("tab", { name: "Объекты" })).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("карта: выделение области со сводкой и измерение", async ({ page }, info) => {
+  test.setTimeout(90_000);
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await login(page, analyst, "/map?c=37.75000,55.73000&z=12");
+  const canvas = page.locator(".maplibregl-canvas");
+  await expect(canvas).toBeVisible({ timeout: 30_000 });
+  await page.waitForTimeout(2000);
+  const box = await canvas.boundingBox();
+  if (!box) {
+    throw new Error("нет карты");
+  }
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+
+  await page.getByRole("button", { name: "Выделить область" }).click();
+  for (const [dx = 0, dy = 0] of [
+    [-200, -150],
+    [200, -150],
+    [200, 150],
+    [-200, 150],
+  ]) {
+    await page.mouse.click(cx + dx, cy + dy);
+    await page.waitForTimeout(200);
+  }
+  // Многоугольник закрывается щелчком в первую вершину.
+  await page.mouse.click(cx - 200, cy - 150);
+  const panel = page.getByRole("region", { name: "Сводка по области" });
+  await expect(panel.getByText("Объектов реестра")).toBeVisible({ timeout: 30_000 });
+  await expect(panel.getByText(/км²/)).toBeVisible();
+  expect(await axeViolations(page)).toEqual([]);
+  await page.screenshot({ path: info.outputPath("map-area.png") });
+  await panel.getByRole("button", { name: "Закрыть сводку" }).click();
+
+  await page.getByRole("button", { name: "Измерить расстояние" }).click();
+  await page.mouse.click(cx - 150, cy);
+  await page.waitForTimeout(200);
+  await page.mouse.click(cx + 150, cy);
+  await page.waitForTimeout(200);
+  // Линия завершается повторным щелчком в последнюю точку.
+  await page.mouse.click(cx + 150, cy);
+  await expect(page.getByText(/^Расстояние: [\d, ]+ (м|км)/)).toBeVisible();
+  expect(errors).toEqual([]);
+});

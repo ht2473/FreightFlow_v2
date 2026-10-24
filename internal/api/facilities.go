@@ -231,3 +231,35 @@ func facilityCard(c *facility.Card) (*gen.FacilityCard, error) {
 	}
 	return out, nil
 }
+
+func (s *Server) FacilityArea(ctx context.Context, req *gen.FacilityAreaReq) (*gen.AreaSummary, error) {
+	// Поля GeoJSON — необработанные значения: собираются в объект без перекодирования.
+	fields := make(map[string]json.RawMessage, len(req.Polygon))
+	for k, v := range req.Polygon {
+		fields[k] = json.RawMessage(v)
+	}
+	poly, err := json.Marshal(fields)
+	if err != nil {
+		return nil, err
+	}
+	a, err := s.facilities.Area(ctx, poly, 10)
+	if err != nil {
+		return nil, err
+	}
+	conv := func(in []facility.FacetValue) []gen.FacetValue {
+		out := make([]gen.FacetValue, len(in))
+		for i, v := range in {
+			out[i] = gen.FacetValue{Value: v.Value, Label: v.Label, Count: v.Count}
+		}
+		return out
+	}
+	out := &gen.AreaSummary{
+		AreaKm2: a.AreaKm2, Facilities: a.Facilities, BuildingAreaM2: a.BuildingM2, FloorAreaM2: a.FloorM2,
+		Types: conv(a.Types), Poi: conv(a.Poi), Restrictions: a.Restrictions, RestrictedKm: a.RestrictedKm,
+		WorksActive: a.WorksActive, WorksPlanned: a.WorksPlanned, Top: make([]gen.FacilityItem, len(a.Top)),
+	}
+	for i, it := range a.Top {
+		out.Top[i] = facilityItem(it)
+	}
+	return out, nil
+}

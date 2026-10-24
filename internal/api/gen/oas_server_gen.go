@@ -103,6 +103,15 @@ type Handler interface {
 	//
 	// DELETE /me/totp
 	DisableTotp(ctx context.Context, req *PasswordConfirmation) error
+	// FacilityArea implements facilityArea operation.
+	//
+	// Объекты реестра (число, площади, типы, крупнейшие),
+	// инфраструктура, участки с ограничениями для
+	// грузовиков, дорожные работы внутри многоугольника (до
+	// 2 500 км²).
+	//
+	// POST /facilities/area
+	FacilityArea(ctx context.Context, req *FacilityAreaReq) (*AreaSummary, error)
 	// FacilityFacets implements facilityFacets operation.
 	//
 	// Распределения выборки по типу, округу, кольцу и

@@ -401,6 +401,12 @@ func TestAPIFacilities(t *testing.T) {
 		!strings.Contains(string(body), `"types":[{`) {
 		t.Errorf("facets: %d %s", resp.StatusCode, body)
 	}
+	area := fmt.Sprintf(`{"polygon":{"type":"Polygon","coordinates":[[[%[1]f,%[2]f],[%[3]f,%[2]f],[%[3]f,%[4]f],[%[1]f,%[4]f],[%[1]f,%[2]f]]]}}`,
+		it.Point.Lon-0.01, it.Point.Lat-0.01, it.Point.Lon+0.01, it.Point.Lat+0.01)
+	if resp, raw := f.do(t, http.MethodPost, "/api/v1/facilities/area", analyst, area); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(raw), it.ID) {
+		t.Errorf("area: %d %s", resp.StatusCode, raw)
+	}
 	resp, body = f.do(t, http.MethodGet, "/api/v1/facilities/"+it.ID, analyst, "")
 	if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), `"confidenceReasons":[{`) {
 		t.Errorf("card: %d %s", resp.StatusCode, body)

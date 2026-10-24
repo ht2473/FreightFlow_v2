@@ -124,6 +124,15 @@ type Invoker interface {
 	//
 	// DELETE /me/totp
 	DisableTotp(ctx context.Context, request *PasswordConfirmation) error
+	// FacilityArea invokes facilityArea operation.
+	//
+	// Объекты реестра (число, площади, типы, крупнейшие),
+	// инфраструктура, участки с ограничениями для
+	// грузовиков, дорожные работы внутри многоугольника (до
+	// 2 500 км²).
+	//
+	// POST /facilities/area
+	FacilityArea(ctx context.Context, request *FacilityAreaReq) (*AreaSummary, error)
 	// FacilityFacets invokes facilityFacets operation.
 	//
 	// Распределения выборки по типу, округу, кольцу и
@@ -2135,6 +2144,137 @@ func (c *Client) sendDisableTotp(ctx context.Context, request *PasswordConfirmat
 
 	stage = "DecodeResponse"
 	result, err := decodeDisableTotpResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// FacilityArea invokes facilityArea operation.
+//
+// Объекты реестра (число, площади, типы, крупнейшие),
+// инфраструктура, участки с ограничениями для
+// грузовиков, дорожные работы внутри многоугольника (до
+// 2 500 км²).
+//
+// POST /facilities/area
+func (c *Client) FacilityArea(ctx context.Context, request *FacilityAreaReq) (*AreaSummary, error) {
+	res, err := c.sendFacilityArea(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendFacilityArea(ctx context.Context, request *FacilityAreaReq) (res *AreaSummary, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("facilityArea"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/facilities/area"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, FacilityAreaOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/facilities/area"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeFacilityAreaRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, FacilityAreaOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, FacilityAreaOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeFacilityAreaResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

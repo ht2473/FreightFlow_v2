@@ -147,6 +147,18 @@ func (UnimplementedHandler) DisableTotp(ctx context.Context, req *PasswordConfir
 	return ht.ErrNotImplemented
 }
 
+// FacilityArea implements facilityArea operation.
+//
+// Объекты реестра (число, площади, типы, крупнейшие),
+// инфраструктура, участки с ограничениями для
+// грузовиков, дорожные работы внутри многоугольника (до
+// 2 500 км²).
+//
+// POST /facilities/area
+func (UnimplementedHandler) FacilityArea(ctx context.Context, req *FacilityAreaReq) (r *AreaSummary, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // FacilityFacets implements facilityFacets operation.
 //
 // Распределения выборки по типу, округу, кольцу и

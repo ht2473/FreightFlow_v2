@@ -114,3 +114,26 @@ func TestListFacetsCard(t *testing.T) {
 		t.Errorf("compare one: %v", err)
 	}
 }
+
+func TestArea(t *testing.T) {
+	t.Parallel()
+	pool := dbtest.New(t)
+	osmtest.LoadDistrict(t, pool)
+	svc := New(pool)
+	var poly string
+	if err := pool.QueryRow(t.Context(), `SELECT ST_AsGeoJSON(ST_Envelope(ST_Collect(point))) FROM infra.facility WHERE status = 'active'`).Scan(&poly); err != nil {
+		t.Fatal(err)
+	}
+	a, err := svc.Area(t.Context(), []byte(poly), 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var active int
+	_ = pool.QueryRow(t.Context(), `SELECT count(*) FROM infra.facility WHERE status = 'active'`).Scan(&active)
+	if a.Facilities == 0 || a.Facilities > active || a.AreaKm2 <= 0 || len(a.Types) == 0 || len(a.Top) == 0 || a.BuildingM2 <= 0 {
+		t.Fatalf("area %+v", a)
+	}
+	if _, err := svc.Area(t.Context(), []byte(`{"type":"Point","coordinates":[37.6,55.7]}`), 5); !errors.Is(err, ErrBadFilter) {
+		t.Errorf("point: %v", err)
+	}
+}

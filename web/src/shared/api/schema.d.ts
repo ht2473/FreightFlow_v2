@@ -380,6 +380,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/facilities/area": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Сводка по области на карте
+         * @description Объекты реестра (число, площади, типы, крупнейшие), инфраструктура, участки с
+         *     ограничениями для грузовиков, дорожные работы внутри многоугольника (до 2 500 км²).
+         */
+        post: operations["facilityArea"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/facilities/compare": {
         parameters: {
             query?: never;
@@ -1381,6 +1402,20 @@ export interface components {
             point: components["schemas"]["LngLat"];
             /** Format: date-time */
             firstSeen: string;
+        };
+        AreaSummary: {
+            areaKm2: number;
+            facilities: number;
+            buildingAreaM2: number;
+            floorAreaM2: number;
+            types: components["schemas"]["FacetValue"][];
+            poi: components["schemas"]["FacetValue"][];
+            /** @description Участков с запретом или пределом для грузовиков */
+            restrictions: number;
+            restrictedKm: number;
+            worksActive: number;
+            worksPlanned: number;
+            top: components["schemas"]["FacilityItem"][];
         };
         FacilityPage: {
             items: components["schemas"]["FacilityItem"][];
@@ -2442,6 +2477,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FacilityFacets"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    facilityArea: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Многоугольник GeoJSON */
+                    polygon: {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Сводка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaSummary"];
                 };
             };
             default: components["responses"]["Problem"];

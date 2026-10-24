@@ -19,6 +19,7 @@ const (
 	CreateUserOperation            OperationName = "CreateUser"
 	CurateFacilityOperation        OperationName = "CurateFacility"
 	DisableTotpOperation           OperationName = "DisableTotp"
+	FacilityAreaOperation          OperationName = "FacilityArea"
 	FacilityFacetsOperation        OperationName = "FacilityFacets"
 	FacilityHistoryOperation       OperationName = "FacilityHistory"
 	GetExportOperation             OperationName = "GetExport"

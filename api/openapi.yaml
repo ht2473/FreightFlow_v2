@@ -549,6 +549,35 @@ paths:
               schema: { $ref: "#/components/schemas/FacilityFacets" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /facilities/area:
+    post:
+      tags: [facilities]
+      operationId: facilityArea
+      summary: Сводка по области на карте
+      description: |
+        Объекты реестра (число, площади, типы, крупнейшие), инфраструктура, участки с
+        ограничениями для грузовиков, дорожные работы внутри многоугольника (до 2 500 км²).
+      x-permission: map.view
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [polygon]
+              properties:
+                polygon:
+                  type: object
+                  description: "Многоугольник GeoJSON"
+                  additionalProperties: {}
+      responses:
+        "200":
+          description: Сводка
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AreaSummary" }
+        default: { $ref: "#/components/responses/Problem" }
+
   /facilities/compare:
     get:
       tags: [facilities]
@@ -1917,6 +1946,22 @@ components:
         hasPermit: { type: boolean }
         point: { $ref: "#/components/schemas/LngLat" }
         firstSeen: { type: string, format: date-time }
+
+    AreaSummary:
+      type: object
+      required: [areaKm2, facilities, buildingAreaM2, floorAreaM2, types, poi, restrictions, restrictedKm, worksActive, worksPlanned, top]
+      properties:
+        areaKm2: { type: number }
+        facilities: { type: integer }
+        buildingAreaM2: { type: number }
+        floorAreaM2: { type: number }
+        types: { type: array, items: { $ref: "#/components/schemas/FacetValue" } }
+        poi: { type: array, items: { $ref: "#/components/schemas/FacetValue" } }
+        restrictions: { type: integer, description: "Участков с запретом или пределом для грузовиков" }
+        restrictedKm: { type: number }
+        worksActive: { type: integer }
+        worksPlanned: { type: integer }
+        top: { type: array, items: { $ref: "#/components/schemas/FacilityItem" } }
 
     FacilityPage:
       type: object
