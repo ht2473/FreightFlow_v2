@@ -9,7 +9,7 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, Columns3, GitCompare, Map as MapIcon, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Columns3, GitCompare, Map as MapIcon, MessageSquareWarning, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { Dialog, DialogTrigger, Popover } from "react-aria-components";
 import { Guard } from "@/app/Guard";
@@ -195,9 +195,12 @@ function Registry() {
         title="Объекты"
         subtitle="Реестр объектов логистики: склады, терминалы, холодильники, ж/д и оптовые площадки"
         actions={
-          <Link to="/map" search={{ l: "facility_areas,facilities" }} className="btn btn-sm">
-            <MapIcon size={14} aria-hidden /> На карте
-          </Link>
+          <>
+            {can(me.data, "registry.curate") && <ReportsLink />}
+            <Link to="/map" search={{ l: "facility_areas,facilities" }} className="btn btn-sm">
+              <MapIcon size={14} aria-hidden /> На карте
+            </Link>
+          </>
         }
       />
       <div className={s.layout}>
@@ -502,5 +505,21 @@ function CompareBar() {
         </Button>
       </div>
     </div>
+  );
+}
+
+/** Ссылка на очередь сообщений о неточностях с числом открытых. */
+function ReportsLink() {
+  const open = $api.useQuery(
+    "get",
+    "/facility-reports",
+    { params: { query: { status: "open" } } },
+    { staleTime: 30_000 },
+  );
+  const n = open.data?.length ?? 0;
+  return (
+    <Link to="/facilities/reports" className="btn btn-sm">
+      <MessageSquareWarning size={14} aria-hidden /> Сообщения о неточностях{n > 0 ? ` (${n})` : ""}
+    </Link>
   );
 }

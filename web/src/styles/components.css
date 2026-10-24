@@ -92,6 +92,16 @@
   font-size: 14px;
 }
 
+.input.textarea {
+  height: auto;
+  min-height: 80px;
+  padding: 8px 10px;
+  resize: vertical;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 .input:hover {
   border-color: var(--n8);
 }

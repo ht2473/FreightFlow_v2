@@ -372,3 +372,11 @@
   color: var(--tx2);
   font-size: 12px;
 }
+
+.curatedNote {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--r2);
+  background: var(--info-bg);
+  font-size: 12.5px;
+}

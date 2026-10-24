@@ -7,6 +7,7 @@ import {
   Modal as AriaModal,
   Select as AriaSelect,
   Switch as AriaSwitch,
+  TextArea as AriaTextArea,
   TextField as AriaTextField,
   type TextFieldProps as AriaTextFieldProps,
   type CheckboxProps,
@@ -69,6 +70,29 @@ export function TextField({ label, description, errorMessage, placeholder, ...pr
     <AriaTextField {...props} isInvalid={props.isInvalid ?? Boolean(errorMessage)} className="field">
       <Label className="label">{label}</Label>
       <Input className="input" placeholder={placeholder} />
+      {description && !errorMessage && (
+        <Text slot="description" className="field-hint">
+          {description}
+        </Text>
+      )}
+      <FieldError className="field-error">{errorMessage}</FieldError>
+    </AriaTextField>
+  );
+}
+
+/** Многострочное поле с подписью и ошибкой. */
+export function TextArea({
+  label,
+  description,
+  errorMessage,
+  placeholder,
+  rows = 4,
+  ...props
+}: TextFieldProps & { rows?: number }) {
+  return (
+    <AriaTextField {...props} isInvalid={props.isInvalid ?? Boolean(errorMessage)} className="field">
+      <Label className="label">{label}</Label>
+      <AriaTextArea className="input textarea" placeholder={placeholder} rows={rows} />
       {description && !errorMessage && (
         <Text slot="description" className="field-hint">
           {description}

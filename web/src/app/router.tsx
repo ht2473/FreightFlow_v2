@@ -59,6 +59,11 @@ const routeTree = rootRoute.addChildren([
   }),
   createRoute({
     getParentRoute: () => rootRoute,
+    path: "/facilities/reports",
+    component: lazyRouteComponent(() => import("@/features/facilities/ReportsPage"), "ReportsPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
     path: "/facilities/$facilityId",
     component: lazyRouteComponent(() => import("@/features/facilities/FacilityPage"), "FacilityPage"),
   }),

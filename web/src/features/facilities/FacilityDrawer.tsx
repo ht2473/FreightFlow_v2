@@ -1,12 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { ExternalLink, GitCompare, Map as MapIcon, Maximize2, Route, Timer } from "lucide-react";
 import { $api, problemMessage, type Schemas } from "@/shared/api/client";
+import { can, useMe } from "@/shared/auth";
 import { date, dateTime, num } from "@/shared/format";
 import { Badge, Button, cellClass, EmptyState, Skeleton, tableClass } from "@/shared/ui";
 import { Tabs } from "@/shared/ui/navigation";
 import { Drawer } from "@/shared/ui/overlays";
 import { formatCenter } from "../map/state";
 import { restrictionText } from "../network/labels";
+import { CurateFacility, fieldLabel, History, ReportIssue } from "./Curation";
 import { maxCompare, useCompare } from "./compare";
 import s from "./facilities.module.css";
 import {
@@ -78,6 +80,7 @@ export function CardTabs({ c }: { c: Card }) {
         { id: "works", title: `Работы (${c.works.length})`, content: <Works c={c} /> },
         { id: "nearby", title: "Рядом", content: <Nearby c={c} /> },
         { id: "sources", title: "Источники", content: <Sources c={c} /> },
+        { id: "history", title: "История", content: <History c={c} /> },
       ]}
     />
   );
@@ -113,9 +116,15 @@ export function Actions({ f }: { f: Schemas["FacilityItem"] }) {
 
 function Overview({ c }: { c: Card }) {
   const f = c.facility;
+  const me = useMe();
   const mkad = c.access.find((a) => a.profile === "truck_20" && a.target === "mkad");
   return (
     <div className={s.stack}>
+      {c.curated.length > 0 && (
+        <p className={s.curatedNote}>
+          Уточнено редактором: {c.curated.map((x) => fieldLabel[x].toLowerCase()).join(", ")}
+        </p>
+      )}
       <dl className={s.facts}>
         <dt>Адрес</dt>
         <dd>{f.address ?? "—"}</dd>
@@ -153,6 +162,10 @@ function Overview({ c }: { c: Card }) {
             </li>
           ))}
         </ul>
+      </div>
+      <div className={s.actions}>
+        {can(me.data, "registry.curate") && <CurateFacility c={c} />}
+        <ReportIssue c={c} />
       </div>
     </div>
   );
