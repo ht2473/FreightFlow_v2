@@ -584,3 +584,89 @@ func TestAPITerritories(t *testing.T) {
 		t.Errorf("неверный уровень: %d", resp.StatusCode)
 	}
 }
+
+// Контракт рабочего пространства: права ролей на операции реестра, выгрузок, видов, уточнения и
+// территорий; разбор и проверка фильтров.
+func TestAPIWorkspaceContract(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	osmtest.LoadDistrict(t, f.pool)
+	viewer := f.token(t, "wv@example.com", identity.RoleViewer)
+	analyst := f.token(t, "wa@example.com", identity.RoleAnalyst)
+	steward := f.token(t, "ws@example.com", identity.RoleDataSteward)
+	var id, district string
+	if err := f.pool.QueryRow(t.Context(), `SELECT id::text, district_id::text FROM infra.facility
+		WHERE status = 'active' AND district_id IS NOT NULL ORDER BY building_area_m2 DESC NULLS LAST LIMIT 1`).Scan(&id, &district); err != nil {
+		t.Fatal(err)
+	}
+	fac := "/api/v1/facilities/" + id
+	poly := `{"polygon":{"type":"Polygon","coordinates":[[[37.6,55.7],[37.8,55.7],[37.8,55.8],[37.6,55.8],[37.6,55.7]]]}}`
+
+	cases := []struct {
+		name, method, path, token, body string
+		want                             int
+	}{
+		// Права: просмотр — всем ролям, выгрузки и виды — с аналитика, уточнение — редактору.
+		{"viewer lists registry", http.MethodGet, "/api/v1/facilities?limit=1", viewer, "", http.StatusOK},
+		{"viewer reads facets", http.MethodGet, "/api/v1/facilities/facets", viewer, "", http.StatusOK},
+		{"viewer reads points", http.MethodGet, "/api/v1/facilities/points", viewer, "", http.StatusOK},
+		{"viewer reads card", http.MethodGet, fac, viewer, "", http.StatusOK},
+		{"viewer reads history", http.MethodGet, fac + "/history", viewer, "", http.StatusOK},
+		{"viewer summarizes area", http.MethodPost, "/api/v1/facilities/area", viewer, poly, http.StatusOK},
+		{"viewer lists territories", http.MethodGet, "/api/v1/territories", viewer, "", http.StatusOK},
+		{"viewer reads territory", http.MethodGet, "/api/v1/territories/" + district, viewer, "", http.StatusOK},
+		{"viewer lists views", http.MethodGet, "/api/v1/views?page=map", viewer, "", http.StatusOK},
+		{"viewer cannot save view", http.MethodPost, "/api/v1/views", viewer, `{"page":"map","name":"x","params":{}}`, http.StatusForbidden},
+		{"viewer cannot export", http.MethodPost, "/api/v1/exports", viewer, `{"kind":"facilities","format":"csv","filter":{}}`, http.StatusForbidden},
+		{"viewer cannot list exports", http.MethodGet, "/api/v1/exports", viewer, "", http.StatusForbidden},
+		{"viewer reports issue", http.MethodPost, fac + "/reports", viewer, `{"message":"Объект закрыт"}`, http.StatusCreated},
+		{"analyst saves view", http.MethodPost, "/api/v1/views", analyst, `{"page":"facilities","name":"Склады","params":{"type":"warehouse"}}`, http.StatusCreated},
+		{"analyst lists exports", http.MethodGet, "/api/v1/exports", analyst, "", http.StatusOK},
+		{"analyst cannot curate", http.MethodPost, fac + "/curations", analyst, `{"field":"name","value":"x","reason":"y"}`, http.StatusForbidden},
+		{"analyst cannot read report queue", http.MethodGet, "/api/v1/facility-reports", analyst, "", http.StatusForbidden},
+		{"steward reads report queue", http.MethodGet, "/api/v1/facility-reports", steward, "", http.StatusOK},
+		{"anonymous cannot list", http.MethodGet, "/api/v1/facilities", "", "", http.StatusUnauthorized},
+		{"anonymous cannot read points", http.MethodGet, "/api/v1/facilities/points", "", "", http.StatusUnauthorized},
+
+		// Фильтры: допустимые сочетания и отказ на неверных значениях.
+		{"all filters", http.MethodGet, "/api/v1/facilities?q=склад&type=warehouse&type=terminal&district=" + district +
+			"&ring=mkad&ring=ckad&minArea=100&maxArea=1000000&minConfidence=0.4&status=active&bbox=37.5,55.6,37.9,55.9" +
+			"&maxMkadMin=60&nearRestrictions=false&hasPermit=false&sort=-area,name", analyst, "", http.StatusOK},
+		{"radius filter", http.MethodGet, "/api/v1/facilities?near=37.7,55.73,3000", analyst, "", http.StatusOK},
+		{"unknown ring", http.MethodGet, "/api/v1/facilities?ring=moon", analyst, "", http.StatusBadRequest},
+		{"confidence over 1", http.MethodGet, "/api/v1/facilities?minConfidence=1.5", analyst, "", http.StatusBadRequest},
+		{"bbox of three", http.MethodGet, "/api/v1/facilities?bbox=37.5,55.6,37.9", analyst, "", http.StatusBadRequest},
+		{"inverted bbox", http.MethodGet, "/api/v1/facilities?bbox=37.9,55.9,37.5,55.6", analyst, "", http.StatusBadRequest},
+		{"unknown sort", http.MethodGet, "/api/v1/facilities?sort=salary", analyst, "", http.StatusBadRequest},
+		{"bad cursor", http.MethodGet, "/api/v1/facilities?cursor=%21%21", analyst, "", http.StatusBadRequest},
+		{"district not uuid", http.MethodGet, "/api/v1/facilities?district=ЮВАО", analyst, "", http.StatusBadRequest},
+		{"area is a point", http.MethodPost, "/api/v1/facilities/area", analyst,
+			`{"polygon":{"type":"Point","coordinates":[37.6,55.7]}}`, http.StatusBadRequest},
+		{"compare one", http.MethodGet, "/api/v1/facilities/compare?ids=" + id, analyst, "", http.StatusBadRequest},
+		{"unknown facility", http.MethodGet, "/api/v1/facilities/" + uuid.NewString(), analyst, "", http.StatusNotFound},
+		{"unknown territory kind", http.MethodGet, "/api/v1/territories?kind=planet", analyst, "", http.StatusBadRequest},
+		{"unknown view page", http.MethodGet, "/api/v1/views?page=moon", analyst, "", http.StatusBadRequest},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, body := f.do(t, tc.method, tc.path, tc.token, tc.body)
+			if resp.StatusCode != tc.want {
+				t.Fatalf("status %d, want %d; body %s", resp.StatusCode, tc.want, body)
+			}
+		})
+	}
+
+	// Фасет не учитывает собственный фильтр: при отборе по типу видны и другие типы.
+	resp, body := f.do(t, http.MethodGet, "/api/v1/facilities/facets?type=warehouse", analyst, "")
+	var facets struct{ Types []struct{ Value string } }
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &facets) != nil || len(facets.Types) < 2 {
+		t.Errorf("facets: %d %s", resp.StatusCode, body)
+	}
+	// Фильтр района сужает выборку до объектов района.
+	_, all := f.do(t, http.MethodGet, "/api/v1/facilities?limit=1", analyst, "")
+	_, byDistrict := f.do(t, http.MethodGet, "/api/v1/facilities?limit=1&district="+district, analyst, "")
+	var a, d struct{ Total int }
+	if json.Unmarshal(all, &a) != nil || json.Unmarshal(byDistrict, &d) != nil || d.Total == 0 || d.Total > a.Total {
+		t.Errorf("district filter: %d of %d", d.Total, a.Total)
+	}
+}
