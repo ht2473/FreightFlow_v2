@@ -127,6 +127,15 @@ func (UnimplementedHandler) CreateUser(ctx context.Context, req *CreateUser) (r 
 	return r, ht.ErrNotImplemented
 }
 
+// CreateView implements createView operation.
+//
+// Сохранить вид (общий — для своей роли).
+//
+// POST /views
+func (UnimplementedHandler) CreateView(ctx context.Context, req *CreateViewReq) (r *SavedView, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CurateFacility implements curateFacility operation.
 //
 // Действует последняя неотменённая правка поля; правки
@@ -136,6 +145,15 @@ func (UnimplementedHandler) CreateUser(ctx context.Context, req *CreateUser) (r 
 // POST /facilities/{facilityId}/curations
 func (UnimplementedHandler) CurateFacility(ctx context.Context, req *CurationRequest, params CurateFacilityParams) (r *Curation, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// DeleteView implements deleteView operation.
+//
+// Удалить свой вид.
+//
+// DELETE /views/{viewId}
+func (UnimplementedHandler) DeleteView(ctx context.Context, params DeleteViewParams) error {
+	return ht.ErrNotImplemented
 }
 
 // DisableTotp implements disableTotp operation.
@@ -422,6 +440,16 @@ func (UnimplementedHandler) ListUsers(ctx context.Context) (r []User, _ error) {
 //
 // GET /routing/profiles
 func (UnimplementedHandler) ListVehicleProfiles(ctx context.Context) (r []VehicleProfile, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListViews implements listViews operation.
+//
+// Сохранённые виды страницы — свои и общие для моих
+// ролей.
+//
+// GET /views
+func (UnimplementedHandler) ListViews(ctx context.Context, params ListViewsParams) (r []SavedView, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -1,0 +1,68 @@
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 300px;
+  padding: 8px;
+  outline: none;
+}
+
+.empty {
+  margin: 4px 6px;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.apply {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--r1);
+  background: none;
+  color: var(--tx);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.apply:hover {
+  background: var(--hover);
+}
+
+.note {
+  color: var(--tx2);
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

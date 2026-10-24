@@ -502,3 +502,9 @@
   text-align: left;
   cursor: pointer;
 }
+
+.viewsRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px 0;
+}

@@ -29,6 +29,7 @@ import {
 } from "@/shared/ui";
 import { NumberField } from "@/shared/ui/fields";
 import { Pagination, SegmentedControl } from "@/shared/ui/navigation";
+import { ViewsMenu } from "@/shared/ViewsMenu";
 import { maxCompare, useCompare } from "./compare";
 import { ExportMenu } from "./ExportMenu";
 import { FacilityDrawer } from "./FacilityDrawer";
@@ -197,6 +198,11 @@ function Registry() {
         actions={
           <>
             {can(me.data, "registry.curate") && <ReportsLink />}
+            <ViewsMenu
+              page="facilities"
+              params={{ ...search, open: undefined }}
+              onApply={(p) => navigate({ search: p as FacilitySearch, replace: true })}
+            />
             <Link to="/map" search={{ l: "facility_areas,facilities" }} className="btn btn-sm">
               <MapIcon size={14} aria-hidden /> На карте
             </Link>

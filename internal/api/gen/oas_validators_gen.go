@@ -675,6 +675,63 @@ func (s *CreateUser) Validate() error {
 	return nil
 }
 
+func (s *CreateViewReq) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Page.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "page",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := (validate.String{
+			MinLength:     1,
+			MinLengthSet:  true,
+			MaxLength:     120,
+			MaxLengthSet:  true,
+			Email:         false,
+			Hostname:      false,
+			Regex:         nil,
+			MinNumeric:    0,
+			MinNumericSet: false,
+			MaxNumeric:    0,
+			MaxNumericSet: false,
+		}).Validate(string(s.Name)); err != nil {
+			return errors.Wrap(err, "string")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "name",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s CreateViewReqPage) Validate() error {
+	switch s {
+	case "map":
+		return nil
+	case "facilities":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *CreatedToken) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -2703,6 +2760,17 @@ func (s ListFacilityReportsStatus) Validate() error {
 	}
 }
 
+func (s ListViewsPage) Validate() error {
+	switch s {
+	case "map":
+		return nil
+	case "facilities":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *LngLat) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -4700,6 +4768,40 @@ func (s RunTrigger) Validate() error {
 	case "manual":
 		return nil
 	case "cli":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *SavedView) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Page.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "page",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s SavedViewPage) Validate() error {
+	switch s {
+	case "map":
+		return nil
+	case "facilities":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

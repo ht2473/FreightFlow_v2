@@ -604,6 +604,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Сохранённые виды страницы — свои и общие для моих ролей */
+        get: operations["listViews"];
+        put?: never;
+        /** Сохранить вид (общий — для своей роли) */
+        post: operations["createView"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/views/{viewId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Удалить свой вид */
+        delete: operations["deleteView"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/regulation": {
         parameters: {
             query?: never;
@@ -1416,6 +1451,21 @@ export interface components {
             worksActive: number;
             worksPlanned: number;
             top: components["schemas"]["FacilityItem"][];
+        };
+        SavedView: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            page: "map" | "facilities";
+            name: string;
+            params: {
+                [key: string]: unknown;
+            };
+            role?: string;
+            owner: string;
+            mine: boolean;
+            /** Format: date-time */
+            createdAt: string;
         };
         FacilityPage: {
             items: components["schemas"]["FacilityItem"][];
@@ -2802,6 +2852,85 @@ export interface operations {
                 content: {
                     "application/octet-stream": string;
                 };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listViews: {
+        parameters: {
+            query: {
+                page: "map" | "facilities";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Виды */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedView"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createView: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    page: "map" | "facilities";
+                    name: string;
+                    /** @description Параметры адреса страницы */
+                    params: {
+                        [key: string]: unknown;
+                    };
+                    /** @description Роль для общего вида */
+                    role?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Вид */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedView"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteView: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                viewId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Удалён */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             default: components["responses"]["Problem"];
         };

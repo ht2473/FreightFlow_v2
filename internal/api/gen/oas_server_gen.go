@@ -89,6 +89,12 @@ type Handler interface {
 	//
 	// POST /admin/users
 	CreateUser(ctx context.Context, req *CreateUser) (*User, error)
+	// CreateView implements createView operation.
+	//
+	// Сохранить вид (общий — для своей роли).
+	//
+	// POST /views
+	CreateView(ctx context.Context, req *CreateViewReq) (*SavedView, error)
 	// CurateFacility implements curateFacility operation.
 	//
 	// Действует последняя неотменённая правка поля; правки
@@ -97,6 +103,12 @@ type Handler interface {
 	//
 	// POST /facilities/{facilityId}/curations
 	CurateFacility(ctx context.Context, req *CurationRequest, params CurateFacilityParams) (*Curation, error)
+	// DeleteView implements deleteView operation.
+	//
+	// Удалить свой вид.
+	//
+	// DELETE /views/{viewId}
+	DeleteView(ctx context.Context, params DeleteViewParams) error
 	// DisableTotp implements disableTotp operation.
 	//
 	// Отключить двухфакторную защиту.
@@ -297,6 +309,13 @@ type Handler interface {
 	//
 	// GET /routing/profiles
 	ListVehicleProfiles(ctx context.Context) ([]VehicleProfile, error)
+	// ListViews implements listViews operation.
+	//
+	// Сохранённые виды страницы — свои и общие для моих
+	// ролей.
+	//
+	// GET /views
+	ListViews(ctx context.Context, params ListViewsParams) ([]SavedView, error)
 	// ReportFacilityIssue implements reportFacilityIssue operation.
 	//
 	// Сообщить о неточности записи.

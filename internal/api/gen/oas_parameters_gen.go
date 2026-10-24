@@ -165,6 +165,71 @@ func decodeCurateFacilityParams(args [1]string, argsEscaped bool, r *http.Reques
 	return params, nil
 }
 
+// DeleteViewParams is parameters of deleteView operation.
+type DeleteViewParams struct {
+	ViewId uuid.UUID
+}
+
+func unpackDeleteViewParams(packed middleware.Parameters) (params DeleteViewParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "viewId",
+			In:   "path",
+		}
+		params.ViewId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteViewParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteViewParams, _ error) {
+	// Decode path: viewId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "viewId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ViewId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "viewId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // FacilityFacetsParams is parameters of facilityFacets operation.
 type FacilityFacetsParams struct {
 	// Подстрока названия или адреса.
@@ -3613,6 +3678,71 @@ func decodeListRunsParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListViewsParams is parameters of listViews operation.
+type ListViewsParams struct {
+	Page ListViewsPage
+}
+
+func unpackListViewsParams(packed middleware.Parameters) (params ListViewsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "page",
+			In:   "query",
+		}
+		params.Page = packed[key].(ListViewsPage)
+	}
+	return params
+}
+
+func decodeListViewsParams(args [0]string, argsEscaped bool, r *http.Request) (params ListViewsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: page.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "page",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Page = ListViewsPage(c)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.Page.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "page",
 			In:   "query",
 			Err:  err,
 		}

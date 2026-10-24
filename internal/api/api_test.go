@@ -32,6 +32,7 @@ import (
 	"freightflow/internal/report"
 	"freightflow/internal/routing"
 	"freightflow/internal/tiles"
+	"freightflow/internal/views"
 )
 
 func TestEveryOperationHasKnownPermission(t *testing.T) {
@@ -103,7 +104,7 @@ func newFixture(t *testing.T) *fixture {
 	h, err := New(Deps{
 		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
 		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facilities,
-		Reports: report.New(pool, inserter, blobs, facilities), Sessions: sessions, Mailer: mailer,
+		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
@@ -513,5 +514,27 @@ func TestAPICuration(t *testing.T) {
 	var audited int
 	if err := f.pool.QueryRow(t.Context(), `SELECT count(*) FROM core.audit_log WHERE action IN ('facility.curated', 'facility.report_resolved')`).Scan(&audited); err != nil || audited != 2 {
 		t.Errorf("audit: %d, %v", audited, err)
+	}
+}
+
+func TestAPIViews(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	analyst := f.token(t, "view-a@example.com", identity.RoleAnalyst)
+	other := f.token(t, "view-b@example.com", identity.RoleAnalyst)
+	viewer := f.token(t, "view-c@example.com", identity.RoleViewer)
+	if resp, raw := f.do(t, http.MethodPost, "/api/v1/views", analyst,
+		`{"page":"map","name":"Склады ЮВАО","params":{"l":"facilities","z":12},"role":"analyst"}`); resp.StatusCode != http.StatusCreated {
+		t.Fatalf("create: %d %s", resp.StatusCode, raw)
+	}
+	if resp, raw := f.do(t, http.MethodGet, "/api/v1/views?page=map", other, ""); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(raw), `"name":"Склады ЮВАО"`) || !strings.Contains(string(raw), `"z":12`) {
+		t.Errorf("shared: %d %s", resp.StatusCode, raw)
+	}
+	if resp, _ := f.do(t, http.MethodPost, "/api/v1/views", viewer, `{"page":"map","name":"x","params":{}}`); resp.StatusCode != http.StatusForbidden {
+		t.Errorf("viewer create: %d", resp.StatusCode)
+	}
+	if resp, _ := f.do(t, http.MethodPost, "/api/v1/views", analyst, `{"page":"map","name":"x","params":{},"role":"admin"}`); resp.StatusCode != http.StatusUnprocessableEntity {
+		t.Errorf("foreign role: %d", resp.StatusCode)
 	}
 }

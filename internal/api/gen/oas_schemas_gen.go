@@ -1012,6 +1012,108 @@ func (s *CreateUser) SetRoles(val []string) {
 	s.Roles = val
 }
 
+type CreateViewReq struct {
+	Page CreateViewReqPage `json:"page"`
+	Name string            `json:"name"`
+	// Параметры адреса страницы.
+	Params CreateViewReqParams `json:"params"`
+	// Роль для общего вида.
+	Role OptString `json:"role"`
+}
+
+// GetPage returns the value of Page.
+func (s *CreateViewReq) GetPage() CreateViewReqPage {
+	return s.Page
+}
+
+// GetName returns the value of Name.
+func (s *CreateViewReq) GetName() string {
+	return s.Name
+}
+
+// GetParams returns the value of Params.
+func (s *CreateViewReq) GetParams() CreateViewReqParams {
+	return s.Params
+}
+
+// GetRole returns the value of Role.
+func (s *CreateViewReq) GetRole() OptString {
+	return s.Role
+}
+
+// SetPage sets the value of Page.
+func (s *CreateViewReq) SetPage(val CreateViewReqPage) {
+	s.Page = val
+}
+
+// SetName sets the value of Name.
+func (s *CreateViewReq) SetName(val string) {
+	s.Name = val
+}
+
+// SetParams sets the value of Params.
+func (s *CreateViewReq) SetParams(val CreateViewReqParams) {
+	s.Params = val
+}
+
+// SetRole sets the value of Role.
+func (s *CreateViewReq) SetRole(val OptString) {
+	s.Role = val
+}
+
+type CreateViewReqPage string
+
+const (
+	CreateViewReqPageMap        CreateViewReqPage = "map"
+	CreateViewReqPageFacilities CreateViewReqPage = "facilities"
+)
+
+// AllValues returns all CreateViewReqPage values.
+func (CreateViewReqPage) AllValues() []CreateViewReqPage {
+	return []CreateViewReqPage{
+		CreateViewReqPageMap,
+		CreateViewReqPageFacilities,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CreateViewReqPage) MarshalText() ([]byte, error) {
+	switch s {
+	case CreateViewReqPageMap:
+		return []byte(s), nil
+	case CreateViewReqPageFacilities:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CreateViewReqPage) UnmarshalText(data []byte) error {
+	switch CreateViewReqPage(data) {
+	case CreateViewReqPageMap:
+		*s = CreateViewReqPageMap
+		return nil
+	case CreateViewReqPageFacilities:
+		*s = CreateViewReqPageFacilities
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Параметры адреса страницы.
+type CreateViewReqParams map[string]jx.Raw
+
+func (s *CreateViewReqParams) init() CreateViewReqParams {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/CreatedToken
 type CreatedToken struct {
 	Token ApiToken `json:"token"`
@@ -1496,6 +1598,9 @@ func (s *CurationRequestField) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+// DeleteViewNoContent is response for DeleteView operation.
+type DeleteViewNoContent struct{}
 
 // DisableTotpNoContent is response for DisableTotp operation.
 type DisableTotpNoContent struct{}
@@ -4330,6 +4435,47 @@ func (s *ListFacilityReportsStatus) UnmarshalText(data []byte) error {
 		return nil
 	case ListFacilityReportsStatusRejected:
 		*s = ListFacilityReportsStatusRejected
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ListViewsPage string
+
+const (
+	ListViewsPageMap        ListViewsPage = "map"
+	ListViewsPageFacilities ListViewsPage = "facilities"
+)
+
+// AllValues returns all ListViewsPage values.
+func (ListViewsPage) AllValues() []ListViewsPage {
+	return []ListViewsPage{
+		ListViewsPageMap,
+		ListViewsPageFacilities,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ListViewsPage) MarshalText() ([]byte, error) {
+	switch s {
+	case ListViewsPageMap:
+		return []byte(s), nil
+	case ListViewsPageFacilities:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ListViewsPage) UnmarshalText(data []byte) error {
+	switch ListViewsPage(data) {
+	case ListViewsPageMap:
+		*s = ListViewsPageMap
+		return nil
+	case ListViewsPageFacilities:
+		*s = ListViewsPageFacilities
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -8132,6 +8278,150 @@ func (s *RunTrigger) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/SavedView
+type SavedView struct {
+	ID        uuid.UUID       `json:"id"`
+	Page      SavedViewPage   `json:"page"`
+	Name      string          `json:"name"`
+	Params    SavedViewParams `json:"params"`
+	Role      OptString       `json:"role"`
+	Owner     string          `json:"owner"`
+	Mine      bool            `json:"mine"`
+	CreatedAt time.Time       `json:"createdAt"`
+}
+
+// GetID returns the value of ID.
+func (s *SavedView) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetPage returns the value of Page.
+func (s *SavedView) GetPage() SavedViewPage {
+	return s.Page
+}
+
+// GetName returns the value of Name.
+func (s *SavedView) GetName() string {
+	return s.Name
+}
+
+// GetParams returns the value of Params.
+func (s *SavedView) GetParams() SavedViewParams {
+	return s.Params
+}
+
+// GetRole returns the value of Role.
+func (s *SavedView) GetRole() OptString {
+	return s.Role
+}
+
+// GetOwner returns the value of Owner.
+func (s *SavedView) GetOwner() string {
+	return s.Owner
+}
+
+// GetMine returns the value of Mine.
+func (s *SavedView) GetMine() bool {
+	return s.Mine
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *SavedView) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// SetID sets the value of ID.
+func (s *SavedView) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetPage sets the value of Page.
+func (s *SavedView) SetPage(val SavedViewPage) {
+	s.Page = val
+}
+
+// SetName sets the value of Name.
+func (s *SavedView) SetName(val string) {
+	s.Name = val
+}
+
+// SetParams sets the value of Params.
+func (s *SavedView) SetParams(val SavedViewParams) {
+	s.Params = val
+}
+
+// SetRole sets the value of Role.
+func (s *SavedView) SetRole(val OptString) {
+	s.Role = val
+}
+
+// SetOwner sets the value of Owner.
+func (s *SavedView) SetOwner(val string) {
+	s.Owner = val
+}
+
+// SetMine sets the value of Mine.
+func (s *SavedView) SetMine(val bool) {
+	s.Mine = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *SavedView) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+type SavedViewPage string
+
+const (
+	SavedViewPageMap        SavedViewPage = "map"
+	SavedViewPageFacilities SavedViewPage = "facilities"
+)
+
+// AllValues returns all SavedViewPage values.
+func (SavedViewPage) AllValues() []SavedViewPage {
+	return []SavedViewPage{
+		SavedViewPageMap,
+		SavedViewPageFacilities,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SavedViewPage) MarshalText() ([]byte, error) {
+	switch s {
+	case SavedViewPageMap:
+		return []byte(s), nil
+	case SavedViewPageFacilities:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SavedViewPage) UnmarshalText(data []byte) error {
+	switch SavedViewPage(data) {
+	case SavedViewPageMap:
+		*s = SavedViewPageMap
+		return nil
+	case SavedViewPageFacilities:
+		*s = SavedViewPageFacilities
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type SavedViewParams map[string]jx.Raw
+
+func (s *SavedViewParams) init() SavedViewParams {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/Settings

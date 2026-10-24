@@ -26,6 +26,8 @@ tags:
     description: Реестр объектов логистики
   - name: exports
     description: Выгрузки данных
+  - name: views
+    description: Сохранённые виды
   - name: regulation
     description: Регулирование грузового движения
   - name: routing
@@ -829,6 +831,70 @@ paths:
           content:
             application/octet-stream:
               schema: { type: string, format: binary }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /views:
+    get:
+      tags: [views]
+      operationId: listViews
+      summary: Сохранённые виды страницы — свои и общие для моих ролей
+      x-permission: map.view
+      parameters:
+        - name: page
+          in: query
+          required: true
+          schema: { type: string, enum: [map, facilities] }
+      responses:
+        "200":
+          description: Виды
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SavedView" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [views]
+      operationId: createView
+      summary: Сохранить вид (общий — для своей роли)
+      x-permission: views.manage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [page, name, params]
+              properties:
+                page: { type: string, enum: [map, facilities] }
+                name: { type: string, minLength: 1, maxLength: 120 }
+                params:
+                  type: object
+                  description: "Параметры адреса страницы"
+                  additionalProperties: {}
+                role: { type: string, description: "Роль для общего вида" }
+      responses:
+        "201":
+          description: Вид
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SavedView" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /views/{viewId}:
+    delete:
+      tags: [views]
+      operationId: deleteView
+      summary: Удалить свой вид
+      x-permission: views.manage
+      parameters:
+        - name: viewId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: Удалён
         default: { $ref: "#/components/responses/Problem" }
 
   /regulation:
@@ -1962,6 +2028,21 @@ components:
         worksActive: { type: integer }
         worksPlanned: { type: integer }
         top: { type: array, items: { $ref: "#/components/schemas/FacilityItem" } }
+
+    SavedView:
+      type: object
+      required: [id, page, name, params, owner, mine, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        page: { type: string, enum: [map, facilities] }
+        name: { type: string }
+        params:
+          type: object
+          additionalProperties: {}
+        role: { type: string }
+        owner: { type: string }
+        mine: { type: boolean }
+        createdAt: { type: string, format: date-time }
 
     FacilityPage:
       type: object

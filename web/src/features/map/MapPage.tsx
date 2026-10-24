@@ -23,6 +23,7 @@ import { emptyStyle, fullStyle, useBasemapAvailable } from "@/shared/map/style";
 import { IconButton } from "@/shared/ui";
 import { Tabs } from "@/shared/ui/navigation";
 import { useResolvedTheme } from "@/shared/useResolvedTheme";
+import { ViewsMenu } from "@/shared/ViewsMenu";
 import { FacilityDrawer } from "../facilities/FacilityDrawer";
 import { AreaSummary } from "./AreaSummary";
 import { AreaTool, type DrawMode, type Drawn, isPolygon, lineLength } from "./AreaTool";
@@ -270,6 +271,27 @@ function MapWorkspace() {
   return (
     <div className={s.workspace}>
       <aside className={s.panel} aria-label={m.panelTabs}>
+        <div className={s.viewsRow}>
+          <ViewsMenu
+            page="map"
+            params={{ c: search.c, z: search.z, l: search.l }}
+            onApply={(p) => {
+              const c = parseCenter(typeof p.c === "string" ? p.c : undefined);
+              const z = typeof p.z === "number" ? p.z : undefined;
+              if (map && c) {
+                map.jumpTo({ center: c, zoom: z ?? map.getZoom() });
+              }
+              void navigate({
+                search: {
+                  c: typeof p.c === "string" ? p.c : undefined,
+                  z,
+                  l: typeof p.l === "string" ? p.l : undefined,
+                },
+                replace: true,
+              });
+            }}
+          />
+        </div>
         <Tabs
           label={m.panelTabs}
           selected={tab}

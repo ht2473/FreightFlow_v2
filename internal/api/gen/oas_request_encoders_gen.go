@@ -136,6 +136,20 @@ func encodeCreateUserRequest(
 	return nil
 }
 
+func encodeCreateViewRequest(
+	req *CreateViewReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCurateFacilityRequest(
 	req *CurationRequest,
 	r *http.Request,
