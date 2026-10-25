@@ -66,6 +66,20 @@ func encodeChangePasswordRequest(
 	return nil
 }
 
+func encodeComputeIndexRequest(
+	req *ComputeIndexReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeConfirmTotpRequest(
 	req *TotpCode,
 	r *http.Request,
@@ -208,6 +222,20 @@ func encodeReportFacilityIssueRequest(
 
 func encodeResolveFacilityReportRequest(
 	req *ResolveFacilityReportReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeSaveIndexConfigRequest(
+	req *SaveIndexConfigReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

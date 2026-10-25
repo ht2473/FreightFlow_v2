@@ -824,3 +824,72 @@ func TestAPIMetrics(t *testing.T) {
 		t.Errorf("без входа: %d", resp.StatusCode)
 	}
 }
+
+func TestAPIIndexes(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	osmtest.LoadDistrict(t, f.pool)
+	viewer := f.token(t, "iv@example.com", identity.RoleViewer)
+	analyst := f.token(t, "ia@example.com", identity.RoleAnalyst)
+	admin := f.token(t, "iadm@example.com", identity.RoleAdmin)
+	if _, err := analytics.New(f.pool).Recompute(t.Context(), nil, false); err != nil {
+		t.Fatal(err)
+	}
+
+	resp, body := f.do(t, http.MethodGet, "/api/v1/indexes", viewer, "")
+	if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), `"index.attractiveness"`) ||
+		!strings.Contains(string(body), `"defaultWeight":0.4`) {
+		t.Fatalf("список: %d %s", resp.StatusCode, body)
+	}
+	resp, body = f.do(t, http.MethodPost, "/api/v1/indexes/index.attractiveness/compute", viewer, `{"level":"district"}`)
+	var res struct {
+		Scores []struct {
+			Score float64
+			Rank  int
+			Parts []struct{ Ref string }
+		}
+		Sensitivity []struct{ Ref string }
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &res) != nil || len(res.Scores) == 0 || res.Scores[0].Rank != 1 ||
+		len(res.Sensitivity) != 4 {
+		t.Fatalf("расчёт: %d %s", resp.StatusCode, body)
+	}
+	// Пробные веса без сохранения; неверные — 422.
+	if resp, body := f.do(t, http.MethodPost, "/api/v1/indexes/index.restrictions/compute", viewer,
+		`{"level":"district","weights":{"territory.restricted_share":1,"territory.works_per_100km":0},"normalization":"zscore"}`); resp.StatusCode != http.StatusOK {
+		t.Errorf("пробные веса: %d %s", resp.StatusCode, body)
+	}
+	if resp, _ := f.do(t, http.MethodPost, "/api/v1/indexes/index.restrictions/compute", viewer,
+		`{"level":"district","weights":{"territory.population":1}}`); resp.StatusCode != http.StatusUnprocessableEntity {
+		t.Errorf("чужая составляющая: %d", resp.StatusCode)
+	}
+	if resp, _ := f.do(t, http.MethodPost, "/api/v1/indexes/index.nope/compute", viewer, `{"level":"district"}`); resp.StatusCode != http.StatusNotFound {
+		t.Errorf("нет индекса: %d", resp.StatusCode)
+	}
+
+	// Права: наблюдатель не сохраняет; аналитик — только свои; общие — администратор.
+	own := `{"scope":"own","normalization":"zscore","weights":{"district":{"index.accessibility":1,"index.infrastructure":0,"index.restrictions":0,"territory.warehouse_density":0}}}`
+	if resp, _ := f.do(t, http.MethodPut, "/api/v1/indexes/index.attractiveness/config", viewer, own); resp.StatusCode != http.StatusForbidden {
+		t.Errorf("наблюдатель сохраняет: %d", resp.StatusCode)
+	}
+	if resp, body := f.do(t, http.MethodPut, "/api/v1/indexes/index.attractiveness/config", analyst, own); resp.StatusCode != http.StatusNoContent {
+		t.Fatalf("свои веса: %d %s", resp.StatusCode, body)
+	}
+	if resp, body := f.do(t, http.MethodGet, "/api/v1/indexes", analyst, ""); !strings.Contains(string(body), `"own":true`) ||
+		resp.StatusCode != http.StatusOK {
+		t.Errorf("свои веса не видны: %s", body)
+	}
+	if _, body := f.do(t, http.MethodGet, "/api/v1/indexes", viewer, ""); strings.Contains(string(body), `"own":true`) {
+		t.Errorf("чужие веса видны")
+	}
+	def := strings.Replace(own, `"own"`, `"default"`, 1)
+	if resp, _ := f.do(t, http.MethodPut, "/api/v1/indexes/index.attractiveness/config", analyst, def); resp.StatusCode != http.StatusForbidden {
+		t.Errorf("аналитик меняет общие: %d", resp.StatusCode)
+	}
+	if resp, body := f.do(t, http.MethodPut, "/api/v1/indexes/index.attractiveness/config", admin, def); resp.StatusCode != http.StatusNoContent {
+		t.Errorf("администратор: %d %s", resp.StatusCode, body)
+	}
+	if resp, _ := f.do(t, http.MethodDelete, "/api/v1/indexes/index.attractiveness/config", analyst, ""); resp.StatusCode != http.StatusNoContent {
+		t.Errorf("сброс: %d", resp.StatusCode)
+	}
+}

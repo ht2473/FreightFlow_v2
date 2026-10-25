@@ -1011,6 +1011,92 @@ paths:
                 items: { $ref: "#/components/schemas/SearchHit" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /indexes:
+    get:
+      tags: [analytics]
+      operationId: listIndexes
+      summary: Сводные индексы — составляющие, веса пользователя и по умолчанию
+      x-permission: analytics.view
+      responses:
+        "200":
+          description: Индексы
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/IndexDef" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /indexes/{code}/compute:
+    post:
+      tags: [analytics]
+      operationId: computeIndex
+      summary: Значения индекса на уровне и чувствительность к весам
+      description: Без весов в запросе — веса пользователя (свои или по умолчанию); с весами — расчёт без сохранения.
+      x-permission: analytics.view
+      parameters:
+        - $ref: "#/components/parameters/IndexCode"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [level]
+              properties:
+                level: { type: string, enum: [district, h3_8] }
+                weights:
+                  type: object
+                  additionalProperties: { type: number, minimum: 0, maximum: 100 }
+                normalization: { type: string, enum: [minmax, zscore] }
+      responses:
+        "200":
+          description: Индекс
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IndexResult" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /indexes/{code}/config:
+    put:
+      tags: [analytics]
+      operationId: saveIndexConfig
+      summary: Сохранить веса индекса — свои или по умолчанию для всех (администратор)
+      x-permission: views.manage
+      parameters:
+        - $ref: "#/components/parameters/IndexCode"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scope, weights, normalization]
+              properties:
+                scope: { type: string, enum: [own, default] }
+                weights:
+                  type: object
+                  description: "Веса по уровням: { district: { показатель: вес } }"
+                  additionalProperties:
+                    type: object
+                    additionalProperties: { type: number, minimum: 0, maximum: 100 }
+                normalization: { type: string, enum: [minmax, zscore] }
+      responses:
+        "204":
+          description: Сохранено
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [analytics]
+      operationId: resetIndexConfig
+      summary: Удалить свои веса индекса
+      x-permission: views.manage
+      parameters:
+        - $ref: "#/components/parameters/IndexCode"
+      responses:
+        "204":
+          description: Удалено
+        default: { $ref: "#/components/responses/Problem" }
+
   /metrics:
     get:
       tags: [analytics]
@@ -1383,6 +1469,11 @@ components:
       in: query
       explode: true
       schema: { type: array, maxItems: 20, items: { type: string, format: uuid } }
+    IndexCode:
+      name: code
+      in: path
+      required: true
+      schema: { type: string, pattern: "^index\\.[a-z_]+$" }
     SearchQ:
       name: q
       in: query
@@ -2395,6 +2486,77 @@ components:
               items: { $ref: "#/components/schemas/FacilityItem" }
         fuzzy: { type: boolean, description: "Документы найдены по сходству написания" }
         tookMs: { type: integer }
+
+    IndexDef:
+      type: object
+      required: [code, title, method, normalization, own, levels]
+      properties:
+        code: { type: string }
+        title: { type: string }
+        method: { type: string }
+        normalization: { type: string, enum: [minmax, zscore] }
+        own: { type: boolean, description: "У пользователя свои веса" }
+        levels:
+          type: array
+          items:
+            type: object
+            required: [level, components]
+            properties:
+              level: { type: string, enum: [district, h3_8] }
+              components:
+                type: array
+                items:
+                  type: object
+                  required: [ref, title, unit, direction, weight, defaultWeight]
+                  properties:
+                    ref: { type: string }
+                    title: { type: string }
+                    unit: { type: string }
+                    direction: { type: integer, enum: [-1, 1] }
+                    weight: { type: number }
+                    defaultWeight: { type: number }
+
+    IndexResult:
+      type: object
+      required: [code, level, normalization, weights, scores, sensitivity]
+      properties:
+        code: { type: string }
+        level: { type: string }
+        normalization: { type: string, enum: [minmax, zscore] }
+        weights:
+          type: object
+          additionalProperties: { type: number }
+        scores:
+          type: array
+          items:
+            type: object
+            required: [entity, label, score, rank, parts]
+            properties:
+              entity: { type: string }
+              label: { type: string }
+              score: { type: number }
+              rank: { type: integer }
+              parts:
+                type: array
+                items:
+                  type: object
+                  required: [ref, value, normalized, weight]
+                  properties:
+                    ref: { type: string }
+                    value: { type: number }
+                    normalized: { type: number }
+                    weight: { type: number }
+        sensitivity:
+          type: array
+          items:
+            type: object
+            required: [ref, rhoMinus, rhoPlus, maxShift, entities]
+            properties:
+              ref: { type: string }
+              rhoMinus: { type: number, description: "Корреляция Спирмена рангов при весе −20 %" }
+              rhoPlus: { type: number }
+              maxShift: { type: integer }
+              entities: { type: integer }
 
     MetricDef:
       type: object

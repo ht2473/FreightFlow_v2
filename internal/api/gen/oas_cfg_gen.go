@@ -20,6 +20,7 @@ import (
 var regexMap = map[string]ogenregex.Regexp{
 	"^[a-z0-9_]+\\.[a-z0-9_]+$": ogenregex.MustCompile("^[a-z0-9_]+\\.[a-z0-9_]+$"),
 	"^[a-z][a-z0-9_]*$":         ogenregex.MustCompile("^[a-z][a-z0-9_]*$"),
+	"^index\\.[a-z_]+$":         ogenregex.MustCompile("^index\\.[a-z_]+$"),
 }
 var (
 	// Allocate option closure once.

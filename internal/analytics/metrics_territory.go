@@ -161,6 +161,21 @@ var territoryMetrics = []Metric{
 		GROUP BY a.level, a.entity, n.inputs`,
 	},
 	{
+		Code: "territory.fuel_per_100km", Title: "Обеспеченность АЗС", Unit: "АЗС на 100 км", Levels: territoryLevels,
+		Version: 1, Formula: "АЗС на территории / протяжённость магистральной сети × 100",
+		Method:    "АЗС — реестры Москвы (экологичные и прочие) и OSM; магистральная сеть — как у «Обеспеченности стоянками».",
+		Domains:   []string{"infra"},
+		DependsOn: []string{"territory.network_km"},
+		Compute: areas + `
+		SELECT a.level, a.entity, NULL::date, (count(p.id) / (n.inputs ->> 'main_km')::float8 * 100)::float8,
+		       jsonb_build_object('points', count(p.id), 'main_km', n.inputs -> 'main_km')
+		FROM a
+		JOIN analytics.metric_value n ON n.metric_code = 'territory.network_km' AND n.level = a.level AND n.entity = a.entity
+		     AND (n.inputs ->> 'main_km')::float8 > 0
+		LEFT JOIN infra.poi p ON p.kind = 'fuel' AND p.point && a.geom AND ST_Intersects(a.geom, p.point)
+		GROUP BY a.level, a.entity, n.inputs`,
+	},
+	{
 		Code: "territory.median_mkad_min", Title: "Средняя доступность объектов", Unit: "мин", Levels: territoryLevels, Version: 1,
 		Formula:   "медиана времени до МКАД объектов территории",
 		Method:    "Медиана показателя «Время до МКАД» по объектам реестра территории; недостижимые объекты не учитываются.",

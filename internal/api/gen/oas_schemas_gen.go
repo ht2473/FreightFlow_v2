@@ -757,6 +757,135 @@ func (s *ChangePassword) SetNewPassword(val string) {
 // ChangePasswordNoContent is response for ChangePassword operation.
 type ChangePasswordNoContent struct{}
 
+type ComputeIndexReq struct {
+	Level         ComputeIndexReqLevel            `json:"level"`
+	Weights       OptComputeIndexReqWeights       `json:"weights"`
+	Normalization OptComputeIndexReqNormalization `json:"normalization"`
+}
+
+// GetLevel returns the value of Level.
+func (s *ComputeIndexReq) GetLevel() ComputeIndexReqLevel {
+	return s.Level
+}
+
+// GetWeights returns the value of Weights.
+func (s *ComputeIndexReq) GetWeights() OptComputeIndexReqWeights {
+	return s.Weights
+}
+
+// GetNormalization returns the value of Normalization.
+func (s *ComputeIndexReq) GetNormalization() OptComputeIndexReqNormalization {
+	return s.Normalization
+}
+
+// SetLevel sets the value of Level.
+func (s *ComputeIndexReq) SetLevel(val ComputeIndexReqLevel) {
+	s.Level = val
+}
+
+// SetWeights sets the value of Weights.
+func (s *ComputeIndexReq) SetWeights(val OptComputeIndexReqWeights) {
+	s.Weights = val
+}
+
+// SetNormalization sets the value of Normalization.
+func (s *ComputeIndexReq) SetNormalization(val OptComputeIndexReqNormalization) {
+	s.Normalization = val
+}
+
+type ComputeIndexReqLevel string
+
+const (
+	ComputeIndexReqLevelDistrict ComputeIndexReqLevel = "district"
+	ComputeIndexReqLevelH38      ComputeIndexReqLevel = "h3_8"
+)
+
+// AllValues returns all ComputeIndexReqLevel values.
+func (ComputeIndexReqLevel) AllValues() []ComputeIndexReqLevel {
+	return []ComputeIndexReqLevel{
+		ComputeIndexReqLevelDistrict,
+		ComputeIndexReqLevelH38,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ComputeIndexReqLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case ComputeIndexReqLevelDistrict:
+		return []byte(s), nil
+	case ComputeIndexReqLevelH38:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ComputeIndexReqLevel) UnmarshalText(data []byte) error {
+	switch ComputeIndexReqLevel(data) {
+	case ComputeIndexReqLevelDistrict:
+		*s = ComputeIndexReqLevelDistrict
+		return nil
+	case ComputeIndexReqLevelH38:
+		*s = ComputeIndexReqLevelH38
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ComputeIndexReqNormalization string
+
+const (
+	ComputeIndexReqNormalizationMinmax ComputeIndexReqNormalization = "minmax"
+	ComputeIndexReqNormalizationZscore ComputeIndexReqNormalization = "zscore"
+)
+
+// AllValues returns all ComputeIndexReqNormalization values.
+func (ComputeIndexReqNormalization) AllValues() []ComputeIndexReqNormalization {
+	return []ComputeIndexReqNormalization{
+		ComputeIndexReqNormalizationMinmax,
+		ComputeIndexReqNormalizationZscore,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ComputeIndexReqNormalization) MarshalText() ([]byte, error) {
+	switch s {
+	case ComputeIndexReqNormalizationMinmax:
+		return []byte(s), nil
+	case ComputeIndexReqNormalizationZscore:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ComputeIndexReqNormalization) UnmarshalText(data []byte) error {
+	switch ComputeIndexReqNormalization(data) {
+	case ComputeIndexReqNormalizationMinmax:
+		*s = ComputeIndexReqNormalizationMinmax
+		return nil
+	case ComputeIndexReqNormalizationZscore:
+		*s = ComputeIndexReqNormalizationZscore
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ComputeIndexReqWeights map[string]float64
+
+func (s *ComputeIndexReqWeights) init() ComputeIndexReqWeights {
+	m := *s
+	if m == nil {
+		m = map[string]float64{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/ConfidenceReason
 type ConfidenceReason struct {
 	Code   string  `json:"code"`
@@ -3841,6 +3970,554 @@ func (s *GetExportFileOKHeaders) SetResponse(val GetExportFileOK) {
 	s.Response = val
 }
 
+// Ref: #/components/schemas/IndexDef
+type IndexDef struct {
+	Code          string                `json:"code"`
+	Title         string                `json:"title"`
+	Method        string                `json:"method"`
+	Normalization IndexDefNormalization `json:"normalization"`
+	// У пользователя свои веса.
+	Own    bool                 `json:"own"`
+	Levels []IndexDefLevelsItem `json:"levels"`
+}
+
+// GetCode returns the value of Code.
+func (s *IndexDef) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *IndexDef) GetTitle() string {
+	return s.Title
+}
+
+// GetMethod returns the value of Method.
+func (s *IndexDef) GetMethod() string {
+	return s.Method
+}
+
+// GetNormalization returns the value of Normalization.
+func (s *IndexDef) GetNormalization() IndexDefNormalization {
+	return s.Normalization
+}
+
+// GetOwn returns the value of Own.
+func (s *IndexDef) GetOwn() bool {
+	return s.Own
+}
+
+// GetLevels returns the value of Levels.
+func (s *IndexDef) GetLevels() []IndexDefLevelsItem {
+	return s.Levels
+}
+
+// SetCode sets the value of Code.
+func (s *IndexDef) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *IndexDef) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetMethod sets the value of Method.
+func (s *IndexDef) SetMethod(val string) {
+	s.Method = val
+}
+
+// SetNormalization sets the value of Normalization.
+func (s *IndexDef) SetNormalization(val IndexDefNormalization) {
+	s.Normalization = val
+}
+
+// SetOwn sets the value of Own.
+func (s *IndexDef) SetOwn(val bool) {
+	s.Own = val
+}
+
+// SetLevels sets the value of Levels.
+func (s *IndexDef) SetLevels(val []IndexDefLevelsItem) {
+	s.Levels = val
+}
+
+type IndexDefLevelsItem struct {
+	Level      IndexDefLevelsItemLevel            `json:"level"`
+	Components []IndexDefLevelsItemComponentsItem `json:"components"`
+}
+
+// GetLevel returns the value of Level.
+func (s *IndexDefLevelsItem) GetLevel() IndexDefLevelsItemLevel {
+	return s.Level
+}
+
+// GetComponents returns the value of Components.
+func (s *IndexDefLevelsItem) GetComponents() []IndexDefLevelsItemComponentsItem {
+	return s.Components
+}
+
+// SetLevel sets the value of Level.
+func (s *IndexDefLevelsItem) SetLevel(val IndexDefLevelsItemLevel) {
+	s.Level = val
+}
+
+// SetComponents sets the value of Components.
+func (s *IndexDefLevelsItem) SetComponents(val []IndexDefLevelsItemComponentsItem) {
+	s.Components = val
+}
+
+type IndexDefLevelsItemComponentsItem struct {
+	Ref           string                                    `json:"ref"`
+	Title         string                                    `json:"title"`
+	Unit          string                                    `json:"unit"`
+	Direction     IndexDefLevelsItemComponentsItemDirection `json:"direction"`
+	Weight        float64                                   `json:"weight"`
+	DefaultWeight float64                                   `json:"defaultWeight"`
+}
+
+// GetRef returns the value of Ref.
+func (s *IndexDefLevelsItemComponentsItem) GetRef() string {
+	return s.Ref
+}
+
+// GetTitle returns the value of Title.
+func (s *IndexDefLevelsItemComponentsItem) GetTitle() string {
+	return s.Title
+}
+
+// GetUnit returns the value of Unit.
+func (s *IndexDefLevelsItemComponentsItem) GetUnit() string {
+	return s.Unit
+}
+
+// GetDirection returns the value of Direction.
+func (s *IndexDefLevelsItemComponentsItem) GetDirection() IndexDefLevelsItemComponentsItemDirection {
+	return s.Direction
+}
+
+// GetWeight returns the value of Weight.
+func (s *IndexDefLevelsItemComponentsItem) GetWeight() float64 {
+	return s.Weight
+}
+
+// GetDefaultWeight returns the value of DefaultWeight.
+func (s *IndexDefLevelsItemComponentsItem) GetDefaultWeight() float64 {
+	return s.DefaultWeight
+}
+
+// SetRef sets the value of Ref.
+func (s *IndexDefLevelsItemComponentsItem) SetRef(val string) {
+	s.Ref = val
+}
+
+// SetTitle sets the value of Title.
+func (s *IndexDefLevelsItemComponentsItem) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetUnit sets the value of Unit.
+func (s *IndexDefLevelsItemComponentsItem) SetUnit(val string) {
+	s.Unit = val
+}
+
+// SetDirection sets the value of Direction.
+func (s *IndexDefLevelsItemComponentsItem) SetDirection(val IndexDefLevelsItemComponentsItemDirection) {
+	s.Direction = val
+}
+
+// SetWeight sets the value of Weight.
+func (s *IndexDefLevelsItemComponentsItem) SetWeight(val float64) {
+	s.Weight = val
+}
+
+// SetDefaultWeight sets the value of DefaultWeight.
+func (s *IndexDefLevelsItemComponentsItem) SetDefaultWeight(val float64) {
+	s.DefaultWeight = val
+}
+
+type IndexDefLevelsItemComponentsItemDirection int
+
+const (
+	IndexDefLevelsItemComponentsItemDirectionMinus1 IndexDefLevelsItemComponentsItemDirection = -1
+	IndexDefLevelsItemComponentsItemDirection1      IndexDefLevelsItemComponentsItemDirection = 1
+)
+
+// AllValues returns all IndexDefLevelsItemComponentsItemDirection values.
+func (IndexDefLevelsItemComponentsItemDirection) AllValues() []IndexDefLevelsItemComponentsItemDirection {
+	return []IndexDefLevelsItemComponentsItemDirection{
+		IndexDefLevelsItemComponentsItemDirectionMinus1,
+		IndexDefLevelsItemComponentsItemDirection1,
+	}
+}
+
+type IndexDefLevelsItemLevel string
+
+const (
+	IndexDefLevelsItemLevelDistrict IndexDefLevelsItemLevel = "district"
+	IndexDefLevelsItemLevelH38      IndexDefLevelsItemLevel = "h3_8"
+)
+
+// AllValues returns all IndexDefLevelsItemLevel values.
+func (IndexDefLevelsItemLevel) AllValues() []IndexDefLevelsItemLevel {
+	return []IndexDefLevelsItemLevel{
+		IndexDefLevelsItemLevelDistrict,
+		IndexDefLevelsItemLevelH38,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s IndexDefLevelsItemLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case IndexDefLevelsItemLevelDistrict:
+		return []byte(s), nil
+	case IndexDefLevelsItemLevelH38:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *IndexDefLevelsItemLevel) UnmarshalText(data []byte) error {
+	switch IndexDefLevelsItemLevel(data) {
+	case IndexDefLevelsItemLevelDistrict:
+		*s = IndexDefLevelsItemLevelDistrict
+		return nil
+	case IndexDefLevelsItemLevelH38:
+		*s = IndexDefLevelsItemLevelH38
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type IndexDefNormalization string
+
+const (
+	IndexDefNormalizationMinmax IndexDefNormalization = "minmax"
+	IndexDefNormalizationZscore IndexDefNormalization = "zscore"
+)
+
+// AllValues returns all IndexDefNormalization values.
+func (IndexDefNormalization) AllValues() []IndexDefNormalization {
+	return []IndexDefNormalization{
+		IndexDefNormalizationMinmax,
+		IndexDefNormalizationZscore,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s IndexDefNormalization) MarshalText() ([]byte, error) {
+	switch s {
+	case IndexDefNormalizationMinmax:
+		return []byte(s), nil
+	case IndexDefNormalizationZscore:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *IndexDefNormalization) UnmarshalText(data []byte) error {
+	switch IndexDefNormalization(data) {
+	case IndexDefNormalizationMinmax:
+		*s = IndexDefNormalizationMinmax
+		return nil
+	case IndexDefNormalizationZscore:
+		*s = IndexDefNormalizationZscore
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/IndexResult
+type IndexResult struct {
+	Code          string                       `json:"code"`
+	Level         string                       `json:"level"`
+	Normalization IndexResultNormalization     `json:"normalization"`
+	Weights       IndexResultWeights           `json:"weights"`
+	Scores        []IndexResultScoresItem      `json:"scores"`
+	Sensitivity   []IndexResultSensitivityItem `json:"sensitivity"`
+}
+
+// GetCode returns the value of Code.
+func (s *IndexResult) GetCode() string {
+	return s.Code
+}
+
+// GetLevel returns the value of Level.
+func (s *IndexResult) GetLevel() string {
+	return s.Level
+}
+
+// GetNormalization returns the value of Normalization.
+func (s *IndexResult) GetNormalization() IndexResultNormalization {
+	return s.Normalization
+}
+
+// GetWeights returns the value of Weights.
+func (s *IndexResult) GetWeights() IndexResultWeights {
+	return s.Weights
+}
+
+// GetScores returns the value of Scores.
+func (s *IndexResult) GetScores() []IndexResultScoresItem {
+	return s.Scores
+}
+
+// GetSensitivity returns the value of Sensitivity.
+func (s *IndexResult) GetSensitivity() []IndexResultSensitivityItem {
+	return s.Sensitivity
+}
+
+// SetCode sets the value of Code.
+func (s *IndexResult) SetCode(val string) {
+	s.Code = val
+}
+
+// SetLevel sets the value of Level.
+func (s *IndexResult) SetLevel(val string) {
+	s.Level = val
+}
+
+// SetNormalization sets the value of Normalization.
+func (s *IndexResult) SetNormalization(val IndexResultNormalization) {
+	s.Normalization = val
+}
+
+// SetWeights sets the value of Weights.
+func (s *IndexResult) SetWeights(val IndexResultWeights) {
+	s.Weights = val
+}
+
+// SetScores sets the value of Scores.
+func (s *IndexResult) SetScores(val []IndexResultScoresItem) {
+	s.Scores = val
+}
+
+// SetSensitivity sets the value of Sensitivity.
+func (s *IndexResult) SetSensitivity(val []IndexResultSensitivityItem) {
+	s.Sensitivity = val
+}
+
+type IndexResultNormalization string
+
+const (
+	IndexResultNormalizationMinmax IndexResultNormalization = "minmax"
+	IndexResultNormalizationZscore IndexResultNormalization = "zscore"
+)
+
+// AllValues returns all IndexResultNormalization values.
+func (IndexResultNormalization) AllValues() []IndexResultNormalization {
+	return []IndexResultNormalization{
+		IndexResultNormalizationMinmax,
+		IndexResultNormalizationZscore,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s IndexResultNormalization) MarshalText() ([]byte, error) {
+	switch s {
+	case IndexResultNormalizationMinmax:
+		return []byte(s), nil
+	case IndexResultNormalizationZscore:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *IndexResultNormalization) UnmarshalText(data []byte) error {
+	switch IndexResultNormalization(data) {
+	case IndexResultNormalizationMinmax:
+		*s = IndexResultNormalizationMinmax
+		return nil
+	case IndexResultNormalizationZscore:
+		*s = IndexResultNormalizationZscore
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type IndexResultScoresItem struct {
+	Entity string                           `json:"entity"`
+	Label  string                           `json:"label"`
+	Score  float64                          `json:"score"`
+	Rank   int                              `json:"rank"`
+	Parts  []IndexResultScoresItemPartsItem `json:"parts"`
+}
+
+// GetEntity returns the value of Entity.
+func (s *IndexResultScoresItem) GetEntity() string {
+	return s.Entity
+}
+
+// GetLabel returns the value of Label.
+func (s *IndexResultScoresItem) GetLabel() string {
+	return s.Label
+}
+
+// GetScore returns the value of Score.
+func (s *IndexResultScoresItem) GetScore() float64 {
+	return s.Score
+}
+
+// GetRank returns the value of Rank.
+func (s *IndexResultScoresItem) GetRank() int {
+	return s.Rank
+}
+
+// GetParts returns the value of Parts.
+func (s *IndexResultScoresItem) GetParts() []IndexResultScoresItemPartsItem {
+	return s.Parts
+}
+
+// SetEntity sets the value of Entity.
+func (s *IndexResultScoresItem) SetEntity(val string) {
+	s.Entity = val
+}
+
+// SetLabel sets the value of Label.
+func (s *IndexResultScoresItem) SetLabel(val string) {
+	s.Label = val
+}
+
+// SetScore sets the value of Score.
+func (s *IndexResultScoresItem) SetScore(val float64) {
+	s.Score = val
+}
+
+// SetRank sets the value of Rank.
+func (s *IndexResultScoresItem) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetParts sets the value of Parts.
+func (s *IndexResultScoresItem) SetParts(val []IndexResultScoresItemPartsItem) {
+	s.Parts = val
+}
+
+type IndexResultScoresItemPartsItem struct {
+	Ref        string  `json:"ref"`
+	Value      float64 `json:"value"`
+	Normalized float64 `json:"normalized"`
+	Weight     float64 `json:"weight"`
+}
+
+// GetRef returns the value of Ref.
+func (s *IndexResultScoresItemPartsItem) GetRef() string {
+	return s.Ref
+}
+
+// GetValue returns the value of Value.
+func (s *IndexResultScoresItemPartsItem) GetValue() float64 {
+	return s.Value
+}
+
+// GetNormalized returns the value of Normalized.
+func (s *IndexResultScoresItemPartsItem) GetNormalized() float64 {
+	return s.Normalized
+}
+
+// GetWeight returns the value of Weight.
+func (s *IndexResultScoresItemPartsItem) GetWeight() float64 {
+	return s.Weight
+}
+
+// SetRef sets the value of Ref.
+func (s *IndexResultScoresItemPartsItem) SetRef(val string) {
+	s.Ref = val
+}
+
+// SetValue sets the value of Value.
+func (s *IndexResultScoresItemPartsItem) SetValue(val float64) {
+	s.Value = val
+}
+
+// SetNormalized sets the value of Normalized.
+func (s *IndexResultScoresItemPartsItem) SetNormalized(val float64) {
+	s.Normalized = val
+}
+
+// SetWeight sets the value of Weight.
+func (s *IndexResultScoresItemPartsItem) SetWeight(val float64) {
+	s.Weight = val
+}
+
+type IndexResultSensitivityItem struct {
+	Ref string `json:"ref"`
+	// Корреляция Спирмена рангов при весе −20 %.
+	RhoMinus float64 `json:"rhoMinus"`
+	RhoPlus  float64 `json:"rhoPlus"`
+	MaxShift int     `json:"maxShift"`
+	Entities int     `json:"entities"`
+}
+
+// GetRef returns the value of Ref.
+func (s *IndexResultSensitivityItem) GetRef() string {
+	return s.Ref
+}
+
+// GetRhoMinus returns the value of RhoMinus.
+func (s *IndexResultSensitivityItem) GetRhoMinus() float64 {
+	return s.RhoMinus
+}
+
+// GetRhoPlus returns the value of RhoPlus.
+func (s *IndexResultSensitivityItem) GetRhoPlus() float64 {
+	return s.RhoPlus
+}
+
+// GetMaxShift returns the value of MaxShift.
+func (s *IndexResultSensitivityItem) GetMaxShift() int {
+	return s.MaxShift
+}
+
+// GetEntities returns the value of Entities.
+func (s *IndexResultSensitivityItem) GetEntities() int {
+	return s.Entities
+}
+
+// SetRef sets the value of Ref.
+func (s *IndexResultSensitivityItem) SetRef(val string) {
+	s.Ref = val
+}
+
+// SetRhoMinus sets the value of RhoMinus.
+func (s *IndexResultSensitivityItem) SetRhoMinus(val float64) {
+	s.RhoMinus = val
+}
+
+// SetRhoPlus sets the value of RhoPlus.
+func (s *IndexResultSensitivityItem) SetRhoPlus(val float64) {
+	s.RhoPlus = val
+}
+
+// SetMaxShift sets the value of MaxShift.
+func (s *IndexResultSensitivityItem) SetMaxShift(val int) {
+	s.MaxShift = val
+}
+
+// SetEntities sets the value of Entities.
+func (s *IndexResultSensitivityItem) SetEntities(val int) {
+	s.Entities = val
+}
+
+type IndexResultWeights map[string]float64
+
+func (s *IndexResultWeights) init() IndexResultWeights {
+	m := *s
+	if m == nil {
+		m = map[string]float64{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/InviteCreated
 type InviteCreated struct {
 	Email          string `json:"email"`
@@ -6486,6 +7163,98 @@ func (o OptBool) Or(d bool) bool {
 	return d
 }
 
+// NewOptComputeIndexReqNormalization returns new OptComputeIndexReqNormalization with value set to v.
+func NewOptComputeIndexReqNormalization(v ComputeIndexReqNormalization) OptComputeIndexReqNormalization {
+	return OptComputeIndexReqNormalization{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptComputeIndexReqNormalization is optional ComputeIndexReqNormalization.
+type OptComputeIndexReqNormalization struct {
+	Value ComputeIndexReqNormalization
+	Set   bool
+}
+
+// IsSet returns true if OptComputeIndexReqNormalization was set.
+func (o OptComputeIndexReqNormalization) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptComputeIndexReqNormalization) Reset() {
+	var v ComputeIndexReqNormalization
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptComputeIndexReqNormalization) SetTo(v ComputeIndexReqNormalization) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptComputeIndexReqNormalization) Get() (v ComputeIndexReqNormalization, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptComputeIndexReqNormalization) Or(d ComputeIndexReqNormalization) ComputeIndexReqNormalization {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptComputeIndexReqWeights returns new OptComputeIndexReqWeights with value set to v.
+func NewOptComputeIndexReqWeights(v ComputeIndexReqWeights) OptComputeIndexReqWeights {
+	return OptComputeIndexReqWeights{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptComputeIndexReqWeights is optional ComputeIndexReqWeights.
+type OptComputeIndexReqWeights struct {
+	Value ComputeIndexReqWeights
+	Set   bool
+}
+
+// IsSet returns true if OptComputeIndexReqWeights was set.
+func (o OptComputeIndexReqWeights) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptComputeIndexReqWeights) Reset() {
+	var v ComputeIndexReqWeights
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptComputeIndexReqWeights) SetTo(v ComputeIndexReqWeights) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptComputeIndexReqWeights) Get() (v ComputeIndexReqWeights, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptComputeIndexReqWeights) Or(d ComputeIndexReqWeights) ComputeIndexReqWeights {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDate returns new OptDate with value set to v.
 func NewOptDate(v time.Time) OptDate {
 	return OptDate{
@@ -8526,6 +9295,9 @@ func (s *ReportFacilityIssueReq) SetMessage(val string) {
 	s.Message = val
 }
 
+// ResetIndexConfigNoContent is response for ResetIndexConfig operation.
+type ResetIndexConfigNoContent struct{}
+
 // ResetUserTotpNoContent is response for ResetUserTotp operation.
 type ResetUserTotpNoContent struct{}
 
@@ -9357,6 +10129,151 @@ func (s *RunTrigger) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// SaveIndexConfigNoContent is response for SaveIndexConfig operation.
+type SaveIndexConfigNoContent struct{}
+
+type SaveIndexConfigReq struct {
+	Scope SaveIndexConfigReqScope `json:"scope"`
+	// Веса по уровням: { district: { показатель: вес } }.
+	Weights       SaveIndexConfigReqWeights       `json:"weights"`
+	Normalization SaveIndexConfigReqNormalization `json:"normalization"`
+}
+
+// GetScope returns the value of Scope.
+func (s *SaveIndexConfigReq) GetScope() SaveIndexConfigReqScope {
+	return s.Scope
+}
+
+// GetWeights returns the value of Weights.
+func (s *SaveIndexConfigReq) GetWeights() SaveIndexConfigReqWeights {
+	return s.Weights
+}
+
+// GetNormalization returns the value of Normalization.
+func (s *SaveIndexConfigReq) GetNormalization() SaveIndexConfigReqNormalization {
+	return s.Normalization
+}
+
+// SetScope sets the value of Scope.
+func (s *SaveIndexConfigReq) SetScope(val SaveIndexConfigReqScope) {
+	s.Scope = val
+}
+
+// SetWeights sets the value of Weights.
+func (s *SaveIndexConfigReq) SetWeights(val SaveIndexConfigReqWeights) {
+	s.Weights = val
+}
+
+// SetNormalization sets the value of Normalization.
+func (s *SaveIndexConfigReq) SetNormalization(val SaveIndexConfigReqNormalization) {
+	s.Normalization = val
+}
+
+type SaveIndexConfigReqNormalization string
+
+const (
+	SaveIndexConfigReqNormalizationMinmax SaveIndexConfigReqNormalization = "minmax"
+	SaveIndexConfigReqNormalizationZscore SaveIndexConfigReqNormalization = "zscore"
+)
+
+// AllValues returns all SaveIndexConfigReqNormalization values.
+func (SaveIndexConfigReqNormalization) AllValues() []SaveIndexConfigReqNormalization {
+	return []SaveIndexConfigReqNormalization{
+		SaveIndexConfigReqNormalizationMinmax,
+		SaveIndexConfigReqNormalizationZscore,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SaveIndexConfigReqNormalization) MarshalText() ([]byte, error) {
+	switch s {
+	case SaveIndexConfigReqNormalizationMinmax:
+		return []byte(s), nil
+	case SaveIndexConfigReqNormalizationZscore:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SaveIndexConfigReqNormalization) UnmarshalText(data []byte) error {
+	switch SaveIndexConfigReqNormalization(data) {
+	case SaveIndexConfigReqNormalizationMinmax:
+		*s = SaveIndexConfigReqNormalizationMinmax
+		return nil
+	case SaveIndexConfigReqNormalizationZscore:
+		*s = SaveIndexConfigReqNormalizationZscore
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type SaveIndexConfigReqScope string
+
+const (
+	SaveIndexConfigReqScopeOwn     SaveIndexConfigReqScope = "own"
+	SaveIndexConfigReqScopeDefault SaveIndexConfigReqScope = "default"
+)
+
+// AllValues returns all SaveIndexConfigReqScope values.
+func (SaveIndexConfigReqScope) AllValues() []SaveIndexConfigReqScope {
+	return []SaveIndexConfigReqScope{
+		SaveIndexConfigReqScopeOwn,
+		SaveIndexConfigReqScopeDefault,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SaveIndexConfigReqScope) MarshalText() ([]byte, error) {
+	switch s {
+	case SaveIndexConfigReqScopeOwn:
+		return []byte(s), nil
+	case SaveIndexConfigReqScopeDefault:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SaveIndexConfigReqScope) UnmarshalText(data []byte) error {
+	switch SaveIndexConfigReqScope(data) {
+	case SaveIndexConfigReqScopeOwn:
+		*s = SaveIndexConfigReqScopeOwn
+		return nil
+	case SaveIndexConfigReqScopeDefault:
+		*s = SaveIndexConfigReqScopeDefault
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Веса по уровням: { district: { показатель: вес } }.
+type SaveIndexConfigReqWeights map[string]SaveIndexConfigReqWeightsItem
+
+func (s *SaveIndexConfigReqWeights) init() SaveIndexConfigReqWeights {
+	m := *s
+	if m == nil {
+		m = map[string]SaveIndexConfigReqWeightsItem{}
+		*s = m
+	}
+	return m
+}
+
+type SaveIndexConfigReqWeightsItem map[string]float64
+
+func (s *SaveIndexConfigReqWeightsItem) init() SaveIndexConfigReqWeightsItem {
+	m := *s
+	if m == nil {
+		m = map[string]float64{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/SavedView

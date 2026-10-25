@@ -56,6 +56,13 @@ type Handler interface {
 	//
 	// GET /facilities/compare
 	CompareFacilities(ctx context.Context, params CompareFacilitiesParams) ([]FacilityCard, error)
+	// ComputeIndex implements computeIndex operation.
+	//
+	// Без весов в запросе — веса пользователя (свои или по
+	// умолчанию); с весами — расчёт без сохранения.
+	//
+	// POST /indexes/{code}/compute
+	ComputeIndex(ctx context.Context, req *ComputeIndexReq, params ComputeIndexParams) (*IndexResult, error)
 	// ConfirmTotp implements confirmTotp operation.
 	//
 	// Подтвердить подключение кодом из приложения.
@@ -285,6 +292,13 @@ type Handler interface {
 	//
 	// GET /facility-reports
 	ListFacilityReports(ctx context.Context, params ListFacilityReportsParams) ([]FacilityReport, error)
+	// ListIndexes implements listIndexes operation.
+	//
+	// Сводные индексы — составляющие, веса пользователя и
+	// по умолчанию.
+	//
+	// GET /indexes
+	ListIndexes(ctx context.Context) ([]IndexDef, error)
 	// ListLayers implements listLayers operation.
 	//
 	// Слои в порядке отрисовки снизу вверх с адресами тайлов
@@ -367,6 +381,12 @@ type Handler interface {
 	//
 	// POST /facilities/{facilityId}/reports
 	ReportFacilityIssue(ctx context.Context, req *ReportFacilityIssueReq, params ReportFacilityIssueParams) (*FacilityReport, error)
+	// ResetIndexConfig implements resetIndexConfig operation.
+	//
+	// Удалить свои веса индекса.
+	//
+	// DELETE /indexes/{code}/config
+	ResetIndexConfig(ctx context.Context, params ResetIndexConfigParams) error
 	// ResetUserTotp implements resetUserTotp operation.
 	//
 	// Сбросить двухфакторную защиту пользователя.
@@ -399,6 +419,13 @@ type Handler interface {
 	//
 	// DELETE /me/tokens/{tokenId}
 	RevokeToken(ctx context.Context, params RevokeTokenParams) error
+	// SaveIndexConfig implements saveIndexConfig operation.
+	//
+	// Сохранить веса индекса — свои или по умолчанию для
+	// всех (администратор).
+	//
+	// PUT /indexes/{code}/config
+	SaveIndexConfig(ctx context.Context, req *SaveIndexConfigReq, params SaveIndexConfigParams) error
 	// Search implements search operation.
 	//
 	// Запрос разбирается в фильтры объектов (тип, округ,

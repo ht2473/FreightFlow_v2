@@ -77,6 +77,8 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 			WithDetail("Между точками нет пути с учётом ограничений и закрытых зон")
 	case errors.Is(err, analytics.ErrUnknown):
 		return problem.NotFound
+	case errors.Is(err, analytics.ErrIndexConfig):
+		return problem.New(http.StatusUnprocessableEntity, "invalid_index_config", strings.TrimPrefix(err.Error(), "analytics: invalid index config: "))
 	case errors.Is(err, territory.ErrNotFound):
 		return problem.NotFound
 	case errors.Is(err, views.ErrNotFound):

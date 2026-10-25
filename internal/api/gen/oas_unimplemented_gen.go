@@ -79,6 +79,16 @@ func (UnimplementedHandler) CompareFacilities(ctx context.Context, params Compar
 	return r, ht.ErrNotImplemented
 }
 
+// ComputeIndex implements computeIndex operation.
+//
+// Без весов в запросе — веса пользователя (свои или по
+// умолчанию); с весами — расчёт без сохранения.
+//
+// POST /indexes/{code}/compute
+func (UnimplementedHandler) ComputeIndex(ctx context.Context, req *ComputeIndexReq, params ComputeIndexParams) (r *IndexResult, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ConfirmTotp implements confirmTotp operation.
 //
 // Подтвердить подключение кодом из приложения.
@@ -407,6 +417,16 @@ func (UnimplementedHandler) ListFacilityReports(ctx context.Context, params List
 	return r, ht.ErrNotImplemented
 }
 
+// ListIndexes implements listIndexes operation.
+//
+// Сводные индексы — составляющие, веса пользователя и
+// по умолчанию.
+//
+// GET /indexes
+func (UnimplementedHandler) ListIndexes(ctx context.Context) (r []IndexDef, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListLayers implements listLayers operation.
 //
 // Слои в порядке отрисовки снизу вверх с адресами тайлов
@@ -528,6 +548,15 @@ func (UnimplementedHandler) ReportFacilityIssue(ctx context.Context, req *Report
 	return r, ht.ErrNotImplemented
 }
 
+// ResetIndexConfig implements resetIndexConfig operation.
+//
+// Удалить свои веса индекса.
+//
+// DELETE /indexes/{code}/config
+func (UnimplementedHandler) ResetIndexConfig(ctx context.Context, params ResetIndexConfigParams) error {
+	return ht.ErrNotImplemented
+}
+
 // ResetUserTotp implements resetUserTotp operation.
 //
 // Сбросить двухфакторную защиту пользователя.
@@ -572,6 +601,16 @@ func (UnimplementedHandler) RevokeCuration(ctx context.Context, params RevokeCur
 //
 // DELETE /me/tokens/{tokenId}
 func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenParams) error {
+	return ht.ErrNotImplemented
+}
+
+// SaveIndexConfig implements saveIndexConfig operation.
+//
+// Сохранить веса индекса — свои или по умолчанию для
+// всех (администратор).
+//
+// PUT /indexes/{code}/config
+func (UnimplementedHandler) SaveIndexConfig(ctx context.Context, req *SaveIndexConfigReq, params SaveIndexConfigParams) error {
 	return ht.ErrNotImplemented
 }
 

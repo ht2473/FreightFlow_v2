@@ -44,6 +44,23 @@ var h3Metrics = []Metric{
 		GROUP BY c.level, c.entity`,
 	},
 	{
+		Code: "h3.mkad_min", Title: "Время до МКАД объектов ячейки", Unit: "мин", Levels: h3Levels, Version: 1,
+		Formula:   "медиана времени до МКАД объектов ячейки",
+		Method:    "Медиана показателя «Время до МКАД» по объектам реестра в ячейке; ячейки без объектов значения не имеют.",
+		DependsOn: []string{"facility.mkad_min"},
+		Domains:   []string{"territory"},
+		Compute: cells + `,
+		x AS (SELECT h3_lat_lng_to_cell(f.point, r.res) AS h3, v.value
+		      FROM infra.facility f
+		      JOIN analytics.metric_value v ON v.metric_code = 'facility.mkad_min' AND v.level = 'facility' AND v.entity = f.id::text,
+		      (VALUES (8), (9)) r (res)
+		      WHERE f.status = 'active')
+		SELECT c.level, c.entity, NULL::date, percentile_cont(0.5) WITHIN GROUP (ORDER BY x.value)::float8,
+		       jsonb_build_object('facilities', count(*))
+		FROM c JOIN x ON x.h3 = c.h3
+		GROUP BY c.level, c.entity`,
+	},
+	{
 		Code: "h3.restricted_km", Title: "Сеть с ограничениями в ячейке", Unit: "км", Levels: h3Levels, Version: 1,
 		Formula: "Σ длины участков улично-дорожной сети с запретом грузовиков или пределом массы и габаритов",
 		Method:  "Как «Сеть с ограничениями для грузовиков» территорий; участок — в ячейке своей середины.",

@@ -90,6 +90,19 @@ func encodeCompareFacilitiesResponse(response []FacilityCard, w http.ResponseWri
 	return nil
 }
 
+func encodeComputeIndexResponse(response *IndexResult, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeConfirmTotpResponse(response *RecoveryCodes, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -547,6 +560,23 @@ func encodeListFacilityReportsResponse(response []FacilityReport, w http.Respons
 	return nil
 }
 
+func encodeListIndexesResponse(response []IndexDef, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	e.ArrStart()
+	for _, elem := range response {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeListLayersResponse(response *LayerCatalog, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -756,6 +786,12 @@ func encodeReportFacilityIssueResponse(response *FacilityReport, w http.Response
 	return nil
 }
 
+func encodeResetIndexConfigResponse(response *ResetIndexConfigNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+
+	return nil
+}
+
 func encodeResetUserTotpResponse(response *ResetUserTotpNoContent, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(204)
 
@@ -799,6 +835,12 @@ func encodeRevokeCurationResponse(response *RevokeCurationNoContent, w http.Resp
 }
 
 func encodeRevokeTokenResponse(response *RevokeTokenNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+
+	return nil
+}
+
+func encodeSaveIndexConfigResponse(response *SaveIndexConfigNoContent, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(204)
 
 	return nil
