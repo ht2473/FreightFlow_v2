@@ -138,6 +138,12 @@ type Handler interface {
 	//
 	// POST /facilities/area
 	FacilityArea(ctx context.Context, req *FacilityAreaReq) (*AreaSummary, error)
+	// FacilityClusters implements facilityClusters operation.
+	//
+	// Кластеры объектов реестра (DBSCAN).
+	//
+	// POST /analytics/clusters
+	FacilityClusters(ctx context.Context, req *FacilityClustersReq) (*ClusterResult, error)
 	// FacilityFacets implements facilityFacets operation.
 	//
 	// Распределения выборки по типу, округу, кольцу и
@@ -266,6 +272,12 @@ type Handler interface {
 	//
 	// GET /admin/users/{userId}
 	GetUser(ctx context.Context, params GetUserParams) (*User, error)
+	// Hotspots implements hotspots operation.
+	//
+	// Горячие и холодные точки показателя ячеек H3 (Getis–Ord Gi*).
+	//
+	// POST /analytics/hotspots
+	Hotspots(ctx context.Context, req *HotspotsReq) (*HotspotResult, error)
 	// ListAudit implements listAudit operation.
 	//
 	// Журнал аудита.

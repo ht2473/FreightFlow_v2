@@ -197,6 +197,15 @@ func (UnimplementedHandler) FacilityArea(ctx context.Context, req *FacilityAreaR
 	return r, ht.ErrNotImplemented
 }
 
+// FacilityClusters implements facilityClusters operation.
+//
+// Кластеры объектов реестра (DBSCAN).
+//
+// POST /analytics/clusters
+func (UnimplementedHandler) FacilityClusters(ctx context.Context, req *FacilityClustersReq) (r *ClusterResult, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // FacilityFacets implements facilityFacets operation.
 //
 // Распределения выборки по типу, округу, кольцу и
@@ -376,6 +385,15 @@ func (UnimplementedHandler) GetTerritory(ctx context.Context, params GetTerritor
 //
 // GET /admin/users/{userId}
 func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// Hotspots implements hotspots operation.
+//
+// Горячие и холодные точки показателя ячеек H3 (Getis–Ord Gi*).
+//
+// POST /analytics/hotspots
+func (UnimplementedHandler) Hotspots(ctx context.Context, req *HotspotsReq) (r *HotspotResult, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

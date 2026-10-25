@@ -757,6 +757,157 @@ func (s *ChangePassword) SetNewPassword(val string) {
 // ChangePasswordNoContent is response for ChangePassword operation.
 type ChangePasswordNoContent struct{}
 
+// Ref: #/components/schemas/ClusterResult
+type ClusterResult struct {
+	EpsM      float64  `json:"epsM"`
+	MinPoints int      `json:"minPoints"`
+	Types     []string `json:"types"`
+	Total     int      `json:"total"`
+	// Объектов вне кластеров.
+	Noise    int                         `json:"noise"`
+	Clusters []ClusterResultClustersItem `json:"clusters"`
+}
+
+// GetEpsM returns the value of EpsM.
+func (s *ClusterResult) GetEpsM() float64 {
+	return s.EpsM
+}
+
+// GetMinPoints returns the value of MinPoints.
+func (s *ClusterResult) GetMinPoints() int {
+	return s.MinPoints
+}
+
+// GetTypes returns the value of Types.
+func (s *ClusterResult) GetTypes() []string {
+	return s.Types
+}
+
+// GetTotal returns the value of Total.
+func (s *ClusterResult) GetTotal() int {
+	return s.Total
+}
+
+// GetNoise returns the value of Noise.
+func (s *ClusterResult) GetNoise() int {
+	return s.Noise
+}
+
+// GetClusters returns the value of Clusters.
+func (s *ClusterResult) GetClusters() []ClusterResultClustersItem {
+	return s.Clusters
+}
+
+// SetEpsM sets the value of EpsM.
+func (s *ClusterResult) SetEpsM(val float64) {
+	s.EpsM = val
+}
+
+// SetMinPoints sets the value of MinPoints.
+func (s *ClusterResult) SetMinPoints(val int) {
+	s.MinPoints = val
+}
+
+// SetTypes sets the value of Types.
+func (s *ClusterResult) SetTypes(val []string) {
+	s.Types = val
+}
+
+// SetTotal sets the value of Total.
+func (s *ClusterResult) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetNoise sets the value of Noise.
+func (s *ClusterResult) SetNoise(val int) {
+	s.Noise = val
+}
+
+// SetClusters sets the value of Clusters.
+func (s *ClusterResult) SetClusters(val []ClusterResultClustersItem) {
+	s.Clusters = val
+}
+
+type ClusterResultClustersItem struct {
+	ID             int                           `json:"id"`
+	Facilities     int                           `json:"facilities"`
+	BuildingAreaM2 float64                       `json:"buildingAreaM2"`
+	Center         LngLat                        `json:"center"`
+	Hull           ClusterResultClustersItemHull `json:"hull"`
+	Names          []string                      `json:"names"`
+}
+
+// GetID returns the value of ID.
+func (s *ClusterResultClustersItem) GetID() int {
+	return s.ID
+}
+
+// GetFacilities returns the value of Facilities.
+func (s *ClusterResultClustersItem) GetFacilities() int {
+	return s.Facilities
+}
+
+// GetBuildingAreaM2 returns the value of BuildingAreaM2.
+func (s *ClusterResultClustersItem) GetBuildingAreaM2() float64 {
+	return s.BuildingAreaM2
+}
+
+// GetCenter returns the value of Center.
+func (s *ClusterResultClustersItem) GetCenter() LngLat {
+	return s.Center
+}
+
+// GetHull returns the value of Hull.
+func (s *ClusterResultClustersItem) GetHull() ClusterResultClustersItemHull {
+	return s.Hull
+}
+
+// GetNames returns the value of Names.
+func (s *ClusterResultClustersItem) GetNames() []string {
+	return s.Names
+}
+
+// SetID sets the value of ID.
+func (s *ClusterResultClustersItem) SetID(val int) {
+	s.ID = val
+}
+
+// SetFacilities sets the value of Facilities.
+func (s *ClusterResultClustersItem) SetFacilities(val int) {
+	s.Facilities = val
+}
+
+// SetBuildingAreaM2 sets the value of BuildingAreaM2.
+func (s *ClusterResultClustersItem) SetBuildingAreaM2(val float64) {
+	s.BuildingAreaM2 = val
+}
+
+// SetCenter sets the value of Center.
+func (s *ClusterResultClustersItem) SetCenter(val LngLat) {
+	s.Center = val
+}
+
+// SetHull sets the value of Hull.
+func (s *ClusterResultClustersItem) SetHull(val ClusterResultClustersItemHull) {
+	s.Hull = val
+}
+
+// SetNames sets the value of Names.
+func (s *ClusterResultClustersItem) SetNames(val []string) {
+	s.Names = val
+}
+
+type ClusterResultClustersItemHull map[string]jx.Raw
+
+func (s *ClusterResultClustersItemHull) init() ClusterResultClustersItemHull {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 type ComputeIndexReq struct {
 	Level         ComputeIndexReqLevel            `json:"level"`
 	Weights       OptComputeIndexReqWeights       `json:"weights"`
@@ -2812,6 +2963,43 @@ func (s *FacilityCardTerritory) init() FacilityCardTerritory {
 	return m
 }
 
+type FacilityClustersReq struct {
+	// Радиус соседства, м.
+	EpsM      float64  `json:"epsM"`
+	MinPoints int      `json:"minPoints"`
+	Types     []string `json:"types"`
+}
+
+// GetEpsM returns the value of EpsM.
+func (s *FacilityClustersReq) GetEpsM() float64 {
+	return s.EpsM
+}
+
+// GetMinPoints returns the value of MinPoints.
+func (s *FacilityClustersReq) GetMinPoints() int {
+	return s.MinPoints
+}
+
+// GetTypes returns the value of Types.
+func (s *FacilityClustersReq) GetTypes() []string {
+	return s.Types
+}
+
+// SetEpsM sets the value of EpsM.
+func (s *FacilityClustersReq) SetEpsM(val float64) {
+	s.EpsM = val
+}
+
+// SetMinPoints sets the value of MinPoints.
+func (s *FacilityClustersReq) SetMinPoints(val int) {
+	s.MinPoints = val
+}
+
+// SetTypes sets the value of Types.
+func (s *FacilityClustersReq) SetTypes(val []string) {
+	s.Types = val
+}
+
 // Ref: #/components/schemas/FacilityFacets
 type FacilityFacets struct {
 	Types      []FacetValue `json:"types"`
@@ -3968,6 +4156,311 @@ func (s *GetExportFileOKHeaders) SetContentDisposition(val OptString) {
 // SetResponse sets the value of Response.
 func (s *GetExportFileOKHeaders) SetResponse(val GetExportFileOK) {
 	s.Response = val
+}
+
+// Ref: #/components/schemas/HotspotResult
+type HotspotResult struct {
+	Metric      string                         `json:"metric"`
+	Level       string                         `json:"level"`
+	K           int                            `json:"k"`
+	Cells       int                            `json:"cells"`
+	Mean        float64                        `json:"mean"`
+	Sd          float64                        `json:"sd"`
+	Hot         int                            `json:"hot"`
+	Cold        int                            `json:"cold"`
+	Significant []HotspotResultSignificantItem `json:"significant"`
+}
+
+// GetMetric returns the value of Metric.
+func (s *HotspotResult) GetMetric() string {
+	return s.Metric
+}
+
+// GetLevel returns the value of Level.
+func (s *HotspotResult) GetLevel() string {
+	return s.Level
+}
+
+// GetK returns the value of K.
+func (s *HotspotResult) GetK() int {
+	return s.K
+}
+
+// GetCells returns the value of Cells.
+func (s *HotspotResult) GetCells() int {
+	return s.Cells
+}
+
+// GetMean returns the value of Mean.
+func (s *HotspotResult) GetMean() float64 {
+	return s.Mean
+}
+
+// GetSd returns the value of Sd.
+func (s *HotspotResult) GetSd() float64 {
+	return s.Sd
+}
+
+// GetHot returns the value of Hot.
+func (s *HotspotResult) GetHot() int {
+	return s.Hot
+}
+
+// GetCold returns the value of Cold.
+func (s *HotspotResult) GetCold() int {
+	return s.Cold
+}
+
+// GetSignificant returns the value of Significant.
+func (s *HotspotResult) GetSignificant() []HotspotResultSignificantItem {
+	return s.Significant
+}
+
+// SetMetric sets the value of Metric.
+func (s *HotspotResult) SetMetric(val string) {
+	s.Metric = val
+}
+
+// SetLevel sets the value of Level.
+func (s *HotspotResult) SetLevel(val string) {
+	s.Level = val
+}
+
+// SetK sets the value of K.
+func (s *HotspotResult) SetK(val int) {
+	s.K = val
+}
+
+// SetCells sets the value of Cells.
+func (s *HotspotResult) SetCells(val int) {
+	s.Cells = val
+}
+
+// SetMean sets the value of Mean.
+func (s *HotspotResult) SetMean(val float64) {
+	s.Mean = val
+}
+
+// SetSd sets the value of Sd.
+func (s *HotspotResult) SetSd(val float64) {
+	s.Sd = val
+}
+
+// SetHot sets the value of Hot.
+func (s *HotspotResult) SetHot(val int) {
+	s.Hot = val
+}
+
+// SetCold sets the value of Cold.
+func (s *HotspotResult) SetCold(val int) {
+	s.Cold = val
+}
+
+// SetSignificant sets the value of Significant.
+func (s *HotspotResult) SetSignificant(val []HotspotResultSignificantItem) {
+	s.Significant = val
+}
+
+type HotspotResultSignificantItem struct {
+	H3    string  `json:"h3"`
+	Value float64 `json:"value"`
+	// Значение в окрестности на км².
+	Density    float64                                `json:"density"`
+	Z          float64                                `json:"z"`
+	Confidence HotspotResultSignificantItemConfidence `json:"confidence"`
+	Sign       HotspotResultSignificantItemSign       `json:"sign"`
+	Geometry   HotspotResultSignificantItemGeometry   `json:"geometry"`
+}
+
+// GetH3 returns the value of H3.
+func (s *HotspotResultSignificantItem) GetH3() string {
+	return s.H3
+}
+
+// GetValue returns the value of Value.
+func (s *HotspotResultSignificantItem) GetValue() float64 {
+	return s.Value
+}
+
+// GetDensity returns the value of Density.
+func (s *HotspotResultSignificantItem) GetDensity() float64 {
+	return s.Density
+}
+
+// GetZ returns the value of Z.
+func (s *HotspotResultSignificantItem) GetZ() float64 {
+	return s.Z
+}
+
+// GetConfidence returns the value of Confidence.
+func (s *HotspotResultSignificantItem) GetConfidence() HotspotResultSignificantItemConfidence {
+	return s.Confidence
+}
+
+// GetSign returns the value of Sign.
+func (s *HotspotResultSignificantItem) GetSign() HotspotResultSignificantItemSign {
+	return s.Sign
+}
+
+// GetGeometry returns the value of Geometry.
+func (s *HotspotResultSignificantItem) GetGeometry() HotspotResultSignificantItemGeometry {
+	return s.Geometry
+}
+
+// SetH3 sets the value of H3.
+func (s *HotspotResultSignificantItem) SetH3(val string) {
+	s.H3 = val
+}
+
+// SetValue sets the value of Value.
+func (s *HotspotResultSignificantItem) SetValue(val float64) {
+	s.Value = val
+}
+
+// SetDensity sets the value of Density.
+func (s *HotspotResultSignificantItem) SetDensity(val float64) {
+	s.Density = val
+}
+
+// SetZ sets the value of Z.
+func (s *HotspotResultSignificantItem) SetZ(val float64) {
+	s.Z = val
+}
+
+// SetConfidence sets the value of Confidence.
+func (s *HotspotResultSignificantItem) SetConfidence(val HotspotResultSignificantItemConfidence) {
+	s.Confidence = val
+}
+
+// SetSign sets the value of Sign.
+func (s *HotspotResultSignificantItem) SetSign(val HotspotResultSignificantItemSign) {
+	s.Sign = val
+}
+
+// SetGeometry sets the value of Geometry.
+func (s *HotspotResultSignificantItem) SetGeometry(val HotspotResultSignificantItemGeometry) {
+	s.Geometry = val
+}
+
+type HotspotResultSignificantItemConfidence int
+
+const (
+	HotspotResultSignificantItemConfidence90 HotspotResultSignificantItemConfidence = 90
+	HotspotResultSignificantItemConfidence95 HotspotResultSignificantItemConfidence = 95
+	HotspotResultSignificantItemConfidence99 HotspotResultSignificantItemConfidence = 99
+)
+
+// AllValues returns all HotspotResultSignificantItemConfidence values.
+func (HotspotResultSignificantItemConfidence) AllValues() []HotspotResultSignificantItemConfidence {
+	return []HotspotResultSignificantItemConfidence{
+		HotspotResultSignificantItemConfidence90,
+		HotspotResultSignificantItemConfidence95,
+		HotspotResultSignificantItemConfidence99,
+	}
+}
+
+type HotspotResultSignificantItemGeometry map[string]jx.Raw
+
+func (s *HotspotResultSignificantItemGeometry) init() HotspotResultSignificantItemGeometry {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type HotspotResultSignificantItemSign int
+
+const (
+	HotspotResultSignificantItemSignMinus1 HotspotResultSignificantItemSign = -1
+	HotspotResultSignificantItemSign1      HotspotResultSignificantItemSign = 1
+)
+
+// AllValues returns all HotspotResultSignificantItemSign values.
+func (HotspotResultSignificantItemSign) AllValues() []HotspotResultSignificantItemSign {
+	return []HotspotResultSignificantItemSign{
+		HotspotResultSignificantItemSignMinus1,
+		HotspotResultSignificantItemSign1,
+	}
+}
+
+type HotspotsReq struct {
+	Metric string           `json:"metric"`
+	Level  HotspotsReqLevel `json:"level"`
+	// Соседство — диск из k колец.
+	K int `json:"k"`
+}
+
+// GetMetric returns the value of Metric.
+func (s *HotspotsReq) GetMetric() string {
+	return s.Metric
+}
+
+// GetLevel returns the value of Level.
+func (s *HotspotsReq) GetLevel() HotspotsReqLevel {
+	return s.Level
+}
+
+// GetK returns the value of K.
+func (s *HotspotsReq) GetK() int {
+	return s.K
+}
+
+// SetMetric sets the value of Metric.
+func (s *HotspotsReq) SetMetric(val string) {
+	s.Metric = val
+}
+
+// SetLevel sets the value of Level.
+func (s *HotspotsReq) SetLevel(val HotspotsReqLevel) {
+	s.Level = val
+}
+
+// SetK sets the value of K.
+func (s *HotspotsReq) SetK(val int) {
+	s.K = val
+}
+
+type HotspotsReqLevel string
+
+const (
+	HotspotsReqLevelH38 HotspotsReqLevel = "h3_8"
+	HotspotsReqLevelH39 HotspotsReqLevel = "h3_9"
+)
+
+// AllValues returns all HotspotsReqLevel values.
+func (HotspotsReqLevel) AllValues() []HotspotsReqLevel {
+	return []HotspotsReqLevel{
+		HotspotsReqLevelH38,
+		HotspotsReqLevelH39,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s HotspotsReqLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case HotspotsReqLevelH38:
+		return []byte(s), nil
+	case HotspotsReqLevelH39:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *HotspotsReqLevel) UnmarshalText(data []byte) error {
+	switch HotspotsReqLevel(data) {
+	case HotspotsReqLevelH38:
+		*s = HotspotsReqLevelH38
+		return nil
+	case HotspotsReqLevelH39:
+		*s = HotspotsReqLevelH39
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/IndexDef

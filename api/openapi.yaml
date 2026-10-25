@@ -1097,6 +1097,59 @@ paths:
           description: Удалено
         default: { $ref: "#/components/responses/Problem" }
 
+  /analytics/hotspots:
+    post:
+      tags: [analytics]
+      operationId: hotspots
+      summary: Горячие и холодные точки показателя ячеек H3 (Getis–Ord Gi*)
+      x-permission: analytics.view
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [metric, level, k]
+              properties:
+                metric: { type: string, pattern: "^h3\\.[a-z_]+$" }
+                level: { type: string, enum: [h3_8, h3_9] }
+                k: { type: integer, minimum: 1, maximum: 3, description: "Соседство — диск из k колец" }
+      responses:
+        "200":
+          description: Итог с параметрами
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HotspotResult" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /analytics/clusters:
+    post:
+      tags: [analytics]
+      operationId: facilityClusters
+      summary: Кластеры объектов реестра (DBSCAN)
+      x-permission: analytics.view
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [epsM, minPoints]
+              properties:
+                epsM: { type: number, minimum: 50, maximum: 10000, description: "Радиус соседства, м" }
+                minPoints: { type: integer, minimum: 2, maximum: 100 }
+                types:
+                  type: array
+                  maxItems: 10
+                  items: { type: string }
+      responses:
+        "200":
+          description: Кластеры
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ClusterResult" }
+        default: { $ref: "#/components/responses/Problem" }
+
   /metrics:
     get:
       tags: [analytics]
@@ -2623,6 +2676,62 @@ components:
                   lo95: { type: number }
                   hi95: { type: number }
         forecastNote: { type: string, description: "Почему прогноз не построен" }
+
+    HotspotResult:
+      type: object
+      required: [metric, level, k, cells, mean, sd, hot, cold, significant]
+      properties:
+        metric: { type: string }
+        level: { type: string }
+        k: { type: integer }
+        cells: { type: integer }
+        mean: { type: number }
+        sd: { type: number }
+        hot: { type: integer }
+        cold: { type: integer }
+        significant:
+          type: array
+          items:
+            type: object
+            required: [h3, value, density, z, confidence, sign, geometry]
+            properties:
+              h3: { type: string }
+              value: { type: number }
+              density: { type: number, description: "Значение в окрестности на км²" }
+              z: { type: number }
+              confidence: { type: integer, enum: [90, 95, 99] }
+              sign: { type: integer, enum: [-1, 1] }
+              geometry:
+                type: object
+                additionalProperties: {}
+
+    ClusterResult:
+      type: object
+      required: [epsM, minPoints, types, total, noise, clusters]
+      properties:
+        epsM: { type: number }
+        minPoints: { type: integer }
+        types:
+          type: array
+          items: { type: string }
+        total: { type: integer }
+        noise: { type: integer, description: "Объектов вне кластеров" }
+        clusters:
+          type: array
+          items:
+            type: object
+            required: [id, facilities, buildingAreaM2, center, hull, names]
+            properties:
+              id: { type: integer }
+              facilities: { type: integer }
+              buildingAreaM2: { type: number }
+              center: { $ref: "#/components/schemas/LngLat" }
+              hull:
+                type: object
+                additionalProperties: {}
+              names:
+                type: array
+                items: { type: string }
 
     MetricDef:
       type: object

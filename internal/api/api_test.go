@@ -823,6 +823,21 @@ func TestAPIMetrics(t *testing.T) {
 	if resp, _ := f.do(t, http.MethodGet, "/api/v1/metrics", "", ""); resp.StatusCode != http.StatusUnauthorized {
 		t.Errorf("без входа: %d", resp.StatusCode)
 	}
+	// Горячие точки и кластеры: параметры возвращаются вместе с итогом.
+	resp, body = f.do(t, http.MethodPost, "/api/v1/analytics/hotspots", viewer, `{"metric":"h3.facilities","level":"h3_8","k":1}`)
+	if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), `"k":1`) || !strings.Contains(string(body), `"sign":1`) {
+		t.Errorf("горячие точки: %d %.300s", resp.StatusCode, body)
+	}
+	if resp, _ := f.do(t, http.MethodPost, "/api/v1/analytics/hotspots", viewer, `{"metric":"h3.nope","level":"h3_8","k":1}`); resp.StatusCode != http.StatusNotFound {
+		t.Errorf("нет показателя ячеек: %d", resp.StatusCode)
+	}
+	resp, body = f.do(t, http.MethodPost, "/api/v1/analytics/clusters", viewer, `{"epsM":400,"minPoints":3}`)
+	if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), `"epsM":400`) || !strings.Contains(string(body), `"hull"`) {
+		t.Errorf("кластеры: %d %.300s", resp.StatusCode, body)
+	}
+	if resp, _ := f.do(t, http.MethodPost, "/api/v1/analytics/clusters", viewer, `{"epsM":5,"minPoints":3}`); resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("радиус 5 м: %d", resp.StatusCode)
+	}
 }
 
 func TestAPIIndexes(t *testing.T) {

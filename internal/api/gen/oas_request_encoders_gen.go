@@ -206,6 +206,34 @@ func encodeFacilityAreaRequest(
 	return nil
 }
 
+func encodeFacilityClustersRequest(
+	req *FacilityClustersReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeHotspotsRequest(
+	req *HotspotsReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeReportFacilityIssueRequest(
 	req *ReportFacilityIssueReq,
 	r *http.Request,

@@ -152,3 +152,48 @@ func (s *Server) MetricSeries(ctx context.Context, p gen.MetricSeriesParams) (*g
 	out.Forecast = gen.NewOptMetricSeriesForecast(fc)
 	return out, nil
 }
+
+func (s *Server) Hotspots(ctx context.Context, req *gen.HotspotsReq) (*gen.HotspotResult, error) {
+	res, err := s.analytics.Hotspots(ctx, analytics.HotspotParams{Metric: req.Metric, Level: string(req.Level), K: req.K})
+	if err != nil {
+		return nil, err
+	}
+	out := &gen.HotspotResult{
+		Metric: res.Params.Metric, Level: res.Params.Level, K: res.Params.K, Cells: res.Cells, Mean: res.Mean, Sd: res.SD,
+		Hot: res.Hot, Cold: res.Cold, Significant: make([]gen.HotspotResultSignificantItem, len(res.Significant)),
+	}
+	for i, h := range res.Significant {
+		g, err := rawObject(h.Geometry)
+		if err != nil {
+			return nil, err
+		}
+		out.Significant[i] = gen.HotspotResultSignificantItem{
+			H3: h.H3, Value: h.Value, Density: h.Density, Z: h.Z,
+			Confidence: gen.HotspotResultSignificantItemConfidence(h.Confidence),
+			Sign:       gen.HotspotResultSignificantItemSign(h.Sign), Geometry: g,
+		}
+	}
+	return out, nil
+}
+
+func (s *Server) FacilityClusters(ctx context.Context, req *gen.FacilityClustersReq) (*gen.ClusterResult, error) {
+	res, err := s.analytics.Clusters(ctx, analytics.ClusterParams{EpsM: req.EpsM, MinPoints: req.MinPoints, Types: req.Types})
+	if err != nil {
+		return nil, err
+	}
+	out := &gen.ClusterResult{
+		EpsM: res.Params.EpsM, MinPoints: res.Params.MinPoints, Types: nonNil(res.Params.Types), Total: res.Total,
+		Noise: res.Noise, Clusters: make([]gen.ClusterResultClustersItem, len(res.Clusters)),
+	}
+	for i, c := range res.Clusters {
+		hull, err := rawObject(c.Hull)
+		if err != nil {
+			return nil, err
+		}
+		out.Clusters[i] = gen.ClusterResultClustersItem{
+			ID: c.ID, Facilities: c.Facilities, BuildingAreaM2: c.BuildingM2,
+			Center: gen.LngLat{Lon: c.Lon, Lat: c.Lat}, Hull: hull, Names: nonNil(c.Names),
+		}
+	}
+	return out, nil
+}
