@@ -194,6 +194,23 @@ func encodeCurateFacilityResponse(response *Curation, w http.ResponseWriter, spa
 	return nil
 }
 
+func encodeDataUpdatesResponse(response []DataUpdatesOKItem, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	e.ArrStart()
+	for _, elem := range response {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeDeleteViewResponse(response *DeleteViewNoContent, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(204)
 
@@ -302,6 +319,19 @@ func encodeGeocodeResponse(response []SearchHit, w http.ResponseWriter, span tra
 		elem.Encode(e)
 	}
 	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeGetDashboardResponse(response *Dashboard, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
@@ -786,6 +816,19 @@ func encodeListViewsResponse(response []SavedView, w http.ResponseWriter, span t
 	return nil
 }
 
+func encodeMetricGeoResponse(response MetricGeoOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeMetricSeriesResponse(response *MetricSeries, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -821,6 +864,12 @@ func encodeReportFacilityIssueResponse(response *FacilityReport, w http.Response
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
+	return nil
+}
+
+func encodeResetDashboardResponse(response *ResetDashboardNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
 
 	return nil
 }
@@ -875,6 +924,19 @@ func encodeRevokeCurationResponse(response *RevokeCurationNoContent, w http.Resp
 
 func encodeRevokeTokenResponse(response *RevokeTokenNoContent, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(204)
+
+	return nil
+}
+
+func encodeSaveDashboardResponse(response *Dashboard, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
 
 	return nil
 }

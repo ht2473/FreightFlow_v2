@@ -212,3 +212,29 @@ func toSnapshot(r sqlc.IngestSnapshot) Snapshot {
 	}
 	return s
 }
+
+// Update — опубликованное обновление данных: источник, время, число записей, домены.
+type Update struct {
+	Source     string
+	Title      string
+	Publisher  string
+	FinishedAt time.Time
+	Records    *int64
+	Domains    []string
+}
+
+// RecentUpdates — последние успешные загрузки (лента обновлений на дашборде).
+func (s *Service) RecentUpdates(ctx context.Context, limit int) ([]Update, error) {
+	rows, err := s.d.Pool.Query(ctx, `
+		SELECT r.source_code, s.title, s.publisher, r.finished_at, (r.stats ->> 'records')::bigint, s.domains
+		FROM ingest.run r JOIN ingest.source s ON s.code = r.source_code
+		WHERE r.status = 'succeeded' AND r.finished_at IS NOT NULL
+		ORDER BY r.finished_at DESC LIMIT $1`, limit)
+	if err != nil {
+		return nil, fmt.Errorf("recent updates: %w", err)
+	}
+	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (Update, error) {
+		var u Update
+		return u, r.Scan(&u.Source, &u.Title, &u.Publisher, &u.FinishedAt, &u.Records, &u.Domains)
+	})
+}

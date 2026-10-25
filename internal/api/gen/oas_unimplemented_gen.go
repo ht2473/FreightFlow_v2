@@ -157,6 +157,15 @@ func (UnimplementedHandler) CurateFacility(ctx context.Context, req *CurationReq
 	return r, ht.ErrNotImplemented
 }
 
+// DataUpdates implements dataUpdates operation.
+//
+// Последние обновления данных (успешные загрузки).
+//
+// GET /data/updates
+func (UnimplementedHandler) DataUpdates(ctx context.Context, params DataUpdatesParams) (r []DataUpdatesOKItem, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteView implements deleteView operation.
 //
 // Удалить свой вид.
@@ -242,6 +251,15 @@ func (UnimplementedHandler) FacilityPoints(ctx context.Context) (r []FacilityPoi
 //
 // GET /geocode
 func (UnimplementedHandler) Geocode(ctx context.Context, params GeocodeParams) (r []SearchHit, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetDashboard implements getDashboard operation.
+//
+// Виджеты главного дашборда пользователя.
+//
+// GET /me/dashboard
+func (UnimplementedHandler) GetDashboard(ctx context.Context) (r *Dashboard, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -547,6 +565,16 @@ func (UnimplementedHandler) ListViews(ctx context.Context, params ListViewsParam
 	return r, ht.ErrNotImplemented
 }
 
+// MetricGeo implements metricGeo operation.
+//
+// Значения показателя с геометрией (GeoJSON) — картограмма
+// районов, округов или ячеек H3.
+//
+// GET /metrics/{code}/geo
+func (UnimplementedHandler) MetricGeo(ctx context.Context, params MetricGeoParams) (r MetricGeoOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // MetricSeries implements metricSeries operation.
 //
 // Ряд показателя по городу и прогноз с точностью моделей
@@ -574,6 +602,15 @@ func (UnimplementedHandler) MetricValues(ctx context.Context, params MetricValue
 // POST /facilities/{facilityId}/reports
 func (UnimplementedHandler) ReportFacilityIssue(ctx context.Context, req *ReportFacilityIssueReq, params ReportFacilityIssueParams) (r *FacilityReport, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// ResetDashboard implements resetDashboard operation.
+//
+// Вернуть дашборд по умолчанию.
+//
+// DELETE /me/dashboard
+func (UnimplementedHandler) ResetDashboard(ctx context.Context) error {
+	return ht.ErrNotImplemented
 }
 
 // ResetIndexConfig implements resetIndexConfig operation.
@@ -630,6 +667,16 @@ func (UnimplementedHandler) RevokeCuration(ctx context.Context, params RevokeCur
 // DELETE /me/tokens/{tokenId}
 func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenParams) error {
 	return ht.ErrNotImplemented
+}
+
+// SaveDashboard implements saveDashboard operation.
+//
+// Сохранить свои виджеты (пустой список не допускается
+// — для сброса DELETE).
+//
+// PUT /me/dashboard
+func (UnimplementedHandler) SaveDashboard(ctx context.Context, req *SaveDashboardReq) (r *Dashboard, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // SaveIndexConfig implements saveIndexConfig operation.

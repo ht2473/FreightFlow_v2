@@ -1879,6 +1879,102 @@ func (s *CurationRequestField) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/Dashboard
+type Dashboard struct {
+	// Свой набор виджетов (иначе по умолчанию).
+	Own     bool     `json:"own"`
+	Widgets []Widget `json:"widgets"`
+}
+
+// GetOwn returns the value of Own.
+func (s *Dashboard) GetOwn() bool {
+	return s.Own
+}
+
+// GetWidgets returns the value of Widgets.
+func (s *Dashboard) GetWidgets() []Widget {
+	return s.Widgets
+}
+
+// SetOwn sets the value of Own.
+func (s *Dashboard) SetOwn(val bool) {
+	s.Own = val
+}
+
+// SetWidgets sets the value of Widgets.
+func (s *Dashboard) SetWidgets(val []Widget) {
+	s.Widgets = val
+}
+
+type DataUpdatesOKItem struct {
+	Source     string    `json:"source"`
+	Title      string    `json:"title"`
+	Publisher  string    `json:"publisher"`
+	FinishedAt time.Time `json:"finishedAt"`
+	Records    OptInt64  `json:"records"`
+	Domains    []string  `json:"domains"`
+}
+
+// GetSource returns the value of Source.
+func (s *DataUpdatesOKItem) GetSource() string {
+	return s.Source
+}
+
+// GetTitle returns the value of Title.
+func (s *DataUpdatesOKItem) GetTitle() string {
+	return s.Title
+}
+
+// GetPublisher returns the value of Publisher.
+func (s *DataUpdatesOKItem) GetPublisher() string {
+	return s.Publisher
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *DataUpdatesOKItem) GetFinishedAt() time.Time {
+	return s.FinishedAt
+}
+
+// GetRecords returns the value of Records.
+func (s *DataUpdatesOKItem) GetRecords() OptInt64 {
+	return s.Records
+}
+
+// GetDomains returns the value of Domains.
+func (s *DataUpdatesOKItem) GetDomains() []string {
+	return s.Domains
+}
+
+// SetSource sets the value of Source.
+func (s *DataUpdatesOKItem) SetSource(val string) {
+	s.Source = val
+}
+
+// SetTitle sets the value of Title.
+func (s *DataUpdatesOKItem) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetPublisher sets the value of Publisher.
+func (s *DataUpdatesOKItem) SetPublisher(val string) {
+	s.Publisher = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *DataUpdatesOKItem) SetFinishedAt(val time.Time) {
+	s.FinishedAt = val
+}
+
+// SetRecords sets the value of Records.
+func (s *DataUpdatesOKItem) SetRecords(val OptInt64) {
+	s.Records = val
+}
+
+// SetDomains sets the value of Domains.
+func (s *DataUpdatesOKItem) SetDomains(val []string) {
+	s.Domains = val
+}
+
 // DeleteViewNoContent is response for DeleteView operation.
 type DeleteViewNoContent struct{}
 
@@ -6493,6 +6589,72 @@ func (s *MetricDefLevelsItem) UnmarshalText(data []byte) error {
 	}
 }
 
+type MetricGeoLevel string
+
+const (
+	MetricGeoLevelDistrict MetricGeoLevel = "district"
+	MetricGeoLevelOkrug    MetricGeoLevel = "okrug"
+	MetricGeoLevelH38      MetricGeoLevel = "h3_8"
+	MetricGeoLevelH39      MetricGeoLevel = "h3_9"
+)
+
+// AllValues returns all MetricGeoLevel values.
+func (MetricGeoLevel) AllValues() []MetricGeoLevel {
+	return []MetricGeoLevel{
+		MetricGeoLevelDistrict,
+		MetricGeoLevelOkrug,
+		MetricGeoLevelH38,
+		MetricGeoLevelH39,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MetricGeoLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case MetricGeoLevelDistrict:
+		return []byte(s), nil
+	case MetricGeoLevelOkrug:
+		return []byte(s), nil
+	case MetricGeoLevelH38:
+		return []byte(s), nil
+	case MetricGeoLevelH39:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MetricGeoLevel) UnmarshalText(data []byte) error {
+	switch MetricGeoLevel(data) {
+	case MetricGeoLevelDistrict:
+		*s = MetricGeoLevelDistrict
+		return nil
+	case MetricGeoLevelOkrug:
+		*s = MetricGeoLevelOkrug
+		return nil
+	case MetricGeoLevelH38:
+		*s = MetricGeoLevelH38
+		return nil
+	case MetricGeoLevelH39:
+		*s = MetricGeoLevelH39
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type MetricGeoOK map[string]jx.Raw
+
+func (s *MetricGeoOK) init() MetricGeoOK {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/MetricSeries
 type MetricSeries struct {
 	Metric MetricDef                `json:"metric"`
@@ -9189,6 +9351,52 @@ func (o OptUpdateUserStatus) Or(d UpdateUserStatus) UpdateUserStatus {
 	return d
 }
 
+// NewOptWidgetLevel returns new OptWidgetLevel with value set to v.
+func NewOptWidgetLevel(v WidgetLevel) OptWidgetLevel {
+	return OptWidgetLevel{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWidgetLevel is optional WidgetLevel.
+type OptWidgetLevel struct {
+	Value WidgetLevel
+	Set   bool
+}
+
+// IsSet returns true if OptWidgetLevel was set.
+func (o OptWidgetLevel) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWidgetLevel) Reset() {
+	var v WidgetLevel
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWidgetLevel) SetTo(v WidgetLevel) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWidgetLevel) Get() (v WidgetLevel, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWidgetLevel) Or(d WidgetLevel) WidgetLevel {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptZoneRuleMassBasis returns new OptZoneRuleMassBasis with value set to v.
 func NewOptZoneRuleMassBasis(v ZoneRuleMassBasis) OptZoneRuleMassBasis {
 	return OptZoneRuleMassBasis{
@@ -10125,6 +10333,9 @@ func (s *ReportFacilityIssueReq) SetMessage(val string) {
 	s.Message = val
 }
 
+// ResetDashboardNoContent is response for ResetDashboard operation.
+type ResetDashboardNoContent struct{}
+
 // ResetIndexConfigNoContent is response for ResetIndexConfig operation.
 type ResetIndexConfigNoContent struct{}
 
@@ -10959,6 +11170,20 @@ func (s *RunTrigger) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+type SaveDashboardReq struct {
+	Widgets []Widget `json:"widgets"`
+}
+
+// GetWidgets returns the value of Widgets.
+func (s *SaveDashboardReq) GetWidgets() []Widget {
+	return s.Widgets
+}
+
+// SetWidgets sets the value of Widgets.
+func (s *SaveDashboardReq) SetWidgets(val []Widget) {
+	s.Widgets = val
 }
 
 // SaveIndexConfigNoContent is response for SaveIndexConfig operation.
@@ -13401,6 +13626,185 @@ func (s *VehicleProfile) SetEcoClass(val int) {
 // SetHazmat sets the value of Hazmat.
 func (s *VehicleProfile) SetHazmat(val bool) {
 	s.Hazmat = val
+}
+
+// Ref: #/components/schemas/Widget
+type Widget struct {
+	Kind   WidgetKind     `json:"kind"`
+	Metric OptString      `json:"metric"`
+	Index  OptString      `json:"index"`
+	Level  OptWidgetLevel `json:"level"`
+}
+
+// GetKind returns the value of Kind.
+func (s *Widget) GetKind() WidgetKind {
+	return s.Kind
+}
+
+// GetMetric returns the value of Metric.
+func (s *Widget) GetMetric() OptString {
+	return s.Metric
+}
+
+// GetIndex returns the value of Index.
+func (s *Widget) GetIndex() OptString {
+	return s.Index
+}
+
+// GetLevel returns the value of Level.
+func (s *Widget) GetLevel() OptWidgetLevel {
+	return s.Level
+}
+
+// SetKind sets the value of Kind.
+func (s *Widget) SetKind(val WidgetKind) {
+	s.Kind = val
+}
+
+// SetMetric sets the value of Metric.
+func (s *Widget) SetMetric(val OptString) {
+	s.Metric = val
+}
+
+// SetIndex sets the value of Index.
+func (s *Widget) SetIndex(val OptString) {
+	s.Index = val
+}
+
+// SetLevel sets the value of Level.
+func (s *Widget) SetLevel(val OptWidgetLevel) {
+	s.Level = val
+}
+
+type WidgetKind string
+
+const (
+	WidgetKindKpi    WidgetKind = "kpi"
+	WidgetKindSeries WidgetKind = "series"
+	WidgetKindRating WidgetKind = "rating"
+	WidgetKindIndex  WidgetKind = "index"
+)
+
+// AllValues returns all WidgetKind values.
+func (WidgetKind) AllValues() []WidgetKind {
+	return []WidgetKind{
+		WidgetKindKpi,
+		WidgetKindSeries,
+		WidgetKindRating,
+		WidgetKindIndex,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WidgetKind) MarshalText() ([]byte, error) {
+	switch s {
+	case WidgetKindKpi:
+		return []byte(s), nil
+	case WidgetKindSeries:
+		return []byte(s), nil
+	case WidgetKindRating:
+		return []byte(s), nil
+	case WidgetKindIndex:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WidgetKind) UnmarshalText(data []byte) error {
+	switch WidgetKind(data) {
+	case WidgetKindKpi:
+		*s = WidgetKindKpi
+		return nil
+	case WidgetKindSeries:
+		*s = WidgetKindSeries
+		return nil
+	case WidgetKindRating:
+		*s = WidgetKindRating
+		return nil
+	case WidgetKindIndex:
+		*s = WidgetKindIndex
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type WidgetLevel string
+
+const (
+	WidgetLevelFacility WidgetLevel = "facility"
+	WidgetLevelDistrict WidgetLevel = "district"
+	WidgetLevelOkrug    WidgetLevel = "okrug"
+	WidgetLevelSegment  WidgetLevel = "segment"
+	WidgetLevelCity     WidgetLevel = "city"
+	WidgetLevelH38      WidgetLevel = "h3_8"
+	WidgetLevelH39      WidgetLevel = "h3_9"
+)
+
+// AllValues returns all WidgetLevel values.
+func (WidgetLevel) AllValues() []WidgetLevel {
+	return []WidgetLevel{
+		WidgetLevelFacility,
+		WidgetLevelDistrict,
+		WidgetLevelOkrug,
+		WidgetLevelSegment,
+		WidgetLevelCity,
+		WidgetLevelH38,
+		WidgetLevelH39,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WidgetLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case WidgetLevelFacility:
+		return []byte(s), nil
+	case WidgetLevelDistrict:
+		return []byte(s), nil
+	case WidgetLevelOkrug:
+		return []byte(s), nil
+	case WidgetLevelSegment:
+		return []byte(s), nil
+	case WidgetLevelCity:
+		return []byte(s), nil
+	case WidgetLevelH38:
+		return []byte(s), nil
+	case WidgetLevelH39:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WidgetLevel) UnmarshalText(data []byte) error {
+	switch WidgetLevel(data) {
+	case WidgetLevelFacility:
+		*s = WidgetLevelFacility
+		return nil
+	case WidgetLevelDistrict:
+		*s = WidgetLevelDistrict
+		return nil
+	case WidgetLevelOkrug:
+		*s = WidgetLevelOkrug
+		return nil
+	case WidgetLevelSegment:
+		*s = WidgetLevelSegment
+		return nil
+	case WidgetLevelCity:
+		*s = WidgetLevelCity
+		return nil
+	case WidgetLevelH38:
+		*s = WidgetLevelH38
+		return nil
+	case WidgetLevelH39:
+		*s = WidgetLevelH39
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/ZoneRule

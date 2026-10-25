@@ -197,3 +197,69 @@ func (s *Server) FacilityClusters(ctx context.Context, req *gen.FacilityClusters
 	}
 	return out, nil
 }
+
+func (s *Server) MetricGeo(ctx context.Context, p gen.MetricGeoParams) (gen.MetricGeoOK, error) {
+	raw, err := s.analytics.Geo(ctx, p.Code, string(p.Level))
+	if err != nil {
+		return nil, err
+	}
+	obj, err := rawObject(raw)
+	return gen.MetricGeoOK(obj), err
+}
+
+func (s *Server) DataUpdates(ctx context.Context, p gen.DataUpdatesParams) ([]gen.DataUpdatesOKItem, error) {
+	list, err := s.ingest.RecentUpdates(ctx, p.Limit.Or(10))
+	if err != nil {
+		return nil, err
+	}
+	out := make([]gen.DataUpdatesOKItem, len(list))
+	for i, u := range list {
+		out[i] = gen.DataUpdatesOKItem{
+			Source: u.Source, Title: u.Title, Publisher: u.Publisher, FinishedAt: u.FinishedAt, Domains: nonNil(u.Domains),
+		}
+		if u.Records != nil {
+			out[i].Records = gen.NewOptInt64(*u.Records)
+		}
+	}
+	return out, nil
+}
+
+func toWidgets(ws []analytics.Widget) []gen.Widget {
+	out := make([]gen.Widget, len(ws))
+	for i, w := range ws {
+		out[i] = gen.Widget{Kind: gen.WidgetKind(w.Kind)}
+		if w.Metric != "" {
+			out[i].Metric = gen.NewOptString(w.Metric)
+		}
+		if w.Index != "" {
+			out[i].Index = gen.NewOptString(w.Index)
+		}
+		if w.Level != "" {
+			out[i].Level = gen.NewOptWidgetLevel(gen.WidgetLevel(w.Level))
+		}
+	}
+	return out
+}
+
+func (s *Server) GetDashboard(ctx context.Context) (*gen.Dashboard, error) {
+	ws, own, err := s.analytics.Dashboard(ctx, principal(ctx).UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &gen.Dashboard{Widgets: toWidgets(ws), Own: own}, nil
+}
+
+func (s *Server) SaveDashboard(ctx context.Context, req *gen.SaveDashboardReq) (*gen.Dashboard, error) {
+	ws := make([]analytics.Widget, len(req.Widgets))
+	for i, w := range req.Widgets {
+		ws[i] = analytics.Widget{Kind: string(w.Kind), Metric: w.Metric.Or(""), Index: w.Index.Or(""), Level: string(w.Level.Or(""))}
+	}
+	if err := s.analytics.SaveDashboard(ctx, principal(ctx).UserID, ws); err != nil {
+		return nil, err
+	}
+	return s.GetDashboard(ctx)
+}
+
+func (s *Server) ResetDashboard(ctx context.Context) error {
+	return s.analytics.SaveDashboard(ctx, principal(ctx).UserID, nil)
+}

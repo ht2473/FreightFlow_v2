@@ -958,3 +958,56 @@ func TestAPIMetricSeries(t *testing.T) {
 		t.Errorf("показатель без ряда: %d", resp.StatusCode)
 	}
 }
+
+func TestAPIDashboardAndGeo(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	osmtest.LoadDistrict(t, f.pool)
+	viewer := f.token(t, "dv@example.com", identity.RoleViewer)
+	if _, err := analytics.New(f.pool).Recompute(t.Context(), nil, false); err != nil {
+		t.Fatal(err)
+	}
+	resp, body := f.do(t, http.MethodGet, "/api/v1/me/dashboard", viewer, "")
+	if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), `"own":false`) || !strings.Contains(string(body), `"index.attractiveness"`) {
+		t.Fatalf("по умолчанию: %d %s", resp.StatusCode, body)
+	}
+	mine := `{"widgets":[{"kind":"kpi","metric":"territory.facilities"},{"kind":"rating","metric":"territory.warehouse_density","level":"district"}]}`
+	if resp, body := f.do(t, http.MethodPut, "/api/v1/me/dashboard", viewer, mine); resp.StatusCode != http.StatusOK ||
+		!strings.Contains(string(body), `"own":true`) || strings.Count(string(body), `"kind"`) != 2 {
+		t.Errorf("свои виджеты: %d %s", resp.StatusCode, body)
+	}
+	for _, bad := range []string{
+		`{"widgets":[{"kind":"kpi","metric":"facility.mkad_min"}]}`,
+		`{"widgets":[{"kind":"series","metric":"territory.facilities"}]}`,
+		`{"widgets":[{"kind":"index","index":"index.attractiveness","level":"okrug"}]}`,
+	} {
+		if resp, _ := f.do(t, http.MethodPut, "/api/v1/me/dashboard", viewer, bad); resp.StatusCode != http.StatusUnprocessableEntity {
+			t.Errorf("неверный виджет %s: %d", bad, resp.StatusCode)
+		}
+	}
+	if resp, _ := f.do(t, http.MethodDelete, "/api/v1/me/dashboard", viewer, ""); resp.StatusCode != http.StatusNoContent {
+		t.Errorf("сброс: %d", resp.StatusCode)
+	}
+	if _, body := f.do(t, http.MethodGet, "/api/v1/me/dashboard", viewer, ""); !strings.Contains(string(body), `"own":false`) {
+		t.Errorf("после сброса: %s", body)
+	}
+
+	resp, body = f.do(t, http.MethodGet, "/api/v1/metrics/territory.facilities/geo?level=district", viewer, "")
+	var fc struct {
+		Type     string
+		Features []struct {
+			Geometry   struct{ Type string }
+			Properties struct{ Label string }
+		}
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &fc) != nil || fc.Type != "FeatureCollection" || len(fc.Features) == 0 ||
+		fc.Features[0].Geometry.Type == "" || fc.Features[0].Properties.Label == "" {
+		t.Errorf("картограмма: %d %.300s", resp.StatusCode, body)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/metrics/facility.mkad_min/geo?level=district", viewer, ""); resp.StatusCode != http.StatusNotFound {
+		t.Errorf("уровень не показателя: %d", resp.StatusCode)
+	}
+	if resp, body := f.do(t, http.MethodGet, "/api/v1/data/updates", viewer, ""); resp.StatusCode != http.StatusOK {
+		t.Errorf("обновления: %d %s", resp.StatusCode, body)
+	}
+}

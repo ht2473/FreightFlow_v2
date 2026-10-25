@@ -110,6 +110,12 @@ type Handler interface {
 	//
 	// POST /facilities/{facilityId}/curations
 	CurateFacility(ctx context.Context, req *CurationRequest, params CurateFacilityParams) (*Curation, error)
+	// DataUpdates implements dataUpdates operation.
+	//
+	// Последние обновления данных (успешные загрузки).
+	//
+	// GET /data/updates
+	DataUpdates(ctx context.Context, params DataUpdatesParams) ([]DataUpdatesOKItem, error)
 	// DeleteView implements deleteView operation.
 	//
 	// Удалить свой вид.
@@ -171,6 +177,12 @@ type Handler interface {
 	//
 	// GET /geocode
 	Geocode(ctx context.Context, params GeocodeParams) ([]SearchHit, error)
+	// GetDashboard implements getDashboard operation.
+	//
+	// Виджеты главного дашборда пользователя.
+	//
+	// GET /me/dashboard
+	GetDashboard(ctx context.Context) (*Dashboard, error)
 	// GetExport implements getExport operation.
 	//
 	// Состояние выгрузки.
@@ -380,6 +392,13 @@ type Handler interface {
 	//
 	// GET /views
 	ListViews(ctx context.Context, params ListViewsParams) ([]SavedView, error)
+	// MetricGeo implements metricGeo operation.
+	//
+	// Значения показателя с геометрией (GeoJSON) — картограмма
+	// районов, округов или ячеек H3.
+	//
+	// GET /metrics/{code}/geo
+	MetricGeo(ctx context.Context, params MetricGeoParams) (MetricGeoOK, error)
 	// MetricSeries implements metricSeries operation.
 	//
 	// Ряд показателя по городу и прогноз с точностью моделей
@@ -400,6 +419,12 @@ type Handler interface {
 	//
 	// POST /facilities/{facilityId}/reports
 	ReportFacilityIssue(ctx context.Context, req *ReportFacilityIssueReq, params ReportFacilityIssueParams) (*FacilityReport, error)
+	// ResetDashboard implements resetDashboard operation.
+	//
+	// Вернуть дашборд по умолчанию.
+	//
+	// DELETE /me/dashboard
+	ResetDashboard(ctx context.Context) error
 	// ResetIndexConfig implements resetIndexConfig operation.
 	//
 	// Удалить свои веса индекса.
@@ -438,6 +463,13 @@ type Handler interface {
 	//
 	// DELETE /me/tokens/{tokenId}
 	RevokeToken(ctx context.Context, params RevokeTokenParams) error
+	// SaveDashboard implements saveDashboard operation.
+	//
+	// Сохранить свои виджеты (пустой список не допускается
+	// — для сброса DELETE).
+	//
+	// PUT /me/dashboard
+	SaveDashboard(ctx context.Context, req *SaveDashboardReq) (*Dashboard, error)
 	// SaveIndexConfig implements saveIndexConfig operation.
 	//
 	// Сохранить веса индекса — свои или по умолчанию для
