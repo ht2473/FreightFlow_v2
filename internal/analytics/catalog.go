@@ -36,6 +36,10 @@ type Metric struct {
 	Daily     bool
 	Version   int
 	Compute   string
+	// Series — периодичность ряда (month, year) у показателей с периодом; Flow — величина за
+	// период (сумма событий): пропуск периода — ноль, текущий неполный период в ряд не входит.
+	Series string
+	Flow   bool
 }
 
 // ErrUnknown — неизвестный показатель.

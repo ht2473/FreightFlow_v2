@@ -36,7 +36,21 @@ var segmentMetrics = []Metric{
 
 var cityMetrics = []Metric{
 	{
+		Code: "city.works_active", Title: "Идущие дорожные работы", Unit: "работ", Levels: []string{LevelCity}, Version: 1,
+		Series: SeriesMonth, Daily: true,
+		Formula: "число дорожных работ, период которых пересекается с месяцем",
+		Method: "Плановые и аварийные работы портала открытых данных Москвы (наборы 2016–2019, плановые и аварийные " +
+			"текущие) с периодом проведения; работа учитывается в каждом месяце, с которым пересекается её период.",
+		Domains: []string{"operations"},
+		Compute: `SELECT 'city', 'moscow', m::date, count(w.id)::float8, '{}'::jsonb
+			FROM generate_series((SELECT date_trunc('month', min(lower(period))) FROM operations.road_work),
+			                     date_trunc('month', current_date), interval '1 month') m
+			LEFT JOIN operations.road_work w ON w.period && tstzrange(m, m + interval '1 month')
+			GROUP BY m`,
+	},
+	{
 		Code: "city.commissioning", Title: "Ввод объектов в эксплуатацию", Unit: "разрешений", Levels: []string{LevelCity}, Version: 1,
+		Series: SeriesMonth, Flow: true,
 		Formula: "число разрешений на ввод в эксплуатацию за месяц",
 		Method: "Реестр разрешений на ввод объектов в эксплуатацию (портал открытых данных Москвы); во входах — " +
 			"разрешения на объекты логистики и их площадь.",
@@ -49,7 +63,7 @@ var cityMetrics = []Metric{
 	},
 	{
 		Code: "city.passes_valid", Title: "Действующие пропуска грузовиков", Unit: "пропусков", Levels: []string{LevelCity},
-		Version: 1, Formula: "число действующих пропусков на въезд грузовиков в зоны ограничения на месяц",
+		Version: 1, Series: SeriesMonth, Formula: "число действующих пропусков на въезд грузовиков в зоны ограничения на месяц",
 		Method: "Статистика пропусков Дептранса (портал открытых данных Москвы): действующие пропуска всех видов " +
 			"(разовые, годовые) в зоны МКАД, ТТК и Садового кольца; во входах — по зонам.",
 		Domains: []string{"regulation"},
@@ -59,7 +73,7 @@ var cityMetrics = []Metric{
 	},
 	{
 		Code: "city.special_permits", Title: "Специальные разрешения на тяжеловесный и крупногабаритный транспорт",
-		Unit: "разрешений", Levels: []string{LevelCity}, Version: 1,
+		Unit: "разрешений", Levels: []string{LevelCity}, Version: 1, Series: SeriesMonth, Flow: true,
 		Formula: "число выданных специальных разрешений за месяц",
 		Method:  "Реестр специальных разрешений на движение тяжеловесного и крупногабаритного транспорта (портал открытых данных Москвы).",
 		Domains: []string{"regulation"},
@@ -70,7 +84,7 @@ var cityMetrics = []Metric{
 	},
 	{
 		Code: "city.vehicle_emissions", Title: "Выбросы от автомобильного транспорта", Unit: "в единицах набора",
-		Levels: []string{LevelCity}, Version: 1, Formula: "значение набора за год",
+		Levels: []string{LevelCity}, Version: 1, Series: SeriesYear, Formula: "значение набора за год",
 		Method: "Выбросы загрязняющих веществ в атмосферу от автомобильного транспорта, портал открытых данных Москвы, " +
 			"набор 2385. Единица измерения в паспорте набора не указана — значения показываются как есть.",
 		Domains: []string{"statistics"},
@@ -79,7 +93,7 @@ var cityMetrics = []Metric{
 	},
 	{
 		Code: "city.freight_tonnage", Title: "Перевозка грузов автомобильным транспортом", Unit: "тыс. т", Levels: []string{LevelCity},
-		Version: 1, Formula: "объём перевезённых грузов за год (организации без субъектов малого предпринимательства)",
+		Version: 1, Series: SeriesYear, Formula: "объём перевезённых грузов за год (организации без субъектов малого предпринимательства)",
 		Method:  "ЕМИСС, показатель 57791 по Москве.",
 		Domains: []string{"statistics"},
 		Compute: `SELECT 'city', 'moscow', o.period, o.value::float8, jsonb_build_object('source', o.source_code)

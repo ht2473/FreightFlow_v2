@@ -6000,6 +6000,297 @@ func (s *MetricDefLevelsItem) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/MetricSeries
+type MetricSeries struct {
+	Metric MetricDef                `json:"metric"`
+	Points []MetricSeriesPointsItem `json:"points"`
+	// Прогноз (модель) — выбранная по MASE на скользящей
+	// проверке.
+	Forecast OptMetricSeriesForecast `json:"forecast"`
+	// Почему прогноз не построен.
+	ForecastNote OptString `json:"forecastNote"`
+}
+
+// GetMetric returns the value of Metric.
+func (s *MetricSeries) GetMetric() MetricDef {
+	return s.Metric
+}
+
+// GetPoints returns the value of Points.
+func (s *MetricSeries) GetPoints() []MetricSeriesPointsItem {
+	return s.Points
+}
+
+// GetForecast returns the value of Forecast.
+func (s *MetricSeries) GetForecast() OptMetricSeriesForecast {
+	return s.Forecast
+}
+
+// GetForecastNote returns the value of ForecastNote.
+func (s *MetricSeries) GetForecastNote() OptString {
+	return s.ForecastNote
+}
+
+// SetMetric sets the value of Metric.
+func (s *MetricSeries) SetMetric(val MetricDef) {
+	s.Metric = val
+}
+
+// SetPoints sets the value of Points.
+func (s *MetricSeries) SetPoints(val []MetricSeriesPointsItem) {
+	s.Points = val
+}
+
+// SetForecast sets the value of Forecast.
+func (s *MetricSeries) SetForecast(val OptMetricSeriesForecast) {
+	s.Forecast = val
+}
+
+// SetForecastNote sets the value of ForecastNote.
+func (s *MetricSeries) SetForecastNote(val OptString) {
+	s.ForecastNote = val
+}
+
+// Прогноз (модель) — выбранная по MASE на скользящей
+// проверке.
+type MetricSeriesForecast struct {
+	Model MetricSeriesForecastModel `json:"model"`
+	// Начал скользящей проверки.
+	Holdout int                              `json:"holdout"`
+	Scores  []MetricSeriesForecastScoresItem `json:"scores"`
+	Points  []MetricSeriesForecastPointsItem `json:"points"`
+}
+
+// GetModel returns the value of Model.
+func (s *MetricSeriesForecast) GetModel() MetricSeriesForecastModel {
+	return s.Model
+}
+
+// GetHoldout returns the value of Holdout.
+func (s *MetricSeriesForecast) GetHoldout() int {
+	return s.Holdout
+}
+
+// GetScores returns the value of Scores.
+func (s *MetricSeriesForecast) GetScores() []MetricSeriesForecastScoresItem {
+	return s.Scores
+}
+
+// GetPoints returns the value of Points.
+func (s *MetricSeriesForecast) GetPoints() []MetricSeriesForecastPointsItem {
+	return s.Points
+}
+
+// SetModel sets the value of Model.
+func (s *MetricSeriesForecast) SetModel(val MetricSeriesForecastModel) {
+	s.Model = val
+}
+
+// SetHoldout sets the value of Holdout.
+func (s *MetricSeriesForecast) SetHoldout(val int) {
+	s.Holdout = val
+}
+
+// SetScores sets the value of Scores.
+func (s *MetricSeriesForecast) SetScores(val []MetricSeriesForecastScoresItem) {
+	s.Scores = val
+}
+
+// SetPoints sets the value of Points.
+func (s *MetricSeriesForecast) SetPoints(val []MetricSeriesForecastPointsItem) {
+	s.Points = val
+}
+
+type MetricSeriesForecastModel string
+
+const (
+	MetricSeriesForecastModelSeasonalNaive MetricSeriesForecastModel = "seasonal_naive"
+	MetricSeriesForecastModelHoltWinters   MetricSeriesForecastModel = "holt_winters"
+	MetricSeriesForecastModelRegression    MetricSeriesForecastModel = "regression"
+)
+
+// AllValues returns all MetricSeriesForecastModel values.
+func (MetricSeriesForecastModel) AllValues() []MetricSeriesForecastModel {
+	return []MetricSeriesForecastModel{
+		MetricSeriesForecastModelSeasonalNaive,
+		MetricSeriesForecastModelHoltWinters,
+		MetricSeriesForecastModelRegression,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MetricSeriesForecastModel) MarshalText() ([]byte, error) {
+	switch s {
+	case MetricSeriesForecastModelSeasonalNaive:
+		return []byte(s), nil
+	case MetricSeriesForecastModelHoltWinters:
+		return []byte(s), nil
+	case MetricSeriesForecastModelRegression:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MetricSeriesForecastModel) UnmarshalText(data []byte) error {
+	switch MetricSeriesForecastModel(data) {
+	case MetricSeriesForecastModelSeasonalNaive:
+		*s = MetricSeriesForecastModelSeasonalNaive
+		return nil
+	case MetricSeriesForecastModelHoltWinters:
+		*s = MetricSeriesForecastModelHoltWinters
+		return nil
+	case MetricSeriesForecastModelRegression:
+		*s = MetricSeriesForecastModelRegression
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type MetricSeriesForecastPointsItem struct {
+	Period time.Time `json:"period"`
+	Value  float64   `json:"value"`
+	Lo80   float64   `json:"lo80"`
+	Hi80   float64   `json:"hi80"`
+	Lo95   float64   `json:"lo95"`
+	Hi95   float64   `json:"hi95"`
+}
+
+// GetPeriod returns the value of Period.
+func (s *MetricSeriesForecastPointsItem) GetPeriod() time.Time {
+	return s.Period
+}
+
+// GetValue returns the value of Value.
+func (s *MetricSeriesForecastPointsItem) GetValue() float64 {
+	return s.Value
+}
+
+// GetLo80 returns the value of Lo80.
+func (s *MetricSeriesForecastPointsItem) GetLo80() float64 {
+	return s.Lo80
+}
+
+// GetHi80 returns the value of Hi80.
+func (s *MetricSeriesForecastPointsItem) GetHi80() float64 {
+	return s.Hi80
+}
+
+// GetLo95 returns the value of Lo95.
+func (s *MetricSeriesForecastPointsItem) GetLo95() float64 {
+	return s.Lo95
+}
+
+// GetHi95 returns the value of Hi95.
+func (s *MetricSeriesForecastPointsItem) GetHi95() float64 {
+	return s.Hi95
+}
+
+// SetPeriod sets the value of Period.
+func (s *MetricSeriesForecastPointsItem) SetPeriod(val time.Time) {
+	s.Period = val
+}
+
+// SetValue sets the value of Value.
+func (s *MetricSeriesForecastPointsItem) SetValue(val float64) {
+	s.Value = val
+}
+
+// SetLo80 sets the value of Lo80.
+func (s *MetricSeriesForecastPointsItem) SetLo80(val float64) {
+	s.Lo80 = val
+}
+
+// SetHi80 sets the value of Hi80.
+func (s *MetricSeriesForecastPointsItem) SetHi80(val float64) {
+	s.Hi80 = val
+}
+
+// SetLo95 sets the value of Lo95.
+func (s *MetricSeriesForecastPointsItem) SetLo95(val float64) {
+	s.Lo95 = val
+}
+
+// SetHi95 sets the value of Hi95.
+func (s *MetricSeriesForecastPointsItem) SetHi95(val float64) {
+	s.Hi95 = val
+}
+
+type MetricSeriesForecastScoresItem struct {
+	Model  string  `json:"model"`
+	Mase   float64 `json:"mase"`
+	Points int     `json:"points"`
+}
+
+// GetModel returns the value of Model.
+func (s *MetricSeriesForecastScoresItem) GetModel() string {
+	return s.Model
+}
+
+// GetMase returns the value of Mase.
+func (s *MetricSeriesForecastScoresItem) GetMase() float64 {
+	return s.Mase
+}
+
+// GetPoints returns the value of Points.
+func (s *MetricSeriesForecastScoresItem) GetPoints() int {
+	return s.Points
+}
+
+// SetModel sets the value of Model.
+func (s *MetricSeriesForecastScoresItem) SetModel(val string) {
+	s.Model = val
+}
+
+// SetMase sets the value of Mase.
+func (s *MetricSeriesForecastScoresItem) SetMase(val float64) {
+	s.Mase = val
+}
+
+// SetPoints sets the value of Points.
+func (s *MetricSeriesForecastScoresItem) SetPoints(val int) {
+	s.Points = val
+}
+
+type MetricSeriesPointsItem struct {
+	Period time.Time `json:"period"`
+	Value  float64   `json:"value"`
+	// Периода нет в источнике (у потока — ноль).
+	Filled bool `json:"filled"`
+}
+
+// GetPeriod returns the value of Period.
+func (s *MetricSeriesPointsItem) GetPeriod() time.Time {
+	return s.Period
+}
+
+// GetValue returns the value of Value.
+func (s *MetricSeriesPointsItem) GetValue() float64 {
+	return s.Value
+}
+
+// GetFilled returns the value of Filled.
+func (s *MetricSeriesPointsItem) GetFilled() bool {
+	return s.Filled
+}
+
+// SetPeriod sets the value of Period.
+func (s *MetricSeriesPointsItem) SetPeriod(val time.Time) {
+	s.Period = val
+}
+
+// SetValue sets the value of Value.
+func (s *MetricSeriesPointsItem) SetValue(val float64) {
+	s.Value = val
+}
+
+// SetFilled sets the value of Filled.
+func (s *MetricSeriesPointsItem) SetFilled(val bool) {
+	s.Filled = val
+}
+
 // Ref: #/components/schemas/MetricValue
 type MetricValue struct {
 	Code   string            `json:"code"`
@@ -7985,6 +8276,52 @@ func (o OptLngLat) Get() (v LngLat, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptLngLat) Or(d LngLat) LngLat {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMetricSeriesForecast returns new OptMetricSeriesForecast with value set to v.
+func NewOptMetricSeriesForecast(v MetricSeriesForecast) OptMetricSeriesForecast {
+	return OptMetricSeriesForecast{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMetricSeriesForecast is optional MetricSeriesForecast.
+type OptMetricSeriesForecast struct {
+	Value MetricSeriesForecast
+	Set   bool
+}
+
+// IsSet returns true if OptMetricSeriesForecast was set.
+func (o OptMetricSeriesForecast) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMetricSeriesForecast) Reset() {
+	var v MetricSeriesForecast
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMetricSeriesForecast) SetTo(v MetricSeriesForecast) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMetricSeriesForecast) Get() (v MetricSeriesForecast, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMetricSeriesForecast) Or(d MetricSeriesForecast) MetricSeriesForecast {
 	if v, ok := o.Get(); ok {
 		return v
 	}

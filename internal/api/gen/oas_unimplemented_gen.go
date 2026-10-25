@@ -529,6 +529,16 @@ func (UnimplementedHandler) ListViews(ctx context.Context, params ListViewsParam
 	return r, ht.ErrNotImplemented
 }
 
+// MetricSeries implements metricSeries operation.
+//
+// Ряд показателя по городу и прогноз с точностью моделей
+// на истории.
+//
+// GET /metrics/{code}/series
+func (UnimplementedHandler) MetricSeries(ctx context.Context, params MetricSeriesParams) (r *MetricSeries, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // MetricValues implements metricValues operation.
 //
 // Значения показателя на уровне — рейтинг или ряд по

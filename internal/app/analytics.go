@@ -16,8 +16,11 @@ func runAnalytics(ctx context.Context, env *Env, args []string) error {
 	if len(args) >= 2 && args[0] == "index" {
 		return runIndex(ctx, env, args[1:])
 	}
+	if len(args) >= 2 && args[0] == "forecast" {
+		return runForecast(ctx, env, args[1:])
+	}
 	if len(args) == 0 || args[0] != "recompute" {
-		fmt.Fprintln(env.Stderr, "Использование: freightflow analytics recompute [-force] [код...] | index <код> [-level district|h3_8]")
+		fmt.Fprintln(env.Stderr, "Использование: freightflow analytics recompute [-force] [код...] | index <код> [-level district|h3_8] | forecast <код> [-h 12]")
 		return ErrUsage
 	}
 	fs := flag.NewFlagSet("analytics recompute", flag.ContinueOnError)
@@ -74,6 +77,38 @@ func runIndex(ctx context.Context, env *Env, args []string) error {
 	}
 	for _, s := range res.Sensitivity {
 		fmt.Fprintf(env.Stdout, "вес %s ±20 %%: ρ = %.3f / %.3f, наибольший сдвиг места %d\n", s.Ref, s.RhoMinus, s.RhoPlus, s.MaxShift)
+	}
+	return nil
+}
+
+// runForecast — прогноз ряда показателя: точность моделей на скользящей проверке и прогноз.
+func runForecast(ctx context.Context, env *Env, args []string) error {
+	fs := flag.NewFlagSet("analytics forecast", flag.ContinueOnError)
+	fs.SetOutput(env.Stderr)
+	h := fs.Int("h", 12, "горизонт, периодов")
+	if len(args) == 0 {
+		return ErrUsage
+	}
+	code := args[0]
+	if err := fs.Parse(args[1:]); err != nil {
+		return ErrUsage
+	}
+	rt, err := startRuntime(ctx, env, "analytics")
+	if err != nil {
+		return err
+	}
+	defer rt.close(ctx)
+	m, pts, res, err := analytics.New(rt.pool).Forecast(ctx, code, *h)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(env.Stdout, "%s: %d точек (%s — %s), модель %s, проверка на %d началах\n", m.Title, len(pts),
+		pts[0].Period.Format("01.2006"), pts[len(pts)-1].Period.Format("01.2006"), res.Model, res.Holdout)
+	for _, sc := range res.Scores {
+		fmt.Fprintf(env.Stdout, "  %-15s MASE %.3f (%d пар)\n", sc.Model, sc.MASE, sc.Points)
+	}
+	for i, p := range res.Forecast {
+		fmt.Fprintf(env.Stdout, "  +%-2d %8.1f  [%8.1f; %8.1f]  95 %%: [%8.1f; %8.1f]\n", i+1, p.Value, p.Lo80, p.Hi80, p.Lo95, p.Hi95)
 	}
 	return nil
 }

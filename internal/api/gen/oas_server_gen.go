@@ -368,6 +368,13 @@ type Handler interface {
 	//
 	// GET /views
 	ListViews(ctx context.Context, params ListViewsParams) ([]SavedView, error)
+	// MetricSeries implements metricSeries operation.
+	//
+	// Ряд показателя по городу и прогноз с точностью моделей
+	// на истории.
+	//
+	// GET /metrics/{code}/series
+	MetricSeries(ctx context.Context, params MetricSeriesParams) (*MetricSeries, error)
 	// MetricValues implements metricValues operation.
 	//
 	// Значения показателя на уровне — рейтинг или ряд по

@@ -893,3 +893,53 @@ func TestAPIIndexes(t *testing.T) {
 		t.Errorf("сброс: %d", resp.StatusCode)
 	}
 }
+
+func TestAPIMetricSeries(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	viewer := f.token(t, "ms@example.com", identity.RoleViewer)
+	// Четыре года помесячных действующих пропусков с сезонностью; ввод объектов — в двух месяцах из 24.
+	if _, err := f.pool.Exec(t.Context(), `
+		INSERT INTO ingest.source (code, title, publisher, url, license, attribution, domains)
+		VALUES ('test_stat', 'Тест', 'Тест', 'https://example.com', 'CC BY 4.0', 'тест', '{regulation}') ON CONFLICT DO NOTHING;
+		INSERT INTO regulation.pass_stat (month, zone, series, metric, value, source_code)
+		SELECT (date '2021-01-01' + make_interval(months => i))::date, 'МКАД', 'БА', 'valid',
+		       10000 + i * 50 + (500 * sin(i * pi() / 6))::int, 'test_stat'
+		FROM generate_series(0, 47) i;
+		INSERT INTO infra.commissioning (id, mos_global_id, permit_date, source_code)
+		VALUES (gen_random_uuid(), 1, date '2023-01-10', 'test_stat'), (gen_random_uuid(), 2, date '2024-12-05', 'test_stat')`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := analytics.New(f.pool).Recompute(t.Context(), []string{"city.passes_valid", "city.commissioning"}, true); err != nil {
+		t.Fatal(err)
+	}
+	resp, body := f.do(t, http.MethodGet, "/api/v1/metrics/city.passes_valid/series?horizon=6", viewer, "")
+	var s struct {
+		Points   []struct{ Value float64 }
+		Forecast *struct {
+			Model  string
+			Scores []struct{ Mase float64 }
+			Points []struct {
+				Period            string
+				Value, Lo95, Hi95 float64
+			}
+		}
+		ForecastNote string
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &s) != nil || len(s.Points) != 48 || s.Forecast == nil ||
+		len(s.Forecast.Points) != 6 || s.Forecast.Points[0].Period != "2025-01-01" || len(s.Forecast.Scores) != 3 {
+		t.Fatalf("ряд пропусков: %d %s", resp.StatusCode, body)
+	}
+	for _, p := range s.Forecast.Points {
+		if p.Lo95 > p.Value || p.Hi95 < p.Value {
+			t.Errorf("интервал %+v", p)
+		}
+	}
+	resp, body = f.do(t, http.MethodGet, "/api/v1/metrics/city.commissioning/series", viewer, "")
+	if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), `"forecastNote"`) || strings.Contains(string(body), `"forecast":`) {
+		t.Errorf("разреженный ряд: %d %s", resp.StatusCode, body)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/metrics/territory.facilities/series", viewer, ""); resp.StatusCode != http.StatusNotFound {
+		t.Errorf("показатель без ряда: %d", resp.StatusCode)
+	}
+}

@@ -58,6 +58,7 @@ const (
 	ListUsersOperation             OperationName = "ListUsers"
 	ListVehicleProfilesOperation   OperationName = "ListVehicleProfiles"
 	ListViewsOperation             OperationName = "ListViews"
+	MetricSeriesOperation          OperationName = "MetricSeries"
 	MetricValuesOperation          OperationName = "MetricValues"
 	ReportFacilityIssueOperation   OperationName = "ReportFacilityIssue"
 	ResetIndexConfigOperation      OperationName = "ResetIndexConfig"

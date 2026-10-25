@@ -1138,6 +1138,28 @@ paths:
                 items: { $ref: "#/components/schemas/MetricValue" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /metrics/{code}/series:
+    get:
+      tags: [analytics]
+      operationId: metricSeries
+      summary: Ряд показателя по городу и прогноз с точностью моделей на истории
+      x-permission: analytics.view
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema: { type: string, pattern: "^[a-z0-9_]+\\.[a-z0-9_]+$" }
+        - name: horizon
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 36, default: 12 }
+      responses:
+        "200":
+          description: Ряд и прогноз
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MetricSeries" }
+        default: { $ref: "#/components/responses/Problem" }
+
   /metrics/{code}:
     get:
       tags: [analytics]
@@ -2557,6 +2579,50 @@ components:
               rhoPlus: { type: number }
               maxShift: { type: integer }
               entities: { type: integer }
+
+    MetricSeries:
+      type: object
+      required: [metric, points]
+      properties:
+        metric: { $ref: "#/components/schemas/MetricDef" }
+        points:
+          type: array
+          items:
+            type: object
+            required: [period, value, filled]
+            properties:
+              period: { type: string, format: date }
+              value: { type: number }
+              filled: { type: boolean, description: "Периода нет в источнике (у потока — ноль)" }
+        forecast:
+          type: object
+          required: [model, holdout, scores, points]
+          description: Прогноз (модель) — выбранная по MASE на скользящей проверке
+          properties:
+            model: { type: string, enum: [seasonal_naive, holt_winters, regression] }
+            holdout: { type: integer, description: "Начал скользящей проверки" }
+            scores:
+              type: array
+              items:
+                type: object
+                required: [model, mase, points]
+                properties:
+                  model: { type: string }
+                  mase: { type: number }
+                  points: { type: integer }
+            points:
+              type: array
+              items:
+                type: object
+                required: [period, value, lo80, hi80, lo95, hi95]
+                properties:
+                  period: { type: string, format: date }
+                  value: { type: number }
+                  lo80: { type: number }
+                  hi80: { type: number }
+                  lo95: { type: number }
+                  hi95: { type: number }
+        forecastNote: { type: string, description: "Почему прогноз не построен" }
 
     MetricDef:
       type: object
