@@ -22,8 +22,13 @@ func Open(ctx context.Context, url string) (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse database url: %w", err)
 	}
-	cfg.MaxConns = 20
-	cfg.MinConns = 2
+	// Размер пула — из адреса (pool_max_conns, pool_min_conns), иначе 20 и 2.
+	if !strings.Contains(url, "pool_max_conns") {
+		cfg.MaxConns = 20
+	}
+	if !strings.Contains(url, "pool_min_conns") {
+		cfg.MinConns = 2
+	}
 	cfg.MaxConnIdleTime = 5 * time.Minute
 	cfg.ConnConfig.RuntimeParams["application_name"] = "freightflow"
 	cfg.ConnConfig.RuntimeParams["timezone"] = "Europe/Moscow"

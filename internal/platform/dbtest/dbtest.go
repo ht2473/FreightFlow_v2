@@ -176,6 +176,11 @@ func withDatabase(rawURL, name string) string {
 		return rawURL
 	}
 	u.Path = "/" + name
+	// Тестов с базой десятки параллельно, у сервера предел соединений: тесту хватает четырёх.
+	q := u.Query()
+	q.Set("pool_max_conns", "4")
+	q.Set("pool_min_conns", "0")
+	u.RawQuery = q.Encode()
 	return u.String()
 }
 
