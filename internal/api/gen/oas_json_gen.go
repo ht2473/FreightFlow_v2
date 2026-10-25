@@ -13155,6 +13155,39 @@ func (s *OptLayerPropertyLabels) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes LngLat as json.
+func (o OptLngLat) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes LngLat from json.
+func (o *OptLngLat) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptLngLat to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptLngLat) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptLngLat) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes RouteLine as json.
 func (o OptRouteLine) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -13217,6 +13250,72 @@ func (s OptRun) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptRun) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes SearchHit as json.
+func (o OptSearchHit) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes SearchHit from json.
+func (o *OptSearchHit) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptSearchHit to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptSearchHit) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptSearchHit) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes SearchResultFacilities as json.
+func (o OptSearchResultFacilities) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes SearchResultFacilities from json.
+func (o *OptSearchResultFacilities) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptSearchResultFacilities to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptSearchResultFacilities) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptSearchResultFacilities) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -13419,6 +13518,460 @@ func (s OptZoneRuleUseNote) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptZoneRuleUseNote) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ParsedQuery) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ParsedQuery) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("text")
+		e.Str(s.Text)
+	}
+	{
+		e.FieldStart("chips")
+		e.ArrStart()
+		for _, elem := range s.Chips {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("facility")
+		e.Bool(s.Facility)
+	}
+	{
+		e.FieldStart("types")
+		e.ArrStart()
+		for _, elem := range s.Types {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("okrugs")
+		e.ArrStart()
+		for _, elem := range s.Okrugs {
+			json.EncodeUUID(e, elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("districts")
+		e.ArrStart()
+		for _, elem := range s.Districts {
+			json.EncodeUUID(e, elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("rings")
+		e.ArrStart()
+		for _, elem := range s.Rings {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.MinArea.Set {
+			e.FieldStart("minArea")
+			s.MinArea.Encode(e)
+		}
+	}
+	{
+		if s.MaxArea.Set {
+			e.FieldStart("maxArea")
+			s.MaxArea.Encode(e)
+		}
+	}
+	{
+		if s.MaxMkadMin.Set {
+			e.FieldStart("maxMkadMin")
+			s.MaxMkadMin.Encode(e)
+		}
+	}
+	{
+		if s.MinConfidence.Set {
+			e.FieldStart("minConfidence")
+			s.MinConfidence.Encode(e)
+		}
+	}
+	{
+		if s.NearRestrictions.Set {
+			e.FieldStart("nearRestrictions")
+			s.NearRestrictions.Encode(e)
+		}
+	}
+	{
+		if s.HasPermit.Set {
+			e.FieldStart("hasPermit")
+			s.HasPermit.Encode(e)
+		}
+	}
+	{
+		if s.NearText.Set {
+			e.FieldStart("nearText")
+			s.NearText.Encode(e)
+		}
+	}
+	{
+		if s.NearKm.Set {
+			e.FieldStart("nearKm")
+			s.NearKm.Encode(e)
+		}
+	}
+	{
+		if s.Coordinates.Set {
+			e.FieldStart("coordinates")
+			s.Coordinates.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfParsedQuery = [16]string{
+	0:  "text",
+	1:  "chips",
+	2:  "facility",
+	3:  "types",
+	4:  "okrugs",
+	5:  "districts",
+	6:  "rings",
+	7:  "minArea",
+	8:  "maxArea",
+	9:  "maxMkadMin",
+	10: "minConfidence",
+	11: "nearRestrictions",
+	12: "hasPermit",
+	13: "nearText",
+	14: "nearKm",
+	15: "coordinates",
+}
+
+// Decode decodes ParsedQuery from json.
+func (s *ParsedQuery) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ParsedQuery to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "text":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Text = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"text\"")
+			}
+		case "chips":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Chips = make([]SearchChip, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem SearchChip
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Chips = append(s.Chips, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"chips\"")
+			}
+		case "facility":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Bool()
+				s.Facility = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"facility\"")
+			}
+		case "types":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.Types = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Types = append(s.Types, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"types\"")
+			}
+		case "okrugs":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				s.Okrugs = make([]uuid.UUID, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem uuid.UUID
+					v, err := json.DecodeUUID(d)
+					elem = v
+					if err != nil {
+						return err
+					}
+					s.Okrugs = append(s.Okrugs, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"okrugs\"")
+			}
+		case "districts":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				s.Districts = make([]uuid.UUID, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem uuid.UUID
+					v, err := json.DecodeUUID(d)
+					elem = v
+					if err != nil {
+						return err
+					}
+					s.Districts = append(s.Districts, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"districts\"")
+			}
+		case "rings":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				s.Rings = make([]ParsedQueryRingsItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ParsedQueryRingsItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Rings = append(s.Rings, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rings\"")
+			}
+		case "minArea":
+			if err := func() error {
+				s.MinArea.Reset()
+				if err := s.MinArea.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"minArea\"")
+			}
+		case "maxArea":
+			if err := func() error {
+				s.MaxArea.Reset()
+				if err := s.MaxArea.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"maxArea\"")
+			}
+		case "maxMkadMin":
+			if err := func() error {
+				s.MaxMkadMin.Reset()
+				if err := s.MaxMkadMin.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"maxMkadMin\"")
+			}
+		case "minConfidence":
+			if err := func() error {
+				s.MinConfidence.Reset()
+				if err := s.MinConfidence.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"minConfidence\"")
+			}
+		case "nearRestrictions":
+			if err := func() error {
+				s.NearRestrictions.Reset()
+				if err := s.NearRestrictions.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nearRestrictions\"")
+			}
+		case "hasPermit":
+			if err := func() error {
+				s.HasPermit.Reset()
+				if err := s.HasPermit.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"hasPermit\"")
+			}
+		case "nearText":
+			if err := func() error {
+				s.NearText.Reset()
+				if err := s.NearText.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nearText\"")
+			}
+		case "nearKm":
+			if err := func() error {
+				s.NearKm.Reset()
+				if err := s.NearKm.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nearKm\"")
+			}
+		case "coordinates":
+			if err := func() error {
+				s.Coordinates.Reset()
+				if err := s.Coordinates.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"coordinates\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ParsedQuery")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b01111111,
+		0b00000000,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfParsedQuery) {
+					name = jsonFieldsNameOfParsedQuery[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ParsedQuery) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ParsedQuery) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ParsedQueryRingsItem as json.
+func (s ParsedQueryRingsItem) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ParsedQueryRingsItem from json.
+func (s *ParsedQueryRingsItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ParsedQueryRingsItem to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ParsedQueryRingsItem(v) {
+	case ParsedQueryRingsItemSk:
+		*s = ParsedQueryRingsItemSk
+	case ParsedQueryRingsItemTtk:
+		*s = ParsedQueryRingsItemTtk
+	case ParsedQueryRingsItemMkad:
+		*s = ParsedQueryRingsItemMkad
+	case ParsedQueryRingsItemCkad:
+		*s = ParsedQueryRingsItemCkad
+	case ParsedQueryRingsItemOutside:
+		*s = ParsedQueryRingsItemOutside
+	default:
+		*s = ParsedQueryRingsItem(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ParsedQueryRingsItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ParsedQueryRingsItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -17454,6 +18007,739 @@ func (s SavedViewParams) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *SavedViewParams) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SearchChip) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SearchChip) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("field")
+		s.Field.Encode(e)
+	}
+	{
+		e.FieldStart("label")
+		e.Str(s.Label)
+	}
+}
+
+var jsonFieldsNameOfSearchChip = [2]string{
+	0: "field",
+	1: "label",
+}
+
+// Decode decodes SearchChip from json.
+func (s *SearchChip) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SearchChip to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "field":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Field.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"field\"")
+			}
+		case "label":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Label = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"label\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SearchChip")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSearchChip) {
+					name = jsonFieldsNameOfSearchChip[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SearchChip) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SearchChip) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes SearchChipField as json.
+func (s SearchChipField) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes SearchChipField from json.
+func (s *SearchChipField) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SearchChipField to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch SearchChipField(v) {
+	case SearchChipFieldType:
+		*s = SearchChipFieldType
+	case SearchChipFieldOkrug:
+		*s = SearchChipFieldOkrug
+	case SearchChipFieldDistrict:
+		*s = SearchChipFieldDistrict
+	case SearchChipFieldRing:
+		*s = SearchChipFieldRing
+	case SearchChipFieldArea:
+		*s = SearchChipFieldArea
+	case SearchChipFieldMkad:
+		*s = SearchChipFieldMkad
+	case SearchChipFieldConf:
+		*s = SearchChipFieldConf
+	case SearchChipFieldRestr:
+		*s = SearchChipFieldRestr
+	case SearchChipFieldPermit:
+		*s = SearchChipFieldPermit
+	case SearchChipFieldNear:
+		*s = SearchChipFieldNear
+	default:
+		*s = SearchChipField(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s SearchChipField) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SearchChipField) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SearchHit) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SearchHit) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("kind")
+		s.Kind.Encode(e)
+	}
+	{
+		e.FieldStart("ref")
+		e.Str(s.Ref)
+	}
+	{
+		e.FieldStart("title")
+		e.Str(s.Title)
+	}
+	{
+		if s.Subtitle.Set {
+			e.FieldStart("subtitle")
+			s.Subtitle.Encode(e)
+		}
+	}
+	{
+		if s.Point.Set {
+			e.FieldStart("point")
+			s.Point.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("score")
+		e.Float64(s.Score)
+	}
+}
+
+var jsonFieldsNameOfSearchHit = [6]string{
+	0: "kind",
+	1: "ref",
+	2: "title",
+	3: "subtitle",
+	4: "point",
+	5: "score",
+}
+
+// Decode decodes SearchHit from json.
+func (s *SearchHit) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SearchHit to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "kind":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Kind.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"kind\"")
+			}
+		case "ref":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Ref = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ref\"")
+			}
+		case "title":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Title = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"title\"")
+			}
+		case "subtitle":
+			if err := func() error {
+				s.Subtitle.Reset()
+				if err := s.Subtitle.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"subtitle\"")
+			}
+		case "point":
+			if err := func() error {
+				s.Point.Reset()
+				if err := s.Point.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"point\"")
+			}
+		case "score":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Float64()
+				s.Score = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"score\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SearchHit")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00100111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSearchHit) {
+					name = jsonFieldsNameOfSearchHit[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SearchHit) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SearchHit) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes SearchHitKind as json.
+func (s SearchHitKind) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes SearchHitKind from json.
+func (s *SearchHitKind) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SearchHitKind to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch SearchHitKind(v) {
+	case SearchHitKindFacility:
+		*s = SearchHitKindFacility
+	case SearchHitKindAddress:
+		*s = SearchHitKindAddress
+	case SearchHitKindStreet:
+		*s = SearchHitKindStreet
+	case SearchHitKindTerritory:
+		*s = SearchHitKindTerritory
+	case SearchHitKindDataset:
+		*s = SearchHitKindDataset
+	case SearchHitKindSource:
+		*s = SearchHitKindSource
+	case SearchHitKindLegalAct:
+		*s = SearchHitKindLegalAct
+	case SearchHitKindHelp:
+		*s = SearchHitKindHelp
+	case SearchHitKindRoadWork:
+		*s = SearchHitKindRoadWork
+	case SearchHitKindSavedView:
+		*s = SearchHitKindSavedView
+	case SearchHitKindReport:
+		*s = SearchHitKindReport
+	default:
+		*s = SearchHitKind(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s SearchHitKind) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SearchHitKind) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SearchResult) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SearchResult) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("query")
+		e.Str(s.Query)
+	}
+	{
+		e.FieldStart("parsed")
+		s.Parsed.Encode(e)
+	}
+	{
+		if s.Near.Set {
+			e.FieldStart("near")
+			s.Near.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("hits")
+		e.ArrStart()
+		for _, elem := range s.Hits {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.Facilities.Set {
+			e.FieldStart("facilities")
+			s.Facilities.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("fuzzy")
+		e.Bool(s.Fuzzy)
+	}
+	{
+		e.FieldStart("tookMs")
+		e.Int(s.TookMs)
+	}
+}
+
+var jsonFieldsNameOfSearchResult = [7]string{
+	0: "query",
+	1: "parsed",
+	2: "near",
+	3: "hits",
+	4: "facilities",
+	5: "fuzzy",
+	6: "tookMs",
+}
+
+// Decode decodes SearchResult from json.
+func (s *SearchResult) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SearchResult to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "query":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Query = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"query\"")
+			}
+		case "parsed":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Parsed.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"parsed\"")
+			}
+		case "near":
+			if err := func() error {
+				s.Near.Reset()
+				if err := s.Near.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"near\"")
+			}
+		case "hits":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.Hits = make([]SearchHit, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem SearchHit
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Hits = append(s.Hits, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"hits\"")
+			}
+		case "facilities":
+			if err := func() error {
+				s.Facilities.Reset()
+				if err := s.Facilities.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"facilities\"")
+			}
+		case "fuzzy":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Bool()
+				s.Fuzzy = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"fuzzy\"")
+			}
+		case "tookMs":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int()
+				s.TookMs = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tookMs\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SearchResult")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b01101011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSearchResult) {
+					name = jsonFieldsNameOfSearchResult[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SearchResult) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SearchResult) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SearchResultFacilities) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SearchResultFacilities) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("total")
+		e.Int(s.Total)
+	}
+	{
+		e.FieldStart("items")
+		e.ArrStart()
+		for _, elem := range s.Items {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfSearchResultFacilities = [2]string{
+	0: "total",
+	1: "items",
+}
+
+// Decode decodes SearchResultFacilities from json.
+func (s *SearchResultFacilities) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SearchResultFacilities to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "total":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Total = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total\"")
+			}
+		case "items":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Items = make([]FacilityItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem FacilityItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Items = append(s.Items, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"items\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SearchResultFacilities")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSearchResultFacilities) {
+					name = jsonFieldsNameOfSearchResultFacilities[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SearchResultFacilities) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SearchResultFacilities) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

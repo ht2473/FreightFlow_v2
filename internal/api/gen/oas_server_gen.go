@@ -145,6 +145,12 @@ type Handler interface {
 	//
 	// GET /facilities/points
 	FacilityPoints(ctx context.Context) ([]FacilityPoint, error)
+	// Geocode implements geocode operation.
+	//
+	// Прямое геокодирование — адреса реестра Москвы и улицы.
+	//
+	// GET /geocode
+	Geocode(ctx context.Context, params GeocodeParams) ([]SearchHit, error)
 	// GetExport implements getExport operation.
 	//
 	// Состояние выгрузки.
@@ -353,6 +359,13 @@ type Handler interface {
 	//
 	// PATCH /facility-reports/{reportId}
 	ResolveFacilityReport(ctx context.Context, req *ResolveFacilityReportReq, params ResolveFacilityReportParams) (*FacilityReport, error)
+	// ReverseGeocode implements reverseGeocode operation.
+	//
+	// Обратное геокодирование — ближайший адрес в 50 м и
+	// район.
+	//
+	// GET /geocode/reverse
+	ReverseGeocode(ctx context.Context, params ReverseGeocodeParams) ([]SearchHit, error)
 	// RevokeCuration implements revokeCuration operation.
 	//
 	// Отменить правку (без действующих правок поля —
@@ -366,6 +379,23 @@ type Handler interface {
 	//
 	// DELETE /me/tokens/{tokenId}
 	RevokeToken(ctx context.Context, params RevokeTokenParams) error
+	// Search implements search operation.
+	//
+	// Запрос разбирается в фильтры объектов (тип, округ,
+	// район, площадь, время до МКАД, пояс, признаки, «рядом с
+	// …»); если фильтры есть — ответ содержит объекты
+	// реестра по ним, иначе — документы по видам (объекты,
+	// адреса, улицы, территории, акты, работы, виды, наборы
+	// данных).
+	//
+	// GET /search
+	Search(ctx context.Context, params SearchParams) (*SearchResult, error)
+	// SearchParse implements searchParse operation.
+	//
+	// Разбор запроса в фильтры без поиска.
+	//
+	// GET /search/parse
+	SearchParse(ctx context.Context, params SearchParseParams) (*ParsedQuery, error)
 	// SearchPlaces implements searchPlaces operation.
 	//
 	// Объекты реестра по названию и адреса адресного
@@ -374,6 +404,12 @@ type Handler interface {
 	//
 	// GET /routing/places
 	SearchPlaces(ctx context.Context, params SearchPlacesParams) ([]Place, error)
+	// SearchSuggest implements searchSuggest operation.
+	//
+	// Подсказки при вводе.
+	//
+	// GET /search/suggest
+	SearchSuggest(ctx context.Context, params SearchSuggestParams) ([]SearchHit, error)
 	// StartRun implements startRun operation.
 	//
 	// Запустить загрузку.

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"freightflow/internal/facility"
 	"freightflow/internal/ingest/sources/osm/osmtest"
 	"freightflow/internal/platform/dbtest"
 )
@@ -13,7 +14,7 @@ func TestReindex(t *testing.T) {
 	pool := dbtest.New(t)
 	osmtest.LoadDistrict(t, pool)
 	ctx := t.Context()
-	svc := New(pool)
+	svc := New(pool, facility.New(pool))
 
 	res, err := svc.Reindex(ctx, nil, false)
 	if err != nil {

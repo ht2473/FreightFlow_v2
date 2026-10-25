@@ -146,3 +146,12 @@ func builder(kind string) (Builder, bool) {
 	}
 	return Builder{}, false
 }
+
+// AllKinds — все виды документов индекса.
+func AllKinds() []string {
+	out := make([]string, len(Builders))
+	for i, b := range Builders {
+		out[i] = b.Kind
+	}
+	return out
+}

@@ -207,6 +207,15 @@ func (UnimplementedHandler) FacilityPoints(ctx context.Context) (r []FacilityPoi
 	return r, ht.ErrNotImplemented
 }
 
+// Geocode implements geocode operation.
+//
+// Прямое геокодирование — адреса реестра Москвы и улицы.
+//
+// GET /geocode
+func (UnimplementedHandler) Geocode(ctx context.Context, params GeocodeParams) (r []SearchHit, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetExport implements getExport operation.
 //
 // Состояние выгрузки.
@@ -508,6 +517,16 @@ func (UnimplementedHandler) ResolveFacilityReport(ctx context.Context, req *Reso
 	return r, ht.ErrNotImplemented
 }
 
+// ReverseGeocode implements reverseGeocode operation.
+//
+// Обратное геокодирование — ближайший адрес в 50 м и
+// район.
+//
+// GET /geocode/reverse
+func (UnimplementedHandler) ReverseGeocode(ctx context.Context, params ReverseGeocodeParams) (r []SearchHit, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // RevokeCuration implements revokeCuration operation.
 //
 // Отменить правку (без действующих правок поля —
@@ -527,6 +546,29 @@ func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenP
 	return ht.ErrNotImplemented
 }
 
+// Search implements search operation.
+//
+// Запрос разбирается в фильтры объектов (тип, округ,
+// район, площадь, время до МКАД, пояс, признаки, «рядом с
+// …»); если фильтры есть — ответ содержит объекты
+// реестра по ним, иначе — документы по видам (объекты,
+// адреса, улицы, территории, акты, работы, виды, наборы
+// данных).
+//
+// GET /search
+func (UnimplementedHandler) Search(ctx context.Context, params SearchParams) (r *SearchResult, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SearchParse implements searchParse operation.
+//
+// Разбор запроса в фильтры без поиска.
+//
+// GET /search/parse
+func (UnimplementedHandler) SearchParse(ctx context.Context, params SearchParseParams) (r *ParsedQuery, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // SearchPlaces implements searchPlaces operation.
 //
 // Объекты реестра по названию и адреса адресного
@@ -535,6 +577,15 @@ func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenP
 //
 // GET /routing/places
 func (UnimplementedHandler) SearchPlaces(ctx context.Context, params SearchPlacesParams) (r []Place, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SearchSuggest implements searchSuggest operation.
+//
+// Подсказки при вводе.
+//
+// GET /search/suggest
+func (UnimplementedHandler) SearchSuggest(ctx context.Context, params SearchSuggestParams) (r []SearchHit, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

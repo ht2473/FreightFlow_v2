@@ -28,6 +28,8 @@ tags:
     description: Выгрузки данных
   - name: territories
     description: Территории
+  - name: search
+    description: Поиск и геокодер
   - name: views
     description: Сохранённые виды
   - name: regulation
@@ -890,6 +892,113 @@ paths:
               schema: { $ref: "#/components/schemas/TerritoryProfile" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /search:
+    get:
+      tags: [search]
+      operationId: search
+      summary: Поиск по системе с разбором запроса в фильтры реестра
+      description: |
+        Запрос разбирается в фильтры объектов (тип, округ, район, площадь, время до МКАД, пояс,
+        признаки, «рядом с …»); если фильтры есть — ответ содержит объекты реестра по ним, иначе —
+        документы по видам (объекты, адреса, улицы, территории, акты, работы, виды, наборы данных).
+      x-permission: map.view
+      parameters:
+        - $ref: "#/components/parameters/SearchQ"
+        - $ref: "#/components/parameters/SearchLon"
+        - $ref: "#/components/parameters/SearchLat"
+      responses:
+        "200":
+          description: Результат
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SearchResult" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /search/suggest:
+    get:
+      tags: [search]
+      operationId: searchSuggest
+      summary: Подсказки при вводе
+      x-permission: map.view
+      parameters:
+        - $ref: "#/components/parameters/SearchQ"
+        - $ref: "#/components/parameters/SearchLon"
+        - $ref: "#/components/parameters/SearchLat"
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 20, default: 8 }
+      responses:
+        "200":
+          description: Подсказки
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SearchHit" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /search/parse:
+    get:
+      tags: [search]
+      operationId: searchParse
+      summary: Разбор запроса в фильтры без поиска
+      x-permission: map.view
+      parameters:
+        - $ref: "#/components/parameters/SearchQ"
+      responses:
+        "200":
+          description: Разбор
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ParsedQuery" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /geocode:
+    get:
+      tags: [search]
+      operationId: geocode
+      summary: Прямое геокодирование — адреса реестра Москвы и улицы
+      x-permission: map.view
+      parameters:
+        - $ref: "#/components/parameters/SearchQ"
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 20, default: 5 }
+      responses:
+        "200":
+          description: Адреса
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SearchHit" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /geocode/reverse:
+    get:
+      tags: [search]
+      operationId: reverseGeocode
+      summary: Обратное геокодирование — ближайший адрес в 50 м и район
+      x-permission: map.view
+      parameters:
+        - name: lon
+          in: query
+          required: true
+          schema: { type: number, minimum: -180, maximum: 180 }
+        - name: lat
+          in: query
+          required: true
+          schema: { type: number, minimum: -90, maximum: 90 }
+      responses:
+        "200":
+          description: Адрес и район (что найдено)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SearchHit" }
+        default: { $ref: "#/components/responses/Problem" }
+
   /views:
     get:
       tags: [views]
@@ -1219,6 +1328,20 @@ components:
       in: query
       explode: true
       schema: { type: array, maxItems: 20, items: { type: string, format: uuid } }
+    SearchQ:
+      name: q
+      in: query
+      required: true
+      schema: { type: string, minLength: 1, maxLength: 300 }
+    SearchLon:
+      name: lon
+      in: query
+      description: Долгота центра карты — близкие документы выше
+      schema: { type: number, minimum: -180, maximum: 180 }
+    SearchLat:
+      name: lat
+      in: query
+      schema: { type: number, minimum: -90, maximum: 90 }
     FacilityDistrict:
       name: district
       in: query
@@ -2145,6 +2268,78 @@ components:
               type: array
               items: { $ref: "#/components/schemas/TerritoryRow" }
             summary: { $ref: "#/components/schemas/AreaSummary" }
+
+    SearchHit:
+      type: object
+      required: [kind, ref, title, score]
+      properties:
+        kind:
+          type: string
+          enum: [facility, address, street, territory, dataset, source, legal_act, help, road_work, saved_view, report]
+        ref: { type: string, description: "Идентификатор сущности своего вида" }
+        title: { type: string }
+        subtitle: { type: string }
+        point: { $ref: "#/components/schemas/LngLat" }
+        score: { type: number }
+
+    SearchChip:
+      type: object
+      required: [field, label]
+      properties:
+        field: { type: string, enum: [type, okrug, district, ring, area, mkad, conf, restr, permit, near] }
+        label: { type: string }
+
+    ParsedQuery:
+      type: object
+      required: [text, chips, facility, types, okrugs, districts, rings]
+      properties:
+        text: { type: string, description: "Остаток запроса — поиск по словам" }
+        chips:
+          type: array
+          items: { $ref: "#/components/schemas/SearchChip" }
+        facility: { type: boolean, description: "Запрос относится к объектам реестра" }
+        types:
+          type: array
+          items: { type: string }
+        okrugs:
+          type: array
+          items: { type: string, format: uuid }
+        districts:
+          type: array
+          items: { type: string, format: uuid }
+        rings:
+          type: array
+          items: { type: string, enum: [sk, ttk, mkad, ckad, outside] }
+        minArea: { type: number }
+        maxArea: { type: number }
+        maxMkadMin: { type: number }
+        minConfidence: { type: number }
+        nearRestrictions: { type: boolean }
+        hasPermit: { type: boolean }
+        nearText: { type: string }
+        nearKm: { type: number }
+        coordinates: { $ref: "#/components/schemas/LngLat" }
+
+    SearchResult:
+      type: object
+      required: [query, parsed, hits, fuzzy, tookMs]
+      properties:
+        query: { type: string }
+        parsed: { $ref: "#/components/schemas/ParsedQuery" }
+        near: { $ref: "#/components/schemas/SearchHit" }
+        hits:
+          type: array
+          items: { $ref: "#/components/schemas/SearchHit" }
+        facilities:
+          type: object
+          required: [total, items]
+          properties:
+            total: { type: integer }
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/FacilityItem" }
+        fuzzy: { type: boolean, description: "Документы найдены по сходству написания" }
+        tookMs: { type: integer }
 
     SavedView:
       type: object

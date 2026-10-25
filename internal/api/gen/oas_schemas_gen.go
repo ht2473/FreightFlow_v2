@@ -6605,6 +6605,52 @@ func (o OptListTerritoriesKind) Or(d ListTerritoriesKind) ListTerritoriesKind {
 	return d
 }
 
+// NewOptLngLat returns new OptLngLat with value set to v.
+func NewOptLngLat(v LngLat) OptLngLat {
+	return OptLngLat{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLngLat is optional LngLat.
+type OptLngLat struct {
+	Value LngLat
+	Set   bool
+}
+
+// IsSet returns true if OptLngLat was set.
+func (o OptLngLat) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLngLat) Reset() {
+	var v LngLat
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLngLat) SetTo(v LngLat) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLngLat) Get() (v LngLat, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLngLat) Or(d LngLat) LngLat {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptRouteLine returns new OptRouteLine with value set to v.
 func NewOptRouteLine(v RouteLine) OptRouteLine {
 	return OptRouteLine{
@@ -6691,6 +6737,98 @@ func (o OptRun) Get() (v Run, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptRun) Or(d Run) Run {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSearchHit returns new OptSearchHit with value set to v.
+func NewOptSearchHit(v SearchHit) OptSearchHit {
+	return OptSearchHit{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSearchHit is optional SearchHit.
+type OptSearchHit struct {
+	Value SearchHit
+	Set   bool
+}
+
+// IsSet returns true if OptSearchHit was set.
+func (o OptSearchHit) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSearchHit) Reset() {
+	var v SearchHit
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSearchHit) SetTo(v SearchHit) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSearchHit) Get() (v SearchHit, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSearchHit) Or(d SearchHit) SearchHit {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSearchResultFacilities returns new OptSearchResultFacilities with value set to v.
+func NewOptSearchResultFacilities(v SearchResultFacilities) OptSearchResultFacilities {
+	return OptSearchResultFacilities{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSearchResultFacilities is optional SearchResultFacilities.
+type OptSearchResultFacilities struct {
+	Value SearchResultFacilities
+	Set   bool
+}
+
+// IsSet returns true if OptSearchResultFacilities was set.
+func (o OptSearchResultFacilities) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSearchResultFacilities) Reset() {
+	var v SearchResultFacilities
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSearchResultFacilities) SetTo(v SearchResultFacilities) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSearchResultFacilities) Get() (v SearchResultFacilities, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSearchResultFacilities) Or(d SearchResultFacilities) SearchResultFacilities {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -6971,6 +7109,250 @@ func (o OptZoneRuleUseNote) Or(d ZoneRuleUseNote) ZoneRuleUseNote {
 		return v
 	}
 	return d
+}
+
+// Ref: #/components/schemas/ParsedQuery
+type ParsedQuery struct {
+	// Остаток запроса — поиск по словам.
+	Text  string       `json:"text"`
+	Chips []SearchChip `json:"chips"`
+	// Запрос относится к объектам реестра.
+	Facility         bool                   `json:"facility"`
+	Types            []string               `json:"types"`
+	Okrugs           []uuid.UUID            `json:"okrugs"`
+	Districts        []uuid.UUID            `json:"districts"`
+	Rings            []ParsedQueryRingsItem `json:"rings"`
+	MinArea          OptFloat64             `json:"minArea"`
+	MaxArea          OptFloat64             `json:"maxArea"`
+	MaxMkadMin       OptFloat64             `json:"maxMkadMin"`
+	MinConfidence    OptFloat64             `json:"minConfidence"`
+	NearRestrictions OptBool                `json:"nearRestrictions"`
+	HasPermit        OptBool                `json:"hasPermit"`
+	NearText         OptString              `json:"nearText"`
+	NearKm           OptFloat64             `json:"nearKm"`
+	Coordinates      OptLngLat              `json:"coordinates"`
+}
+
+// GetText returns the value of Text.
+func (s *ParsedQuery) GetText() string {
+	return s.Text
+}
+
+// GetChips returns the value of Chips.
+func (s *ParsedQuery) GetChips() []SearchChip {
+	return s.Chips
+}
+
+// GetFacility returns the value of Facility.
+func (s *ParsedQuery) GetFacility() bool {
+	return s.Facility
+}
+
+// GetTypes returns the value of Types.
+func (s *ParsedQuery) GetTypes() []string {
+	return s.Types
+}
+
+// GetOkrugs returns the value of Okrugs.
+func (s *ParsedQuery) GetOkrugs() []uuid.UUID {
+	return s.Okrugs
+}
+
+// GetDistricts returns the value of Districts.
+func (s *ParsedQuery) GetDistricts() []uuid.UUID {
+	return s.Districts
+}
+
+// GetRings returns the value of Rings.
+func (s *ParsedQuery) GetRings() []ParsedQueryRingsItem {
+	return s.Rings
+}
+
+// GetMinArea returns the value of MinArea.
+func (s *ParsedQuery) GetMinArea() OptFloat64 {
+	return s.MinArea
+}
+
+// GetMaxArea returns the value of MaxArea.
+func (s *ParsedQuery) GetMaxArea() OptFloat64 {
+	return s.MaxArea
+}
+
+// GetMaxMkadMin returns the value of MaxMkadMin.
+func (s *ParsedQuery) GetMaxMkadMin() OptFloat64 {
+	return s.MaxMkadMin
+}
+
+// GetMinConfidence returns the value of MinConfidence.
+func (s *ParsedQuery) GetMinConfidence() OptFloat64 {
+	return s.MinConfidence
+}
+
+// GetNearRestrictions returns the value of NearRestrictions.
+func (s *ParsedQuery) GetNearRestrictions() OptBool {
+	return s.NearRestrictions
+}
+
+// GetHasPermit returns the value of HasPermit.
+func (s *ParsedQuery) GetHasPermit() OptBool {
+	return s.HasPermit
+}
+
+// GetNearText returns the value of NearText.
+func (s *ParsedQuery) GetNearText() OptString {
+	return s.NearText
+}
+
+// GetNearKm returns the value of NearKm.
+func (s *ParsedQuery) GetNearKm() OptFloat64 {
+	return s.NearKm
+}
+
+// GetCoordinates returns the value of Coordinates.
+func (s *ParsedQuery) GetCoordinates() OptLngLat {
+	return s.Coordinates
+}
+
+// SetText sets the value of Text.
+func (s *ParsedQuery) SetText(val string) {
+	s.Text = val
+}
+
+// SetChips sets the value of Chips.
+func (s *ParsedQuery) SetChips(val []SearchChip) {
+	s.Chips = val
+}
+
+// SetFacility sets the value of Facility.
+func (s *ParsedQuery) SetFacility(val bool) {
+	s.Facility = val
+}
+
+// SetTypes sets the value of Types.
+func (s *ParsedQuery) SetTypes(val []string) {
+	s.Types = val
+}
+
+// SetOkrugs sets the value of Okrugs.
+func (s *ParsedQuery) SetOkrugs(val []uuid.UUID) {
+	s.Okrugs = val
+}
+
+// SetDistricts sets the value of Districts.
+func (s *ParsedQuery) SetDistricts(val []uuid.UUID) {
+	s.Districts = val
+}
+
+// SetRings sets the value of Rings.
+func (s *ParsedQuery) SetRings(val []ParsedQueryRingsItem) {
+	s.Rings = val
+}
+
+// SetMinArea sets the value of MinArea.
+func (s *ParsedQuery) SetMinArea(val OptFloat64) {
+	s.MinArea = val
+}
+
+// SetMaxArea sets the value of MaxArea.
+func (s *ParsedQuery) SetMaxArea(val OptFloat64) {
+	s.MaxArea = val
+}
+
+// SetMaxMkadMin sets the value of MaxMkadMin.
+func (s *ParsedQuery) SetMaxMkadMin(val OptFloat64) {
+	s.MaxMkadMin = val
+}
+
+// SetMinConfidence sets the value of MinConfidence.
+func (s *ParsedQuery) SetMinConfidence(val OptFloat64) {
+	s.MinConfidence = val
+}
+
+// SetNearRestrictions sets the value of NearRestrictions.
+func (s *ParsedQuery) SetNearRestrictions(val OptBool) {
+	s.NearRestrictions = val
+}
+
+// SetHasPermit sets the value of HasPermit.
+func (s *ParsedQuery) SetHasPermit(val OptBool) {
+	s.HasPermit = val
+}
+
+// SetNearText sets the value of NearText.
+func (s *ParsedQuery) SetNearText(val OptString) {
+	s.NearText = val
+}
+
+// SetNearKm sets the value of NearKm.
+func (s *ParsedQuery) SetNearKm(val OptFloat64) {
+	s.NearKm = val
+}
+
+// SetCoordinates sets the value of Coordinates.
+func (s *ParsedQuery) SetCoordinates(val OptLngLat) {
+	s.Coordinates = val
+}
+
+type ParsedQueryRingsItem string
+
+const (
+	ParsedQueryRingsItemSk      ParsedQueryRingsItem = "sk"
+	ParsedQueryRingsItemTtk     ParsedQueryRingsItem = "ttk"
+	ParsedQueryRingsItemMkad    ParsedQueryRingsItem = "mkad"
+	ParsedQueryRingsItemCkad    ParsedQueryRingsItem = "ckad"
+	ParsedQueryRingsItemOutside ParsedQueryRingsItem = "outside"
+)
+
+// AllValues returns all ParsedQueryRingsItem values.
+func (ParsedQueryRingsItem) AllValues() []ParsedQueryRingsItem {
+	return []ParsedQueryRingsItem{
+		ParsedQueryRingsItemSk,
+		ParsedQueryRingsItemTtk,
+		ParsedQueryRingsItemMkad,
+		ParsedQueryRingsItemCkad,
+		ParsedQueryRingsItemOutside,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ParsedQueryRingsItem) MarshalText() ([]byte, error) {
+	switch s {
+	case ParsedQueryRingsItemSk:
+		return []byte(s), nil
+	case ParsedQueryRingsItemTtk:
+		return []byte(s), nil
+	case ParsedQueryRingsItemMkad:
+		return []byte(s), nil
+	case ParsedQueryRingsItemCkad:
+		return []byte(s), nil
+	case ParsedQueryRingsItemOutside:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ParsedQueryRingsItem) UnmarshalText(data []byte) error {
+	switch ParsedQueryRingsItem(data) {
+	case ParsedQueryRingsItemSk:
+		*s = ParsedQueryRingsItemSk
+		return nil
+	case ParsedQueryRingsItemTtk:
+		*s = ParsedQueryRingsItemTtk
+		return nil
+	case ParsedQueryRingsItemMkad:
+		*s = ParsedQueryRingsItemMkad
+		return nil
+	case ParsedQueryRingsItemCkad:
+		*s = ParsedQueryRingsItemCkad
+		return nil
+	case ParsedQueryRingsItemOutside:
+		*s = ParsedQueryRingsItemOutside
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/PassSeries
@@ -8603,6 +8985,411 @@ func (s *SavedViewParams) init() SavedViewParams {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #/components/schemas/SearchChip
+type SearchChip struct {
+	Field SearchChipField `json:"field"`
+	Label string          `json:"label"`
+}
+
+// GetField returns the value of Field.
+func (s *SearchChip) GetField() SearchChipField {
+	return s.Field
+}
+
+// GetLabel returns the value of Label.
+func (s *SearchChip) GetLabel() string {
+	return s.Label
+}
+
+// SetField sets the value of Field.
+func (s *SearchChip) SetField(val SearchChipField) {
+	s.Field = val
+}
+
+// SetLabel sets the value of Label.
+func (s *SearchChip) SetLabel(val string) {
+	s.Label = val
+}
+
+type SearchChipField string
+
+const (
+	SearchChipFieldType     SearchChipField = "type"
+	SearchChipFieldOkrug    SearchChipField = "okrug"
+	SearchChipFieldDistrict SearchChipField = "district"
+	SearchChipFieldRing     SearchChipField = "ring"
+	SearchChipFieldArea     SearchChipField = "area"
+	SearchChipFieldMkad     SearchChipField = "mkad"
+	SearchChipFieldConf     SearchChipField = "conf"
+	SearchChipFieldRestr    SearchChipField = "restr"
+	SearchChipFieldPermit   SearchChipField = "permit"
+	SearchChipFieldNear     SearchChipField = "near"
+)
+
+// AllValues returns all SearchChipField values.
+func (SearchChipField) AllValues() []SearchChipField {
+	return []SearchChipField{
+		SearchChipFieldType,
+		SearchChipFieldOkrug,
+		SearchChipFieldDistrict,
+		SearchChipFieldRing,
+		SearchChipFieldArea,
+		SearchChipFieldMkad,
+		SearchChipFieldConf,
+		SearchChipFieldRestr,
+		SearchChipFieldPermit,
+		SearchChipFieldNear,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SearchChipField) MarshalText() ([]byte, error) {
+	switch s {
+	case SearchChipFieldType:
+		return []byte(s), nil
+	case SearchChipFieldOkrug:
+		return []byte(s), nil
+	case SearchChipFieldDistrict:
+		return []byte(s), nil
+	case SearchChipFieldRing:
+		return []byte(s), nil
+	case SearchChipFieldArea:
+		return []byte(s), nil
+	case SearchChipFieldMkad:
+		return []byte(s), nil
+	case SearchChipFieldConf:
+		return []byte(s), nil
+	case SearchChipFieldRestr:
+		return []byte(s), nil
+	case SearchChipFieldPermit:
+		return []byte(s), nil
+	case SearchChipFieldNear:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SearchChipField) UnmarshalText(data []byte) error {
+	switch SearchChipField(data) {
+	case SearchChipFieldType:
+		*s = SearchChipFieldType
+		return nil
+	case SearchChipFieldOkrug:
+		*s = SearchChipFieldOkrug
+		return nil
+	case SearchChipFieldDistrict:
+		*s = SearchChipFieldDistrict
+		return nil
+	case SearchChipFieldRing:
+		*s = SearchChipFieldRing
+		return nil
+	case SearchChipFieldArea:
+		*s = SearchChipFieldArea
+		return nil
+	case SearchChipFieldMkad:
+		*s = SearchChipFieldMkad
+		return nil
+	case SearchChipFieldConf:
+		*s = SearchChipFieldConf
+		return nil
+	case SearchChipFieldRestr:
+		*s = SearchChipFieldRestr
+		return nil
+	case SearchChipFieldPermit:
+		*s = SearchChipFieldPermit
+		return nil
+	case SearchChipFieldNear:
+		*s = SearchChipFieldNear
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/SearchHit
+type SearchHit struct {
+	Kind SearchHitKind `json:"kind"`
+	// Идентификатор сущности своего вида.
+	Ref      string    `json:"ref"`
+	Title    string    `json:"title"`
+	Subtitle OptString `json:"subtitle"`
+	Point    OptLngLat `json:"point"`
+	Score    float64   `json:"score"`
+}
+
+// GetKind returns the value of Kind.
+func (s *SearchHit) GetKind() SearchHitKind {
+	return s.Kind
+}
+
+// GetRef returns the value of Ref.
+func (s *SearchHit) GetRef() string {
+	return s.Ref
+}
+
+// GetTitle returns the value of Title.
+func (s *SearchHit) GetTitle() string {
+	return s.Title
+}
+
+// GetSubtitle returns the value of Subtitle.
+func (s *SearchHit) GetSubtitle() OptString {
+	return s.Subtitle
+}
+
+// GetPoint returns the value of Point.
+func (s *SearchHit) GetPoint() OptLngLat {
+	return s.Point
+}
+
+// GetScore returns the value of Score.
+func (s *SearchHit) GetScore() float64 {
+	return s.Score
+}
+
+// SetKind sets the value of Kind.
+func (s *SearchHit) SetKind(val SearchHitKind) {
+	s.Kind = val
+}
+
+// SetRef sets the value of Ref.
+func (s *SearchHit) SetRef(val string) {
+	s.Ref = val
+}
+
+// SetTitle sets the value of Title.
+func (s *SearchHit) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetSubtitle sets the value of Subtitle.
+func (s *SearchHit) SetSubtitle(val OptString) {
+	s.Subtitle = val
+}
+
+// SetPoint sets the value of Point.
+func (s *SearchHit) SetPoint(val OptLngLat) {
+	s.Point = val
+}
+
+// SetScore sets the value of Score.
+func (s *SearchHit) SetScore(val float64) {
+	s.Score = val
+}
+
+type SearchHitKind string
+
+const (
+	SearchHitKindFacility  SearchHitKind = "facility"
+	SearchHitKindAddress   SearchHitKind = "address"
+	SearchHitKindStreet    SearchHitKind = "street"
+	SearchHitKindTerritory SearchHitKind = "territory"
+	SearchHitKindDataset   SearchHitKind = "dataset"
+	SearchHitKindSource    SearchHitKind = "source"
+	SearchHitKindLegalAct  SearchHitKind = "legal_act"
+	SearchHitKindHelp      SearchHitKind = "help"
+	SearchHitKindRoadWork  SearchHitKind = "road_work"
+	SearchHitKindSavedView SearchHitKind = "saved_view"
+	SearchHitKindReport    SearchHitKind = "report"
+)
+
+// AllValues returns all SearchHitKind values.
+func (SearchHitKind) AllValues() []SearchHitKind {
+	return []SearchHitKind{
+		SearchHitKindFacility,
+		SearchHitKindAddress,
+		SearchHitKindStreet,
+		SearchHitKindTerritory,
+		SearchHitKindDataset,
+		SearchHitKindSource,
+		SearchHitKindLegalAct,
+		SearchHitKindHelp,
+		SearchHitKindRoadWork,
+		SearchHitKindSavedView,
+		SearchHitKindReport,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SearchHitKind) MarshalText() ([]byte, error) {
+	switch s {
+	case SearchHitKindFacility:
+		return []byte(s), nil
+	case SearchHitKindAddress:
+		return []byte(s), nil
+	case SearchHitKindStreet:
+		return []byte(s), nil
+	case SearchHitKindTerritory:
+		return []byte(s), nil
+	case SearchHitKindDataset:
+		return []byte(s), nil
+	case SearchHitKindSource:
+		return []byte(s), nil
+	case SearchHitKindLegalAct:
+		return []byte(s), nil
+	case SearchHitKindHelp:
+		return []byte(s), nil
+	case SearchHitKindRoadWork:
+		return []byte(s), nil
+	case SearchHitKindSavedView:
+		return []byte(s), nil
+	case SearchHitKindReport:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SearchHitKind) UnmarshalText(data []byte) error {
+	switch SearchHitKind(data) {
+	case SearchHitKindFacility:
+		*s = SearchHitKindFacility
+		return nil
+	case SearchHitKindAddress:
+		*s = SearchHitKindAddress
+		return nil
+	case SearchHitKindStreet:
+		*s = SearchHitKindStreet
+		return nil
+	case SearchHitKindTerritory:
+		*s = SearchHitKindTerritory
+		return nil
+	case SearchHitKindDataset:
+		*s = SearchHitKindDataset
+		return nil
+	case SearchHitKindSource:
+		*s = SearchHitKindSource
+		return nil
+	case SearchHitKindLegalAct:
+		*s = SearchHitKindLegalAct
+		return nil
+	case SearchHitKindHelp:
+		*s = SearchHitKindHelp
+		return nil
+	case SearchHitKindRoadWork:
+		*s = SearchHitKindRoadWork
+		return nil
+	case SearchHitKindSavedView:
+		*s = SearchHitKindSavedView
+		return nil
+	case SearchHitKindReport:
+		*s = SearchHitKindReport
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/SearchResult
+type SearchResult struct {
+	Query      string                    `json:"query"`
+	Parsed     ParsedQuery               `json:"parsed"`
+	Near       OptSearchHit              `json:"near"`
+	Hits       []SearchHit               `json:"hits"`
+	Facilities OptSearchResultFacilities `json:"facilities"`
+	// Документы найдены по сходству написания.
+	Fuzzy  bool `json:"fuzzy"`
+	TookMs int  `json:"tookMs"`
+}
+
+// GetQuery returns the value of Query.
+func (s *SearchResult) GetQuery() string {
+	return s.Query
+}
+
+// GetParsed returns the value of Parsed.
+func (s *SearchResult) GetParsed() ParsedQuery {
+	return s.Parsed
+}
+
+// GetNear returns the value of Near.
+func (s *SearchResult) GetNear() OptSearchHit {
+	return s.Near
+}
+
+// GetHits returns the value of Hits.
+func (s *SearchResult) GetHits() []SearchHit {
+	return s.Hits
+}
+
+// GetFacilities returns the value of Facilities.
+func (s *SearchResult) GetFacilities() OptSearchResultFacilities {
+	return s.Facilities
+}
+
+// GetFuzzy returns the value of Fuzzy.
+func (s *SearchResult) GetFuzzy() bool {
+	return s.Fuzzy
+}
+
+// GetTookMs returns the value of TookMs.
+func (s *SearchResult) GetTookMs() int {
+	return s.TookMs
+}
+
+// SetQuery sets the value of Query.
+func (s *SearchResult) SetQuery(val string) {
+	s.Query = val
+}
+
+// SetParsed sets the value of Parsed.
+func (s *SearchResult) SetParsed(val ParsedQuery) {
+	s.Parsed = val
+}
+
+// SetNear sets the value of Near.
+func (s *SearchResult) SetNear(val OptSearchHit) {
+	s.Near = val
+}
+
+// SetHits sets the value of Hits.
+func (s *SearchResult) SetHits(val []SearchHit) {
+	s.Hits = val
+}
+
+// SetFacilities sets the value of Facilities.
+func (s *SearchResult) SetFacilities(val OptSearchResultFacilities) {
+	s.Facilities = val
+}
+
+// SetFuzzy sets the value of Fuzzy.
+func (s *SearchResult) SetFuzzy(val bool) {
+	s.Fuzzy = val
+}
+
+// SetTookMs sets the value of TookMs.
+func (s *SearchResult) SetTookMs(val int) {
+	s.TookMs = val
+}
+
+type SearchResultFacilities struct {
+	Total int            `json:"total"`
+	Items []FacilityItem `json:"items"`
+}
+
+// GetTotal returns the value of Total.
+func (s *SearchResultFacilities) GetTotal() int {
+	return s.Total
+}
+
+// GetItems returns the value of Items.
+func (s *SearchResultFacilities) GetItems() []FacilityItem {
+	return s.Items
+}
+
+// SetTotal sets the value of Total.
+func (s *SearchResultFacilities) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetItems sets the value of Items.
+func (s *SearchResultFacilities) SetItems(val []FacilityItem) {
+	s.Items = val
 }
 
 // Ref: #/components/schemas/Settings

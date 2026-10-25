@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"freightflow/internal/facility"
 	"freightflow/internal/platform/db"
 )
 
@@ -17,11 +18,15 @@ var ErrUnknownKind = errors.New("search: unknown kind")
 
 // Service — поиск.
 type Service struct {
-	pool *pgxpool.Pool
+	pool       *pgxpool.Pool
+	facilities *facility.Service
+	parsers    parserCache
 }
 
-// New — сервис поиска.
-func New(pool *pgxpool.Pool) *Service { return &Service{pool: pool} }
+// New — сервис поиска; объекты по разобранным фильтрам выбирает реестр.
+func New(pool *pgxpool.Pool, facilities *facility.Service) *Service {
+	return &Service{pool: pool, facilities: facilities}
+}
 
 // Indexed — итог переиндексации вида.
 type Indexed struct {

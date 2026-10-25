@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"sync"
 	"testing"
@@ -31,6 +32,7 @@ import (
 	"freightflow/internal/regulation"
 	"freightflow/internal/report"
 	"freightflow/internal/routing"
+	"freightflow/internal/search"
 	"freightflow/internal/territory"
 	"freightflow/internal/tiles"
 	"freightflow/internal/views"
@@ -105,7 +107,7 @@ func newFixture(t *testing.T) *fixture {
 	h, err := New(Deps{
 		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
 		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facilities,
-		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Territories: territory.New(pool, facilities), Sessions: sessions, Mailer: mailer,
+		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Territories: territory.New(pool, facilities), Search: search.New(pool, facilities), Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
@@ -670,5 +672,111 @@ func TestAPIWorkspaceContract(t *testing.T) {
 	var a, d struct{ Total int }
 	if json.Unmarshal(all, &a) != nil || json.Unmarshal(byDistrict, &d) != nil || d.Total == 0 || d.Total > a.Total {
 		t.Errorf("district filter: %d of %d", d.Total, a.Total)
+	}
+}
+
+func TestAPISearch(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	osmtest.LoadDistrict(t, f.pool)
+	analyst := f.token(t, "sa@example.com", identity.RoleAnalyst)
+	other := f.token(t, "sb@example.com", identity.RoleAnalyst)
+	steward := f.token(t, "ss@example.com", identity.RoleDataSteward)
+	if resp, raw := f.do(t, http.MethodPost, "/api/v1/views", analyst, `{"page":"map","name":"Склады у реки","params":{}}`); resp.StatusCode != http.StatusCreated {
+		t.Fatalf("view: %d %s", resp.StatusCode, raw)
+	}
+	if _, err := f.pool.Exec(t.Context(), `INSERT INTO ingest.source (code, title, publisher, url, license, attribution, domains)
+		VALUES ('mos_test', 'Склады и терминалы', 'Портал', 'https://data.mos.ru', 'CC BY 4.0', 'data.mos.ru', '{facility}')
+		ON CONFLICT (code) DO NOTHING`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := search.New(f.pool, facility.New(f.pool)).Reindex(t.Context(), nil, true); err != nil {
+		t.Fatal(err)
+	}
+	var district string
+	if err := f.pool.QueryRow(t.Context(), `SELECT name FROM territory.admin_area WHERE kind = 'district'
+		AND id IN (SELECT district_id FROM infra.facility) LIMIT 1`).Scan(&district); err != nil {
+		t.Fatal(err)
+	}
+
+	type result struct {
+		Parsed struct {
+			Facility bool
+			Types    []string
+			Chips    []struct{ Field, Label string }
+		}
+		Hits       []struct{ Kind, Ref, Title string }
+		Facilities *struct{ Total int }
+	}
+	get := func(token, path string) (int, result, string) {
+		resp, raw := f.do(t, http.MethodGet, path, token, "")
+		var r result
+		_ = json.Unmarshal(raw, &r)
+		return resp.StatusCode, r, string(raw)
+	}
+
+	// Запрос с фильтрами: тип и район — объекты реестра по фильтрам.
+	code, r, raw := get(analyst, "/api/v1/search?q="+url.QueryEscape("склады "+district))
+	if code != http.StatusOK || !r.Parsed.Facility || len(r.Parsed.Types) != 1 || r.Facilities == nil || r.Facilities.Total == 0 ||
+		len(r.Parsed.Chips) != 2 {
+		t.Errorf("фильтры: %d %s", code, raw)
+	}
+	// Территория без фильтров — документ.
+	code, r, raw = get(analyst, "/api/v1/search?q="+url.QueryEscape(district))
+	if code != http.StatusOK || r.Parsed.Facility || len(r.Hits) == 0 || r.Hits[0].Kind != "territory" {
+		t.Errorf("территория: %d %s", code, raw)
+	}
+	// Сохранённый вид виден владельцу, но не другому аналитику; наборы данных — управляющим данными.
+	hasKind := func(r result, kind string) bool {
+		for _, h := range r.Hits {
+			if h.Kind == kind {
+				return true
+			}
+		}
+		return false
+	}
+	if _, r, raw = get(analyst, "/api/v1/search?q="+url.QueryEscape("склады у реки")); !hasKind(r, "saved_view") {
+		t.Errorf("свой вид: %s", raw)
+	}
+	if _, r, raw = get(other, "/api/v1/search?q="+url.QueryEscape("склады у реки")); hasKind(r, "saved_view") {
+		t.Errorf("чужой вид: %s", raw)
+	}
+	if _, r, _ = get(analyst, "/api/v1/search?q="+url.QueryEscape("терминалы портал")); hasKind(r, "dataset") {
+		t.Errorf("набор данных у аналитика")
+	}
+	if _, r, raw = get(steward, "/api/v1/search?q="+url.QueryEscape("склады и терминалы портал")); !hasKind(r, "dataset") {
+		t.Errorf("набор данных у редактора: %s", raw)
+	}
+
+	// Подсказки, разбор, геокодер.
+	resp, body := f.do(t, http.MethodGet, "/api/v1/search/suggest?q="+url.QueryEscape(district[:len(district)/2]), analyst, "")
+	var hits []struct{ Kind string }
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &hits) != nil || len(hits) == 0 {
+		t.Errorf("подсказки: %d %s", resp.StatusCode, body)
+	}
+	resp, body = f.do(t, http.MethodGet, "/api/v1/search/parse?q="+url.QueryEscape("РЦ больше 2 га у МКАД"), analyst, "")
+	var parsed struct {
+		Types      []string
+		MinArea    float64
+		MaxMkadMin float64
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &parsed) != nil || parsed.MinArea != 20000 ||
+		parsed.MaxMkadMin != 10 || len(parsed.Types) != 1 {
+		t.Errorf("разбор: %d %s", resp.StatusCode, body)
+	}
+	var lon, lat float64
+	if err := f.pool.QueryRow(t.Context(), `SELECT ST_X(point), ST_Y(point) FROM search.document WHERE kind = 'territory' AND subtitle LIKE 'Район%' LIMIT 1`).
+		Scan(&lon, &lat); err != nil {
+		t.Fatal(err)
+	}
+	resp, body = f.do(t, http.MethodGet, fmt.Sprintf("/api/v1/geocode/reverse?lon=%f&lat=%f", lon, lat), analyst, "")
+	if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), `"territory"`) {
+		t.Errorf("обратный геокодер: %d %s", resp.StatusCode, body)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/search?q=", analyst, ""); resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("пустой запрос: %d", resp.StatusCode)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/search?q=x", "", ""); resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("без входа: %d", resp.StatusCode)
 	}
 }
