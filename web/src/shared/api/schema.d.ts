@@ -745,6 +745,216 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/indexes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Сводные индексы — составляющие, веса пользователя и по умолчанию */
+        get: operations["listIndexes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/indexes/{code}/compute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Значения индекса на уровне и чувствительность к весам
+         * @description Без весов в запросе — веса пользователя (свои или по умолчанию); с весами — расчёт без сохранения.
+         */
+        post: operations["computeIndex"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/indexes/{code}/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Сохранить веса индекса — свои или по умолчанию для всех (администратор) */
+        put: operations["saveIndexConfig"];
+        post?: never;
+        /** Удалить свои веса индекса */
+        delete: operations["resetIndexConfig"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/hotspots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Горячие и холодные точки показателя ячеек H3 (Getis–Ord Gi*) */
+        post: operations["hotspots"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/clusters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Кластеры объектов реестра (DBSCAN) */
+        post: operations["facilityClusters"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Каталог показателей с методиками и временем расчёта */
+        get: operations["listMetrics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/metrics/entity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Текущие значения всех показателей объекта уровня с местом среди соседей */
+        get: operations["entityMetrics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/metrics/{code}/series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ряд показателя по городу и прогноз с точностью моделей на истории */
+        get: operations["metricSeries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/metrics/{code}/geo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Значения показателя с геометрией (GeoJSON) — картограмма районов, округов или ячеек H3 */
+        get: operations["metricGeo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/data/updates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Последние обновления данных (успешные загрузки) */
+        get: operations["dataUpdates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Виджеты главного дашборда пользователя */
+        get: operations["getDashboard"];
+        /** Сохранить свои виджеты (пустой список не допускается — для сброса DELETE) */
+        put: operations["saveDashboard"];
+        post?: never;
+        /** Вернуть дашборд по умолчанию */
+        delete: operations["resetDashboard"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/metrics/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Значения показателя на уровне — рейтинг или ряд по периодам */
+        get: operations["metricValues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/views": {
         parameters: {
             query?: never;
@@ -1668,6 +1878,180 @@ export interface components {
             fuzzy: boolean;
             tookMs: number;
         };
+        IndexDef: {
+            code: string;
+            title: string;
+            method: string;
+            /** @enum {string} */
+            normalization: "minmax" | "zscore";
+            /** @description У пользователя свои веса */
+            own: boolean;
+            levels: {
+                /** @enum {string} */
+                level: "district" | "h3_8";
+                components: {
+                    ref: string;
+                    title: string;
+                    unit: string;
+                    /** @enum {integer} */
+                    direction: -1 | 1;
+                    weight: number;
+                    defaultWeight: number;
+                }[];
+            }[];
+        };
+        IndexResult: {
+            code: string;
+            level: string;
+            /** @enum {string} */
+            normalization: "minmax" | "zscore";
+            weights: {
+                [key: string]: number;
+            };
+            scores: {
+                entity: string;
+                label: string;
+                score: number;
+                rank: number;
+                parts: {
+                    ref: string;
+                    value: number;
+                    normalized: number;
+                    weight: number;
+                }[];
+            }[];
+            sensitivity: {
+                ref: string;
+                /** @description Корреляция Спирмена рангов при весе −20 % */
+                rhoMinus: number;
+                rhoPlus: number;
+                maxShift: number;
+                entities: number;
+            }[];
+        };
+        MetricSeries: {
+            metric: components["schemas"]["MetricDef"];
+            points: {
+                /** Format: date */
+                period: string;
+                value: number;
+                /** @description Периода нет в источнике (у потока — ноль) */
+                filled: boolean;
+            }[];
+            /** @description Прогноз (модель) — выбранная по MASE на скользящей проверке */
+            forecast?: {
+                /** @enum {string} */
+                model: "seasonal_naive" | "holt_winters" | "regression";
+                /** @description Начал скользящей проверки */
+                holdout: number;
+                scores: {
+                    model: string;
+                    mase: number;
+                    points: number;
+                }[];
+                points: {
+                    /** Format: date */
+                    period: string;
+                    value: number;
+                    lo80: number;
+                    hi80: number;
+                    lo95: number;
+                    hi95: number;
+                }[];
+            };
+            /** @description Почему прогноз не построен */
+            forecastNote?: string;
+        };
+        HotspotResult: {
+            metric: string;
+            level: string;
+            k: number;
+            cells: number;
+            mean: number;
+            sd: number;
+            hot: number;
+            cold: number;
+            significant: {
+                h3: string;
+                value: number;
+                /** @description Значение в окрестности на км² */
+                density: number;
+                z: number;
+                /** @enum {integer} */
+                confidence: 90 | 95 | 99;
+                /** @enum {integer} */
+                sign: -1 | 1;
+                geometry: {
+                    [key: string]: unknown;
+                };
+            }[];
+        };
+        ClusterResult: {
+            epsM: number;
+            minPoints: number;
+            types: string[];
+            total: number;
+            /** @description Объектов вне кластеров */
+            noise: number;
+            clusters: {
+                id: number;
+                facilities: number;
+                buildingAreaM2: number;
+                center: components["schemas"]["LngLat"];
+                hull: {
+                    [key: string]: unknown;
+                };
+                names: string[];
+            }[];
+        };
+        Widget: {
+            /** @enum {string} */
+            kind: "kpi" | "series" | "rating" | "index";
+            metric?: string;
+            index?: string;
+            /** @enum {string} */
+            level?: "facility" | "district" | "okrug" | "segment" | "city" | "h3_8" | "h3_9";
+        };
+        Dashboard: {
+            /** @description Свой набор виджетов (иначе по умолчанию) */
+            own: boolean;
+            widgets: components["schemas"]["Widget"][];
+        };
+        MetricDef: {
+            code: string;
+            title: string;
+            unit: string;
+            levels: ("facility" | "district" | "okrug" | "segment" | "city" | "h3_8" | "h3_9")[];
+            formula: string;
+            /** @description Методика (Markdown) */
+            method: string;
+            domains: string[];
+            dependsOn: string[];
+            version: number;
+            /** Format: date-time */
+            computedAt?: string;
+            rows: number;
+        };
+        MetricValue: {
+            code: string;
+            /** @enum {string} */
+            level: "facility" | "district" | "okrug" | "segment" | "city" | "h3_8" | "h3_9";
+            entity: string;
+            label: string;
+            /** Format: date */
+            period?: string;
+            value: number;
+            inputs: {
+                [key: string]: unknown;
+            };
+            /** @description Место по убыванию среди объектов уровня */
+            rank: number;
+            of: number;
+        };
+        MetricValues: {
+            metric: components["schemas"]["MetricDef"];
+            values: components["schemas"]["MetricValue"][];
+        };
         SavedView: {
             /** Format: uuid */
             id: string;
@@ -2018,6 +2402,7 @@ export interface components {
         FacilityQ: string;
         FacilityType: string[];
         FacilityOkrug: string[];
+        IndexCode: string;
         SearchQ: string;
         /** @description Долгота центра карты — близкие документы выше */
         SearchLon: number;
@@ -3255,6 +3640,404 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SearchHit"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listIndexes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Индексы */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IndexDef"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    computeIndex: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: components["parameters"]["IndexCode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    level: "district" | "h3_8";
+                    weights?: {
+                        [key: string]: number;
+                    };
+                    /** @enum {string} */
+                    normalization?: "minmax" | "zscore";
+                };
+            };
+        };
+        responses: {
+            /** @description Индекс */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IndexResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    saveIndexConfig: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: components["parameters"]["IndexCode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    scope: "own" | "default";
+                    /** @description Веса по уровням: { district: { показатель: вес } } */
+                    weights: {
+                        [key: string]: {
+                            [key: string]: number;
+                        };
+                    };
+                    /** @enum {string} */
+                    normalization: "minmax" | "zscore";
+                };
+            };
+        };
+        responses: {
+            /** @description Сохранено */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    resetIndexConfig: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: components["parameters"]["IndexCode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Удалено */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    hotspots: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    metric: string;
+                    /** @enum {string} */
+                    level: "h3_8" | "h3_9";
+                    /** @description Соседство — диск из k колец */
+                    k: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Итог с параметрами */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HotspotResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    facilityClusters: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Радиус соседства, м */
+                    epsM: number;
+                    minPoints: number;
+                    types?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Кластеры */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClusterResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listMetrics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Показатели */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricDef"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    entityMetrics: {
+        parameters: {
+            query: {
+                level: "facility" | "district" | "okrug" | "segment" | "city" | "h3_8" | "h3_9";
+                entity: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Значения */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricValue"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    metricSeries: {
+        parameters: {
+            query?: {
+                horizon?: number;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ряд и прогноз */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricSeries"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    metricGeo: {
+        parameters: {
+            query: {
+                level: "district" | "okrug" | "h3_8" | "h3_9";
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description FeatureCollection, у объекта — entity, value, label */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    dataUpdates: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Обновления */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        source: string;
+                        title: string;
+                        publisher: string;
+                        /** Format: date-time */
+                        finishedAt: string;
+                        /** Format: int64 */
+                        records?: number;
+                        domains: string[];
+                    }[];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getDashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Виджеты */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    saveDashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    widgets: components["schemas"]["Widget"][];
+                };
+            };
+        };
+        responses: {
+            /** @description Виджеты */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    resetDashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сброшено */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    metricValues: {
+        parameters: {
+            query?: {
+                level?: "facility" | "district" | "okrug" | "segment" | "city" | "h3_8" | "h3_9";
+                /** @description Ряд по периодам вместо текущих значений */
+                series?: boolean;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Показатель и значения */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricValues"];
                 };
             };
             default: components["responses"]["Problem"];

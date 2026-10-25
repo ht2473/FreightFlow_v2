@@ -28,6 +28,8 @@ const roles = [
   "acc",
   "acc-ring",
   "acc-on",
+  "acc-soft",
+  "acc-tx",
   "panel",
   "tx",
   "tx2",

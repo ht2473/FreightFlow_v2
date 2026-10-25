@@ -1,4 +1,5 @@
 import { createRootRoute, createRoute, createRouter, lazyRouteComponent, redirect } from "@tanstack/react-router";
+import { analyticsSearchSchema } from "@/features/analytics/AnalyticsPage";
 import { compareSearchSchema, facilitySearchSchema } from "@/features/facilities/search";
 import { mapSearchSchema } from "@/features/map/state";
 import { networkSearchSchema } from "@/features/network/search";
@@ -37,7 +38,11 @@ function sectionRoute<P extends string>(path: P) {
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  sectionRoute("/dashboard"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/dashboard",
+    component: lazyRouteComponent(() => import("@/features/dashboard/DashboardPage"), "DashboardPage"),
+  }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: "/map",
@@ -103,7 +108,17 @@ const routeTree = rootRoute.addChildren([
     path: "/regulation",
     component: lazyRouteComponent(() => import("@/features/regulation/RegulationPage"), "RegulationPage"),
   }),
-  sectionRoute("/analytics"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/analytics",
+    validateSearch: (search: Record<string, unknown>) => analyticsSearchSchema.parse(search),
+    component: lazyRouteComponent(() => import("@/features/analytics/AnalyticsPage"), "AnalyticsPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/analytics/methods",
+    component: lazyRouteComponent(() => import("@/features/analytics/MethodsPage"), "MethodsPage"),
+  }),
   sectionRoute("/scenarios"),
   sectionRoute("/site-selection"),
   sectionRoute("/reports"),

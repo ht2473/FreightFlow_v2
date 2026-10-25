@@ -17,6 +17,7 @@ import { area } from "../facilities/labels";
 import { formatCenter, layerStates } from "../map/state";
 import { parseSort, sortRows } from "./search";
 import { TerritoryTable } from "./TerritoriesPage";
+import { TerritoryMetrics } from "./TerritoryMetrics";
 import s from "./territories.module.css";
 
 type Profile = Schemas["TerritoryProfile"];
@@ -90,6 +91,7 @@ function Territory() {
               <p className={f.mapNote}>Граница территории, объекты логистики, дорожные работы.</p>
             </div>
           </div>
+          <TerritoryMetrics level={okrug ? "okrug" : "district"} id={p.id} />
           {okrug && p.children.length > 0 && (
             <Section title="Районы округа">
               <TerritoryTable
