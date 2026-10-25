@@ -250,7 +250,7 @@ function MapWorkspace() {
         return;
       }
       const layer = catalogRef.current.find((l) => l.code === codeOf(f.layer.id));
-      setHover({ x: e.point.x, y: e.point.y, ...describe(f, layer) });
+      setHover({ x: e.point.x, y: e.point.y, ...describeFeature(f, layer) });
     };
     const onLeave = () => {
       setState(hovered, { hover: false });
@@ -529,7 +529,7 @@ function toObject(f: MapGeoJSONFeature): ObjectItem {
 }
 
 /** Подпись объекта для подсказки: название или вид, ниже — слой. */
-function describe(f: MapGeoJSONFeature, layer: MapLayer | undefined): { title: string; subtitle: string } {
+function describeFeature(f: MapGeoJSONFeature, layer: MapLayer | undefined): { title: string; subtitle: string } {
   const p = f.properties as Record<string, unknown>;
   const enumProp = layer?.properties.find((x) => x.kind === "enum" && p[x.name] !== undefined);
   const enumLabel = enumProp ? enumProp.labels?.[String(p[enumProp.name])] : undefined;
