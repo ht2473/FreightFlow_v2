@@ -165,6 +165,16 @@ func (UnimplementedHandler) DisableTotp(ctx context.Context, req *PasswordConfir
 	return ht.ErrNotImplemented
 }
 
+// EntityMetrics implements entityMetrics operation.
+//
+// Текущие значения всех показателей объекта уровня с
+// местом среди соседей.
+//
+// GET /metrics/entity
+func (UnimplementedHandler) EntityMetrics(ctx context.Context, params EntityMetricsParams) (r []MetricValue, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // FacilityArea implements facilityArea operation.
 //
 // Объекты реестра (число, площади, типы, крупнейшие),
@@ -408,6 +418,15 @@ func (UnimplementedHandler) ListLayers(ctx context.Context) (r *LayerCatalog, _ 
 	return r, ht.ErrNotImplemented
 }
 
+// ListMetrics implements listMetrics operation.
+//
+// Каталог показателей с методиками и временем расчёта.
+//
+// GET /metrics
+func (UnimplementedHandler) ListMetrics(ctx context.Context) (r []MetricDef, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListPermissions implements listPermissions operation.
 //
 // Справочник прав.
@@ -487,6 +506,16 @@ func (UnimplementedHandler) ListVehicleProfiles(ctx context.Context) (r []Vehicl
 //
 // GET /views
 func (UnimplementedHandler) ListViews(ctx context.Context, params ListViewsParams) (r []SavedView, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MetricValues implements metricValues operation.
+//
+// Значения показателя на уровне — рейтинг или ряд по
+// периодам.
+//
+// GET /metrics/{code}
+func (UnimplementedHandler) MetricValues(ctx context.Context, params MetricValuesParams) (r *MetricValues, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -10990,6 +10990,815 @@ func (s *Me) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *MetricDef) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *MetricDef) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("code")
+		e.Str(s.Code)
+	}
+	{
+		e.FieldStart("title")
+		e.Str(s.Title)
+	}
+	{
+		e.FieldStart("unit")
+		e.Str(s.Unit)
+	}
+	{
+		e.FieldStart("levels")
+		e.ArrStart()
+		for _, elem := range s.Levels {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("formula")
+		e.Str(s.Formula)
+	}
+	{
+		e.FieldStart("method")
+		e.Str(s.Method)
+	}
+	{
+		e.FieldStart("domains")
+		e.ArrStart()
+		for _, elem := range s.Domains {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("dependsOn")
+		e.ArrStart()
+		for _, elem := range s.DependsOn {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("version")
+		e.Int(s.Version)
+	}
+	{
+		if s.ComputedAt.Set {
+			e.FieldStart("computedAt")
+			s.ComputedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		e.FieldStart("rows")
+		e.Int(s.Rows)
+	}
+}
+
+var jsonFieldsNameOfMetricDef = [11]string{
+	0:  "code",
+	1:  "title",
+	2:  "unit",
+	3:  "levels",
+	4:  "formula",
+	5:  "method",
+	6:  "domains",
+	7:  "dependsOn",
+	8:  "version",
+	9:  "computedAt",
+	10: "rows",
+}
+
+// Decode decodes MetricDef from json.
+func (s *MetricDef) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MetricDef to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "code":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Code = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"code\"")
+			}
+		case "title":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Title = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"title\"")
+			}
+		case "unit":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Unit = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"unit\"")
+			}
+		case "levels":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.Levels = make([]MetricDefLevelsItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem MetricDefLevelsItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Levels = append(s.Levels, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"levels\"")
+			}
+		case "formula":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Str()
+				s.Formula = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"formula\"")
+			}
+		case "method":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Str()
+				s.Method = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"method\"")
+			}
+		case "domains":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				s.Domains = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Domains = append(s.Domains, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"domains\"")
+			}
+		case "dependsOn":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				s.DependsOn = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.DependsOn = append(s.DependsOn, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"dependsOn\"")
+			}
+		case "version":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Version = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"version\"")
+			}
+		case "computedAt":
+			if err := func() error {
+				s.ComputedAt.Reset()
+				if err := s.ComputedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"computedAt\"")
+			}
+		case "rows":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.Rows = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rows\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MetricDef")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000101,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfMetricDef) {
+					name = jsonFieldsNameOfMetricDef[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *MetricDef) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MetricDef) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MetricDefLevelsItem as json.
+func (s MetricDefLevelsItem) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes MetricDefLevelsItem from json.
+func (s *MetricDefLevelsItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MetricDefLevelsItem to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch MetricDefLevelsItem(v) {
+	case MetricDefLevelsItemFacility:
+		*s = MetricDefLevelsItemFacility
+	case MetricDefLevelsItemDistrict:
+		*s = MetricDefLevelsItemDistrict
+	case MetricDefLevelsItemOkrug:
+		*s = MetricDefLevelsItemOkrug
+	case MetricDefLevelsItemSegment:
+		*s = MetricDefLevelsItemSegment
+	case MetricDefLevelsItemCity:
+		*s = MetricDefLevelsItemCity
+	case MetricDefLevelsItemH38:
+		*s = MetricDefLevelsItemH38
+	case MetricDefLevelsItemH39:
+		*s = MetricDefLevelsItemH39
+	default:
+		*s = MetricDefLevelsItem(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MetricDefLevelsItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MetricDefLevelsItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *MetricValue) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *MetricValue) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("code")
+		e.Str(s.Code)
+	}
+	{
+		e.FieldStart("level")
+		s.Level.Encode(e)
+	}
+	{
+		e.FieldStart("entity")
+		e.Str(s.Entity)
+	}
+	{
+		e.FieldStart("label")
+		e.Str(s.Label)
+	}
+	{
+		if s.Period.Set {
+			e.FieldStart("period")
+			s.Period.Encode(e, json.EncodeDate)
+		}
+	}
+	{
+		e.FieldStart("value")
+		e.Float64(s.Value)
+	}
+	{
+		e.FieldStart("inputs")
+		s.Inputs.Encode(e)
+	}
+	{
+		e.FieldStart("rank")
+		e.Int(s.Rank)
+	}
+	{
+		e.FieldStart("of")
+		e.Int(s.Of)
+	}
+}
+
+var jsonFieldsNameOfMetricValue = [9]string{
+	0: "code",
+	1: "level",
+	2: "entity",
+	3: "label",
+	4: "period",
+	5: "value",
+	6: "inputs",
+	7: "rank",
+	8: "of",
+}
+
+// Decode decodes MetricValue from json.
+func (s *MetricValue) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MetricValue to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "code":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Code = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"code\"")
+			}
+		case "level":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Level.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"level\"")
+			}
+		case "entity":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Entity = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"entity\"")
+			}
+		case "label":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Label = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"label\"")
+			}
+		case "period":
+			if err := func() error {
+				s.Period.Reset()
+				if err := s.Period.Decode(d, json.DecodeDate); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"period\"")
+			}
+		case "value":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Float64()
+				s.Value = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"value\"")
+			}
+		case "inputs":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				if err := s.Inputs.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"inputs\"")
+			}
+		case "rank":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int()
+				s.Rank = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rank\"")
+			}
+		case "of":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Of = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"of\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MetricValue")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11101111,
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfMetricValue) {
+					name = jsonFieldsNameOfMetricValue[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *MetricValue) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MetricValue) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s MetricValueInputs) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s MetricValueInputs) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes MetricValueInputs from json.
+func (s *MetricValueInputs) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MetricValueInputs to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MetricValueInputs")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MetricValueInputs) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MetricValueInputs) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MetricValueLevel as json.
+func (s MetricValueLevel) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes MetricValueLevel from json.
+func (s *MetricValueLevel) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MetricValueLevel to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch MetricValueLevel(v) {
+	case MetricValueLevelFacility:
+		*s = MetricValueLevelFacility
+	case MetricValueLevelDistrict:
+		*s = MetricValueLevelDistrict
+	case MetricValueLevelOkrug:
+		*s = MetricValueLevelOkrug
+	case MetricValueLevelSegment:
+		*s = MetricValueLevelSegment
+	case MetricValueLevelCity:
+		*s = MetricValueLevelCity
+	case MetricValueLevelH38:
+		*s = MetricValueLevelH38
+	case MetricValueLevelH39:
+		*s = MetricValueLevelH39
+	default:
+		*s = MetricValueLevel(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MetricValueLevel) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MetricValueLevel) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *MetricValues) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *MetricValues) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("metric")
+		s.Metric.Encode(e)
+	}
+	{
+		e.FieldStart("values")
+		e.ArrStart()
+		for _, elem := range s.Values {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfMetricValues = [2]string{
+	0: "metric",
+	1: "values",
+}
+
+// Decode decodes MetricValues from json.
+func (s *MetricValues) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MetricValues to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "metric":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Metric.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"metric\"")
+			}
+		case "values":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Values = make([]MetricValue, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem MetricValue
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Values = append(s.Values, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"values\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MetricValues")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfMetricValues) {
+					name = jsonFieldsNameOfMetricValues[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *MetricValues) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MetricValues) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *MonthValue) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)

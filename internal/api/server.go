@@ -15,6 +15,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	spec "freightflow/api"
+	"freightflow/internal/analytics"
 	"freightflow/internal/api/gen"
 	"freightflow/internal/facility"
 	"freightflow/internal/identity"
@@ -51,7 +52,9 @@ type Deps struct {
 	Territories *territory.Service
 	// Search — поиск и геокодер.
 	Search *search.Service
-	Layers *tiles.Service
+	// Analytics — показатели.
+	Analytics *analytics.Service
+	Layers    *tiles.Service
 	// Regulation — зоны, правила и статистика регулирования.
 	Regulation *regulation.Service
 	// Routing — маршруты грузовиков.
@@ -83,6 +86,7 @@ type Server struct {
 	views       *views.Service
 	territories *territory.Service
 	search      *search.Service
+	analytics   *analytics.Service
 	routeLimit  *ratelimit.Limiter
 	sessions    *session.Manager
 	mailer      Mailer
@@ -100,7 +104,7 @@ func New(d Deps) (http.Handler, error) {
 		return nil, err
 	}
 	s := &Server{
-		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, facilities: d.Facilities, reports: d.Reports, views: d.Views, territories: d.Territories, search: d.Search, sessions: d.Sessions, mailer: d.Mailer,
+		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, facilities: d.Facilities, reports: d.Reports, views: d.Views, territories: d.Territories, search: d.Search, analytics: d.Analytics, sessions: d.Sessions, mailer: d.Mailer,
 		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), routeLimit: d.RoutingLimit,
 	}
 	if s.routeLimit == nil {

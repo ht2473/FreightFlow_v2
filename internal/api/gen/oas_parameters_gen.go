@@ -230,6 +230,135 @@ func decodeDeleteViewParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// EntityMetricsParams is parameters of entityMetrics operation.
+type EntityMetricsParams struct {
+	Level  EntityMetricsLevel
+	Entity string
+}
+
+func unpackEntityMetricsParams(packed middleware.Parameters) (params EntityMetricsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "level",
+			In:   "query",
+		}
+		params.Level = packed[key].(EntityMetricsLevel)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "entity",
+			In:   "query",
+		}
+		params.Entity = packed[key].(string)
+	}
+	return params
+}
+
+func decodeEntityMetricsParams(args [0]string, argsEscaped bool, r *http.Request) (params EntityMetricsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: level.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "level",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Level = EntityMetricsLevel(c)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.Level.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "level",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: entity.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "entity",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Entity = c
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     1,
+					MinLengthSet:  true,
+					MaxLength:     80,
+					MaxLengthSet:  true,
+					Email:         false,
+					Hostname:      false,
+					Regex:         nil,
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.Entity)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "entity",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // FacilityFacetsParams is parameters of facilityFacets operation.
 type FacilityFacetsParams struct {
 	// Подстрока названия или адреса.
@@ -4045,6 +4174,296 @@ func decodeListViewsParams(args [0]string, argsEscaped bool, r *http.Request) (p
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "page",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// MetricValuesParams is parameters of metricValues operation.
+type MetricValuesParams struct {
+	Code  string
+	Level OptMetricValuesLevel `json:",omitempty,omitzero"`
+	// Ряд по периодам вместо текущих значений.
+	Series OptBool `json:",omitempty,omitzero"`
+	Limit  OptInt  `json:",omitempty,omitzero"`
+}
+
+func unpackMetricValuesParams(packed middleware.Parameters) (params MetricValuesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "code",
+			In:   "path",
+		}
+		params.Code = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "level",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Level = v.(OptMetricValuesLevel)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "series",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Series = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeMetricValuesParams(args [1]string, argsEscaped bool, r *http.Request) (params MetricValuesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: code.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "code",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Code = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9_]+\\.[a-z0-9_]+$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.Code)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "code",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: level.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "level",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLevelVal MetricValuesLevel
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLevelVal = MetricValuesLevel(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Level.SetTo(paramsDotLevelVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Level.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "level",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: series.
+	{
+		val := bool(false)
+		params.Series.SetTo(val)
+	}
+	// Decode query: series.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "series",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSeriesVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSeriesVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Series.SetTo(paramsDotSeriesVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "series",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(500)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           5000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
 			In:   "query",
 			Err:  err,
 		}

@@ -17,6 +17,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	spec "freightflow/api"
+	"freightflow/internal/analytics"
 	"freightflow/internal/facility"
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
@@ -107,7 +108,7 @@ func newFixture(t *testing.T) *fixture {
 	h, err := New(Deps{
 		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
 		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facilities,
-		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Territories: territory.New(pool, facilities), Search: search.New(pool, facilities), Sessions: sessions, Mailer: mailer,
+		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Territories: territory.New(pool, facilities), Search: search.New(pool, facilities), Analytics: analytics.New(pool), Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
@@ -773,6 +774,53 @@ func TestAPISearch(t *testing.T) {
 		t.Errorf("пустой запрос: %d", resp.StatusCode)
 	}
 	if resp, _ := f.do(t, http.MethodGet, "/api/v1/search?q=x", "", ""); resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("без входа: %d", resp.StatusCode)
+	}
+}
+
+func TestAPIMetrics(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	osmtest.LoadDistrict(t, f.pool)
+	viewer := f.token(t, "mv@example.com", identity.RoleViewer)
+	if _, err := analytics.New(f.pool).Recompute(t.Context(), nil, false); err != nil {
+		t.Fatal(err)
+	}
+
+	resp, body := f.do(t, http.MethodGet, "/api/v1/metrics", viewer, "")
+	var defs []struct {
+		Code, Method string
+		Rows         int
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &defs) != nil || len(defs) != len(analytics.Catalog()) ||
+		defs[0].Method == "" {
+		t.Fatalf("каталог: %d %s", resp.StatusCode, body)
+	}
+
+	resp, body = f.do(t, http.MethodGet, "/api/v1/metrics/territory.facilities?level=okrug", viewer, "")
+	var vals struct {
+		Metric struct{ Code string }
+		Values []struct {
+			Entity, Label string
+			Value         float64
+			Rank, Of      int
+		}
+	}
+	if resp.StatusCode != http.StatusOK || json.Unmarshal(body, &vals) != nil || len(vals.Values) == 0 ||
+		vals.Values[0].Label == "" || vals.Values[0].Rank != 1 || vals.Values[0].Of != len(vals.Values) {
+		t.Fatalf("рейтинг округов: %d %s", resp.StatusCode, body)
+	}
+	resp, body = f.do(t, http.MethodGet, "/api/v1/metrics/entity?level=okrug&entity="+vals.Values[0].Entity, viewer, "")
+	if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), `"territory.facilities"`) || !strings.Contains(string(body), `"rank":1`) {
+		t.Errorf("показатели округа: %d %s", resp.StatusCode, body)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/metrics/territory.facilities?level=segment", viewer, ""); resp.StatusCode != http.StatusNotFound {
+		t.Errorf("уровень не показателя: %d", resp.StatusCode)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/metrics/nope.metric", viewer, ""); resp.StatusCode != http.StatusNotFound {
+		t.Errorf("нет показателя: %d", resp.StatusCode)
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/metrics", "", ""); resp.StatusCode != http.StatusUnauthorized {
 		t.Errorf("без входа: %d", resp.StatusCode)
 	}
 }

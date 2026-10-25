@@ -1657,6 +1657,82 @@ func (s *ElementDamage) SetDisconnected(val int) {
 	s.Disconnected = val
 }
 
+type EntityMetricsLevel string
+
+const (
+	EntityMetricsLevelFacility EntityMetricsLevel = "facility"
+	EntityMetricsLevelDistrict EntityMetricsLevel = "district"
+	EntityMetricsLevelOkrug    EntityMetricsLevel = "okrug"
+	EntityMetricsLevelSegment  EntityMetricsLevel = "segment"
+	EntityMetricsLevelCity     EntityMetricsLevel = "city"
+	EntityMetricsLevelH38      EntityMetricsLevel = "h3_8"
+	EntityMetricsLevelH39      EntityMetricsLevel = "h3_9"
+)
+
+// AllValues returns all EntityMetricsLevel values.
+func (EntityMetricsLevel) AllValues() []EntityMetricsLevel {
+	return []EntityMetricsLevel{
+		EntityMetricsLevelFacility,
+		EntityMetricsLevelDistrict,
+		EntityMetricsLevelOkrug,
+		EntityMetricsLevelSegment,
+		EntityMetricsLevelCity,
+		EntityMetricsLevelH38,
+		EntityMetricsLevelH39,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s EntityMetricsLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case EntityMetricsLevelFacility:
+		return []byte(s), nil
+	case EntityMetricsLevelDistrict:
+		return []byte(s), nil
+	case EntityMetricsLevelOkrug:
+		return []byte(s), nil
+	case EntityMetricsLevelSegment:
+		return []byte(s), nil
+	case EntityMetricsLevelCity:
+		return []byte(s), nil
+	case EntityMetricsLevelH38:
+		return []byte(s), nil
+	case EntityMetricsLevelH39:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *EntityMetricsLevel) UnmarshalText(data []byte) error {
+	switch EntityMetricsLevel(data) {
+	case EntityMetricsLevelFacility:
+		*s = EntityMetricsLevelFacility
+		return nil
+	case EntityMetricsLevelDistrict:
+		*s = EntityMetricsLevelDistrict
+		return nil
+	case EntityMetricsLevelOkrug:
+		*s = EntityMetricsLevelOkrug
+		return nil
+	case EntityMetricsLevelSegment:
+		*s = EntityMetricsLevelSegment
+		return nil
+	case EntityMetricsLevelCity:
+		*s = EntityMetricsLevelCity
+		return nil
+	case EntityMetricsLevelH38:
+		*s = EntityMetricsLevelH38
+		return nil
+	case EntityMetricsLevelH39:
+		*s = EntityMetricsLevelH39
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/Export
 type Export struct {
 	ID         uuid.UUID    `json:"id"`
@@ -5045,6 +5121,501 @@ func (s *Me) SetTotpEnabled(val bool) {
 	s.TotpEnabled = val
 }
 
+// Ref: #/components/schemas/MetricDef
+type MetricDef struct {
+	Code    string                `json:"code"`
+	Title   string                `json:"title"`
+	Unit    string                `json:"unit"`
+	Levels  []MetricDefLevelsItem `json:"levels"`
+	Formula string                `json:"formula"`
+	// Методика (Markdown).
+	Method     string      `json:"method"`
+	Domains    []string    `json:"domains"`
+	DependsOn  []string    `json:"dependsOn"`
+	Version    int         `json:"version"`
+	ComputedAt OptDateTime `json:"computedAt"`
+	Rows       int         `json:"rows"`
+}
+
+// GetCode returns the value of Code.
+func (s *MetricDef) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *MetricDef) GetTitle() string {
+	return s.Title
+}
+
+// GetUnit returns the value of Unit.
+func (s *MetricDef) GetUnit() string {
+	return s.Unit
+}
+
+// GetLevels returns the value of Levels.
+func (s *MetricDef) GetLevels() []MetricDefLevelsItem {
+	return s.Levels
+}
+
+// GetFormula returns the value of Formula.
+func (s *MetricDef) GetFormula() string {
+	return s.Formula
+}
+
+// GetMethod returns the value of Method.
+func (s *MetricDef) GetMethod() string {
+	return s.Method
+}
+
+// GetDomains returns the value of Domains.
+func (s *MetricDef) GetDomains() []string {
+	return s.Domains
+}
+
+// GetDependsOn returns the value of DependsOn.
+func (s *MetricDef) GetDependsOn() []string {
+	return s.DependsOn
+}
+
+// GetVersion returns the value of Version.
+func (s *MetricDef) GetVersion() int {
+	return s.Version
+}
+
+// GetComputedAt returns the value of ComputedAt.
+func (s *MetricDef) GetComputedAt() OptDateTime {
+	return s.ComputedAt
+}
+
+// GetRows returns the value of Rows.
+func (s *MetricDef) GetRows() int {
+	return s.Rows
+}
+
+// SetCode sets the value of Code.
+func (s *MetricDef) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *MetricDef) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetUnit sets the value of Unit.
+func (s *MetricDef) SetUnit(val string) {
+	s.Unit = val
+}
+
+// SetLevels sets the value of Levels.
+func (s *MetricDef) SetLevels(val []MetricDefLevelsItem) {
+	s.Levels = val
+}
+
+// SetFormula sets the value of Formula.
+func (s *MetricDef) SetFormula(val string) {
+	s.Formula = val
+}
+
+// SetMethod sets the value of Method.
+func (s *MetricDef) SetMethod(val string) {
+	s.Method = val
+}
+
+// SetDomains sets the value of Domains.
+func (s *MetricDef) SetDomains(val []string) {
+	s.Domains = val
+}
+
+// SetDependsOn sets the value of DependsOn.
+func (s *MetricDef) SetDependsOn(val []string) {
+	s.DependsOn = val
+}
+
+// SetVersion sets the value of Version.
+func (s *MetricDef) SetVersion(val int) {
+	s.Version = val
+}
+
+// SetComputedAt sets the value of ComputedAt.
+func (s *MetricDef) SetComputedAt(val OptDateTime) {
+	s.ComputedAt = val
+}
+
+// SetRows sets the value of Rows.
+func (s *MetricDef) SetRows(val int) {
+	s.Rows = val
+}
+
+type MetricDefLevelsItem string
+
+const (
+	MetricDefLevelsItemFacility MetricDefLevelsItem = "facility"
+	MetricDefLevelsItemDistrict MetricDefLevelsItem = "district"
+	MetricDefLevelsItemOkrug    MetricDefLevelsItem = "okrug"
+	MetricDefLevelsItemSegment  MetricDefLevelsItem = "segment"
+	MetricDefLevelsItemCity     MetricDefLevelsItem = "city"
+	MetricDefLevelsItemH38      MetricDefLevelsItem = "h3_8"
+	MetricDefLevelsItemH39      MetricDefLevelsItem = "h3_9"
+)
+
+// AllValues returns all MetricDefLevelsItem values.
+func (MetricDefLevelsItem) AllValues() []MetricDefLevelsItem {
+	return []MetricDefLevelsItem{
+		MetricDefLevelsItemFacility,
+		MetricDefLevelsItemDistrict,
+		MetricDefLevelsItemOkrug,
+		MetricDefLevelsItemSegment,
+		MetricDefLevelsItemCity,
+		MetricDefLevelsItemH38,
+		MetricDefLevelsItemH39,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MetricDefLevelsItem) MarshalText() ([]byte, error) {
+	switch s {
+	case MetricDefLevelsItemFacility:
+		return []byte(s), nil
+	case MetricDefLevelsItemDistrict:
+		return []byte(s), nil
+	case MetricDefLevelsItemOkrug:
+		return []byte(s), nil
+	case MetricDefLevelsItemSegment:
+		return []byte(s), nil
+	case MetricDefLevelsItemCity:
+		return []byte(s), nil
+	case MetricDefLevelsItemH38:
+		return []byte(s), nil
+	case MetricDefLevelsItemH39:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MetricDefLevelsItem) UnmarshalText(data []byte) error {
+	switch MetricDefLevelsItem(data) {
+	case MetricDefLevelsItemFacility:
+		*s = MetricDefLevelsItemFacility
+		return nil
+	case MetricDefLevelsItemDistrict:
+		*s = MetricDefLevelsItemDistrict
+		return nil
+	case MetricDefLevelsItemOkrug:
+		*s = MetricDefLevelsItemOkrug
+		return nil
+	case MetricDefLevelsItemSegment:
+		*s = MetricDefLevelsItemSegment
+		return nil
+	case MetricDefLevelsItemCity:
+		*s = MetricDefLevelsItemCity
+		return nil
+	case MetricDefLevelsItemH38:
+		*s = MetricDefLevelsItemH38
+		return nil
+	case MetricDefLevelsItemH39:
+		*s = MetricDefLevelsItemH39
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/MetricValue
+type MetricValue struct {
+	Code   string            `json:"code"`
+	Level  MetricValueLevel  `json:"level"`
+	Entity string            `json:"entity"`
+	Label  string            `json:"label"`
+	Period OptDate           `json:"period"`
+	Value  float64           `json:"value"`
+	Inputs MetricValueInputs `json:"inputs"`
+	// Место по убыванию среди объектов уровня.
+	Rank int `json:"rank"`
+	Of   int `json:"of"`
+}
+
+// GetCode returns the value of Code.
+func (s *MetricValue) GetCode() string {
+	return s.Code
+}
+
+// GetLevel returns the value of Level.
+func (s *MetricValue) GetLevel() MetricValueLevel {
+	return s.Level
+}
+
+// GetEntity returns the value of Entity.
+func (s *MetricValue) GetEntity() string {
+	return s.Entity
+}
+
+// GetLabel returns the value of Label.
+func (s *MetricValue) GetLabel() string {
+	return s.Label
+}
+
+// GetPeriod returns the value of Period.
+func (s *MetricValue) GetPeriod() OptDate {
+	return s.Period
+}
+
+// GetValue returns the value of Value.
+func (s *MetricValue) GetValue() float64 {
+	return s.Value
+}
+
+// GetInputs returns the value of Inputs.
+func (s *MetricValue) GetInputs() MetricValueInputs {
+	return s.Inputs
+}
+
+// GetRank returns the value of Rank.
+func (s *MetricValue) GetRank() int {
+	return s.Rank
+}
+
+// GetOf returns the value of Of.
+func (s *MetricValue) GetOf() int {
+	return s.Of
+}
+
+// SetCode sets the value of Code.
+func (s *MetricValue) SetCode(val string) {
+	s.Code = val
+}
+
+// SetLevel sets the value of Level.
+func (s *MetricValue) SetLevel(val MetricValueLevel) {
+	s.Level = val
+}
+
+// SetEntity sets the value of Entity.
+func (s *MetricValue) SetEntity(val string) {
+	s.Entity = val
+}
+
+// SetLabel sets the value of Label.
+func (s *MetricValue) SetLabel(val string) {
+	s.Label = val
+}
+
+// SetPeriod sets the value of Period.
+func (s *MetricValue) SetPeriod(val OptDate) {
+	s.Period = val
+}
+
+// SetValue sets the value of Value.
+func (s *MetricValue) SetValue(val float64) {
+	s.Value = val
+}
+
+// SetInputs sets the value of Inputs.
+func (s *MetricValue) SetInputs(val MetricValueInputs) {
+	s.Inputs = val
+}
+
+// SetRank sets the value of Rank.
+func (s *MetricValue) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetOf sets the value of Of.
+func (s *MetricValue) SetOf(val int) {
+	s.Of = val
+}
+
+type MetricValueInputs map[string]jx.Raw
+
+func (s *MetricValueInputs) init() MetricValueInputs {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type MetricValueLevel string
+
+const (
+	MetricValueLevelFacility MetricValueLevel = "facility"
+	MetricValueLevelDistrict MetricValueLevel = "district"
+	MetricValueLevelOkrug    MetricValueLevel = "okrug"
+	MetricValueLevelSegment  MetricValueLevel = "segment"
+	MetricValueLevelCity     MetricValueLevel = "city"
+	MetricValueLevelH38      MetricValueLevel = "h3_8"
+	MetricValueLevelH39      MetricValueLevel = "h3_9"
+)
+
+// AllValues returns all MetricValueLevel values.
+func (MetricValueLevel) AllValues() []MetricValueLevel {
+	return []MetricValueLevel{
+		MetricValueLevelFacility,
+		MetricValueLevelDistrict,
+		MetricValueLevelOkrug,
+		MetricValueLevelSegment,
+		MetricValueLevelCity,
+		MetricValueLevelH38,
+		MetricValueLevelH39,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MetricValueLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case MetricValueLevelFacility:
+		return []byte(s), nil
+	case MetricValueLevelDistrict:
+		return []byte(s), nil
+	case MetricValueLevelOkrug:
+		return []byte(s), nil
+	case MetricValueLevelSegment:
+		return []byte(s), nil
+	case MetricValueLevelCity:
+		return []byte(s), nil
+	case MetricValueLevelH38:
+		return []byte(s), nil
+	case MetricValueLevelH39:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MetricValueLevel) UnmarshalText(data []byte) error {
+	switch MetricValueLevel(data) {
+	case MetricValueLevelFacility:
+		*s = MetricValueLevelFacility
+		return nil
+	case MetricValueLevelDistrict:
+		*s = MetricValueLevelDistrict
+		return nil
+	case MetricValueLevelOkrug:
+		*s = MetricValueLevelOkrug
+		return nil
+	case MetricValueLevelSegment:
+		*s = MetricValueLevelSegment
+		return nil
+	case MetricValueLevelCity:
+		*s = MetricValueLevelCity
+		return nil
+	case MetricValueLevelH38:
+		*s = MetricValueLevelH38
+		return nil
+	case MetricValueLevelH39:
+		*s = MetricValueLevelH39
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/MetricValues
+type MetricValues struct {
+	Metric MetricDef     `json:"metric"`
+	Values []MetricValue `json:"values"`
+}
+
+// GetMetric returns the value of Metric.
+func (s *MetricValues) GetMetric() MetricDef {
+	return s.Metric
+}
+
+// GetValues returns the value of Values.
+func (s *MetricValues) GetValues() []MetricValue {
+	return s.Values
+}
+
+// SetMetric sets the value of Metric.
+func (s *MetricValues) SetMetric(val MetricDef) {
+	s.Metric = val
+}
+
+// SetValues sets the value of Values.
+func (s *MetricValues) SetValues(val []MetricValue) {
+	s.Values = val
+}
+
+type MetricValuesLevel string
+
+const (
+	MetricValuesLevelFacility MetricValuesLevel = "facility"
+	MetricValuesLevelDistrict MetricValuesLevel = "district"
+	MetricValuesLevelOkrug    MetricValuesLevel = "okrug"
+	MetricValuesLevelSegment  MetricValuesLevel = "segment"
+	MetricValuesLevelCity     MetricValuesLevel = "city"
+	MetricValuesLevelH38      MetricValuesLevel = "h3_8"
+	MetricValuesLevelH39      MetricValuesLevel = "h3_9"
+)
+
+// AllValues returns all MetricValuesLevel values.
+func (MetricValuesLevel) AllValues() []MetricValuesLevel {
+	return []MetricValuesLevel{
+		MetricValuesLevelFacility,
+		MetricValuesLevelDistrict,
+		MetricValuesLevelOkrug,
+		MetricValuesLevelSegment,
+		MetricValuesLevelCity,
+		MetricValuesLevelH38,
+		MetricValuesLevelH39,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MetricValuesLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case MetricValuesLevelFacility:
+		return []byte(s), nil
+	case MetricValuesLevelDistrict:
+		return []byte(s), nil
+	case MetricValuesLevelOkrug:
+		return []byte(s), nil
+	case MetricValuesLevelSegment:
+		return []byte(s), nil
+	case MetricValuesLevelCity:
+		return []byte(s), nil
+	case MetricValuesLevelH38:
+		return []byte(s), nil
+	case MetricValuesLevelH39:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MetricValuesLevel) UnmarshalText(data []byte) error {
+	switch MetricValuesLevel(data) {
+	case MetricValuesLevelFacility:
+		*s = MetricValuesLevelFacility
+		return nil
+	case MetricValuesLevelDistrict:
+		*s = MetricValuesLevelDistrict
+		return nil
+	case MetricValuesLevelOkrug:
+		*s = MetricValuesLevelOkrug
+		return nil
+	case MetricValuesLevelSegment:
+		*s = MetricValuesLevelSegment
+		return nil
+	case MetricValuesLevelCity:
+		*s = MetricValuesLevelCity
+		return nil
+	case MetricValuesLevelH38:
+		*s = MetricValuesLevelH38
+		return nil
+	case MetricValuesLevelH39:
+		*s = MetricValuesLevelH39
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/MonthValue
 type MonthValue struct {
 	Month time.Time `json:"month"`
@@ -6645,6 +7216,52 @@ func (o OptLngLat) Get() (v LngLat, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptLngLat) Or(d LngLat) LngLat {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMetricValuesLevel returns new OptMetricValuesLevel with value set to v.
+func NewOptMetricValuesLevel(v MetricValuesLevel) OptMetricValuesLevel {
+	return OptMetricValuesLevel{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMetricValuesLevel is optional MetricValuesLevel.
+type OptMetricValuesLevel struct {
+	Value MetricValuesLevel
+	Set   bool
+}
+
+// IsSet returns true if OptMetricValuesLevel was set.
+func (o OptMetricValuesLevel) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMetricValuesLevel) Reset() {
+	var v MetricValuesLevel
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMetricValuesLevel) SetTo(v MetricValuesLevel) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMetricValuesLevel) Get() (v MetricValuesLevel, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMetricValuesLevel) Or(d MetricValuesLevel) MetricValuesLevel {
 	if v, ok := o.Get(); ok {
 		return v
 	}

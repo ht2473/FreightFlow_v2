@@ -193,6 +193,23 @@ func encodeDisableTotpResponse(response *DisableTotpNoContent, w http.ResponseWr
 	return nil
 }
 
+func encodeEntityMetricsResponse(response []MetricValue, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	e.ArrStart()
+	for _, elem := range response {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeFacilityAreaResponse(response *AreaSummary, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -543,6 +560,23 @@ func encodeListLayersResponse(response *LayerCatalog, w http.ResponseWriter, spa
 	return nil
 }
 
+func encodeListMetricsResponse(response []MetricDef, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	e.ArrStart()
+	for _, elem := range response {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeListPermissionsResponse(response []PermissionInfo, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -689,6 +723,19 @@ func encodeListViewsResponse(response []SavedView, w http.ResponseWriter, span t
 		elem.Encode(e)
 	}
 	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeMetricValuesResponse(response *MetricValues, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}

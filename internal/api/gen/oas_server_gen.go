@@ -115,6 +115,13 @@ type Handler interface {
 	//
 	// DELETE /me/totp
 	DisableTotp(ctx context.Context, req *PasswordConfirmation) error
+	// EntityMetrics implements entityMetrics operation.
+	//
+	// Текущие значения всех показателей объекта уровня с
+	// местом среди соседей.
+	//
+	// GET /metrics/entity
+	EntityMetrics(ctx context.Context, params EntityMetricsParams) ([]MetricValue, error)
 	// FacilityArea implements facilityArea operation.
 	//
 	// Объекты реестра (число, площади, типы, крупнейшие),
@@ -286,6 +293,12 @@ type Handler interface {
 	//
 	// GET /layers
 	ListLayers(ctx context.Context) (*LayerCatalog, error)
+	// ListMetrics implements listMetrics operation.
+	//
+	// Каталог показателей с методиками и временем расчёта.
+	//
+	// GET /metrics
+	ListMetrics(ctx context.Context) ([]MetricDef, error)
 	// ListPermissions implements listPermissions operation.
 	//
 	// Справочник прав.
@@ -341,6 +354,13 @@ type Handler interface {
 	//
 	// GET /views
 	ListViews(ctx context.Context, params ListViewsParams) ([]SavedView, error)
+	// MetricValues implements metricValues operation.
+	//
+	// Значения показателя на уровне — рейтинг или ряд по
+	// периодам.
+	//
+	// GET /metrics/{code}
+	MetricValues(ctx context.Context, params MetricValuesParams) (*MetricValues, error)
 	// ReportFacilityIssue implements reportFacilityIssue operation.
 	//
 	// Сообщить о неточности записи.

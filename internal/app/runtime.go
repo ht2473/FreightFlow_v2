@@ -11,6 +11,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"freightflow/internal/admin"
+	"freightflow/internal/analytics"
 	"freightflow/internal/facility"
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
@@ -115,6 +116,7 @@ func (m *modules) registry(env *Env, pool *pgxpool.Pool) *jobs.Registry {
 	routing.Register(reg, pool, env.Config.ValhallaURL, env.Log.With("component", "routing"))
 	report.Register(reg, m.reports, env.Log.With("component", "report"))
 	search.Register(reg, search.New(pool, m.facilities), env.Log.With("component", "search"))
+	analytics.Register(reg, analytics.New(pool), env.Log.With("component", "analytics"))
 	return reg
 }
 

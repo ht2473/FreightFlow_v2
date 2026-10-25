@@ -30,6 +30,8 @@ tags:
     description: Территории
   - name: search
     description: Поиск и геокодер
+  - name: analytics
+    description: Показатели
   - name: views
     description: Сохранённые виды
   - name: regulation
@@ -1007,6 +1009,76 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/SearchHit" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /metrics:
+    get:
+      tags: [analytics]
+      operationId: listMetrics
+      summary: Каталог показателей с методиками и временем расчёта
+      x-permission: analytics.view
+      responses:
+        "200":
+          description: Показатели
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MetricDef" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /metrics/entity:
+    get:
+      tags: [analytics]
+      operationId: entityMetrics
+      summary: Текущие значения всех показателей объекта уровня с местом среди соседей
+      x-permission: analytics.view
+      parameters:
+        - name: level
+          in: query
+          required: true
+          schema: { type: string, enum: [facility, district, okrug, segment, city, h3_8, h3_9] }
+        - name: entity
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 80 }
+      responses:
+        "200":
+          description: Значения
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MetricValue" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /metrics/{code}:
+    get:
+      tags: [analytics]
+      operationId: metricValues
+      summary: Значения показателя на уровне — рейтинг или ряд по периодам
+      x-permission: analytics.view
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema: { type: string, pattern: "^[a-z0-9_]+\\.[a-z0-9_]+$" }
+        - name: level
+          in: query
+          schema: { type: string, enum: [facility, district, okrug, segment, city, h3_8, h3_9] }
+        - name: series
+          in: query
+          description: Ряд по периодам вместо текущих значений
+          schema: { type: boolean, default: false }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 5000, default: 500 }
+      responses:
+        "200":
+          description: Показатель и значения
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MetricValues" }
         default: { $ref: "#/components/responses/Problem" }
 
   /views:
@@ -2323,6 +2395,53 @@ components:
               items: { $ref: "#/components/schemas/FacilityItem" }
         fuzzy: { type: boolean, description: "Документы найдены по сходству написания" }
         tookMs: { type: integer }
+
+    MetricDef:
+      type: object
+      required: [code, title, unit, levels, formula, method, domains, dependsOn, version, rows]
+      properties:
+        code: { type: string }
+        title: { type: string }
+        unit: { type: string }
+        levels:
+          type: array
+          items: { type: string, enum: [facility, district, okrug, segment, city, h3_8, h3_9] }
+        formula: { type: string }
+        method: { type: string, description: "Методика (Markdown)" }
+        domains:
+          type: array
+          items: { type: string }
+        dependsOn:
+          type: array
+          items: { type: string }
+        version: { type: integer }
+        computedAt: { type: string, format: date-time }
+        rows: { type: integer }
+
+    MetricValue:
+      type: object
+      required: [code, level, entity, label, value, inputs, rank, of]
+      properties:
+        code: { type: string }
+        level: { type: string, enum: [facility, district, okrug, segment, city, h3_8, h3_9] }
+        entity: { type: string }
+        label: { type: string }
+        period: { type: string, format: date }
+        value: { type: number }
+        inputs:
+          type: object
+          additionalProperties: {}
+        rank: { type: integer, description: "Место по убыванию среди объектов уровня" }
+        of: { type: integer }
+
+    MetricValues:
+      type: object
+      required: [metric, values]
+      properties:
+        metric: { $ref: "#/components/schemas/MetricDef" }
+        values:
+          type: array
+          items: { $ref: "#/components/schemas/MetricValue" }
 
     SavedView:
       type: object

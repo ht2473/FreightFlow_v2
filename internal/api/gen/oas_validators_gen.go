@@ -985,6 +985,27 @@ func (s *ElementDamage) Validate() error {
 	return nil
 }
 
+func (s EntityMetricsLevel) Validate() error {
+	switch s {
+	case "facility":
+		return nil
+	case "district":
+		return nil
+	case "okrug":
+		return nil
+	case "segment":
+		return nil
+	case "city":
+		return nil
+	case "h3_8":
+		return nil
+	case "h3_9":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *Export) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -3344,6 +3365,216 @@ func (s *Me) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s *MetricDef) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Levels == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Levels {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "levels",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Domains == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "domains",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.DependsOn == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "dependsOn",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s MetricDefLevelsItem) Validate() error {
+	switch s {
+	case "facility":
+		return nil
+	case "district":
+		return nil
+	case "okrug":
+		return nil
+	case "segment":
+		return nil
+	case "city":
+		return nil
+	case "h3_8":
+		return nil
+	case "h3_9":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *MetricValue) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Level.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "level",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.Value)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "value",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s MetricValueLevel) Validate() error {
+	switch s {
+	case "facility":
+		return nil
+	case "district":
+		return nil
+	case "okrug":
+		return nil
+	case "segment":
+		return nil
+	case "city":
+		return nil
+	case "h3_8":
+		return nil
+	case "h3_9":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *MetricValues) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Metric.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "metric",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Values == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Values {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "values",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s MetricValuesLevel) Validate() error {
+	switch s {
+	case "facility":
+		return nil
+	case "district":
+		return nil
+	case "okrug":
+		return nil
+	case "segment":
+		return nil
+	case "city":
+		return nil
+	case "h3_8":
+		return nil
+	case "h3_9":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *NearbyPoi) Validate() error {

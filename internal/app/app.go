@@ -45,6 +45,7 @@ func commands() []command {
 		{"worker", "фоновые задачи: загрузки, расчёты, уведомления, обслуживание", runWorker},
 		{"etl", "загрузки данных: list | run [-force] <источник> | regions", runETL},
 		{"routing", "маршрутизация: prepare (ограничения из знаков в выгрузке OSM) | accessibility (доступность объектов)", runRouting},
+		{"analytics", "показатели: recompute [-force] [код...]", runAnalytics},
 		{"search", "поиск: reindex [-force] [вид...] (индекс документов)", runSearch},
 		{"migrate", "миграции базы данных: up | down | status", runMigrate},
 		{"admin", "администрирование: create-user | reset-2fa", runAdmin},
