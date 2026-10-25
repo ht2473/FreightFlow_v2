@@ -4121,51 +4121,6 @@ func (s *PermitStats) Validate() error {
 	return nil
 }
 
-func (s *Place) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Kind.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "kind",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.Point.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "point",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s PlaceKind) Validate() error {
-	switch s {
-	case "facility":
-		return nil
-	case "address":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s *QualityCheck) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -5382,6 +5337,35 @@ func (s *SearchResultFacilities) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s SearchSuggestKindItem) Validate() error {
+	switch s {
+	case "facility":
+		return nil
+	case "address":
+		return nil
+	case "street":
+		return nil
+	case "territory":
+		return nil
+	case "dataset":
+		return nil
+	case "source":
+		return nil
+	case "legal_act":
+		return nil
+	case "help":
+		return nil
+	case "road_work":
+		return nil
+	case "saved_view":
+		return nil
+	case "report":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *Settings) Validate() error {

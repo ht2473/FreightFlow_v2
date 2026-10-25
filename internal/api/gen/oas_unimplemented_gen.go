@@ -569,17 +569,6 @@ func (UnimplementedHandler) SearchParse(ctx context.Context, params SearchParseP
 	return r, ht.ErrNotImplemented
 }
 
-// SearchPlaces implements searchPlaces operation.
-//
-// Объекты реестра по названию и адреса адресного
-// реестра Москвы по словам запроса; адреса с номером
-// дома из запроса — выше.
-//
-// GET /routing/places
-func (UnimplementedHandler) SearchPlaces(ctx context.Context, params SearchPlacesParams) (r []Place, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // SearchSuggest implements searchSuggest operation.
 //
 // Подсказки при вводе.

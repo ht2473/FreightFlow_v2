@@ -257,21 +257,6 @@ func (s *Server) GetNetworkAnalysis(ctx context.Context, params gen.GetNetworkAn
 	return out, nil
 }
 
-func (s *Server) SearchPlaces(ctx context.Context, params gen.SearchPlacesParams) ([]gen.Place, error) {
-	list, err := s.routing.Places(ctx, params.Q, params.Limit.Or(8))
-	if err != nil {
-		return nil, err
-	}
-	out := make([]gen.Place, len(list))
-	for i, p := range list {
-		out[i] = gen.Place{
-			Kind: gen.PlaceKind(p.Kind), ID: p.ID, Title: p.Title, Subtitle: p.Subtitle,
-			Point: gen.LngLat{Lon: p.Point.Lon, Lat: p.Point.Lat},
-		}
-	}
-	return out, nil
-}
-
 func (s *Server) BuildMatrix(ctx context.Context, req *gen.MatrixRequest) (*gen.MatrixResult, error) {
 	// Матрица — расчёт на каждые 100 пар.
 	if err := s.spend(ctx, 1+len(req.Sources)*len(req.Targets)/100); err != nil {

@@ -269,13 +269,7 @@ function RouteWorkspace() {
               {points.map(([lon, lat], i) => (
                 <li key={`${lon},${lat}`}>
                   <span className={s.pointMark}>{pointLabel(i, points.length)}</span>
-                  {pointNames[`${lon},${lat}`] ? (
-                    <span className={s.pointName}>{pointNames[`${lon},${lat}`]}</span>
-                  ) : (
-                    <span className="num">
-                      {num(lat, 5)}, {num(lon, 5)}
-                    </span>
-                  )}
+                  <PointName lon={lon} lat={lat} name={pointNames[`${lon},${lat}`]} />
                   <IconButton
                     label={`Убрать точку ${pointLabel(i, points.length)}`}
                     onPress={() => {
@@ -933,4 +927,26 @@ function overlay(
     },
   ];
   return { sources, layers };
+}
+
+/** Подпись точки: выбранное место, иначе ближайший адрес в 50 м, иначе координаты. */
+function PointName({ lon, lat, name }: { lon: number; lat: number; name?: string }) {
+  const rev = $api.useQuery(
+    "get",
+    "/geocode/reverse",
+    { params: { query: { lon, lat } } },
+    {
+      enabled: !name,
+      staleTime: Number.POSITIVE_INFINITY,
+    },
+  );
+  const address = rev.data?.find((h) => h.kind === "address")?.title;
+  if (name || address) {
+    return <span className={s.pointName}>{name ?? address}</span>;
+  }
+  return (
+    <span className="num">
+      {num(lat, 5)}, {num(lon, 5)}
+    </span>
+  );
 }

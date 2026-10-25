@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"freightflow/internal/api/gen"
@@ -109,7 +110,17 @@ func (s *Server) Search(ctx context.Context, p gen.SearchParams) (*gen.SearchRes
 }
 
 func (s *Server) SearchSuggest(ctx context.Context, p gen.SearchSuggestParams) ([]gen.SearchHit, error) {
-	hits, err := s.search.Suggest(ctx, searchRequest(ctx, p.Q, p.Lon, p.Lat), p.Limit.Or(8))
+	req := searchRequest(ctx, p.Q, p.Lon, p.Lat)
+	if len(p.Kind) > 0 {
+		var kinds []string
+		for _, k := range p.Kind {
+			if slices.Contains(req.Kinds, string(k)) {
+				kinds = append(kinds, string(k))
+			}
+		}
+		req.Kinds = kinds
+	}
+	hits, err := s.search.Suggest(ctx, req, p.Limit.Or(8))
 	if err != nil {
 		return nil, err
 	}

@@ -1,19 +1,28 @@
 import { useState } from "react";
-import { $api, type Schemas } from "@/shared/api/client";
+import { $api } from "@/shared/api/client";
+import type { Hit } from "@/shared/search";
 import { SuggestField } from "@/shared/ui/fields";
 import { useDebounced } from "@/shared/useDebounced";
 
-type Place = Schemas["Place"];
+/** Место маршрута: найденный документ с точкой. */
+export type Place = Hit & { point: NonNullable<Hit["point"]> };
 
-const placeKey = (p: Place) => `${p.kind}:${p.id}`;
+const placeKey = (p: Hit) => `${p.kind}:${p.ref}`;
 
-/** Поиск точки по адресу (адресный реестр Москвы) или названию объекта реестра. */
+const kindNote: Partial<Record<Hit["kind"], string>> = { facility: "Объект реестра", street: "Улица" };
+
+/** Поиск точки по адресу или улице (адресный реестр Москвы) и названию объекта реестра. */
 export function PlaceSearch({ label, onSelect }: { label: string; onSelect: (p: Place) => void }) {
   const [text, setText] = useState("");
-  const q = useDebounced(text.trim(), 250);
-  const enabled = q.length >= 3;
-  const places = $api.useQuery("get", "/routing/places", { params: { query: { q } } }, { enabled, staleTime: 60_000 });
-  const list = enabled ? (places.data ?? []) : [];
+  const q = useDebounced(text.trim(), 200);
+  const enabled = q.length >= 2;
+  const places = $api.useQuery(
+    "get",
+    "/search/suggest",
+    { params: { query: { q, kind: ["facility", "address", "street"] } } },
+    { enabled, staleTime: 60_000 },
+  );
+  const list = enabled ? (places.data ?? []).filter((p): p is Place => p.point !== undefined) : [];
   return (
     <SuggestField
       label={label}
@@ -24,7 +33,7 @@ export function PlaceSearch({ label, onSelect }: { label: string; onSelect: (p: 
       suggestions={list.map((p) => ({
         id: placeKey(p),
         label: p.title,
-        description: p.kind === "facility" ? `Объект реестра · ${p.subtitle}` : p.subtitle,
+        description: [kindNote[p.kind], p.subtitle].filter(Boolean).join(" · "),
       }))}
       onSelect={(id) => {
         const p = list.find((x) => placeKey(x) === id);

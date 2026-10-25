@@ -15,6 +15,9 @@ export const mapSearchSchema = z.object({
   ft: z.string().optional().catch(undefined),
   fc: z.number().min(0).max(1).optional().catch(undefined),
   fm: z.number().min(1).max(300).optional().catch(undefined),
+  // Метка найденного места «долгота,широта» и её подпись.
+  pin: z.string().optional().catch(undefined),
+  pt: z.string().max(200).optional().catch(undefined),
 });
 
 export type MapSearch = z.infer<typeof mapSearchSchema>;

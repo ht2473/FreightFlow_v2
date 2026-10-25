@@ -50,7 +50,7 @@
 }
 
 .menu {
-  max-height: 360px;
+  max-height: min(480px, 60vh);
   overflow: auto;
   padding: 6px;
   outline: none;
@@ -82,7 +82,26 @@
 }
 
 .item svg {
+  flex: none;
   color: var(--tx2);
+}
+
+.itemText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemNote {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--tx2);
+  font-size: 12px;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item[data-focused] {

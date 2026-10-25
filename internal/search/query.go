@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"freightflow/internal/facility"
+	"freightflow/internal/platform/db"
 )
 
 // Request — поисковый запрос пользователя.
@@ -166,20 +167,41 @@ func (s *Service) documents(ctx context.Context, req Request, text string) ([]Hi
 	vis = visible(req, &args)
 	prox = proximity(req.Center, &args)
 	args = append(args, req.PerKind*4)
-	fuzzy, err := s.collect(ctx, `
-		SELECT d.kind, d.ref, d.title, d.subtitle, ST_X(d.point), ST_Y(d.point),
-		       word_similarity($1, d.title_norm) * (0.5 + d.weight) + `+prox+` AS score
-		FROM search.document d
-		WHERE $1 <% d.title_norm AND `+vis+`
-		ORDER BY score DESC LIMIT $`+strconv.Itoa(len(args)), args...)
+	var fuzzy []Hit
+	// Порог сходства ниже стандартного (0,6): две ошибки в слове дают около 0,5.
+	err = db.InTx(ctx, s.pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx, `SET LOCAL pg_trgm.word_similarity_threshold = `+fuzzyThreshold); err != nil {
+			return err
+		}
+		var err error
+		fuzzy, err = collectHits(ctx, tx, `
+			SELECT d.kind, d.ref, d.title, d.subtitle, ST_X(d.point), ST_Y(d.point),
+			       word_similarity($1, d.title_norm) * (0.5 + d.weight) + `+prox+` AS score
+			FROM search.document d
+			WHERE $1 <% d.title_norm AND `+vis+`
+			ORDER BY score DESC LIMIT $`+strconv.Itoa(len(args)), args...)
+		return err
+	})
 	if err != nil {
 		return nil, false, err
 	}
 	return trimPerKind(append(hits, fuzzy...), req.PerKind), len(hits) == 0 && len(fuzzy) > 0, nil
 }
 
+// fuzzyThreshold — порог сходства написания при поиске с опечатками.
+const fuzzyThreshold = "0.45"
+
 func (s *Service) collect(ctx context.Context, sql string, args ...any) ([]Hit, error) {
-	rows, err := s.pool.Query(ctx, sql, args...)
+	return collectHits(ctx, s.pool, sql, args...)
+}
+
+// querier — пул или транзакция.
+type querier interface {
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+}
+
+func collectHits(ctx context.Context, q querier, sql string, args ...any) ([]Hit, error) {
+	rows, err := q.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -324,6 +346,8 @@ func (s *Service) Suggest(ctx context.Context, req Request, limit int) ([]Hit, e
 	}
 	vis := visible(req, &args)
 	prox := proximity(req.Center, &args)
+	args = append(args, houseNumber(text))
+	house := strconv.Itoa(len(args))
 	args = append(args, limit)
 	// Сначала отбираются кандидаты по индексу, затем сортируются: ранжирование всех совпадений
 	// префикса («у…») было бы долгим.
@@ -338,6 +362,8 @@ func (s *Service) Suggest(ctx context.Context, req Request, limit int) ([]Hit, e
 		)
 		SELECT d.kind, d.ref, d.title, d.subtitle, ST_X(d.point), ST_Y(d.point),
 		       d.weight + similarity($1, d.title_norm) + CASE WHEN d.title_norm LIKE $1 || '%' THEN 0.5 ELSE 0 END
+		         + CASE WHEN $`+house+` <> '' AND d.kind = 'address'
+		                 AND d.title_norm ~ ('(дом|владение|участок) ' || $`+house+` || '([^0-9а-я]|$)') THEN 0.4 ELSE 0 END
 		         + `+prox+` AS score
 		FROM cand d
 		ORDER BY score DESC LIMIT $`+strconv.Itoa(len(args))+` * 3`, args...)

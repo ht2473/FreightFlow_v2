@@ -1,4 +1,4 @@
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 import type { Feature, FeatureCollection, Point } from "geojson";
 import { ImageDown, Minus, Plus, X } from "lucide-react";
 import type { ExpressionSpecification, GeoJSONSource, MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
@@ -50,6 +50,7 @@ import {
   useOpacity,
   visibleLayers,
 } from "./state";
+import { WhatsHere } from "./WhatsHere";
 import { WorkDate } from "./WorkDate";
 
 export function MapPage() {
@@ -63,6 +64,7 @@ export function MapPage() {
 function MapWorkspace() {
   const search = useSearch({ from: "/map" });
   const navigate = useNavigate({ from: "/map" });
+  const router = useRouter();
   const theme = useResolvedTheme();
   const catalogQuery = $api.useQuery("get", "/layers", {}, { staleTime: 60_000 });
   const basemap = useBasemapAvailable();
@@ -75,6 +77,7 @@ function MapWorkspace() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number; title: string; subtitle: string } | null>(null);
   const [objects, setObjects] = useState<ObjectItem[]>([]);
+  const [here, setHere] = useState<[number, number] | null>(null);
   // Шкала времени работ: смещение в днях от сегодняшнего дня.
   const [workOffset, setWorkOffset] = useState(0);
   // Рисование: режим инструмента, нарисованное, объект из сводки области.
@@ -114,8 +117,8 @@ function MapWorkspace() {
       return null;
     }
     const base = basemap.data ? basemapStyle(theme) : emptyStyle(theme, palette);
-    return fullStyle(base, catalog, data, drawnOverlay(drawn, palette));
-  }, [basemap.data, theme, palette, catalog, data, drawn]);
+    return fullStyle(base, catalog, data, drawnOverlay(drawn, palette, parseCenter(search.pin), search.pt));
+  }, [basemap.data, theme, palette, catalog, data, drawn, search.pin, search.pt]);
 
   const interactive = useRef<string[]>([]);
   interactive.current = interactiveLayerIds(data.layers);
@@ -156,6 +159,11 @@ function MapWorkspace() {
       return;
     }
     const onMove = () => {
+      // Конец движения может прийти уже после перехода на другую страницу (анимация не
+      // закончилась) — тогда адрес не трогается, иначе переход отменился бы.
+      if (router.state.location.pathname !== "/map") {
+        return;
+      }
       const c = map.getCenter();
       const z = Math.round(map.getZoom() * 100) / 100;
       setZoom(z);
@@ -165,7 +173,7 @@ function MapWorkspace() {
     return () => {
       map.off("moveend", onMove);
     };
-  }, [map, navigate]);
+  }, [map, navigate, router]);
 
   // Список объектов видимой области.
   useEffect(() => {
@@ -265,8 +273,12 @@ function MapWorkspace() {
       }
       const layer = f ? catalogRef.current.find((l) => l.code === codeOf(f.layer.id)) : undefined;
       if (!f || !layer) {
+        // Пустое место — «что здесь»: адрес и район по обратному геокодеру.
+        setSelection(null);
+        setHere([e.lngLat.lng, e.lngLat.lat]);
         return;
       }
+      setHere(null);
       setSelection({ layer, feature: f, lngLat: [e.lngLat.lng, e.lngLat.lat] });
     };
     map.on("mousemove", onMove);
@@ -483,6 +495,7 @@ function MapWorkspace() {
             MapLibre
           </a>
         </div>
+        {here && <WhatsHere point={here} onClose={() => setHere(null)} />}
         {hover && (
           <div className={s.hoverTip} style={{ left: hover.x + 14, top: hover.y + 14 }} aria-hidden>
             <b>{hover.title}</b>
@@ -560,14 +573,29 @@ function toPoints(list: Schemas["FacilityPoint"][]): FeatureCollection<Point> {
   };
 }
 
-/** Нарисованное — слоем страницы поверх данных. */
-function drawnOverlay(d: Drawn | null, p: Palette) {
+/** Нарисованное и метка найденного места — слоями страницы поверх данных. */
+function drawnOverlay(d: Drawn | null, p: Palette, pin: [number, number] | null, pinLabel: string | undefined) {
   const data = {
     type: "FeatureCollection" as const,
     features: d ? [{ type: "Feature" as const, properties: {}, geometry: d.geometry }] : [],
   };
+  const pins = {
+    type: "FeatureCollection" as const,
+    features: pin
+      ? [
+          {
+            type: "Feature" as const,
+            properties: { label: pinLabel ?? "" },
+            geometry: { type: "Point" as const, coordinates: pin },
+          },
+        ]
+      : [],
+  };
   return {
-    sources: { "draw:result": { type: "geojson" as const, data } },
+    sources: {
+      "draw:result": { type: "geojson" as const, data },
+      "search:pin": { type: "geojson" as const, data: pins },
+    },
     layers: [
       {
         id: "draw:fill",
@@ -581,6 +609,31 @@ function drawnOverlay(d: Drawn | null, p: Palette) {
         type: "line" as const,
         source: "draw:result",
         paint: { "line-color": color(p, "acc"), "line-width": 2, "line-dasharray": [2, 1] },
+      },
+      {
+        id: "search:pin",
+        type: "circle" as const,
+        source: "search:pin",
+        paint: {
+          "circle-radius": 8,
+          "circle-color": color(p, "crit"),
+          "circle-stroke-color": color(p, "panel"),
+          "circle-stroke-width": 3,
+        },
+      },
+      {
+        id: "search:pin-label",
+        type: "symbol" as const,
+        source: "search:pin",
+        layout: {
+          "text-field": ["get", "label"] as ExpressionSpecification,
+          "text-font": ["Noto Sans Medium"],
+          "text-size": 13,
+          "text-offset": [0, 1.4] as [number, number],
+          "text-anchor": "top" as const,
+          "text-max-width": 16,
+        },
+        paint: { "text-color": color(p, "tx"), "text-halo-color": color(p, "panel"), "text-halo-width": 1.5 },
       },
     ],
   };

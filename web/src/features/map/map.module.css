@@ -442,6 +442,17 @@
   padding: 12px 14px;
 }
 
+.here {
+  bottom: 40px;
+  right: 60px;
+  width: 300px;
+  padding: 12px 14px;
+}
+
+.here dl {
+  margin-bottom: 10px;
+}
+
 .areaHead {
   display: flex;
   align-items: center;

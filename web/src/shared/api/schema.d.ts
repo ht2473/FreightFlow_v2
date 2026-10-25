@@ -655,6 +655,96 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Поиск по системе с разбором запроса в фильтры реестра
+         * @description Запрос разбирается в фильтры объектов (тип, округ, район, площадь, время до МКАД, пояс,
+         *     признаки, «рядом с …»); если фильтры есть — ответ содержит объекты реестра по ним, иначе —
+         *     документы по видам (объекты, адреса, улицы, территории, акты, работы, виды, наборы данных).
+         */
+        get: operations["search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/search/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Подсказки при вводе */
+        get: operations["searchSuggest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/search/parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Разбор запроса в фильтры без поиска */
+        get: operations["searchParse"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Прямое геокодирование — адреса реестра Москвы и улицы */
+        get: operations["geocode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/geocode/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Обратное геокодирование — ближайший адрес в 50 м и район */
+        get: operations["reverseGeocode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/views": {
         parameters: {
             query?: never;
@@ -780,27 +870,6 @@ export interface paths {
         };
         /** Типовые профили ТС */
         get: operations["listVehicleProfiles"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/routing/places": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Поиск точки маршрута по адресу или объекту реестра
-         * @description Объекты реестра по названию и адреса адресного реестра Москвы по словам запроса; адреса с
-         *     номером дома из запроса — выше.
-         */
-        get: operations["searchPlaces"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1551,6 +1620,54 @@ export interface components {
             children: components["schemas"]["TerritoryRow"][];
             summary: components["schemas"]["AreaSummary"];
         };
+        SearchHit: {
+            /** @enum {string} */
+            kind: "facility" | "address" | "street" | "territory" | "dataset" | "source" | "legal_act" | "help" | "road_work" | "saved_view" | "report";
+            /** @description Идентификатор сущности своего вида */
+            ref: string;
+            title: string;
+            subtitle?: string;
+            point?: components["schemas"]["LngLat"];
+            score: number;
+        };
+        SearchChip: {
+            /** @enum {string} */
+            field: "type" | "okrug" | "district" | "ring" | "area" | "mkad" | "conf" | "restr" | "permit" | "near";
+            label: string;
+        };
+        ParsedQuery: {
+            /** @description Остаток запроса — поиск по словам */
+            text: string;
+            chips: components["schemas"]["SearchChip"][];
+            /** @description Запрос относится к объектам реестра */
+            facility: boolean;
+            types: string[];
+            okrugs: string[];
+            districts: string[];
+            rings: ("sk" | "ttk" | "mkad" | "ckad" | "outside")[];
+            minArea?: number;
+            maxArea?: number;
+            maxMkadMin?: number;
+            minConfidence?: number;
+            nearRestrictions?: boolean;
+            hasPermit?: boolean;
+            nearText?: string;
+            nearKm?: number;
+            coordinates?: components["schemas"]["LngLat"];
+        };
+        SearchResult: {
+            query: string;
+            parsed: components["schemas"]["ParsedQuery"];
+            near?: components["schemas"]["SearchHit"];
+            hits: components["schemas"]["SearchHit"][];
+            facilities?: {
+                total: number;
+                items: components["schemas"]["FacilityItem"][];
+            };
+            /** @description Документы найдены по сходству написания */
+            fuzzy: boolean;
+            tookMs: number;
+        };
         SavedView: {
             /** Format: uuid */
             id: string;
@@ -1839,15 +1956,6 @@ export interface components {
             criticality: components["schemas"]["CriticalityStats"];
             critical: components["schemas"]["CriticalElement"][];
         };
-        Place: {
-            /** @enum {string} */
-            kind: "facility" | "address";
-            id: string;
-            title: string;
-            /** @description Адрес объекта или вид адресного объекта */
-            subtitle: string;
-            point: components["schemas"]["LngLat"];
-        };
         MatrixRequest: {
             sources: components["schemas"]["LngLat"][];
             targets: components["schemas"]["LngLat"][];
@@ -1910,6 +2018,10 @@ export interface components {
         FacilityQ: string;
         FacilityType: string[];
         FacilityOkrug: string[];
+        SearchQ: string;
+        /** @description Долгота центра карты — близкие документы выше */
+        SearchLon: number;
+        SearchLat: number;
         FacilityDistrict: string[];
         FacilityRing: ("sk" | "ttk" | "mkad" | "ckad" | "outside")[];
         /** @description Площадь застройки от, м² */
@@ -3022,6 +3134,132 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    search: {
+        parameters: {
+            query: {
+                q: components["parameters"]["SearchQ"];
+                /** @description Долгота центра карты — близкие документы выше */
+                lon?: components["parameters"]["SearchLon"];
+                lat?: components["parameters"]["SearchLat"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Результат */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    searchSuggest: {
+        parameters: {
+            query: {
+                q: components["parameters"]["SearchQ"];
+                /** @description Долгота центра карты — близкие документы выше */
+                lon?: components["parameters"]["SearchLon"];
+                lat?: components["parameters"]["SearchLat"];
+                limit?: number;
+                /** @description Только эти виды документов (поля выбора адреса и объекта) */
+                kind?: ("facility" | "address" | "street" | "territory" | "dataset" | "source" | "legal_act" | "help" | "road_work" | "saved_view" | "report")[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Подсказки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchHit"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    searchParse: {
+        parameters: {
+            query: {
+                q: components["parameters"]["SearchQ"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Разбор */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParsedQuery"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    geocode: {
+        parameters: {
+            query: {
+                q: components["parameters"]["SearchQ"];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Адреса */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchHit"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    reverseGeocode: {
+        parameters: {
+            query: {
+                lon: number;
+                lat: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Адрес и район (что найдено) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchHit"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     listViews: {
         parameters: {
             query: {
@@ -3201,30 +3439,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VehicleProfile"][];
-                };
-            };
-            default: components["responses"]["Problem"];
-        };
-    };
-    searchPlaces: {
-        parameters: {
-            query: {
-                q: string;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Найденные места */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Place"][];
                 };
             };
             default: components["responses"]["Problem"];

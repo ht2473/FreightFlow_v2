@@ -361,6 +361,9 @@ function SearchBar({ search, set }: { search: FacilitySearch; set: (p: Partial<F
                   restr: undefined,
                   permit: undefined,
                   mkad: undefined,
+                  amin: undefined,
+                  amax: undefined,
+                  near: undefined,
                 });
               }}
             >
@@ -400,6 +403,14 @@ function activeChips(sr: FacilitySearch): { key: string; label: string; clear: P
       clear: { permit: undefined },
     });
   if (sr.mkad) out.push({ key: "mkad", label: `До МКАД ≤ ${sr.mkad} мин`, clear: { mkad: undefined } });
+  if (sr.amin !== undefined)
+    out.push({ key: "amin", label: `Площадь ≥ ${num(sr.amin)} м²`, clear: { amin: undefined } });
+  if (sr.amax !== undefined)
+    out.push({ key: "amax", label: `Площадь ≤ ${num(sr.amax)} м²`, clear: { amax: undefined } });
+  if (sr.near) {
+    const r = Number(sr.near.split(",")[2] ?? 0);
+    out.push({ key: "near", label: `В ${num(r / 1000, 1)} км от точки`, clear: { near: undefined } });
+  }
   return hasFilters(sr) ? out : [];
 }
 

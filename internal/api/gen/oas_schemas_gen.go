@@ -7574,107 +7574,6 @@ func (s *PermitStats) SetExceeded(val []NamedCount) {
 	s.Exceeded = val
 }
 
-// Ref: #/components/schemas/Place
-type Place struct {
-	Kind  PlaceKind `json:"kind"`
-	ID    string    `json:"id"`
-	Title string    `json:"title"`
-	// Адрес объекта или вид адресного объекта.
-	Subtitle string `json:"subtitle"`
-	Point    LngLat `json:"point"`
-}
-
-// GetKind returns the value of Kind.
-func (s *Place) GetKind() PlaceKind {
-	return s.Kind
-}
-
-// GetID returns the value of ID.
-func (s *Place) GetID() string {
-	return s.ID
-}
-
-// GetTitle returns the value of Title.
-func (s *Place) GetTitle() string {
-	return s.Title
-}
-
-// GetSubtitle returns the value of Subtitle.
-func (s *Place) GetSubtitle() string {
-	return s.Subtitle
-}
-
-// GetPoint returns the value of Point.
-func (s *Place) GetPoint() LngLat {
-	return s.Point
-}
-
-// SetKind sets the value of Kind.
-func (s *Place) SetKind(val PlaceKind) {
-	s.Kind = val
-}
-
-// SetID sets the value of ID.
-func (s *Place) SetID(val string) {
-	s.ID = val
-}
-
-// SetTitle sets the value of Title.
-func (s *Place) SetTitle(val string) {
-	s.Title = val
-}
-
-// SetSubtitle sets the value of Subtitle.
-func (s *Place) SetSubtitle(val string) {
-	s.Subtitle = val
-}
-
-// SetPoint sets the value of Point.
-func (s *Place) SetPoint(val LngLat) {
-	s.Point = val
-}
-
-type PlaceKind string
-
-const (
-	PlaceKindFacility PlaceKind = "facility"
-	PlaceKindAddress  PlaceKind = "address"
-)
-
-// AllValues returns all PlaceKind values.
-func (PlaceKind) AllValues() []PlaceKind {
-	return []PlaceKind{
-		PlaceKindFacility,
-		PlaceKindAddress,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s PlaceKind) MarshalText() ([]byte, error) {
-	switch s {
-	case PlaceKindFacility:
-		return []byte(s), nil
-	case PlaceKindAddress:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *PlaceKind) UnmarshalText(data []byte) error {
-	switch PlaceKind(data) {
-	case PlaceKindFacility:
-		*s = PlaceKindFacility
-		return nil
-	case PlaceKindAddress:
-		*s = PlaceKindAddress
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
 // Ref: #/components/schemas/Problem
 type Problem struct {
 	Type     OptString    `json:"type"`
@@ -9390,6 +9289,110 @@ func (s *SearchResultFacilities) SetTotal(val int) {
 // SetItems sets the value of Items.
 func (s *SearchResultFacilities) SetItems(val []FacilityItem) {
 	s.Items = val
+}
+
+type SearchSuggestKindItem string
+
+const (
+	SearchSuggestKindItemFacility  SearchSuggestKindItem = "facility"
+	SearchSuggestKindItemAddress   SearchSuggestKindItem = "address"
+	SearchSuggestKindItemStreet    SearchSuggestKindItem = "street"
+	SearchSuggestKindItemTerritory SearchSuggestKindItem = "territory"
+	SearchSuggestKindItemDataset   SearchSuggestKindItem = "dataset"
+	SearchSuggestKindItemSource    SearchSuggestKindItem = "source"
+	SearchSuggestKindItemLegalAct  SearchSuggestKindItem = "legal_act"
+	SearchSuggestKindItemHelp      SearchSuggestKindItem = "help"
+	SearchSuggestKindItemRoadWork  SearchSuggestKindItem = "road_work"
+	SearchSuggestKindItemSavedView SearchSuggestKindItem = "saved_view"
+	SearchSuggestKindItemReport    SearchSuggestKindItem = "report"
+)
+
+// AllValues returns all SearchSuggestKindItem values.
+func (SearchSuggestKindItem) AllValues() []SearchSuggestKindItem {
+	return []SearchSuggestKindItem{
+		SearchSuggestKindItemFacility,
+		SearchSuggestKindItemAddress,
+		SearchSuggestKindItemStreet,
+		SearchSuggestKindItemTerritory,
+		SearchSuggestKindItemDataset,
+		SearchSuggestKindItemSource,
+		SearchSuggestKindItemLegalAct,
+		SearchSuggestKindItemHelp,
+		SearchSuggestKindItemRoadWork,
+		SearchSuggestKindItemSavedView,
+		SearchSuggestKindItemReport,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SearchSuggestKindItem) MarshalText() ([]byte, error) {
+	switch s {
+	case SearchSuggestKindItemFacility:
+		return []byte(s), nil
+	case SearchSuggestKindItemAddress:
+		return []byte(s), nil
+	case SearchSuggestKindItemStreet:
+		return []byte(s), nil
+	case SearchSuggestKindItemTerritory:
+		return []byte(s), nil
+	case SearchSuggestKindItemDataset:
+		return []byte(s), nil
+	case SearchSuggestKindItemSource:
+		return []byte(s), nil
+	case SearchSuggestKindItemLegalAct:
+		return []byte(s), nil
+	case SearchSuggestKindItemHelp:
+		return []byte(s), nil
+	case SearchSuggestKindItemRoadWork:
+		return []byte(s), nil
+	case SearchSuggestKindItemSavedView:
+		return []byte(s), nil
+	case SearchSuggestKindItemReport:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SearchSuggestKindItem) UnmarshalText(data []byte) error {
+	switch SearchSuggestKindItem(data) {
+	case SearchSuggestKindItemFacility:
+		*s = SearchSuggestKindItemFacility
+		return nil
+	case SearchSuggestKindItemAddress:
+		*s = SearchSuggestKindItemAddress
+		return nil
+	case SearchSuggestKindItemStreet:
+		*s = SearchSuggestKindItemStreet
+		return nil
+	case SearchSuggestKindItemTerritory:
+		*s = SearchSuggestKindItemTerritory
+		return nil
+	case SearchSuggestKindItemDataset:
+		*s = SearchSuggestKindItemDataset
+		return nil
+	case SearchSuggestKindItemSource:
+		*s = SearchSuggestKindItemSource
+		return nil
+	case SearchSuggestKindItemLegalAct:
+		*s = SearchSuggestKindItemLegalAct
+		return nil
+	case SearchSuggestKindItemHelp:
+		*s = SearchSuggestKindItemHelp
+		return nil
+	case SearchSuggestKindItemRoadWork:
+		*s = SearchSuggestKindItemRoadWork
+		return nil
+	case SearchSuggestKindItemSavedView:
+		*s = SearchSuggestKindItemSavedView
+		return nil
+	case SearchSuggestKindItemReport:
+		*s = SearchSuggestKindItemReport
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/Settings

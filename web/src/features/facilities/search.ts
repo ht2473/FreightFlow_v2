@@ -14,6 +14,14 @@ export const facilitySearchSchema = z.object({
   restr: z.enum(["yes", "no"]).optional().catch(undefined),
   permit: z.enum(["yes", "no"]).optional().catch(undefined),
   mkad: z.number().min(1).max(300).optional().catch(undefined),
+  // Площадь застройки от и до, м²; окрестность «долгота,широта,радиус м» (из разбора поиска).
+  amin: z.number().min(0).optional().catch(undefined),
+  amax: z.number().min(0).optional().catch(undefined),
+  near: z
+    .string()
+    .regex(/^-?\d+(\.\d+)?,-?\d+(\.\d+)?,\d+(\.\d+)?$/)
+    .optional()
+    .catch(undefined),
   sort: z.string().optional().catch(undefined),
   open: z.string().uuid().optional().catch(undefined),
 });
@@ -45,12 +53,28 @@ export function facilityQuery(s: FacilitySearch) {
     nearRestrictions: s.restr ? s.restr === "yes" : undefined,
     hasPermit: s.permit ? s.permit === "yes" : undefined,
     maxMkadMin: s.mkad,
+    minArea: s.amin,
+    maxArea: s.amax,
+    near: s.near ? s.near.split(",").map(Number) : undefined,
   };
 }
 
 /** Есть ли в выборке хоть один фильтр. */
 export function hasFilters(s: FacilitySearch): boolean {
-  return Boolean(s.q || s.type || s.okrug || s.district || s.ring || s.conf || s.restr || s.permit || s.mkad);
+  return Boolean(
+    s.q ||
+      s.type ||
+      s.okrug ||
+      s.district ||
+      s.ring ||
+      s.conf ||
+      s.restr ||
+      s.permit ||
+      s.mkad ||
+      s.amin !== undefined ||
+      s.amax !== undefined ||
+      s.near,
+  );
 }
 
 export interface SortItem {

@@ -70,6 +70,14 @@ const routeTree = rootRoute.addChildren([
   }),
   createRoute({
     getParentRoute: () => rootRoute,
+    path: "/search",
+    validateSearch: (search: Record<string, unknown>) => ({
+      q: typeof search.q === "string" ? search.q.slice(0, 300) : undefined,
+    }),
+    component: lazyRouteComponent(() => import("@/features/search/SearchPage"), "SearchPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
     path: "/territories",
     validateSearch: (search: Record<string, unknown>) => territorySearchSchema.parse(search),
     component: lazyRouteComponent(() => import("@/features/territories/TerritoriesPage"), "TerritoriesPage"),
@@ -102,6 +110,9 @@ const routeTree = rootRoute.addChildren([
   createRoute({
     getParentRoute: () => rootRoute,
     path: "/data",
+    validateSearch: (search: Record<string, unknown>) => ({
+      source: typeof search.source === "string" ? search.source : undefined,
+    }),
     component: lazyRouteComponent(() => import("@/features/data/SourcesPage"), "SourcesPage"),
   }),
   createRoute({

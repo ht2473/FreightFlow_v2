@@ -396,14 +396,6 @@ type Handler interface {
 	//
 	// GET /search/parse
 	SearchParse(ctx context.Context, params SearchParseParams) (*ParsedQuery, error)
-	// SearchPlaces implements searchPlaces operation.
-	//
-	// Объекты реестра по названию и адреса адресного
-	// реестра Москвы по словам запроса; адреса с номером
-	// дома из запроса — выше.
-	//
-	// GET /routing/places
-	SearchPlaces(ctx context.Context, params SearchPlacesParams) ([]Place, error)
 	// SearchSuggest implements searchSuggest operation.
 	//
 	// Подсказки при вводе.

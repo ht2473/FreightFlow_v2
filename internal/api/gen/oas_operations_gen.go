@@ -62,7 +62,6 @@ const (
 	RevokeTokenOperation           OperationName = "RevokeToken"
 	SearchOperation                OperationName = "Search"
 	SearchParseOperation           OperationName = "SearchParse"
-	SearchPlacesOperation          OperationName = "SearchPlaces"
 	SearchSuggestOperation         OperationName = "SearchSuggest"
 	StartRunOperation              OperationName = "StartRun"
 	UpdateMeOperation              OperationName = "UpdateMe"

@@ -83,6 +83,9 @@ export function titleFor(pathname: string): string {
   if (pathname.startsWith("/profile")) {
     return "Профиль";
   }
+  if (pathname.startsWith("/search")) {
+    return "Поиск";
+  }
   if (pathname.startsWith("/dev/ui")) {
     return "Компоненты";
   }

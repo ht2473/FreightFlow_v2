@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Database, MoreHorizontal, Play } from "lucide-react";
-import { useState } from "react";
 import { Menu, MenuItem, MenuTrigger, Popover, Separator } from "react-aria-components";
 import { Guard } from "@/app/Guard";
 import { $api, problemMessage, type Schemas } from "@/shared/api/client";
@@ -45,7 +45,10 @@ function SourceList() {
       refetchInterval: (q) => (q.state.data?.some((src) => isActive(src.lastRun?.status)) ? 3000 : false),
     },
   );
-  const [open, setOpen] = useState<string | null>(null);
+  // Открытый источник — в адресе: на него ведут результаты поиска.
+  const open = useSearch({ from: "/data" }).source ?? null;
+  const navigate = useNavigate({ from: "/data" });
+  const setOpen = (source: string | null) => void navigate({ search: { source: source ?? undefined }, replace: true });
   const refresh = () => qc.invalidateQueries({ queryKey: ["get", "/data/sources"] });
 
   const start = $api.useMutation("post", "/data/sources/{code}/runs", {
