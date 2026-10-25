@@ -14,7 +14,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/lmittmann/tint v1.2.1
-	github.com/maypok86/otter/v2 v2.3.0
+	github.com/maypok86/otter/v2 v2.4.0
 	github.com/ogen-go/ogen v1.24.0
 	github.com/paulmach/orb v0.13.0
 	github.com/pquerna/otp v1.5.0
@@ -82,7 +82,6 @@ require (
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/sethvargo/go-retry v0.5.0 // indirect
 	github.com/shopspring/decimal v1.5.0 // indirect
-	github.com/stretchr/testify v1.12.1 // indirect
 	github.com/tidwall/gjson v1.19.0 // indirect
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
