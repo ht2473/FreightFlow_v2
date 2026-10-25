@@ -1,0 +1,68 @@
+name: Проверка
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go:
+    name: Go
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FF_TEST_REQUIRE_DB: "1"
+      FF_TEST_DATABASE_URL: postgres://freightflow:freightflow@localhost:55442/postgres?sslmode=disable
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: База данных (PostgreSQL + PostGIS + H3)
+        run: |
+          docker build -t ff-postgres -f deploy/docker/postgres.Dockerfile deploy/docker
+          docker run -d --name db -p 55442:5432 \
+            -e POSTGRES_USER=freightflow -e POSTGRES_PASSWORD=freightflow -e POSTGRES_DB=freightflow \
+            ff-postgres
+          for i in $(seq 1 60); do docker exec db pg_isready -U freightflow && break; sleep 2; done
+      - name: Линтер
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.14.0
+      - name: Тесты
+        run: go test ./...
+      - name: Сборка
+        run: go build -o bin/freightflow ./cmd/freightflow
+      - name: Уязвимости
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+
+  web:
+    name: Интерфейс
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Типы и линтер
+        run: |
+          npm run typecheck
+          npm run lint
+      - name: Тесты
+        run: npm test
+      - name: Сборка
+        run: npm run build
