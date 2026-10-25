@@ -22,6 +22,7 @@ import (
 	"freightflow/internal/platform/telemetry"
 	"freightflow/internal/report"
 	"freightflow/internal/routing"
+	"freightflow/internal/search"
 )
 
 // runtime — общие службы долгоживущего процесса (app, worker).
@@ -113,6 +114,7 @@ func (m *modules) registry(env *Env, pool *pgxpool.Pool) *jobs.Registry {
 	operations.Register(reg, pool, env.Log.With("component", "operations"))
 	routing.Register(reg, pool, env.Config.ValhallaURL, env.Log.With("component", "routing"))
 	report.Register(reg, m.reports, env.Log.With("component", "report"))
+	search.Register(reg, search.New(pool), env.Log.With("component", "search"))
 	return reg
 }
 
