@@ -85,3 +85,18 @@ func TestParseCases(t *testing.T) {
 		}
 	}
 }
+
+// Набор оценки: не меньше 150 запросов; у каждого — ожидаемый документ или фильтры; фильтры
+// набора разбираются точно (тот же разборщик, что в поиске).
+func TestEvalSet(t *testing.T) {
+	t.Parallel()
+	cs, err := EvalSet()
+	if err != nil || len(cs) < 150 {
+		t.Fatalf("набор: %d %v", len(cs), err)
+	}
+	for _, c := range cs {
+		if c.Q == "" || (len(c.Chips) == 0 && (c.Kind == "" || c.Title == "" && c.Ref == "")) {
+			t.Errorf("неполный запрос %+v", c)
+		}
+	}
+}

@@ -106,7 +106,10 @@ var Builders = []Builder{
 			SELECT 'legal_act', d.code, d.title,
 			       concat_ws(' ', d.authority, CASE WHEN d.number IS NOT NULL THEN '№ ' || d.number END,
 			                 CASE WHEN d.signed_on IS NOT NULL THEN 'от ' || to_char(d.signed_on, 'DD.MM.YYYY') END),
-			       concat_ws(' ', d.kind, d.number, d.summary, p.content),
+			       concat_ws(' ', CASE d.kind WHEN 'act' THEN 'постановление правовой акт'
+			                                  WHEN 'amendment' THEN 'постановление о внесении изменений поправка'
+			                                  ELSE 'официальная страница разъяснение' END,
+			                 d.number, d.summary, p.content),
 			       CASE d.status WHEN 'active' THEN 0.7 ELSE 0.5 END
 			FROM ref.legal_document d
 			LEFT JOIN regulation.official_page p ON p.code = d.code`,

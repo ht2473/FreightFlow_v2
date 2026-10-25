@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -17,8 +18,11 @@ func runSearch(ctx context.Context, env *Env, args []string) error {
 	if len(args) >= 2 && args[0] == "query" {
 		return runSearchQuery(ctx, env, args[1:])
 	}
+	if len(args) >= 1 && args[0] == "eval" {
+		return runSearchEval(ctx, env, args[1:])
+	}
 	if len(args) == 0 || args[0] != "reindex" {
-		fmt.Fprintln(env.Stderr, "Использование: freightflow search reindex [-force] [вид...] | query [-suggest] <запрос>")
+		fmt.Fprintln(env.Stderr, "Использование: freightflow search reindex [-force] [вид...] | query [-suggest] <запрос> | eval [-out отчёт.md]")
 		return ErrUsage
 	}
 	fs := flag.NewFlagSet("search reindex", flag.ContinueOnError)
@@ -102,5 +106,38 @@ func runSearchQuery(ctx context.Context, env *Env, args []string) error {
 		note = " (по сходству написания)"
 	}
 	fmt.Fprintf(out, "документов %d за %s%s\n", len(res.Hits), res.Took.Round(time.Millisecond), note)
+	return nil
+}
+
+// runSearchEval — оценка качества на встроенном наборе запросов; -out — отчёт в Markdown.
+func runSearchEval(ctx context.Context, env *Env, args []string) error {
+	fs := flag.NewFlagSet("search eval", flag.ContinueOnError)
+	fs.SetOutput(env.Stderr)
+	out := fs.String("out", "", "файл отчёта (Markdown)")
+	if err := fs.Parse(args); err != nil {
+		return ErrUsage
+	}
+	rt, err := startRuntime(ctx, env, "search")
+	if err != nil {
+		return err
+	}
+	defer rt.close(ctx)
+	cases, err := search.EvalSet()
+	if err != nil {
+		return err
+	}
+	rep, err := search.New(rt.pool, facility.New(rt.pool)).Evaluate(ctx, cases)
+	if err != nil {
+		return err
+	}
+	var docs int
+	if err := rt.pool.QueryRow(ctx, `SELECT count(*) FROM search.document`).Scan(&docs); err != nil {
+		return err
+	}
+	md := rep.Markdown(time.Now(), docs)
+	fmt.Fprint(env.Stdout, md)
+	if *out != "" {
+		return os.WriteFile(*out, []byte(md), 0o600)
+	}
 	return nil
 }

@@ -27,6 +27,8 @@ type Request struct {
 	Center *Point
 	// PerKind — документов каждого вида, не больше.
 	PerKind int
+	// NoLog — не писать в журнал запросов (оценка качества).
+	NoLog bool
 }
 
 // Hit — найденный документ.
@@ -144,32 +146,58 @@ func (s *Service) documents(ctx context.Context, req Request, text string) ([]Hi
 	args = append(args, req.PerKind)
 	// Усиления: точное и начальное совпадение заголовка, запрос в подзаголовке (номер акта,
 	// район адреса), номер дома из запроса в адресе.
+	// Адресов в ранжирование — не больше maxAddressMatches: запрос «ТАО» совпадает с каждым
+	// адресом округа, а ранжирование десятков тысяч совпадений занимает секунды.
 	hits, err := s.collect(ctx, `
-		WITH q AS (SELECT `+q+` AS tq)
+		WITH q AS (SELECT `+q+` AS tq),
+		m AS (
+			(SELECT d.kind, d.ref, d.title, d.subtitle, d.point, d.weight, d.title_norm, d.subtitle_norm, d.tsv
+			 FROM search.document d, q WHERE d.kind <> 'address' AND d.tsv @@ q.tq AND `+vis+`)
+			UNION ALL
+			(SELECT d.kind, d.ref, d.title, d.subtitle, d.point, d.weight, d.title_norm, d.subtitle_norm, d.tsv
+			 FROM search.document d, q WHERE d.kind = 'address' AND d.tsv @@ q.tq AND `+vis+`
+			 LIMIT `+strconv.Itoa(maxAddressMatches)+`)
+		)
 		SELECT kind, ref, title, subtitle, lon, lat, score FROM (
 			SELECT d.kind, d.ref, d.title, d.subtitle, ST_X(d.point) AS lon, ST_Y(d.point) AS lat,
 			       ts_rank_cd(d.tsv, q.tq, 1) * (0.5 + d.weight)
-			         + CASE WHEN d.title_norm = $1 THEN 1 WHEN d.title_norm LIKE $1 || '%' THEN 0.3 ELSE 0 END
+			         + CASE WHEN translate(d.title_norm, `+punct+`) = $1 THEN 1
+			                WHEN regexp_replace(translate(d.title_norm, `+punct+`), `+generic+`) = $1 THEN 0.8
+			                WHEN translate(d.title_norm, `+punct+`) LIKE $1 || '%' THEN 0.3 ELSE 0 END
 			         + CASE WHEN length($1) >= 3 AND d.subtitle_norm LIKE '%' || $1 || '%' THEN 0.3 ELSE 0 END
 			         + CASE WHEN $`+house+` <> '' AND d.kind = 'address'
 			                 AND d.title_norm ~ ('(дом|владение|участок) ' || $`+house+` || '([^0-9а-я]|$)') THEN 0.4 ELSE 0 END
 			         + `+prox+` AS score
-			FROM search.document d, q
-			WHERE d.tsv @@ q.tq AND `+vis+`
+			FROM m d, q
 		) x
 		ORDER BY row_number() OVER (PARTITION BY kind ORDER BY score DESC) <= $`+strconv.Itoa(len(args))+` DESC, score DESC
 		LIMIT $`+strconv.Itoa(len(args))+` * 6`, args...)
-	if err != nil || len(hits) >= 3 {
+	// Совпадения по словам есть — сходство написания не нужно: его оценки по другой шкале
+	// вытеснили бы точный ответ (дом 24 ниже домов 30 и 33), а запрос по сходству медленный.
+	if err != nil || len(hits) > 0 {
 		return trimPerKind(hits, req.PerKind), false, err
 	}
-	// Опечатки: сходство написания с заголовком.
-	args = []any{core(text)}
-	vis = visible(req, &args)
-	prox = proximity(req.Center, &args)
-	args = append(args, req.PerKind*4)
+	fuzzy, err := s.fuzzy(ctx, req, text, req.PerKind*4)
+	if err != nil {
+		return nil, false, err
+	}
+	return trimPerKind(fuzzy, req.PerKind), len(fuzzy) > 0, nil
+}
+
+// fuzzyThreshold — порог сходства написания при поиске с опечатками.
+const fuzzyThreshold = "0.45"
+
+// fuzzy — документы, похожие по написанию на запрос (опечатки).
+func (s *Service) fuzzy(ctx context.Context, req Request, text string, limit int) ([]Hit, error) {
+	// Опечатки: сходство написания с заголовком. Адреса не участвуют: опечатку в названии улицы
+	// находит документ улицы, а перебор 500 тыс. адресов по сходству медленный.
+	args := []any{core(text)}
+	vis := visible(req, &args)
+	prox := proximity(req.Center, &args)
+	args = append(args, limit)
 	var fuzzy []Hit
 	// Порог сходства ниже стандартного (0,6): две ошибки в слове дают около 0,5.
-	err = db.InTx(ctx, s.pool, func(tx pgx.Tx) error {
+	err := db.InTx(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx, `SET LOCAL pg_trgm.word_similarity_threshold = `+fuzzyThreshold); err != nil {
 			return err
 		}
@@ -178,18 +206,12 @@ func (s *Service) documents(ctx context.Context, req Request, text string) ([]Hi
 			SELECT d.kind, d.ref, d.title, d.subtitle, ST_X(d.point), ST_Y(d.point),
 			       word_similarity($1, d.title_norm) * (0.5 + d.weight) + `+prox+` AS score
 			FROM search.document d
-			WHERE $1 <% d.title_norm AND `+vis+`
+			WHERE d.kind <> 'address' AND $1 <% d.title_norm AND `+vis+`
 			ORDER BY score DESC LIMIT $`+strconv.Itoa(len(args)), args...)
 		return err
 	})
-	if err != nil {
-		return nil, false, err
-	}
-	return trimPerKind(append(hits, fuzzy...), req.PerKind), len(hits) == 0 && len(fuzzy) > 0, nil
+	return fuzzy, err
 }
-
-// fuzzyThreshold — порог сходства написания при поиске с опечатками.
-const fuzzyThreshold = "0.45"
 
 func (s *Service) collect(ctx context.Context, sql string, args ...any) ([]Hit, error) {
 	return collectHits(ctx, s.pool, sql, args...)
@@ -249,7 +271,18 @@ func houseNumber(text string) string {
 	return ""
 }
 
-// core — запрос в нормализованном виде для сравнения с заголовками.
+// generic — аргументы regexp_replace: родовое слово в начале или конце заголовка («район
+// Капотня», «улица Плющиха», «Нижегородский район») — запрос «Капотня» совпадает с ядром.
+const generic = `'^(район|улица|проспект|переулок|шоссе|проезд|площадь|бульвар|набережная) | (район|улица|проспект|переулок|шоссе|проезд|площадь|бульвар|набережная)$', ''`
+
+// punct — аргументы translate: знаки препинания заголовка, которых нет в нормализованном запросе.
+const punct = `',.«»"()', ''`
+
+// maxAddressMatches — адресов в ранжировании, не больше.
+const maxAddressMatches = 3000
+
+// core — запрос в нормализованном виде для сравнения с заголовками: как core.normalize_text
+// (ё → е, нижний регистр), без знаков препинания.
 func core(text string) string {
 	return strings.Join(tokens(text), " ")
 }
@@ -361,7 +394,8 @@ func (s *Service) Suggest(ctx context.Context, req Request, limit int) ([]Hit, e
 			LIMIT 400
 		)
 		SELECT d.kind, d.ref, d.title, d.subtitle, ST_X(d.point), ST_Y(d.point),
-		       d.weight + similarity($1, d.title_norm) + CASE WHEN d.title_norm LIKE $1 || '%' THEN 0.5 ELSE 0 END
+		       d.weight + similarity($1, d.title_norm)
+		         + CASE WHEN translate(d.title_norm, `+punct+`) LIKE $1 || '%' THEN 0.5 ELSE 0 END
 		         + CASE WHEN $`+house+` <> '' AND d.kind = 'address'
 		                 AND d.title_norm ~ ('(дом|владение|участок) ' || $`+house+` || '([^0-9а-я]|$)') THEN 0.4 ELSE 0 END
 		         + `+prox+` AS score
@@ -369,6 +403,12 @@ func (s *Service) Suggest(ctx context.Context, req Request, limit int) ([]Hit, e
 		ORDER BY score DESC LIMIT $`+strconv.Itoa(len(args))+` * 3`, args...)
 	if err != nil {
 		return nil, err
+	}
+	// Начало слова ничего не нашло — вероятно, опечатка: похожие по написанию.
+	if len(hits) == 0 {
+		if hits, err = s.fuzzy(ctx, req, text, limit); err != nil {
+			return nil, err
+		}
 	}
 	// Адреса не вытесняют улицы, территории и объекты.
 	hits = trimPerKind(hits, max(limit/2, 1))
@@ -381,6 +421,9 @@ func (s *Service) Suggest(ctx context.Context, req Request, limit int) ([]Hit, e
 
 // log пишет запрос в журнал; ошибка записи не мешает ответу.
 func (s *Service) log(ctx context.Context, req Request, mode string, res *Result, n int) {
+	if req.NoLog {
+		return
+	}
 	chips, _ := json.Marshal(res.Parsed.Chips)
 	var user *uuid.UUID
 	if req.UserID != uuid.Nil {
