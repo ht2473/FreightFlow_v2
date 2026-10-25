@@ -21,8 +21,8 @@ jobs:
       FF_TEST_REQUIRE_DB: "1"
       FF_TEST_DATABASE_URL: postgres://freightflow:freightflow@localhost:55442/postgres?sslmode=disable
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: База данных (PostgreSQL + PostGIS + H3)
@@ -33,7 +33,7 @@ jobs:
             ff-postgres
           for i in $(seq 1 60); do docker exec db pg_isready -U freightflow && break; sleep 2; done
       - name: Линтер
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           version: v2.14.0
       - name: Тесты
@@ -51,8 +51,8 @@ jobs:
       run:
         working-directory: web
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
