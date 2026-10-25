@@ -148,6 +148,27 @@ var Registry = []Layer{
 		},
 	},
 	{
+		Code: "h3_cells", Group: "territory", Title: "Складские площади по ячейкам H3",
+		Description: "Ячейки H3 с объектами логистики (разрешение 8, с 11-го масштаба — 9): цвет — площадь " +
+			"застройки объектов; в карточке — показатели ячейки", Geometry: "polygon",
+		MinZoom: 8, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"analytics"},
+		Attribution: osmAttribution + "; Росстат (население)",
+		Style: Style{Kind: "category", Property: "class", Note: "Население — модель: по зданиям адресного реестра", Categories: []Category{
+			{Values: []string{"large"}, Label: "От 50 000 м²", Color: "crit"},
+			{Values: []string{"medium"}, Label: "10 000–50 000 м²", Color: "warn"},
+			{Values: []string{"small"}, Label: "До 10 000 м²", Color: "cat3"},
+		}},
+		Properties: []Property{
+			{Name: "facilities", Title: "Объектов логистики", Kind: "number"},
+			{Name: "building_area", Title: "Площадь застройки объектов", Kind: "number", Unit: "м²"},
+			{Name: "population", Title: "Население (модель)", Kind: "number", Unit: "чел."},
+			{Name: "infra", Title: "АЗС, стоянок, площадок отдыха", Kind: "number"},
+			{Name: "restricted_km", Title: "Сеть с ограничениями", Kind: "number", Unit: "км"},
+			{Name: "works", Title: "Идущих дорожных работ", Kind: "number"},
+			{Name: "res", Title: "Разрешение H3", Kind: "number"},
+		},
+	},
+	{
 		Code: "industrial_zones", Group: "territory", Title: "Промзоны",
 		Description: "Территории промышленного назначения по разметке OSM", Geometry: "polygon",
 		MinZoom: 9, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"infra"},

@@ -126,6 +126,19 @@ func TestRecompute(t *testing.T) {
 	if diff := share - restricted/network*100; diff > 1e-9 || diff < -1e-9 {
 		t.Errorf("доля %v, ограничения %v, сеть %v", share, restricted, network)
 	}
+	// Ячейки H3: объекты Москвы распределены по ячейкам каждого разрешения без потерь.
+	var cells8, inCells8, inMoscow int
+	if err := pool.QueryRow(ctx, `
+		SELECT (SELECT count(*) FROM territory.h3_cell WHERE res = 8),
+		       (SELECT sum(value)::int FROM analytics.metric_value WHERE metric_code = 'h3.facilities' AND level = 'h3_8'),
+		       (SELECT count(*) FROM infra.facility f JOIN territory.admin_area m ON m.kind = 'region' AND m.name = 'Москва'
+		        WHERE f.status = 'active' AND EXISTS (SELECT 1 FROM territory.h3_cell c
+		              WHERE c.res = 8 AND c.h3 = h3_lat_lng_to_cell(f.point, 8)))`).Scan(&cells8, &inCells8, &inMoscow); err != nil {
+		t.Fatal(err)
+	}
+	if cells8 == 0 || inCells8 != inMoscow || inMoscow == 0 {
+		t.Errorf("ячейки: %d, объектов в ячейках %d, в Москве %d", cells8, inCells8, inMoscow)
+	}
 	var defs int
 	if err := pool.QueryRow(ctx, `SELECT count(*) FROM analytics.metric_def`).Scan(&defs); err != nil || defs != len(Catalog()) {
 		t.Errorf("каталог в базе: %d %v", defs, err)
