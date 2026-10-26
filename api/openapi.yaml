@@ -1771,6 +1771,24 @@ paths:
                 items: { $ref: "#/components/schemas/ScenarioDistrict" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /scenarios/{scenarioId}/closures:
+    get:
+      tags: [scenarios]
+      operationId: scenarioClosures
+      summary: Перекрытия сценария (GeoJSON)
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/ScenarioId"
+      responses:
+        "200":
+          description: FeatureCollection, у перекрытия — index, kind, label; участки — линиями, области — многоугольниками
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+        default: { $ref: "#/components/responses/Problem" }
+
   /scenarios/{scenarioId}/isochrones:
     get:
       tags: [scenarios]

@@ -105,6 +105,25 @@ func (s *Service) Create(ctx context.Context, userID uuid.UUID, name, descriptio
 	if _, err := s.routing.ProfileByCode(ctx, p.Profile); err != nil {
 		return nil, invalid("неизвестный профиль ТС %q", p.Profile)
 	}
+	// Элемент рейтинга раскрывается в участки сразу: следующий сетевой анализ перенумерует
+	// элементы, а сценарий должен пересчитываться с тем же перекрытием.
+	for i := range p.Closures {
+		c := &p.Closures[i]
+		if c.Kind != ClosureElement || len(c.Segments) > 0 {
+			continue
+		}
+		el, err := s.routing.Element(ctx, *c.Element)
+		if errors.Is(err, routing.ErrElementNotFound) {
+			return nil, invalid("элемента сети %d нет в последнем анализе", *c.Element)
+		}
+		if err != nil {
+			return nil, err
+		}
+		c.Segments = el.Segments
+		if c.Label == "" {
+			c.Label = el.Name
+		}
+	}
 	params, err := json.Marshal(p)
 	if err != nil {
 		return nil, err
@@ -286,5 +305,49 @@ func (s *Service) Isochrones(ctx context.Context, userID, id uuid.UUID) (json.Ra
 		JOIN scenario.scenario sc ON sc.id = i.scenario_id
 		LEFT JOIN infra.facility f ON f.id = nullif(i.origin, 'new')::uuid
 		WHERE i.scenario_id = $1`, id).Scan(&out)
+	return out, err
+}
+
+// Closures — перекрытия сценария (GeoJSON FeatureCollection; свойства index, kind, label): участки
+// — линиями, области — многоугольниками.
+func (s *Service) Closures(ctx context.Context, userID, id uuid.UUID) (json.RawMessage, error) {
+	sc, err := s.Get(ctx, userID, id)
+	if err != nil {
+		return nil, err
+	}
+	type item struct {
+		Index    int         `json:"index"`
+		Kind     string      `json:"kind"`
+		Label    string      `json:"label"`
+		Segments []uuid.UUID `json:"segments"`
+		Polygon  string      `json:"polygon"`
+	}
+	items := make([]item, len(sc.Params.Closures))
+	for i, c := range sc.Params.Closures {
+		items[i] = item{Index: i, Kind: c.Kind, Label: c.Label, Segments: c.Segments}
+		if c.Kind == ClosureArea {
+			items[i].Polygon = lineGeoJSON(c.Polygon)
+		}
+	}
+	b, err := json.Marshal(items)
+	if err != nil {
+		return nil, err
+	}
+	var out json.RawMessage
+	err = s.pool.QueryRow(ctx, `
+		WITH c AS (
+		    SELECT * FROM jsonb_to_recordset($1::jsonb) AS x (index int, kind text, label text, segments uuid[], polygon text)
+		), g AS (
+		    SELECT c.index, c.kind, c.label,
+		           CASE WHEN c.kind = 'area' THEN ST_MakePolygon(ST_GeomFromGeoJSON(c.polygon))
+		                ELSE (SELECT ST_Multi(ST_Collect(s.geom)) FROM network.road_segment s WHERE s.id = ANY (c.segments))
+		           END AS geom
+		    FROM c
+		)
+		SELECT jsonb_build_object('type', 'FeatureCollection', 'features', coalesce(jsonb_agg(jsonb_build_object(
+		           'type', 'Feature', 'geometry', ST_AsGeoJSON(geom, 6)::jsonb,
+		           'properties', jsonb_build_object('index', index, 'kind', kind, 'label', coalesce(label, '')))
+		       ORDER BY index) FILTER (WHERE geom IS NOT NULL), '[]'::jsonb))
+		FROM g`, b).Scan(&out)
 	return out, err
 }

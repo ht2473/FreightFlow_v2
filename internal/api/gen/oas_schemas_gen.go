@@ -11982,6 +11982,17 @@ func (s *ScenarioClosureKind) UnmarshalText(data []byte) error {
 	}
 }
 
+type ScenarioClosuresOK map[string]jx.Raw
+
+func (s *ScenarioClosuresOK) init() ScenarioClosuresOK {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/ScenarioDistrict
 type ScenarioDistrict struct {
 	District   string  `json:"district"`

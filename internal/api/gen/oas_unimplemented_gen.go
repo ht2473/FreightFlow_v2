@@ -748,6 +748,15 @@ func (UnimplementedHandler) SaveIndexConfig(ctx context.Context, req *SaveIndexC
 	return ht.ErrNotImplemented
 }
 
+// ScenarioClosures implements scenarioClosures operation.
+//
+// Перекрытия сценария (GeoJSON).
+//
+// GET /scenarios/{scenarioId}/closures
+func (UnimplementedHandler) ScenarioClosures(ctx context.Context, params ScenarioClosuresParams) (r ScenarioClosuresOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ScenarioDistricts implements scenarioDistricts operation.
 //
 // Изменения доступности по районам.

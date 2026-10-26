@@ -203,3 +203,12 @@ func (s *Server) ScenarioSegmentAt(ctx context.Context, params gen.ScenarioSegme
 		ID: seg.ID, Name: seg.Name, Class: seg.Class, LengthM: seg.LengthM, Geometry: gen.ScenarioSegmentGeometry(geom),
 	}, nil
 }
+
+func (s *Server) ScenarioClosures(ctx context.Context, params gen.ScenarioClosuresParams) (gen.ScenarioClosuresOK, error) {
+	raw, err := s.scenarios.Closures(ctx, principal(ctx).UserID, params.ScenarioId)
+	if err != nil {
+		return nil, err
+	}
+	obj, err := rawObject(raw)
+	return gen.ScenarioClosuresOK(obj), err
+}

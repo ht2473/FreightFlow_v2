@@ -245,6 +245,14 @@ func TestScenarioRun(t *testing.T) {
 		t.Errorf("geojson features = %d, %v", len(fc.Features), err)
 	}
 
+	cl, err := svc.Closures(ctx, user, sc.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(cl, &fc); err != nil || len(fc.Features) != 1 {
+		t.Errorf("closure features = %d, %v", len(fc.Features), err)
+	}
+
 	var events int
 	if err := pool.QueryRow(ctx, `SELECT count(*) FROM notify.outbox WHERE type = 'scenario.computed' AND payload->>'id' = $1`,
 		sc.ID.String()).Scan(&events); err != nil || events != 1 {

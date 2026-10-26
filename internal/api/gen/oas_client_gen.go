@@ -539,6 +539,12 @@ type Invoker interface {
 	//
 	// PUT /indexes/{code}/config
 	SaveIndexConfig(ctx context.Context, request *SaveIndexConfigReq, params SaveIndexConfigParams) error
+	// ScenarioClosures invokes scenarioClosures operation.
+	//
+	// Перекрытия сценария (GeoJSON).
+	//
+	// GET /scenarios/{scenarioId}/closures
+	ScenarioClosures(ctx context.Context, params ScenarioClosuresParams) (ScenarioClosuresOK, error)
 	// ScenarioDistricts invokes scenarioDistricts operation.
 	//
 	// Изменения доступности по районам.
@@ -11726,6 +11732,150 @@ func (c *Client) sendSaveIndexConfig(ctx context.Context, request *SaveIndexConf
 
 	stage = "DecodeResponse"
 	result, err := decodeSaveIndexConfigResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ScenarioClosures invokes scenarioClosures operation.
+//
+// Перекрытия сценария (GeoJSON).
+//
+// GET /scenarios/{scenarioId}/closures
+func (c *Client) ScenarioClosures(ctx context.Context, params ScenarioClosuresParams) (ScenarioClosuresOK, error) {
+	res, err := c.sendScenarioClosures(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendScenarioClosures(ctx context.Context, params ScenarioClosuresParams) (res ScenarioClosuresOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("scenarioClosures"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/scenarios/{scenarioId}/closures"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ScenarioClosuresOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/scenarios/"
+	{
+		// Encode "scenarioId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "scenarioId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ScenarioId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/closures"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, ScenarioClosuresOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ScenarioClosuresOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeScenarioClosuresResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

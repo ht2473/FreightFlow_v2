@@ -81,6 +81,7 @@ const (
 	RevokeTokenOperation           OperationName = "RevokeToken"
 	SaveDashboardOperation         OperationName = "SaveDashboard"
 	SaveIndexConfigOperation       OperationName = "SaveIndexConfig"
+	ScenarioClosuresOperation      OperationName = "ScenarioClosures"
 	ScenarioDistrictsOperation     OperationName = "ScenarioDistricts"
 	ScenarioFacilitiesOperation    OperationName = "ScenarioFacilities"
 	ScenarioIsochronesOperation    OperationName = "ScenarioIsochrones"

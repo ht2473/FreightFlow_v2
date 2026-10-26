@@ -33,17 +33,6 @@ export const sections: Section[] = [
     ],
   },
   {
-    path: "/scenarios",
-    title: "Сценарии",
-    permission: "scenarios.manage",
-    summary: "Расчёты «что если»: перекрытия, новые правила зон, гипотетические объекты.",
-    points: [
-      "Изменение доступности и затронутые объекты",
-      "Сравнение с базой на двух картах",
-      "Анализ устойчивости сети",
-    ],
-  },
-  {
     path: "/site-selection",
     title: "Оценка локации",
     permission: "scenarios.manage",

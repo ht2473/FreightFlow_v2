@@ -389,13 +389,16 @@ func (s *Service) closures(ctx context.Context, p Params, scen *variant) ([]Clos
 		case ClosureSegments:
 			segments = c.Segments
 		case ClosureElement:
-			el, err := s.routing.Element(ctx, *c.Element)
-			if err != nil {
-				return nil, err
-			}
-			segments = el.Segments
-			if info.Label == "" {
-				info.Label = el.Name
+			segments = c.Segments
+			if len(segments) == 0 {
+				el, err := s.routing.Element(ctx, *c.Element)
+				if err != nil {
+					return nil, err
+				}
+				segments = el.Segments
+				if info.Label == "" {
+					info.Label = el.Name
+				}
 			}
 		case ClosureArea:
 			ring := make(routing.Ring, len(c.Polygon))

@@ -518,6 +518,12 @@ type Handler interface {
 	//
 	// PUT /indexes/{code}/config
 	SaveIndexConfig(ctx context.Context, req *SaveIndexConfigReq, params SaveIndexConfigParams) error
+	// ScenarioClosures implements scenarioClosures operation.
+	//
+	// Перекрытия сценария (GeoJSON).
+	//
+	// GET /scenarios/{scenarioId}/closures
+	ScenarioClosures(ctx context.Context, params ScenarioClosuresParams) (ScenarioClosuresOK, error)
 	// ScenarioDistricts implements scenarioDistricts operation.
 	//
 	// Изменения доступности по районам.
