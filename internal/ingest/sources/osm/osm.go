@@ -369,6 +369,7 @@ func collectStats(ctx context.Context, tx pgx.Tx) (ingest.LoadStats, error) {
 		"roads":            `SELECT count(*) FROM network.road_segment`,
 		"restrictions":     `SELECT count(*) FROM network.restriction WHERE origin = 'osm'`,
 		"bridges":          `SELECT count(*) FROM network.bridge`,
+		"land_cover":       `SELECT count(*) FROM territory.land_cover`,
 	}
 	stats := ingest.LoadStats{}
 	for k, q := range queries {
