@@ -138,7 +138,11 @@ const routeTree = rootRoute.addChildren([
     path: "/scenarios/$scenarioId",
     component: lazyRouteComponent(() => import("@/features/scenarios/ScenarioResult"), "ScenarioResultPage"),
   }),
-  sectionRoute("/site-selection"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/site-selection",
+    component: lazyRouteComponent(() => import("@/features/site-selection/SitePage"), "SitePage"),
+  }),
   sectionRoute("/reports"),
   createRoute({
     getParentRoute: () => rootRoute,

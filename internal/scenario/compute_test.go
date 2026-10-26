@@ -135,7 +135,7 @@ func TestScenarioRun(t *testing.T) {
 		t.Fatal(err)
 	}
 	fr := &fakeRouting{built: time.Date(2026, 10, 20, 0, 0, 0, 0, time.UTC), target: routing.Point{Lon: 37.84, Lat: 55.74}}
-	svc := New(pool, client, fr)
+	svc := New(pool, client, fr, nil)
 
 	var facilities int
 	var segment uuid.UUID
@@ -310,7 +310,7 @@ func TestScenarioFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 	fr := &failingRouting{fakeRouting{built: time.Now()}}
-	svc := New(pool, client, fr)
+	svc := New(pool, client, fr, nil)
 	sc, err := svc.Create(ctx, user, "Без службы", "", Params{Profile: "truck_12", NewFacility: &NewFacility{Lon: 37.6, Lat: 55.7}})
 	if err != nil {
 		t.Fatal(err)

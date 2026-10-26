@@ -35,9 +35,10 @@ type Routing interface {
 
 // Service — сценарии, устойчивость и оценка локации.
 type Service struct {
-	pool    *pgxpool.Pool
-	jobs    *jobs.Client
-	routing Routing
+	pool      *pgxpool.Pool
+	jobs      *jobs.Client
+	routing   Routing
+	analytics Analytics
 	// workers — параллельных запросов матриц к службе маршрутизации в одном расчёте.
 	workers int
 }
@@ -46,9 +47,10 @@ type Service struct {
 // очередь внутри службы без выигрыша.
 const matrixWorkers = 4
 
-// New создаёт сервис; client может быть nil в процессе без постановки задач.
-func New(pool *pgxpool.Pool, client *jobs.Client, r Routing) *Service {
-	return &Service{pool: pool, jobs: client, routing: r, workers: matrixWorkers}
+// New создаёт сервис; client может быть nil в процессе без постановки задач, a — без оценки
+// локации.
+func New(pool *pgxpool.Pool, client *jobs.Client, r Routing, a Analytics) *Service {
+	return &Service{pool: pool, jobs: client, routing: r, analytics: a, workers: matrixWorkers}
 }
 
 // ErrNotFound — сценария нет или он чужой.

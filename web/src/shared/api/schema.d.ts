@@ -1394,6 +1394,99 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/site-selection/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Критерии и исключающие зоны оценки локации */
+        get: operations["siteCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site-selection/cells": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Сетка ячеек H3 Москвы (GeoJSON) для карты пригодности */
+        get: operations["siteCells"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site-selection/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Оценить ячейки H3 по критериям (МАИ или прямые веса, TOPSIS)
+         * @description Ячейки с долей любой выбранной исключающей зоны не меньше порога исключаются; остальные
+         *     ранжируются TOPSIS (векторная нормировка, пропуск — худшее значение критерия). Веса — прямые
+         *     или по матрице попарных сравнений МАИ (главный собственный вектор, CR Saaty). Лучшие
+         *     кандидаты — с разнесением; вклад критериев и чувствительность к весам ±20 %.
+         */
+        post: operations["evaluateSite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site-selection/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Мои сохранённые оценки локации */
+        get: operations["listSiteRuns"];
+        put?: never;
+        /** Сохранить оценку (параметры и лучших кандидатов) */
+        post: operations["saveSiteRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site-selection/runs/{runId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Сохранённая оценка */
+        get: operations["getSiteRun"];
+        put?: never;
+        post?: never;
+        /** Удалить сохранённую оценку */
+        delete: operations["deleteSiteRun"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2809,6 +2902,97 @@ export interface components {
             running?: components["schemas"]["ResilienceRun"];
             elements: components["schemas"]["ResilienceElement"][];
         };
+        SiteCriterionDef: {
+            metric: string;
+            title: string;
+            unit: string;
+            /** @description По умолчанию больше — лучше */
+            benefit: boolean;
+            note: string;
+        };
+        SiteExclusionDef: {
+            code: string;
+            title: string;
+        };
+        SiteCatalog: {
+            criteria: components["schemas"]["SiteCriterionDef"][];
+            exclusions: components["schemas"]["SiteExclusionDef"][];
+        };
+        SiteCriterion: {
+            metric: string;
+            benefit: boolean;
+            weight: number;
+        };
+        SiteParams: {
+            /** @enum {integer} */
+            resolution?: 8 | 9;
+            criteria: components["schemas"]["SiteCriterion"][];
+            /** @enum {string} */
+            weighting?: "direct" | "ahp";
+            pairwise?: number[][];
+            exclusions?: string[];
+            exclusionShare?: number;
+            top?: number;
+            spacingKm?: number;
+        };
+        SiteAhp: {
+            lambdaMax: number;
+            ci: number;
+            cr: number;
+            /** @description CR не выше 0,1 */
+            consistent: boolean;
+        };
+        SiteCell: {
+            h3: string;
+            rank: number;
+            /** @description Близость к идеальному решению TOPSIS, 0…1 */
+            score: number;
+            district: string;
+            lon: number;
+            lat: number;
+            /** @description Значения критериев по порядку; пусто — нет данных */
+            values: (number | null)[];
+            /** @description Доли критериев в оценке (сумма 1) */
+            contributions: number[];
+        };
+        SiteScore: {
+            h3: string;
+            score: number;
+        };
+        SiteSensitivity: {
+            metric: string;
+            /** @description Худшая ранговая корреляция при весе ±20 % */
+            spearman: number;
+            /** @description Доля лучших кандидатов, оставшихся лучшими */
+            topKept: number;
+        };
+        SiteResult: {
+            weights: number[];
+            ahp?: components["schemas"]["SiteAhp"];
+            cells: number;
+            candidates: number;
+            excluded: string[];
+            top: components["schemas"]["SiteCell"][];
+            scores: components["schemas"]["SiteScore"][];
+            sensitivity: components["schemas"]["SiteSensitivity"][];
+            /** @description Доля ячеек без значения критерия */
+            missing: number[];
+        };
+        SiteRunRequest: {
+            name: string;
+            params: components["schemas"]["SiteParams"];
+        };
+        SiteRun: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            params: components["schemas"]["SiteParams"];
+            top: components["schemas"]["SiteCell"][];
+            weights: number[];
+            ahp?: components["schemas"]["SiteAhp"];
+            /** Format: date-time */
+            createdAt: string;
+        };
     };
     responses: {
         /** @description Ошибка (RFC 9457) */
@@ -2828,6 +3012,7 @@ export interface components {
         FacilityId: string;
         ScenarioId: string;
         ScenarioTarget: components["schemas"]["ScenarioTargetKind"];
+        SiteRunId: string;
         ExportId: string;
         /** @description Подстрока названия или адреса */
         FacilityQ: string;
@@ -5078,6 +5263,167 @@ export interface operations {
                         [key: string]: unknown;
                     };
                 };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    siteCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Каталог */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteCatalog"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    siteCells: {
+        parameters: {
+            query: {
+                resolution: 8 | 9;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description FeatureCollection, у ячейки — h3 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    evaluateSite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SiteParams"];
+            };
+        };
+        responses: {
+            /** @description Оценка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteResult"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listSiteRuns: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Оценки, новые сверху */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteRun"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    saveSiteRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SiteRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Сохранено */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteRun"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getSiteRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                runId: components["parameters"]["SiteRunId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Оценка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteRun"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteSiteRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                runId: components["parameters"]["SiteRunId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Удалена */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             default: components["responses"]["Problem"];
         };

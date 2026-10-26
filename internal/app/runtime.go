@@ -106,7 +106,7 @@ func newModules(ctx context.Context, env *Env, rt *runtime) (*modules, error) {
 	routes := routing.NewService(rt.pool, routing.NewClient(env.Config.ValhallaURL))
 	return &modules{
 		identity: ids, ingest: ing, facilities: facilities,
-		reports: report.New(rt.pool, inserter, rt.blobs, facilities), scenarios: scenario.New(rt.pool, inserter, routes),
+		reports: report.New(rt.pool, inserter, rt.blobs, facilities), scenarios: scenario.New(rt.pool, inserter, routes, analytics.New(rt.pool)),
 		inserter: inserter,
 	}, nil
 }

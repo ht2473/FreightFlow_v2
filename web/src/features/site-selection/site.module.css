@@ -1,0 +1,73 @@
+.criterion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+}
+
+.criterionText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.criterionControls {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: end;
+  gap: 8px;
+}
+
+.numbers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.candidate {
+  display: grid;
+  grid-template-columns: 1fr 90px auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  font-size: 13px;
+}
+
+.bar {
+  display: flex;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+}
+
+.barLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: var(--tx2);
+  font-size: 12px;
+}
+
+.ramp {
+  display: inline-block;
+  width: 60px;
+  height: 10px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--acc) 5%, transparent), var(--acc));
+}
+
+@media (max-width: 900px) {
+  .numbers {
+    grid-template-columns: 1fr;
+  }
+}

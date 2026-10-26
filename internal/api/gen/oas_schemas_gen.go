@@ -1978,6 +1978,9 @@ func (s *DataUpdatesOKItem) SetDomains(val []string) {
 // DeleteScenarioNoContent is response for DeleteScenario operation.
 type DeleteScenarioNoContent struct{}
 
+// DeleteSiteRunNoContent is response for DeleteSiteRun operation.
+type DeleteSiteRunNoContent struct{}
+
 // DeleteViewNoContent is response for DeleteView operation.
 type DeleteViewNoContent struct{}
 
@@ -7950,6 +7953,51 @@ func (s *NetworkBottleneckKind) UnmarshalText(data []byte) error {
 	}
 }
 
+// NewNilFloat64 returns new NilFloat64 with value set to v.
+func NewNilFloat64(v float64) NilFloat64 {
+	return NilFloat64{
+		Value: v,
+	}
+}
+
+// NilFloat64 is nullable float64.
+type NilFloat64 struct {
+	Value float64
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilFloat64) SetTo(v float64) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilFloat64) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilFloat64) SetToNull() {
+	o.Null = true
+	var v float64
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilFloat64) Get() (v float64, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilFloat64) Or(d float64) float64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #/components/schemas/OfficialPage
 type OfficialPage struct {
 	Code                     string    `json:"code"`
@@ -9394,6 +9442,144 @@ func (o OptSearchResultFacilities) Get() (v SearchResultFacilities, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptSearchResultFacilities) Or(d SearchResultFacilities) SearchResultFacilities {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSiteAhp returns new OptSiteAhp with value set to v.
+func NewOptSiteAhp(v SiteAhp) OptSiteAhp {
+	return OptSiteAhp{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSiteAhp is optional SiteAhp.
+type OptSiteAhp struct {
+	Value SiteAhp
+	Set   bool
+}
+
+// IsSet returns true if OptSiteAhp was set.
+func (o OptSiteAhp) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSiteAhp) Reset() {
+	var v SiteAhp
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSiteAhp) SetTo(v SiteAhp) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSiteAhp) Get() (v SiteAhp, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSiteAhp) Or(d SiteAhp) SiteAhp {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSiteParamsResolution returns new OptSiteParamsResolution with value set to v.
+func NewOptSiteParamsResolution(v SiteParamsResolution) OptSiteParamsResolution {
+	return OptSiteParamsResolution{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSiteParamsResolution is optional SiteParamsResolution.
+type OptSiteParamsResolution struct {
+	Value SiteParamsResolution
+	Set   bool
+}
+
+// IsSet returns true if OptSiteParamsResolution was set.
+func (o OptSiteParamsResolution) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSiteParamsResolution) Reset() {
+	var v SiteParamsResolution
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSiteParamsResolution) SetTo(v SiteParamsResolution) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSiteParamsResolution) Get() (v SiteParamsResolution, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSiteParamsResolution) Or(d SiteParamsResolution) SiteParamsResolution {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSiteParamsWeighting returns new OptSiteParamsWeighting with value set to v.
+func NewOptSiteParamsWeighting(v SiteParamsWeighting) OptSiteParamsWeighting {
+	return OptSiteParamsWeighting{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSiteParamsWeighting is optional SiteParamsWeighting.
+type OptSiteParamsWeighting struct {
+	Value SiteParamsWeighting
+	Set   bool
+}
+
+// IsSet returns true if OptSiteParamsWeighting was set.
+func (o OptSiteParamsWeighting) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSiteParamsWeighting) Reset() {
+	var v SiteParamsWeighting
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSiteParamsWeighting) SetTo(v SiteParamsWeighting) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSiteParamsWeighting) Get() (v SiteParamsWeighting, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSiteParamsWeighting) Or(d SiteParamsWeighting) SiteParamsWeighting {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -14466,6 +14652,749 @@ func (s *SignTypeQuality) SetAmbiguous(val int) {
 // SetUnmatched sets the value of Unmatched.
 func (s *SignTypeQuality) SetUnmatched(val int) {
 	s.Unmatched = val
+}
+
+// Ref: #/components/schemas/SiteAhp
+type SiteAhp struct {
+	LambdaMax float64 `json:"lambdaMax"`
+	Ci        float64 `json:"ci"`
+	Cr        float64 `json:"cr"`
+	// CR не выше 0,1.
+	Consistent bool `json:"consistent"`
+}
+
+// GetLambdaMax returns the value of LambdaMax.
+func (s *SiteAhp) GetLambdaMax() float64 {
+	return s.LambdaMax
+}
+
+// GetCi returns the value of Ci.
+func (s *SiteAhp) GetCi() float64 {
+	return s.Ci
+}
+
+// GetCr returns the value of Cr.
+func (s *SiteAhp) GetCr() float64 {
+	return s.Cr
+}
+
+// GetConsistent returns the value of Consistent.
+func (s *SiteAhp) GetConsistent() bool {
+	return s.Consistent
+}
+
+// SetLambdaMax sets the value of LambdaMax.
+func (s *SiteAhp) SetLambdaMax(val float64) {
+	s.LambdaMax = val
+}
+
+// SetCi sets the value of Ci.
+func (s *SiteAhp) SetCi(val float64) {
+	s.Ci = val
+}
+
+// SetCr sets the value of Cr.
+func (s *SiteAhp) SetCr(val float64) {
+	s.Cr = val
+}
+
+// SetConsistent sets the value of Consistent.
+func (s *SiteAhp) SetConsistent(val bool) {
+	s.Consistent = val
+}
+
+// Ref: #/components/schemas/SiteCatalog
+type SiteCatalog struct {
+	Criteria   []SiteCriterionDef `json:"criteria"`
+	Exclusions []SiteExclusionDef `json:"exclusions"`
+}
+
+// GetCriteria returns the value of Criteria.
+func (s *SiteCatalog) GetCriteria() []SiteCriterionDef {
+	return s.Criteria
+}
+
+// GetExclusions returns the value of Exclusions.
+func (s *SiteCatalog) GetExclusions() []SiteExclusionDef {
+	return s.Exclusions
+}
+
+// SetCriteria sets the value of Criteria.
+func (s *SiteCatalog) SetCriteria(val []SiteCriterionDef) {
+	s.Criteria = val
+}
+
+// SetExclusions sets the value of Exclusions.
+func (s *SiteCatalog) SetExclusions(val []SiteExclusionDef) {
+	s.Exclusions = val
+}
+
+// Ref: #/components/schemas/SiteCell
+type SiteCell struct {
+	H3   string `json:"h3"`
+	Rank int    `json:"rank"`
+	// Близость к идеальному решению TOPSIS, 0…1.
+	Score    float64 `json:"score"`
+	District string  `json:"district"`
+	Lon      float64 `json:"lon"`
+	Lat      float64 `json:"lat"`
+	// Значения критериев по порядку; пусто — нет данных.
+	Values []NilFloat64 `json:"values"`
+	// Доли критериев в оценке (сумма 1).
+	Contributions []float64 `json:"contributions"`
+}
+
+// GetH3 returns the value of H3.
+func (s *SiteCell) GetH3() string {
+	return s.H3
+}
+
+// GetRank returns the value of Rank.
+func (s *SiteCell) GetRank() int {
+	return s.Rank
+}
+
+// GetScore returns the value of Score.
+func (s *SiteCell) GetScore() float64 {
+	return s.Score
+}
+
+// GetDistrict returns the value of District.
+func (s *SiteCell) GetDistrict() string {
+	return s.District
+}
+
+// GetLon returns the value of Lon.
+func (s *SiteCell) GetLon() float64 {
+	return s.Lon
+}
+
+// GetLat returns the value of Lat.
+func (s *SiteCell) GetLat() float64 {
+	return s.Lat
+}
+
+// GetValues returns the value of Values.
+func (s *SiteCell) GetValues() []NilFloat64 {
+	return s.Values
+}
+
+// GetContributions returns the value of Contributions.
+func (s *SiteCell) GetContributions() []float64 {
+	return s.Contributions
+}
+
+// SetH3 sets the value of H3.
+func (s *SiteCell) SetH3(val string) {
+	s.H3 = val
+}
+
+// SetRank sets the value of Rank.
+func (s *SiteCell) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetScore sets the value of Score.
+func (s *SiteCell) SetScore(val float64) {
+	s.Score = val
+}
+
+// SetDistrict sets the value of District.
+func (s *SiteCell) SetDistrict(val string) {
+	s.District = val
+}
+
+// SetLon sets the value of Lon.
+func (s *SiteCell) SetLon(val float64) {
+	s.Lon = val
+}
+
+// SetLat sets the value of Lat.
+func (s *SiteCell) SetLat(val float64) {
+	s.Lat = val
+}
+
+// SetValues sets the value of Values.
+func (s *SiteCell) SetValues(val []NilFloat64) {
+	s.Values = val
+}
+
+// SetContributions sets the value of Contributions.
+func (s *SiteCell) SetContributions(val []float64) {
+	s.Contributions = val
+}
+
+type SiteCellsOK map[string]jx.Raw
+
+func (s *SiteCellsOK) init() SiteCellsOK {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type SiteCellsResolution int
+
+const (
+	SiteCellsResolution8 SiteCellsResolution = 8
+	SiteCellsResolution9 SiteCellsResolution = 9
+)
+
+// AllValues returns all SiteCellsResolution values.
+func (SiteCellsResolution) AllValues() []SiteCellsResolution {
+	return []SiteCellsResolution{
+		SiteCellsResolution8,
+		SiteCellsResolution9,
+	}
+}
+
+// Ref: #/components/schemas/SiteCriterion
+type SiteCriterion struct {
+	Metric  string  `json:"metric"`
+	Benefit bool    `json:"benefit"`
+	Weight  float64 `json:"weight"`
+}
+
+// GetMetric returns the value of Metric.
+func (s *SiteCriterion) GetMetric() string {
+	return s.Metric
+}
+
+// GetBenefit returns the value of Benefit.
+func (s *SiteCriterion) GetBenefit() bool {
+	return s.Benefit
+}
+
+// GetWeight returns the value of Weight.
+func (s *SiteCriterion) GetWeight() float64 {
+	return s.Weight
+}
+
+// SetMetric sets the value of Metric.
+func (s *SiteCriterion) SetMetric(val string) {
+	s.Metric = val
+}
+
+// SetBenefit sets the value of Benefit.
+func (s *SiteCriterion) SetBenefit(val bool) {
+	s.Benefit = val
+}
+
+// SetWeight sets the value of Weight.
+func (s *SiteCriterion) SetWeight(val float64) {
+	s.Weight = val
+}
+
+// Ref: #/components/schemas/SiteCriterionDef
+type SiteCriterionDef struct {
+	Metric string `json:"metric"`
+	Title  string `json:"title"`
+	Unit   string `json:"unit"`
+	// По умолчанию больше — лучше.
+	Benefit bool   `json:"benefit"`
+	Note    string `json:"note"`
+}
+
+// GetMetric returns the value of Metric.
+func (s *SiteCriterionDef) GetMetric() string {
+	return s.Metric
+}
+
+// GetTitle returns the value of Title.
+func (s *SiteCriterionDef) GetTitle() string {
+	return s.Title
+}
+
+// GetUnit returns the value of Unit.
+func (s *SiteCriterionDef) GetUnit() string {
+	return s.Unit
+}
+
+// GetBenefit returns the value of Benefit.
+func (s *SiteCriterionDef) GetBenefit() bool {
+	return s.Benefit
+}
+
+// GetNote returns the value of Note.
+func (s *SiteCriterionDef) GetNote() string {
+	return s.Note
+}
+
+// SetMetric sets the value of Metric.
+func (s *SiteCriterionDef) SetMetric(val string) {
+	s.Metric = val
+}
+
+// SetTitle sets the value of Title.
+func (s *SiteCriterionDef) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetUnit sets the value of Unit.
+func (s *SiteCriterionDef) SetUnit(val string) {
+	s.Unit = val
+}
+
+// SetBenefit sets the value of Benefit.
+func (s *SiteCriterionDef) SetBenefit(val bool) {
+	s.Benefit = val
+}
+
+// SetNote sets the value of Note.
+func (s *SiteCriterionDef) SetNote(val string) {
+	s.Note = val
+}
+
+// Ref: #/components/schemas/SiteExclusionDef
+type SiteExclusionDef struct {
+	Code  string `json:"code"`
+	Title string `json:"title"`
+}
+
+// GetCode returns the value of Code.
+func (s *SiteExclusionDef) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *SiteExclusionDef) GetTitle() string {
+	return s.Title
+}
+
+// SetCode sets the value of Code.
+func (s *SiteExclusionDef) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *SiteExclusionDef) SetTitle(val string) {
+	s.Title = val
+}
+
+// Ref: #/components/schemas/SiteParams
+type SiteParams struct {
+	Resolution     OptSiteParamsResolution `json:"resolution"`
+	Criteria       []SiteCriterion         `json:"criteria"`
+	Weighting      OptSiteParamsWeighting  `json:"weighting"`
+	Pairwise       [][]float64             `json:"pairwise"`
+	Exclusions     []string                `json:"exclusions"`
+	ExclusionShare OptFloat64              `json:"exclusionShare"`
+	Top            OptInt                  `json:"top"`
+	SpacingKm      OptFloat64              `json:"spacingKm"`
+}
+
+// GetResolution returns the value of Resolution.
+func (s *SiteParams) GetResolution() OptSiteParamsResolution {
+	return s.Resolution
+}
+
+// GetCriteria returns the value of Criteria.
+func (s *SiteParams) GetCriteria() []SiteCriterion {
+	return s.Criteria
+}
+
+// GetWeighting returns the value of Weighting.
+func (s *SiteParams) GetWeighting() OptSiteParamsWeighting {
+	return s.Weighting
+}
+
+// GetPairwise returns the value of Pairwise.
+func (s *SiteParams) GetPairwise() [][]float64 {
+	return s.Pairwise
+}
+
+// GetExclusions returns the value of Exclusions.
+func (s *SiteParams) GetExclusions() []string {
+	return s.Exclusions
+}
+
+// GetExclusionShare returns the value of ExclusionShare.
+func (s *SiteParams) GetExclusionShare() OptFloat64 {
+	return s.ExclusionShare
+}
+
+// GetTop returns the value of Top.
+func (s *SiteParams) GetTop() OptInt {
+	return s.Top
+}
+
+// GetSpacingKm returns the value of SpacingKm.
+func (s *SiteParams) GetSpacingKm() OptFloat64 {
+	return s.SpacingKm
+}
+
+// SetResolution sets the value of Resolution.
+func (s *SiteParams) SetResolution(val OptSiteParamsResolution) {
+	s.Resolution = val
+}
+
+// SetCriteria sets the value of Criteria.
+func (s *SiteParams) SetCriteria(val []SiteCriterion) {
+	s.Criteria = val
+}
+
+// SetWeighting sets the value of Weighting.
+func (s *SiteParams) SetWeighting(val OptSiteParamsWeighting) {
+	s.Weighting = val
+}
+
+// SetPairwise sets the value of Pairwise.
+func (s *SiteParams) SetPairwise(val [][]float64) {
+	s.Pairwise = val
+}
+
+// SetExclusions sets the value of Exclusions.
+func (s *SiteParams) SetExclusions(val []string) {
+	s.Exclusions = val
+}
+
+// SetExclusionShare sets the value of ExclusionShare.
+func (s *SiteParams) SetExclusionShare(val OptFloat64) {
+	s.ExclusionShare = val
+}
+
+// SetTop sets the value of Top.
+func (s *SiteParams) SetTop(val OptInt) {
+	s.Top = val
+}
+
+// SetSpacingKm sets the value of SpacingKm.
+func (s *SiteParams) SetSpacingKm(val OptFloat64) {
+	s.SpacingKm = val
+}
+
+type SiteParamsResolution int
+
+const (
+	SiteParamsResolution8 SiteParamsResolution = 8
+	SiteParamsResolution9 SiteParamsResolution = 9
+)
+
+// AllValues returns all SiteParamsResolution values.
+func (SiteParamsResolution) AllValues() []SiteParamsResolution {
+	return []SiteParamsResolution{
+		SiteParamsResolution8,
+		SiteParamsResolution9,
+	}
+}
+
+type SiteParamsWeighting string
+
+const (
+	SiteParamsWeightingDirect SiteParamsWeighting = "direct"
+	SiteParamsWeightingAhp    SiteParamsWeighting = "ahp"
+)
+
+// AllValues returns all SiteParamsWeighting values.
+func (SiteParamsWeighting) AllValues() []SiteParamsWeighting {
+	return []SiteParamsWeighting{
+		SiteParamsWeightingDirect,
+		SiteParamsWeightingAhp,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SiteParamsWeighting) MarshalText() ([]byte, error) {
+	switch s {
+	case SiteParamsWeightingDirect:
+		return []byte(s), nil
+	case SiteParamsWeightingAhp:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SiteParamsWeighting) UnmarshalText(data []byte) error {
+	switch SiteParamsWeighting(data) {
+	case SiteParamsWeightingDirect:
+		*s = SiteParamsWeightingDirect
+		return nil
+	case SiteParamsWeightingAhp:
+		*s = SiteParamsWeightingAhp
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/SiteResult
+type SiteResult struct {
+	Weights     []float64         `json:"weights"`
+	Ahp         OptSiteAhp        `json:"ahp"`
+	Cells       int               `json:"cells"`
+	Candidates  int               `json:"candidates"`
+	Excluded    []string          `json:"excluded"`
+	Top         []SiteCell        `json:"top"`
+	Scores      []SiteScore       `json:"scores"`
+	Sensitivity []SiteSensitivity `json:"sensitivity"`
+	// Доля ячеек без значения критерия.
+	Missing []float64 `json:"missing"`
+}
+
+// GetWeights returns the value of Weights.
+func (s *SiteResult) GetWeights() []float64 {
+	return s.Weights
+}
+
+// GetAhp returns the value of Ahp.
+func (s *SiteResult) GetAhp() OptSiteAhp {
+	return s.Ahp
+}
+
+// GetCells returns the value of Cells.
+func (s *SiteResult) GetCells() int {
+	return s.Cells
+}
+
+// GetCandidates returns the value of Candidates.
+func (s *SiteResult) GetCandidates() int {
+	return s.Candidates
+}
+
+// GetExcluded returns the value of Excluded.
+func (s *SiteResult) GetExcluded() []string {
+	return s.Excluded
+}
+
+// GetTop returns the value of Top.
+func (s *SiteResult) GetTop() []SiteCell {
+	return s.Top
+}
+
+// GetScores returns the value of Scores.
+func (s *SiteResult) GetScores() []SiteScore {
+	return s.Scores
+}
+
+// GetSensitivity returns the value of Sensitivity.
+func (s *SiteResult) GetSensitivity() []SiteSensitivity {
+	return s.Sensitivity
+}
+
+// GetMissing returns the value of Missing.
+func (s *SiteResult) GetMissing() []float64 {
+	return s.Missing
+}
+
+// SetWeights sets the value of Weights.
+func (s *SiteResult) SetWeights(val []float64) {
+	s.Weights = val
+}
+
+// SetAhp sets the value of Ahp.
+func (s *SiteResult) SetAhp(val OptSiteAhp) {
+	s.Ahp = val
+}
+
+// SetCells sets the value of Cells.
+func (s *SiteResult) SetCells(val int) {
+	s.Cells = val
+}
+
+// SetCandidates sets the value of Candidates.
+func (s *SiteResult) SetCandidates(val int) {
+	s.Candidates = val
+}
+
+// SetExcluded sets the value of Excluded.
+func (s *SiteResult) SetExcluded(val []string) {
+	s.Excluded = val
+}
+
+// SetTop sets the value of Top.
+func (s *SiteResult) SetTop(val []SiteCell) {
+	s.Top = val
+}
+
+// SetScores sets the value of Scores.
+func (s *SiteResult) SetScores(val []SiteScore) {
+	s.Scores = val
+}
+
+// SetSensitivity sets the value of Sensitivity.
+func (s *SiteResult) SetSensitivity(val []SiteSensitivity) {
+	s.Sensitivity = val
+}
+
+// SetMissing sets the value of Missing.
+func (s *SiteResult) SetMissing(val []float64) {
+	s.Missing = val
+}
+
+// Ref: #/components/schemas/SiteRun
+type SiteRun struct {
+	ID        uuid.UUID  `json:"id"`
+	Name      string     `json:"name"`
+	Params    SiteParams `json:"params"`
+	Top       []SiteCell `json:"top"`
+	Weights   []float64  `json:"weights"`
+	Ahp       OptSiteAhp `json:"ahp"`
+	CreatedAt time.Time  `json:"createdAt"`
+}
+
+// GetID returns the value of ID.
+func (s *SiteRun) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *SiteRun) GetName() string {
+	return s.Name
+}
+
+// GetParams returns the value of Params.
+func (s *SiteRun) GetParams() SiteParams {
+	return s.Params
+}
+
+// GetTop returns the value of Top.
+func (s *SiteRun) GetTop() []SiteCell {
+	return s.Top
+}
+
+// GetWeights returns the value of Weights.
+func (s *SiteRun) GetWeights() []float64 {
+	return s.Weights
+}
+
+// GetAhp returns the value of Ahp.
+func (s *SiteRun) GetAhp() OptSiteAhp {
+	return s.Ahp
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *SiteRun) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// SetID sets the value of ID.
+func (s *SiteRun) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *SiteRun) SetName(val string) {
+	s.Name = val
+}
+
+// SetParams sets the value of Params.
+func (s *SiteRun) SetParams(val SiteParams) {
+	s.Params = val
+}
+
+// SetTop sets the value of Top.
+func (s *SiteRun) SetTop(val []SiteCell) {
+	s.Top = val
+}
+
+// SetWeights sets the value of Weights.
+func (s *SiteRun) SetWeights(val []float64) {
+	s.Weights = val
+}
+
+// SetAhp sets the value of Ahp.
+func (s *SiteRun) SetAhp(val OptSiteAhp) {
+	s.Ahp = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *SiteRun) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// Ref: #/components/schemas/SiteRunRequest
+type SiteRunRequest struct {
+	Name   string     `json:"name"`
+	Params SiteParams `json:"params"`
+}
+
+// GetName returns the value of Name.
+func (s *SiteRunRequest) GetName() string {
+	return s.Name
+}
+
+// GetParams returns the value of Params.
+func (s *SiteRunRequest) GetParams() SiteParams {
+	return s.Params
+}
+
+// SetName sets the value of Name.
+func (s *SiteRunRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetParams sets the value of Params.
+func (s *SiteRunRequest) SetParams(val SiteParams) {
+	s.Params = val
+}
+
+// Ref: #/components/schemas/SiteScore
+type SiteScore struct {
+	H3    string  `json:"h3"`
+	Score float64 `json:"score"`
+}
+
+// GetH3 returns the value of H3.
+func (s *SiteScore) GetH3() string {
+	return s.H3
+}
+
+// GetScore returns the value of Score.
+func (s *SiteScore) GetScore() float64 {
+	return s.Score
+}
+
+// SetH3 sets the value of H3.
+func (s *SiteScore) SetH3(val string) {
+	s.H3 = val
+}
+
+// SetScore sets the value of Score.
+func (s *SiteScore) SetScore(val float64) {
+	s.Score = val
+}
+
+// Ref: #/components/schemas/SiteSensitivity
+type SiteSensitivity struct {
+	Metric string `json:"metric"`
+	// Худшая ранговая корреляция при весе ±20 %.
+	Spearman float64 `json:"spearman"`
+	// Доля лучших кандидатов, оставшихся лучшими.
+	TopKept float64 `json:"topKept"`
+}
+
+// GetMetric returns the value of Metric.
+func (s *SiteSensitivity) GetMetric() string {
+	return s.Metric
+}
+
+// GetSpearman returns the value of Spearman.
+func (s *SiteSensitivity) GetSpearman() float64 {
+	return s.Spearman
+}
+
+// GetTopKept returns the value of TopKept.
+func (s *SiteSensitivity) GetTopKept() float64 {
+	return s.TopKept
+}
+
+// SetMetric sets the value of Metric.
+func (s *SiteSensitivity) SetMetric(val string) {
+	s.Metric = val
+}
+
+// SetSpearman sets the value of Spearman.
+func (s *SiteSensitivity) SetSpearman(val float64) {
+	s.Spearman = val
+}
+
+// SetTopKept sets the value of TopKept.
+func (s *SiteSensitivity) SetTopKept(val float64) {
+	s.TopKept = val
 }
 
 // Ref: #/components/schemas/SourceInfo

@@ -37,7 +37,7 @@ func TestResilience(t *testing.T) {
 			{VersionID: 7, ID: 4, Kind: "segment", Name: "Без ущерба", Segments: []uuid.UUID{seg}, Rank: 2, DamageMin: 0},
 		},
 	}
-	svc := New(pool, client, fr)
+	svc := New(pool, client, fr, nil)
 
 	st, err := svc.RunResilience(ctx, false)
 	if err != nil {

@@ -132,6 +132,12 @@ type Handler interface {
 	//
 	// DELETE /scenarios/{scenarioId}
 	DeleteScenario(ctx context.Context, params DeleteScenarioParams) error
+	// DeleteSiteRun implements deleteSiteRun operation.
+	//
+	// Удалить сохранённую оценку.
+	//
+	// DELETE /site-selection/runs/{runId}
+	DeleteSiteRun(ctx context.Context, params DeleteSiteRunParams) error
 	// DeleteView implements deleteView operation.
 	//
 	// Удалить свой вид.
@@ -151,6 +157,18 @@ type Handler interface {
 	//
 	// GET /metrics/entity
 	EntityMetrics(ctx context.Context, params EntityMetricsParams) ([]MetricValue, error)
+	// EvaluateSite implements evaluateSite operation.
+	//
+	// Ячейки с долей любой выбранной исключающей зоны не
+	// меньше порога исключаются; остальные ранжируются TOPSIS
+	// (векторная нормировка, пропуск — худшее значение
+	// критерия). Веса — прямые или по матрице попарных
+	// сравнений МАИ (главный собственный вектор, CR Saaty).
+	// Лучшие кандидаты — с разнесением; вклад критериев и
+	// чувствительность к весам ±20 %.
+	//
+	// POST /site-selection/evaluate
+	EvaluateSite(ctx context.Context, req *SiteParams) (*SiteResult, error)
 	// FacilityArea implements facilityArea operation.
 	//
 	// Объекты реестра (число, площади, типы, крупнейшие),
@@ -305,6 +323,12 @@ type Handler interface {
 	//
 	// GET /regulation/signs
 	GetSignQuality(ctx context.Context) (*SignQuality, error)
+	// GetSiteRun implements getSiteRun operation.
+	//
+	// Сохранённая оценка.
+	//
+	// GET /site-selection/runs/{runId}
+	GetSiteRun(ctx context.Context, params GetSiteRunParams) (*SiteRun, error)
 	// GetTerritory implements getTerritory operation.
 	//
 	// Профиль территории — показатели, граница, население,
@@ -401,6 +425,12 @@ type Handler interface {
 	//
 	// GET /scenarios
 	ListScenarios(ctx context.Context) ([]Scenario, error)
+	// ListSiteRuns implements listSiteRuns operation.
+	//
+	// Мои сохранённые оценки локации.
+	//
+	// GET /site-selection/runs
+	ListSiteRuns(ctx context.Context) ([]SiteRun, error)
 	// ListSources implements listSources operation.
 	//
 	// Источники данных со свежестью и последним запуском.
@@ -536,6 +566,12 @@ type Handler interface {
 	//
 	// PUT /indexes/{code}/config
 	SaveIndexConfig(ctx context.Context, req *SaveIndexConfigReq, params SaveIndexConfigParams) error
+	// SaveSiteRun implements saveSiteRun operation.
+	//
+	// Сохранить оценку (параметры и лучших кандидатов).
+	//
+	// POST /site-selection/runs
+	SaveSiteRun(ctx context.Context, req *SiteRunRequest) (*SiteRun, error)
 	// ScenarioClosures implements scenarioClosures operation.
 	//
 	// Перекрытия сценария (GeoJSON).
@@ -589,6 +625,18 @@ type Handler interface {
 	//
 	// GET /search/suggest
 	SearchSuggest(ctx context.Context, params SearchSuggestParams) ([]SearchHit, error)
+	// SiteCatalog implements siteCatalog operation.
+	//
+	// Критерии и исключающие зоны оценки локации.
+	//
+	// GET /site-selection/catalog
+	SiteCatalog(ctx context.Context) (*SiteCatalog, error)
+	// SiteCells implements siteCells operation.
+	//
+	// Сетка ячеек H3 Москвы (GeoJSON) для карты пригодности.
+	//
+	// GET /site-selection/cells
+	SiteCells(ctx context.Context, params SiteCellsParams) (SiteCellsOK, error)
 	// StartRun implements startRun operation.
 	//
 	// Запустить загрузку.

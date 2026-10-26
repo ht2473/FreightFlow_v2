@@ -33,17 +33,6 @@ export const sections: Section[] = [
     ],
   },
   {
-    path: "/site-selection",
-    title: "Оценка локации",
-    permission: "scenarios.manage",
-    summary: "Поиск мест под логистический объект по критериям и весам.",
-    points: [
-      "Критерии из каталога показателей и исключающие зоны",
-      "Веса напрямую или попарным сравнением",
-      "Ранжирование ячеек H3 с объяснением вклада критериев",
-    ],
-  },
-  {
     path: "/reports",
     title: "Отчёты",
     permission: "reports.view",

@@ -188,6 +188,15 @@ func (UnimplementedHandler) DeleteScenario(ctx context.Context, params DeleteSce
 	return ht.ErrNotImplemented
 }
 
+// DeleteSiteRun implements deleteSiteRun operation.
+//
+// Удалить сохранённую оценку.
+//
+// DELETE /site-selection/runs/{runId}
+func (UnimplementedHandler) DeleteSiteRun(ctx context.Context, params DeleteSiteRunParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DeleteView implements deleteView operation.
 //
 // Удалить свой вид.
@@ -213,6 +222,21 @@ func (UnimplementedHandler) DisableTotp(ctx context.Context, req *PasswordConfir
 //
 // GET /metrics/entity
 func (UnimplementedHandler) EntityMetrics(ctx context.Context, params EntityMetricsParams) (r []MetricValue, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// EvaluateSite implements evaluateSite operation.
+//
+// Ячейки с долей любой выбранной исключающей зоны не
+// меньше порога исключаются; остальные ранжируются TOPSIS
+// (векторная нормировка, пропуск — худшее значение
+// критерия). Веса — прямые или по матрице попарных
+// сравнений МАИ (главный собственный вектор, CR Saaty).
+// Лучшие кандидаты — с разнесением; вклад критериев и
+// чувствительность к весам ±20 %.
+//
+// POST /site-selection/evaluate
+func (UnimplementedHandler) EvaluateSite(ctx context.Context, req *SiteParams) (r *SiteResult, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -433,6 +457,15 @@ func (UnimplementedHandler) GetSignQuality(ctx context.Context) (r *SignQuality,
 	return r, ht.ErrNotImplemented
 }
 
+// GetSiteRun implements getSiteRun operation.
+//
+// Сохранённая оценка.
+//
+// GET /site-selection/runs/{runId}
+func (UnimplementedHandler) GetSiteRun(ctx context.Context, params GetSiteRunParams) (r *SiteRun, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetTerritory implements getTerritory operation.
 //
 // Профиль территории — показатели, граница, население,
@@ -571,6 +604,15 @@ func (UnimplementedHandler) ListScenarioElements(ctx context.Context, params Lis
 //
 // GET /scenarios
 func (UnimplementedHandler) ListScenarios(ctx context.Context) (r []Scenario, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListSiteRuns implements listSiteRuns operation.
+//
+// Мои сохранённые оценки локации.
+//
+// GET /site-selection/runs
+func (UnimplementedHandler) ListSiteRuns(ctx context.Context) (r []SiteRun, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -772,6 +814,15 @@ func (UnimplementedHandler) SaveIndexConfig(ctx context.Context, req *SaveIndexC
 	return ht.ErrNotImplemented
 }
 
+// SaveSiteRun implements saveSiteRun operation.
+//
+// Сохранить оценку (параметры и лучших кандидатов).
+//
+// POST /site-selection/runs
+func (UnimplementedHandler) SaveSiteRun(ctx context.Context, req *SiteRunRequest) (r *SiteRun, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ScenarioClosures implements scenarioClosures operation.
 //
 // Перекрытия сценария (GeoJSON).
@@ -846,6 +897,24 @@ func (UnimplementedHandler) SearchParse(ctx context.Context, params SearchParseP
 //
 // GET /search/suggest
 func (UnimplementedHandler) SearchSuggest(ctx context.Context, params SearchSuggestParams) (r []SearchHit, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SiteCatalog implements siteCatalog operation.
+//
+// Критерии и исключающие зоны оценки локации.
+//
+// GET /site-selection/catalog
+func (UnimplementedHandler) SiteCatalog(ctx context.Context) (r *SiteCatalog, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SiteCells implements siteCells operation.
+//
+// Сетка ячеек H3 Москвы (GeoJSON) для карты пригодности.
+//
+// GET /site-selection/cells
+func (UnimplementedHandler) SiteCells(ctx context.Context, params SiteCellsParams) (r SiteCellsOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

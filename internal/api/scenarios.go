@@ -267,3 +267,109 @@ func (s *Server) RunResilience(ctx context.Context) error {
 	}
 	return s.identity.Audit(ctx, &p, identity.AuditEntry{Action: "resilience.queued", EntityType: "resilience"}, meta(ctx))
 }
+
+func (s *Server) SiteCatalog(context.Context) (*gen.SiteCatalog, error) {
+	out := &gen.SiteCatalog{}
+	for _, c := range scenario.SiteCriteria {
+		out.Criteria = append(out.Criteria, gen.SiteCriterionDef{
+			Metric: c.Metric, Title: c.Title, Unit: c.Unit, Benefit: c.Benefit, Note: c.Note,
+		})
+	}
+	for _, e := range scenario.SiteExclusions {
+		out.Exclusions = append(out.Exclusions, gen.SiteExclusionDef{Code: e.Code, Title: e.Title})
+	}
+	return out, nil
+}
+
+func (s *Server) SiteCells(ctx context.Context, params gen.SiteCellsParams) (gen.SiteCellsOK, error) {
+	raw, err := s.scenarios.SiteCells(ctx, int(params.Resolution))
+	if err != nil {
+		return nil, err
+	}
+	obj, err := rawObject(raw)
+	return gen.SiteCellsOK(obj), err
+}
+
+func (s *Server) EvaluateSite(ctx context.Context, req *gen.SiteParams) (*gen.SiteResult, error) {
+	var p scenario.SiteParams
+	if err := recode(&p, req); err != nil {
+		return nil, err
+	}
+	r, err := s.scenarios.EvaluateSite(ctx, p)
+	if err != nil {
+		return nil, err
+	}
+	var out gen.SiteResult
+	return &out, recode(&out, r)
+}
+
+func toSiteRun(r *scenario.SiteRun) (gen.SiteRun, error) {
+	out := gen.SiteRun{ID: r.ID, Name: r.Name, Weights: r.Weights, CreatedAt: r.CreatedAt}
+	if err := recode(&out.Params, r.Params); err != nil {
+		return out, err
+	}
+	if err := recode(&out.Top, r.Top); err != nil {
+		return out, err
+	}
+	if r.AHP != nil {
+		var a gen.SiteAhp
+		if err := recode(&a, r.AHP); err != nil {
+			return out, err
+		}
+		out.Ahp = gen.NewOptSiteAhp(a)
+	}
+	return out, nil
+}
+
+func (s *Server) SaveSiteRun(ctx context.Context, req *gen.SiteRunRequest) (*gen.SiteRun, error) {
+	p := principal(ctx)
+	var params scenario.SiteParams
+	if err := recode(&params, &req.Params); err != nil {
+		return nil, err
+	}
+	r, err := s.scenarios.SaveSite(ctx, p.UserID, req.Name, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.identity.Audit(ctx, &p, identity.AuditEntry{
+		Action: "site_selection.saved", EntityType: "site_selection", EntityID: r.ID.String(),
+		Details: map[string]any{"name": r.Name, "criteria": len(r.Params.Criteria)},
+	}, meta(ctx)); err != nil {
+		return nil, err
+	}
+	out, err := toSiteRun(r)
+	return &out, err
+}
+
+func (s *Server) ListSiteRuns(ctx context.Context) ([]gen.SiteRun, error) {
+	list, err := s.scenarios.SiteRuns(ctx, principal(ctx).UserID, recentScenarios)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]gen.SiteRun, len(list))
+	for i := range list {
+		if out[i], err = toSiteRun(&list[i]); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+
+func (s *Server) GetSiteRun(ctx context.Context, params gen.GetSiteRunParams) (*gen.SiteRun, error) {
+	r, err := s.scenarios.SiteRunByID(ctx, principal(ctx).UserID, params.RunId)
+	if err != nil {
+		return nil, err
+	}
+	out, err := toSiteRun(r)
+	return &out, err
+}
+
+func (s *Server) DeleteSiteRun(ctx context.Context, params gen.DeleteSiteRunParams) error {
+	p := principal(ctx)
+	if err := s.scenarios.DeleteSiteRun(ctx, p.UserID, params.RunId); err != nil {
+		return err
+	}
+	return s.identity.Audit(ctx, &p, identity.AuditEntry{
+		Action: "site_selection.deleted", EntityType: "site_selection", EntityID: params.RunId.String(),
+	}, meta(ctx))
+}
