@@ -344,6 +344,71 @@ func decodeDataUpdatesParams(args [0]string, argsEscaped bool, r *http.Request) 
 	return params, nil
 }
 
+// DeleteScenarioParams is parameters of deleteScenario operation.
+type DeleteScenarioParams struct {
+	ScenarioId uuid.UUID
+}
+
+func unpackDeleteScenarioParams(packed middleware.Parameters) (params DeleteScenarioParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scenarioId",
+			In:   "path",
+		}
+		params.ScenarioId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteScenarioParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteScenarioParams, _ error) {
+	// Decode path: scenarioId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "scenarioId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ScenarioId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scenarioId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DeleteViewParams is parameters of deleteView operation.
 type DeleteViewParams struct {
 	ViewId uuid.UUID
@@ -2183,6 +2248,71 @@ func decodeGetRunParams(args [1]string, argsEscaped bool, r *http.Request) (para
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "runId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetScenarioParams is parameters of getScenario operation.
+type GetScenarioParams struct {
+	ScenarioId uuid.UUID
+}
+
+func unpackGetScenarioParams(packed middleware.Parameters) (params GetScenarioParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scenarioId",
+			In:   "path",
+		}
+		params.ScenarioId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetScenarioParams(args [1]string, argsEscaped bool, r *http.Request) (params GetScenarioParams, _ error) {
+	// Decode path: scenarioId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "scenarioId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ScenarioId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scenarioId",
 			In:   "path",
 			Err:  err,
 		}
@@ -4216,6 +4346,179 @@ func decodeListRunsParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 	return params, nil
 }
 
+// ListScenarioElementsParams is parameters of listScenarioElements operation.
+type ListScenarioElementsParams struct {
+	// Часть названия.
+	Q     OptString `json:",omitempty,omitzero"`
+	Limit OptInt    `json:",omitempty,omitzero"`
+}
+
+func unpackListScenarioElementsParams(packed middleware.Parameters) (params ListScenarioElementsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "q",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Q = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeListScenarioElementsParams(args [0]string, argsEscaped bool, r *http.Request) (params ListScenarioElementsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: q.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "q",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotQVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotQVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Q.SetTo(paramsDotQVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Q.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     100,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "q",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(50)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           200,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ListTerritoriesParams is parameters of listTerritories operation.
 type ListTerritoriesParams struct {
 	Kind OptListTerritoriesKind `json:",omitempty,omitzero"`
@@ -5020,6 +5323,71 @@ func decodeReportFacilityIssueParams(args [1]string, argsEscaped bool, r *http.R
 	return params, nil
 }
 
+// RerunScenarioParams is parameters of rerunScenario operation.
+type RerunScenarioParams struct {
+	ScenarioId uuid.UUID
+}
+
+func unpackRerunScenarioParams(packed middleware.Parameters) (params RerunScenarioParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scenarioId",
+			In:   "path",
+		}
+		params.ScenarioId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeRerunScenarioParams(args [1]string, argsEscaped bool, r *http.Request) (params RerunScenarioParams, _ error) {
+	// Decode path: scenarioId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "scenarioId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ScenarioId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scenarioId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ResetIndexConfigParams is parameters of resetIndexConfig operation.
 type ResetIndexConfigParams struct {
 	Code string
@@ -5634,6 +6002,582 @@ func decodeSaveIndexConfigParams(args [1]string, argsEscaped bool, r *http.Reque
 		return params, &ogenerrors.DecodeParamError{
 			Name: "code",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ScenarioDistrictsParams is parameters of scenarioDistricts operation.
+type ScenarioDistrictsParams struct {
+	ScenarioId uuid.UUID
+	Target     ScenarioTargetKind
+}
+
+func unpackScenarioDistrictsParams(packed middleware.Parameters) (params ScenarioDistrictsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scenarioId",
+			In:   "path",
+		}
+		params.ScenarioId = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "target",
+			In:   "query",
+		}
+		params.Target = packed[key].(ScenarioTargetKind)
+	}
+	return params
+}
+
+func decodeScenarioDistrictsParams(args [1]string, argsEscaped bool, r *http.Request) (params ScenarioDistrictsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: scenarioId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "scenarioId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ScenarioId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scenarioId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: target.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "target",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Target = ScenarioTargetKind(c)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.Target.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "target",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ScenarioFacilitiesParams is parameters of scenarioFacilities operation.
+type ScenarioFacilitiesParams struct {
+	ScenarioId uuid.UUID
+	Target     ScenarioTargetKind
+	// Все объекты, а не только изменившиеся.
+	All   OptBool `json:",omitempty,omitzero"`
+	Limit OptInt  `json:",omitempty,omitzero"`
+}
+
+func unpackScenarioFacilitiesParams(packed middleware.Parameters) (params ScenarioFacilitiesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scenarioId",
+			In:   "path",
+		}
+		params.ScenarioId = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "target",
+			In:   "query",
+		}
+		params.Target = packed[key].(ScenarioTargetKind)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "all",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.All = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeScenarioFacilitiesParams(args [1]string, argsEscaped bool, r *http.Request) (params ScenarioFacilitiesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: scenarioId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "scenarioId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ScenarioId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scenarioId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: target.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "target",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Target = ScenarioTargetKind(c)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.Target.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "target",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: all.
+	{
+		val := bool(false)
+		params.All.SetTo(val)
+	}
+	// Decode query: all.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "all",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotAllVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAllVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.All.SetTo(paramsDotAllVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "all",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(500)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           5000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ScenarioIsochronesParams is parameters of scenarioIsochrones operation.
+type ScenarioIsochronesParams struct {
+	ScenarioId uuid.UUID
+}
+
+func unpackScenarioIsochronesParams(packed middleware.Parameters) (params ScenarioIsochronesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scenarioId",
+			In:   "path",
+		}
+		params.ScenarioId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeScenarioIsochronesParams(args [1]string, argsEscaped bool, r *http.Request) (params ScenarioIsochronesParams, _ error) {
+	// Decode path: scenarioId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "scenarioId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ScenarioId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scenarioId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ScenarioSegmentAtParams is parameters of scenarioSegmentAt operation.
+type ScenarioSegmentAtParams struct {
+	Lon float64
+	Lat float64
+}
+
+func unpackScenarioSegmentAtParams(packed middleware.Parameters) (params ScenarioSegmentAtParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "lon",
+			In:   "query",
+		}
+		params.Lon = packed[key].(float64)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "lat",
+			In:   "query",
+		}
+		params.Lat = packed[key].(float64)
+	}
+	return params
+}
+
+func decodeScenarioSegmentAtParams(args [0]string, argsEscaped bool, r *http.Request) (params ScenarioSegmentAtParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: lon.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "lon",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToFloat64(val)
+				if err != nil {
+					return err
+				}
+
+				params.Lon = c
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.Float{
+					MinSet:        true,
+					Min:           -180,
+					MaxSet:        true,
+					Max:           180,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    nil,
+					Pattern:       nil,
+				}).Validate(float64(params.Lon)); err != nil {
+					return errors.Wrap(err, "float")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "lon",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: lat.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "lat",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToFloat64(val)
+				if err != nil {
+					return err
+				}
+
+				params.Lat = c
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.Float{
+					MinSet:        true,
+					Min:           -85,
+					MaxSet:        true,
+					Max:           85,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    nil,
+					Pattern:       nil,
+				}).Validate(float64(params.Lat)); err != nil {
+					return errors.Wrap(err, "float")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "lat",
+			In:   "query",
 			Err:  err,
 		}
 	}

@@ -119,6 +119,19 @@ func (UnimplementedHandler) CreateInvite(ctx context.Context, req *CreateInvite)
 	return r, ht.ErrNotImplemented
 }
 
+// CreateScenario implements createScenario operation.
+//
+// Сценарий считается фоновой задачей: ответ — сценарий
+// со статусом `queued`. Ход расчёта — события `job.progress` потока
+// `GET /events` и поле `progress`; о завершении сообщает событие
+// `scenario.computed`. База и сценарий считаются с одинаковыми
+// параметрами, различаются только изменения сценария.
+//
+// POST /scenarios
+func (UnimplementedHandler) CreateScenario(ctx context.Context, req *ScenarioRequest) (r *Scenario, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateToken implements createToken operation.
 //
 // Выпустить токен API.
@@ -164,6 +177,15 @@ func (UnimplementedHandler) CurateFacility(ctx context.Context, req *CurationReq
 // GET /data/updates
 func (UnimplementedHandler) DataUpdates(ctx context.Context, params DataUpdatesParams) (r []DataUpdatesOKItem, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// DeleteScenario implements deleteScenario operation.
+//
+// Удалить сценарий с результатами.
+//
+// DELETE /scenarios/{scenarioId}
+func (UnimplementedHandler) DeleteScenario(ctx context.Context, params DeleteScenarioParams) error {
+	return ht.ErrNotImplemented
 }
 
 // DeleteView implements deleteView operation.
@@ -365,6 +387,15 @@ func (UnimplementedHandler) GetRun(ctx context.Context, params GetRunParams) (r 
 	return r, ht.ErrNotImplemented
 }
 
+// GetScenario implements getScenario operation.
+//
+// Сценарий, ход расчёта и итог.
+//
+// GET /scenarios/{scenarioId}
+func (UnimplementedHandler) GetScenario(ctx context.Context, params GetScenarioParams) (r *Scenario, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetSettings implements getSettings operation.
 //
 // Личные настройки.
@@ -510,6 +541,24 @@ func (UnimplementedHandler) ListRuns(ctx context.Context, params ListRunsParams)
 	return r, ht.ErrNotImplemented
 }
 
+// ListScenarioElements implements listScenarioElements operation.
+//
+// Мосты и участки рейтинга критичности для перекрытия.
+//
+// GET /scenarios/elements
+func (UnimplementedHandler) ListScenarioElements(ctx context.Context, params ListScenarioElementsParams) (r []ScenarioElement, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListScenarios implements listScenarios operation.
+//
+// Мои сценарии.
+//
+// GET /scenarios
+func (UnimplementedHandler) ListScenarios(ctx context.Context) (r []Scenario, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListSources implements listSources operation.
 //
 // Источники данных со свежестью и последним запуском.
@@ -604,6 +653,16 @@ func (UnimplementedHandler) ReportFacilityIssue(ctx context.Context, req *Report
 	return r, ht.ErrNotImplemented
 }
 
+// RerunScenario implements rerunScenario operation.
+//
+// Пересчитать сценарий (например, после обновления
+// графа).
+//
+// POST /scenarios/{scenarioId}/rerun
+func (UnimplementedHandler) RerunScenario(ctx context.Context, params RerunScenarioParams) (r *Scenario, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ResetDashboard implements resetDashboard operation.
 //
 // Вернуть дашборд по умолчанию.
@@ -687,6 +746,42 @@ func (UnimplementedHandler) SaveDashboard(ctx context.Context, req *SaveDashboar
 // PUT /indexes/{code}/config
 func (UnimplementedHandler) SaveIndexConfig(ctx context.Context, req *SaveIndexConfigReq, params SaveIndexConfigParams) error {
 	return ht.ErrNotImplemented
+}
+
+// ScenarioDistricts implements scenarioDistricts operation.
+//
+// Изменения доступности по районам.
+//
+// GET /scenarios/{scenarioId}/districts
+func (UnimplementedHandler) ScenarioDistricts(ctx context.Context, params ScenarioDistrictsParams) (r []ScenarioDistrict, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ScenarioFacilities implements scenarioFacilities operation.
+//
+// Изменение времени объектов до цели.
+//
+// GET /scenarios/{scenarioId}/facilities
+func (UnimplementedHandler) ScenarioFacilities(ctx context.Context, params ScenarioFacilitiesParams) (r []ScenarioFacility, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ScenarioIsochrones implements scenarioIsochrones operation.
+//
+// Изохроны базы и сценария (GeoJSON).
+//
+// GET /scenarios/{scenarioId}/isochrones
+func (UnimplementedHandler) ScenarioIsochrones(ctx context.Context, params ScenarioIsochronesParams) (r ScenarioIsochronesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ScenarioSegmentAt implements scenarioSegmentAt operation.
+//
+// Участок сети у точки (для перекрытия щелчком по карте).
+//
+// GET /scenarios/segment-at
+func (UnimplementedHandler) ScenarioSegmentAt(ctx context.Context, params ScenarioSegmentAtParams) (r *ScenarioSegment, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // Search implements search operation.

@@ -84,6 +84,16 @@ type Handler interface {
 	//
 	// POST /admin/invites
 	CreateInvite(ctx context.Context, req *CreateInvite) (*InviteCreated, error)
+	// CreateScenario implements createScenario operation.
+	//
+	// Сценарий считается фоновой задачей: ответ — сценарий
+	// со статусом `queued`. Ход расчёта — события `job.progress` потока
+	// `GET /events` и поле `progress`; о завершении сообщает событие
+	// `scenario.computed`. База и сценарий считаются с одинаковыми
+	// параметрами, различаются только изменения сценария.
+	//
+	// POST /scenarios
+	CreateScenario(ctx context.Context, req *ScenarioRequest) (*Scenario, error)
 	// CreateToken implements createToken operation.
 	//
 	// Выпустить токен API.
@@ -116,6 +126,12 @@ type Handler interface {
 	//
 	// GET /data/updates
 	DataUpdates(ctx context.Context, params DataUpdatesParams) ([]DataUpdatesOKItem, error)
+	// DeleteScenario implements deleteScenario operation.
+	//
+	// Удалить сценарий с результатами.
+	//
+	// DELETE /scenarios/{scenarioId}
+	DeleteScenario(ctx context.Context, params DeleteScenarioParams) error
 	// DeleteView implements deleteView operation.
 	//
 	// Удалить свой вид.
@@ -255,6 +271,12 @@ type Handler interface {
 	//
 	// GET /data/runs/{runId}
 	GetRun(ctx context.Context, params GetRunParams) (*RunDetail, error)
+	// GetScenario implements getScenario operation.
+	//
+	// Сценарий, ход расчёта и итог.
+	//
+	// GET /scenarios/{scenarioId}
+	GetScenario(ctx context.Context, params GetScenarioParams) (*Scenario, error)
 	// GetSettings implements getSettings operation.
 	//
 	// Личные настройки.
@@ -355,6 +377,18 @@ type Handler interface {
 	//
 	// GET /data/sources/{code}/runs
 	ListRuns(ctx context.Context, params ListRunsParams) ([]Run, error)
+	// ListScenarioElements implements listScenarioElements operation.
+	//
+	// Мосты и участки рейтинга критичности для перекрытия.
+	//
+	// GET /scenarios/elements
+	ListScenarioElements(ctx context.Context, params ListScenarioElementsParams) ([]ScenarioElement, error)
+	// ListScenarios implements listScenarios operation.
+	//
+	// Мои сценарии.
+	//
+	// GET /scenarios
+	ListScenarios(ctx context.Context) ([]Scenario, error)
 	// ListSources implements listSources operation.
 	//
 	// Источники данных со свежестью и последним запуском.
@@ -419,6 +453,13 @@ type Handler interface {
 	//
 	// POST /facilities/{facilityId}/reports
 	ReportFacilityIssue(ctx context.Context, req *ReportFacilityIssueReq, params ReportFacilityIssueParams) (*FacilityReport, error)
+	// RerunScenario implements rerunScenario operation.
+	//
+	// Пересчитать сценарий (например, после обновления
+	// графа).
+	//
+	// POST /scenarios/{scenarioId}/rerun
+	RerunScenario(ctx context.Context, params RerunScenarioParams) (*Scenario, error)
 	// ResetDashboard implements resetDashboard operation.
 	//
 	// Вернуть дашборд по умолчанию.
@@ -477,6 +518,30 @@ type Handler interface {
 	//
 	// PUT /indexes/{code}/config
 	SaveIndexConfig(ctx context.Context, req *SaveIndexConfigReq, params SaveIndexConfigParams) error
+	// ScenarioDistricts implements scenarioDistricts operation.
+	//
+	// Изменения доступности по районам.
+	//
+	// GET /scenarios/{scenarioId}/districts
+	ScenarioDistricts(ctx context.Context, params ScenarioDistrictsParams) ([]ScenarioDistrict, error)
+	// ScenarioFacilities implements scenarioFacilities operation.
+	//
+	// Изменение времени объектов до цели.
+	//
+	// GET /scenarios/{scenarioId}/facilities
+	ScenarioFacilities(ctx context.Context, params ScenarioFacilitiesParams) ([]ScenarioFacility, error)
+	// ScenarioIsochrones implements scenarioIsochrones operation.
+	//
+	// Изохроны базы и сценария (GeoJSON).
+	//
+	// GET /scenarios/{scenarioId}/isochrones
+	ScenarioIsochrones(ctx context.Context, params ScenarioIsochronesParams) (ScenarioIsochronesOK, error)
+	// ScenarioSegmentAt implements scenarioSegmentAt operation.
+	//
+	// Участок сети у точки (для перекрытия щелчком по карте).
+	//
+	// GET /scenarios/segment-at
+	ScenarioSegmentAt(ctx context.Context, params ScenarioSegmentAtParams) (*ScenarioSegment, error)
 	// Search implements search operation.
 	//
 	// Запрос разбирается в фильтры объектов (тип, округ,

@@ -27,6 +27,7 @@ const (
 	QueueIngest      = "ingest"
 	QueueOSM         = "osm"
 	QueueRouting     = "routing"
+	QueueScenario    = "scenario"
 	QueueAnalytics   = "analytics"
 	QueueSearch      = "search"
 	QueueReports     = "reports"
@@ -40,12 +41,14 @@ var queueWorkers = map[string]int{
 	QueueIngest:        2,
 	QueueOSM:           1,
 	QueueRouting:       1,
-	QueueAnalytics:     2,
-	QueueSearch:        1,
-	QueueReports:       2,
-	QueueNotify:        4,
-	QueueAlerts:        2,
-	QueueMaintenance:   1,
+	// Сценарии пользователя — отдельно от часового сетевого анализа в routing.
+	QueueScenario:    2,
+	QueueAnalytics:   2,
+	QueueSearch:      1,
+	QueueReports:     2,
+	QueueNotify:      4,
+	QueueAlerts:      2,
+	QueueMaintenance: 1,
 }
 
 // Client — клиент очереди; Insert и InsertTx ставят задачи.

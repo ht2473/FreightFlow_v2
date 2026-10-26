@@ -1193,6 +1193,150 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scenarios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Мои сценарии */
+        get: operations["listScenarios"];
+        put?: never;
+        /**
+         * Создать и посчитать сценарий
+         * @description Сценарий считается фоновой задачей: ответ — сценарий со статусом `queued`. Ход расчёта —
+         *     события `job.progress` потока `GET /events` и поле `progress`; о завершении сообщает
+         *     событие `scenario.computed`. База и сценарий считаются с одинаковыми параметрами,
+         *     различаются только изменения сценария.
+         */
+        post: operations["createScenario"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/elements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Мосты и участки рейтинга критичности для перекрытия */
+        get: operations["listScenarioElements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/segment-at": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Участок сети у точки (для перекрытия щелчком по карте) */
+        get: operations["scenarioSegmentAt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/{scenarioId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Сценарий, ход расчёта и итог */
+        get: operations["getScenario"];
+        put?: never;
+        post?: never;
+        /** Удалить сценарий с результатами */
+        delete: operations["deleteScenario"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/{scenarioId}/rerun": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Пересчитать сценарий (например, после обновления графа) */
+        post: operations["rerunScenario"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/{scenarioId}/facilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Изменение времени объектов до цели */
+        get: operations["scenarioFacilities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/{scenarioId}/districts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Изменения доступности по районам */
+        get: operations["scenarioDistricts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/{scenarioId}/isochrones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Изохроны базы и сценария (GeoJSON) */
+        get: operations["scenarioIsochrones"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2380,6 +2524,184 @@ export interface components {
             zones: components["schemas"]["ZoneVerdict"][];
             blocked?: components["schemas"]["BlockedPoint"];
         };
+        /**
+         * @description Цель доступности: МКАД, ТТК, центр, ж/д грузовые пункты
+         * @enum {string}
+         */
+        ScenarioTargetKind: "mkad" | "ttk" | "center" | "rail_freight";
+        /**
+         * @description Перекрытие: участки сети (`segments` — id участков), элемент рейтинга критичности
+         *     (`element` — номер в последнем сетевом анализе) или область (`polygon` — замкнутый контур).
+         */
+        ScenarioClosure: {
+            /** @enum {string} */
+            kind: "segments" | "element" | "area";
+            label?: string;
+            segments?: string[];
+            element?: number;
+            polygon?: number[][];
+        };
+        ScenarioNewFacility: {
+            name?: string;
+            lon: number;
+            lat: number;
+        };
+        ScenarioParams: {
+            /** @description Код типового профиля ТС */
+            profile: string;
+            /** @description Учитывать правила зон пропусков (иначе — физическая доступность по сети) */
+            zones: boolean;
+            passes?: components["schemas"]["VehiclePass"][];
+            /** Format: date-time */
+            depart?: string;
+            /** @description Решение по зоне в сценарии: true — открыта для профиля, false — закрыта */
+            zoneOverrides?: {
+                [key: string]: boolean;
+            };
+            closures?: components["schemas"]["ScenarioClosure"][];
+            newFacility?: components["schemas"]["ScenarioNewFacility"];
+            targets: components["schemas"]["ScenarioTargetKind"][];
+            isochroneMinutes?: number[];
+            isochroneFacilities?: string[];
+        };
+        ScenarioRequest: {
+            name: string;
+            description?: string;
+            params: components["schemas"]["ScenarioParams"];
+        };
+        ScenarioProgress: {
+            stage?: string;
+            done: number;
+            total: number;
+        };
+        ScenarioTargetSummary: {
+            kind: components["schemas"]["ScenarioTargetKind"];
+            /** @description Объектов с приростом времени */
+            affected: number;
+            /** @description Объектов с сокращением времени */
+            improved: number;
+            /** @description Потеряли доступ */
+            lost: number;
+            /** @description Получили доступ */
+            gained: number;
+            /** @description В закрытой зоне в сценарии */
+            blocked: number;
+            /** @description Суммарный прирост, объекто-минуты */
+            delayMin: number;
+            meanDelay: number;
+            maxDelay: number;
+            baseMedian: number;
+            scenarioMedian: number;
+        };
+        ScenarioClosureInfo: {
+            /** @enum {string} */
+            kind: "segments" | "element" | "area";
+            label: string;
+            segments: number;
+            lengthKm: number;
+            areaKm2?: number;
+            /** @description Рёбер графа, исключённых из расчёта (с направлениями) */
+            excluded: number;
+        };
+        /**
+         * @description ok — достижимо, unreachable — путь не найден, blocked — в закрытой зоне
+         * @enum {string}
+         */
+        ScenarioReach: "ok" | "unreachable" | "blocked";
+        ScenarioEntityTime: {
+            kind: components["schemas"]["ScenarioTargetKind"];
+            baseMin?: number;
+            scenarioMin?: number;
+            baseStatus: components["schemas"]["ScenarioReach"];
+            scenarioStatus: components["schemas"]["ScenarioReach"];
+        };
+        ScenarioIsoSummary: {
+            origin: string;
+            name: string;
+            minutes: number;
+            baseKm2: number;
+            scenarioKm2: number;
+        };
+        ScenarioZoneChange: {
+            /** @enum {string} */
+            zone: "sk" | "ttk" | "mkad";
+            baseClosed: boolean;
+            scenarioClosed: boolean;
+        };
+        ScenarioSummary: {
+            targets: components["schemas"]["ScenarioTargetSummary"][];
+            closures: components["schemas"]["ScenarioClosureInfo"][];
+            newFacility?: components["schemas"]["ScenarioEntityTime"][];
+            isochrones?: components["schemas"]["ScenarioIsoSummary"][];
+            zones?: components["schemas"]["ScenarioZoneChange"][];
+            /** @description База взята из показателей доступности (тот же граф) */
+            baseReused: boolean;
+            facilities: number;
+            durationMs: number;
+        };
+        Scenario: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            description: string;
+            params: components["schemas"]["ScenarioParams"];
+            /** @enum {string} */
+            status: "queued" | "running" | "done" | "failed";
+            progress: components["schemas"]["ScenarioProgress"];
+            summary?: components["schemas"]["ScenarioSummary"];
+            error?: string;
+            /** Format: date-time */
+            graphBuiltAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: date-time */
+            finishedAt?: string;
+        };
+        ScenarioFacility: {
+            /** @description id объекта реестра или new */
+            entity: string;
+            name: string;
+            district: string;
+            point: components["schemas"]["LngLat"];
+            baseMin?: number;
+            scenarioMin?: number;
+            baseStatus: components["schemas"]["ScenarioReach"];
+            scenarioStatus: components["schemas"]["ScenarioReach"];
+        };
+        ScenarioDistrict: {
+            district: string;
+            facilities: number;
+            affected: number;
+            lost: number;
+            delayMin: number;
+            maxDelay: number;
+        };
+        ScenarioElement: {
+            id: number;
+            /** @enum {string} */
+            kind: "bridge" | "segment";
+            name: string;
+            rank: number;
+            /** @description Ущерб по рейтингу критичности, объекто-минуты */
+            damageMin: number;
+            /** @description Линия GeoJSON */
+            geometry: {
+                [key: string]: unknown;
+            };
+        };
+        ScenarioSegment: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            class: string;
+            lengthM: number;
+            /** @description Линия GeoJSON */
+            geometry: {
+                [key: string]: unknown;
+            };
+        };
     };
     responses: {
         /** @description Ошибка (RFC 9457) */
@@ -2397,6 +2719,8 @@ export interface components {
         UserId: string;
         TokenId: string;
         FacilityId: string;
+        ScenarioId: string;
+        ScenarioTarget: components["schemas"]["ScenarioTargetKind"];
         ExportId: string;
         /** @description Подстрока названия или адреса */
         FacilityQ: string;
@@ -4341,6 +4665,246 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NetworkAnalysis"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listScenarios: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сценарии, новые сверху */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createScenario: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScenarioRequest"];
+            };
+        };
+        responses: {
+            /** @description Сценарий поставлен в расчёт */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listScenarioElements: {
+        parameters: {
+            query?: {
+                /** @description Часть названия */
+                q?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Элементы по рейтингу */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioElement"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    scenarioSegmentAt: {
+        parameters: {
+            query: {
+                lon: number;
+                lat: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ближайший участок в 50 м */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioSegment"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getScenario: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scenarioId: components["parameters"]["ScenarioId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сценарий */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteScenario: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scenarioId: components["parameters"]["ScenarioId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Удалён */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    rerunScenario: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scenarioId: components["parameters"]["ScenarioId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сценарий поставлен в расчёт */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    scenarioFacilities: {
+        parameters: {
+            query: {
+                target: components["parameters"]["ScenarioTarget"];
+                /** @description Все объекты, а не только изменившиеся */
+                all?: boolean;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                scenarioId: components["parameters"]["ScenarioId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Объекты, сначала потерявшие доступ, затем по приросту времени */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioFacility"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    scenarioDistricts: {
+        parameters: {
+            query: {
+                target: components["parameters"]["ScenarioTarget"];
+            };
+            header?: never;
+            path: {
+                scenarioId: components["parameters"]["ScenarioId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Районы с изменениями */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioDistrict"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    scenarioIsochrones: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scenarioId: components["parameters"]["ScenarioId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description FeatureCollection, у контура — origin, name, minutes, variant (base, scenario), areaKm2 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             default: components["responses"]["Problem"];

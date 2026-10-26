@@ -1975,6 +1975,9 @@ func (s *DataUpdatesOKItem) SetDomains(val []string) {
 	s.Domains = val
 }
 
+// DeleteScenarioNoContent is response for DeleteScenario operation.
+type DeleteScenarioNoContent struct{}
+
 // DeleteViewNoContent is response for DeleteView operation.
 type DeleteViewNoContent struct{}
 
@@ -9121,6 +9124,144 @@ func (o OptRun) Or(d Run) Run {
 	return d
 }
 
+// NewOptScenarioNewFacility returns new OptScenarioNewFacility with value set to v.
+func NewOptScenarioNewFacility(v ScenarioNewFacility) OptScenarioNewFacility {
+	return OptScenarioNewFacility{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptScenarioNewFacility is optional ScenarioNewFacility.
+type OptScenarioNewFacility struct {
+	Value ScenarioNewFacility
+	Set   bool
+}
+
+// IsSet returns true if OptScenarioNewFacility was set.
+func (o OptScenarioNewFacility) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptScenarioNewFacility) Reset() {
+	var v ScenarioNewFacility
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptScenarioNewFacility) SetTo(v ScenarioNewFacility) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptScenarioNewFacility) Get() (v ScenarioNewFacility, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptScenarioNewFacility) Or(d ScenarioNewFacility) ScenarioNewFacility {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptScenarioParamsZoneOverrides returns new OptScenarioParamsZoneOverrides with value set to v.
+func NewOptScenarioParamsZoneOverrides(v ScenarioParamsZoneOverrides) OptScenarioParamsZoneOverrides {
+	return OptScenarioParamsZoneOverrides{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptScenarioParamsZoneOverrides is optional ScenarioParamsZoneOverrides.
+type OptScenarioParamsZoneOverrides struct {
+	Value ScenarioParamsZoneOverrides
+	Set   bool
+}
+
+// IsSet returns true if OptScenarioParamsZoneOverrides was set.
+func (o OptScenarioParamsZoneOverrides) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptScenarioParamsZoneOverrides) Reset() {
+	var v ScenarioParamsZoneOverrides
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptScenarioParamsZoneOverrides) SetTo(v ScenarioParamsZoneOverrides) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptScenarioParamsZoneOverrides) Get() (v ScenarioParamsZoneOverrides, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptScenarioParamsZoneOverrides) Or(d ScenarioParamsZoneOverrides) ScenarioParamsZoneOverrides {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptScenarioSummary returns new OptScenarioSummary with value set to v.
+func NewOptScenarioSummary(v ScenarioSummary) OptScenarioSummary {
+	return OptScenarioSummary{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptScenarioSummary is optional ScenarioSummary.
+type OptScenarioSummary struct {
+	Value ScenarioSummary
+	Set   bool
+}
+
+// IsSet returns true if OptScenarioSummary was set.
+func (o OptScenarioSummary) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptScenarioSummary) Reset() {
+	var v ScenarioSummary
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptScenarioSummary) SetTo(v ScenarioSummary) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptScenarioSummary) Get() (v ScenarioSummary, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptScenarioSummary) Or(d ScenarioSummary) ScenarioSummary {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSearchHit returns new OptSearchHit with value set to v.
 func NewOptSearchHit(v SearchHit) OptSearchHit {
 	return OptSearchHit{
@@ -11473,6 +11614,1576 @@ func (s *SavedViewParams) init() SavedViewParams {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #/components/schemas/Scenario
+type Scenario struct {
+	ID           uuid.UUID          `json:"id"`
+	Name         string             `json:"name"`
+	Description  string             `json:"description"`
+	Params       ScenarioParams     `json:"params"`
+	Status       ScenarioStatus     `json:"status"`
+	Progress     ScenarioProgress   `json:"progress"`
+	Summary      OptScenarioSummary `json:"summary"`
+	Error        OptString          `json:"error"`
+	GraphBuiltAt OptDateTime        `json:"graphBuiltAt"`
+	CreatedAt    time.Time          `json:"createdAt"`
+	StartedAt    OptDateTime        `json:"startedAt"`
+	FinishedAt   OptDateTime        `json:"finishedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *Scenario) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *Scenario) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *Scenario) GetDescription() string {
+	return s.Description
+}
+
+// GetParams returns the value of Params.
+func (s *Scenario) GetParams() ScenarioParams {
+	return s.Params
+}
+
+// GetStatus returns the value of Status.
+func (s *Scenario) GetStatus() ScenarioStatus {
+	return s.Status
+}
+
+// GetProgress returns the value of Progress.
+func (s *Scenario) GetProgress() ScenarioProgress {
+	return s.Progress
+}
+
+// GetSummary returns the value of Summary.
+func (s *Scenario) GetSummary() OptScenarioSummary {
+	return s.Summary
+}
+
+// GetError returns the value of Error.
+func (s *Scenario) GetError() OptString {
+	return s.Error
+}
+
+// GetGraphBuiltAt returns the value of GraphBuiltAt.
+func (s *Scenario) GetGraphBuiltAt() OptDateTime {
+	return s.GraphBuiltAt
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Scenario) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *Scenario) GetStartedAt() OptDateTime {
+	return s.StartedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *Scenario) GetFinishedAt() OptDateTime {
+	return s.FinishedAt
+}
+
+// SetID sets the value of ID.
+func (s *Scenario) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *Scenario) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *Scenario) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetParams sets the value of Params.
+func (s *Scenario) SetParams(val ScenarioParams) {
+	s.Params = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Scenario) SetStatus(val ScenarioStatus) {
+	s.Status = val
+}
+
+// SetProgress sets the value of Progress.
+func (s *Scenario) SetProgress(val ScenarioProgress) {
+	s.Progress = val
+}
+
+// SetSummary sets the value of Summary.
+func (s *Scenario) SetSummary(val OptScenarioSummary) {
+	s.Summary = val
+}
+
+// SetError sets the value of Error.
+func (s *Scenario) SetError(val OptString) {
+	s.Error = val
+}
+
+// SetGraphBuiltAt sets the value of GraphBuiltAt.
+func (s *Scenario) SetGraphBuiltAt(val OptDateTime) {
+	s.GraphBuiltAt = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Scenario) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *Scenario) SetStartedAt(val OptDateTime) {
+	s.StartedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *Scenario) SetFinishedAt(val OptDateTime) {
+	s.FinishedAt = val
+}
+
+// Перекрытие: участки сети (`segments` — id участков), элемент
+// рейтинга критичности (`element` — номер в последнем
+// сетевом анализе) или область (`polygon` — замкнутый
+// контур).
+// Ref: #/components/schemas/ScenarioClosure
+type ScenarioClosure struct {
+	Kind     ScenarioClosureKind `json:"kind"`
+	Label    OptString           `json:"label"`
+	Segments []uuid.UUID         `json:"segments"`
+	Element  OptInt              `json:"element"`
+	Polygon  [][]float64         `json:"polygon"`
+}
+
+// GetKind returns the value of Kind.
+func (s *ScenarioClosure) GetKind() ScenarioClosureKind {
+	return s.Kind
+}
+
+// GetLabel returns the value of Label.
+func (s *ScenarioClosure) GetLabel() OptString {
+	return s.Label
+}
+
+// GetSegments returns the value of Segments.
+func (s *ScenarioClosure) GetSegments() []uuid.UUID {
+	return s.Segments
+}
+
+// GetElement returns the value of Element.
+func (s *ScenarioClosure) GetElement() OptInt {
+	return s.Element
+}
+
+// GetPolygon returns the value of Polygon.
+func (s *ScenarioClosure) GetPolygon() [][]float64 {
+	return s.Polygon
+}
+
+// SetKind sets the value of Kind.
+func (s *ScenarioClosure) SetKind(val ScenarioClosureKind) {
+	s.Kind = val
+}
+
+// SetLabel sets the value of Label.
+func (s *ScenarioClosure) SetLabel(val OptString) {
+	s.Label = val
+}
+
+// SetSegments sets the value of Segments.
+func (s *ScenarioClosure) SetSegments(val []uuid.UUID) {
+	s.Segments = val
+}
+
+// SetElement sets the value of Element.
+func (s *ScenarioClosure) SetElement(val OptInt) {
+	s.Element = val
+}
+
+// SetPolygon sets the value of Polygon.
+func (s *ScenarioClosure) SetPolygon(val [][]float64) {
+	s.Polygon = val
+}
+
+// Ref: #/components/schemas/ScenarioClosureInfo
+type ScenarioClosureInfo struct {
+	Kind     ScenarioClosureInfoKind `json:"kind"`
+	Label    string                  `json:"label"`
+	Segments int                     `json:"segments"`
+	LengthKm float64                 `json:"lengthKm"`
+	AreaKm2  OptFloat64              `json:"areaKm2"`
+	// Рёбер графа, исключённых из расчёта (с направлениями).
+	Excluded int `json:"excluded"`
+}
+
+// GetKind returns the value of Kind.
+func (s *ScenarioClosureInfo) GetKind() ScenarioClosureInfoKind {
+	return s.Kind
+}
+
+// GetLabel returns the value of Label.
+func (s *ScenarioClosureInfo) GetLabel() string {
+	return s.Label
+}
+
+// GetSegments returns the value of Segments.
+func (s *ScenarioClosureInfo) GetSegments() int {
+	return s.Segments
+}
+
+// GetLengthKm returns the value of LengthKm.
+func (s *ScenarioClosureInfo) GetLengthKm() float64 {
+	return s.LengthKm
+}
+
+// GetAreaKm2 returns the value of AreaKm2.
+func (s *ScenarioClosureInfo) GetAreaKm2() OptFloat64 {
+	return s.AreaKm2
+}
+
+// GetExcluded returns the value of Excluded.
+func (s *ScenarioClosureInfo) GetExcluded() int {
+	return s.Excluded
+}
+
+// SetKind sets the value of Kind.
+func (s *ScenarioClosureInfo) SetKind(val ScenarioClosureInfoKind) {
+	s.Kind = val
+}
+
+// SetLabel sets the value of Label.
+func (s *ScenarioClosureInfo) SetLabel(val string) {
+	s.Label = val
+}
+
+// SetSegments sets the value of Segments.
+func (s *ScenarioClosureInfo) SetSegments(val int) {
+	s.Segments = val
+}
+
+// SetLengthKm sets the value of LengthKm.
+func (s *ScenarioClosureInfo) SetLengthKm(val float64) {
+	s.LengthKm = val
+}
+
+// SetAreaKm2 sets the value of AreaKm2.
+func (s *ScenarioClosureInfo) SetAreaKm2(val OptFloat64) {
+	s.AreaKm2 = val
+}
+
+// SetExcluded sets the value of Excluded.
+func (s *ScenarioClosureInfo) SetExcluded(val int) {
+	s.Excluded = val
+}
+
+type ScenarioClosureInfoKind string
+
+const (
+	ScenarioClosureInfoKindSegments ScenarioClosureInfoKind = "segments"
+	ScenarioClosureInfoKindElement  ScenarioClosureInfoKind = "element"
+	ScenarioClosureInfoKindArea     ScenarioClosureInfoKind = "area"
+)
+
+// AllValues returns all ScenarioClosureInfoKind values.
+func (ScenarioClosureInfoKind) AllValues() []ScenarioClosureInfoKind {
+	return []ScenarioClosureInfoKind{
+		ScenarioClosureInfoKindSegments,
+		ScenarioClosureInfoKindElement,
+		ScenarioClosureInfoKindArea,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScenarioClosureInfoKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ScenarioClosureInfoKindSegments:
+		return []byte(s), nil
+	case ScenarioClosureInfoKindElement:
+		return []byte(s), nil
+	case ScenarioClosureInfoKindArea:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScenarioClosureInfoKind) UnmarshalText(data []byte) error {
+	switch ScenarioClosureInfoKind(data) {
+	case ScenarioClosureInfoKindSegments:
+		*s = ScenarioClosureInfoKindSegments
+		return nil
+	case ScenarioClosureInfoKindElement:
+		*s = ScenarioClosureInfoKindElement
+		return nil
+	case ScenarioClosureInfoKindArea:
+		*s = ScenarioClosureInfoKindArea
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ScenarioClosureKind string
+
+const (
+	ScenarioClosureKindSegments ScenarioClosureKind = "segments"
+	ScenarioClosureKindElement  ScenarioClosureKind = "element"
+	ScenarioClosureKindArea     ScenarioClosureKind = "area"
+)
+
+// AllValues returns all ScenarioClosureKind values.
+func (ScenarioClosureKind) AllValues() []ScenarioClosureKind {
+	return []ScenarioClosureKind{
+		ScenarioClosureKindSegments,
+		ScenarioClosureKindElement,
+		ScenarioClosureKindArea,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScenarioClosureKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ScenarioClosureKindSegments:
+		return []byte(s), nil
+	case ScenarioClosureKindElement:
+		return []byte(s), nil
+	case ScenarioClosureKindArea:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScenarioClosureKind) UnmarshalText(data []byte) error {
+	switch ScenarioClosureKind(data) {
+	case ScenarioClosureKindSegments:
+		*s = ScenarioClosureKindSegments
+		return nil
+	case ScenarioClosureKindElement:
+		*s = ScenarioClosureKindElement
+		return nil
+	case ScenarioClosureKindArea:
+		*s = ScenarioClosureKindArea
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ScenarioDistrict
+type ScenarioDistrict struct {
+	District   string  `json:"district"`
+	Facilities int     `json:"facilities"`
+	Affected   int     `json:"affected"`
+	Lost       int     `json:"lost"`
+	DelayMin   float64 `json:"delayMin"`
+	MaxDelay   float64 `json:"maxDelay"`
+}
+
+// GetDistrict returns the value of District.
+func (s *ScenarioDistrict) GetDistrict() string {
+	return s.District
+}
+
+// GetFacilities returns the value of Facilities.
+func (s *ScenarioDistrict) GetFacilities() int {
+	return s.Facilities
+}
+
+// GetAffected returns the value of Affected.
+func (s *ScenarioDistrict) GetAffected() int {
+	return s.Affected
+}
+
+// GetLost returns the value of Lost.
+func (s *ScenarioDistrict) GetLost() int {
+	return s.Lost
+}
+
+// GetDelayMin returns the value of DelayMin.
+func (s *ScenarioDistrict) GetDelayMin() float64 {
+	return s.DelayMin
+}
+
+// GetMaxDelay returns the value of MaxDelay.
+func (s *ScenarioDistrict) GetMaxDelay() float64 {
+	return s.MaxDelay
+}
+
+// SetDistrict sets the value of District.
+func (s *ScenarioDistrict) SetDistrict(val string) {
+	s.District = val
+}
+
+// SetFacilities sets the value of Facilities.
+func (s *ScenarioDistrict) SetFacilities(val int) {
+	s.Facilities = val
+}
+
+// SetAffected sets the value of Affected.
+func (s *ScenarioDistrict) SetAffected(val int) {
+	s.Affected = val
+}
+
+// SetLost sets the value of Lost.
+func (s *ScenarioDistrict) SetLost(val int) {
+	s.Lost = val
+}
+
+// SetDelayMin sets the value of DelayMin.
+func (s *ScenarioDistrict) SetDelayMin(val float64) {
+	s.DelayMin = val
+}
+
+// SetMaxDelay sets the value of MaxDelay.
+func (s *ScenarioDistrict) SetMaxDelay(val float64) {
+	s.MaxDelay = val
+}
+
+// Ref: #/components/schemas/ScenarioElement
+type ScenarioElement struct {
+	ID   int                 `json:"id"`
+	Kind ScenarioElementKind `json:"kind"`
+	Name string              `json:"name"`
+	Rank int                 `json:"rank"`
+	// Ущерб по рейтингу критичности, объекто-минуты.
+	DamageMin float64 `json:"damageMin"`
+	// Линия GeoJSON.
+	Geometry ScenarioElementGeometry `json:"geometry"`
+}
+
+// GetID returns the value of ID.
+func (s *ScenarioElement) GetID() int {
+	return s.ID
+}
+
+// GetKind returns the value of Kind.
+func (s *ScenarioElement) GetKind() ScenarioElementKind {
+	return s.Kind
+}
+
+// GetName returns the value of Name.
+func (s *ScenarioElement) GetName() string {
+	return s.Name
+}
+
+// GetRank returns the value of Rank.
+func (s *ScenarioElement) GetRank() int {
+	return s.Rank
+}
+
+// GetDamageMin returns the value of DamageMin.
+func (s *ScenarioElement) GetDamageMin() float64 {
+	return s.DamageMin
+}
+
+// GetGeometry returns the value of Geometry.
+func (s *ScenarioElement) GetGeometry() ScenarioElementGeometry {
+	return s.Geometry
+}
+
+// SetID sets the value of ID.
+func (s *ScenarioElement) SetID(val int) {
+	s.ID = val
+}
+
+// SetKind sets the value of Kind.
+func (s *ScenarioElement) SetKind(val ScenarioElementKind) {
+	s.Kind = val
+}
+
+// SetName sets the value of Name.
+func (s *ScenarioElement) SetName(val string) {
+	s.Name = val
+}
+
+// SetRank sets the value of Rank.
+func (s *ScenarioElement) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetDamageMin sets the value of DamageMin.
+func (s *ScenarioElement) SetDamageMin(val float64) {
+	s.DamageMin = val
+}
+
+// SetGeometry sets the value of Geometry.
+func (s *ScenarioElement) SetGeometry(val ScenarioElementGeometry) {
+	s.Geometry = val
+}
+
+// Линия GeoJSON.
+type ScenarioElementGeometry map[string]jx.Raw
+
+func (s *ScenarioElementGeometry) init() ScenarioElementGeometry {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ScenarioElementKind string
+
+const (
+	ScenarioElementKindBridge  ScenarioElementKind = "bridge"
+	ScenarioElementKindSegment ScenarioElementKind = "segment"
+)
+
+// AllValues returns all ScenarioElementKind values.
+func (ScenarioElementKind) AllValues() []ScenarioElementKind {
+	return []ScenarioElementKind{
+		ScenarioElementKindBridge,
+		ScenarioElementKindSegment,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScenarioElementKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ScenarioElementKindBridge:
+		return []byte(s), nil
+	case ScenarioElementKindSegment:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScenarioElementKind) UnmarshalText(data []byte) error {
+	switch ScenarioElementKind(data) {
+	case ScenarioElementKindBridge:
+		*s = ScenarioElementKindBridge
+		return nil
+	case ScenarioElementKindSegment:
+		*s = ScenarioElementKindSegment
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ScenarioEntityTime
+type ScenarioEntityTime struct {
+	Kind           ScenarioTargetKind `json:"kind"`
+	BaseMin        OptFloat64         `json:"baseMin"`
+	ScenarioMin    OptFloat64         `json:"scenarioMin"`
+	BaseStatus     ScenarioReach      `json:"baseStatus"`
+	ScenarioStatus ScenarioReach      `json:"scenarioStatus"`
+}
+
+// GetKind returns the value of Kind.
+func (s *ScenarioEntityTime) GetKind() ScenarioTargetKind {
+	return s.Kind
+}
+
+// GetBaseMin returns the value of BaseMin.
+func (s *ScenarioEntityTime) GetBaseMin() OptFloat64 {
+	return s.BaseMin
+}
+
+// GetScenarioMin returns the value of ScenarioMin.
+func (s *ScenarioEntityTime) GetScenarioMin() OptFloat64 {
+	return s.ScenarioMin
+}
+
+// GetBaseStatus returns the value of BaseStatus.
+func (s *ScenarioEntityTime) GetBaseStatus() ScenarioReach {
+	return s.BaseStatus
+}
+
+// GetScenarioStatus returns the value of ScenarioStatus.
+func (s *ScenarioEntityTime) GetScenarioStatus() ScenarioReach {
+	return s.ScenarioStatus
+}
+
+// SetKind sets the value of Kind.
+func (s *ScenarioEntityTime) SetKind(val ScenarioTargetKind) {
+	s.Kind = val
+}
+
+// SetBaseMin sets the value of BaseMin.
+func (s *ScenarioEntityTime) SetBaseMin(val OptFloat64) {
+	s.BaseMin = val
+}
+
+// SetScenarioMin sets the value of ScenarioMin.
+func (s *ScenarioEntityTime) SetScenarioMin(val OptFloat64) {
+	s.ScenarioMin = val
+}
+
+// SetBaseStatus sets the value of BaseStatus.
+func (s *ScenarioEntityTime) SetBaseStatus(val ScenarioReach) {
+	s.BaseStatus = val
+}
+
+// SetScenarioStatus sets the value of ScenarioStatus.
+func (s *ScenarioEntityTime) SetScenarioStatus(val ScenarioReach) {
+	s.ScenarioStatus = val
+}
+
+// Ref: #/components/schemas/ScenarioFacility
+type ScenarioFacility struct {
+	// Id объекта реестра или new.
+	Entity         string        `json:"entity"`
+	Name           string        `json:"name"`
+	District       string        `json:"district"`
+	Point          LngLat        `json:"point"`
+	BaseMin        OptFloat64    `json:"baseMin"`
+	ScenarioMin    OptFloat64    `json:"scenarioMin"`
+	BaseStatus     ScenarioReach `json:"baseStatus"`
+	ScenarioStatus ScenarioReach `json:"scenarioStatus"`
+}
+
+// GetEntity returns the value of Entity.
+func (s *ScenarioFacility) GetEntity() string {
+	return s.Entity
+}
+
+// GetName returns the value of Name.
+func (s *ScenarioFacility) GetName() string {
+	return s.Name
+}
+
+// GetDistrict returns the value of District.
+func (s *ScenarioFacility) GetDistrict() string {
+	return s.District
+}
+
+// GetPoint returns the value of Point.
+func (s *ScenarioFacility) GetPoint() LngLat {
+	return s.Point
+}
+
+// GetBaseMin returns the value of BaseMin.
+func (s *ScenarioFacility) GetBaseMin() OptFloat64 {
+	return s.BaseMin
+}
+
+// GetScenarioMin returns the value of ScenarioMin.
+func (s *ScenarioFacility) GetScenarioMin() OptFloat64 {
+	return s.ScenarioMin
+}
+
+// GetBaseStatus returns the value of BaseStatus.
+func (s *ScenarioFacility) GetBaseStatus() ScenarioReach {
+	return s.BaseStatus
+}
+
+// GetScenarioStatus returns the value of ScenarioStatus.
+func (s *ScenarioFacility) GetScenarioStatus() ScenarioReach {
+	return s.ScenarioStatus
+}
+
+// SetEntity sets the value of Entity.
+func (s *ScenarioFacility) SetEntity(val string) {
+	s.Entity = val
+}
+
+// SetName sets the value of Name.
+func (s *ScenarioFacility) SetName(val string) {
+	s.Name = val
+}
+
+// SetDistrict sets the value of District.
+func (s *ScenarioFacility) SetDistrict(val string) {
+	s.District = val
+}
+
+// SetPoint sets the value of Point.
+func (s *ScenarioFacility) SetPoint(val LngLat) {
+	s.Point = val
+}
+
+// SetBaseMin sets the value of BaseMin.
+func (s *ScenarioFacility) SetBaseMin(val OptFloat64) {
+	s.BaseMin = val
+}
+
+// SetScenarioMin sets the value of ScenarioMin.
+func (s *ScenarioFacility) SetScenarioMin(val OptFloat64) {
+	s.ScenarioMin = val
+}
+
+// SetBaseStatus sets the value of BaseStatus.
+func (s *ScenarioFacility) SetBaseStatus(val ScenarioReach) {
+	s.BaseStatus = val
+}
+
+// SetScenarioStatus sets the value of ScenarioStatus.
+func (s *ScenarioFacility) SetScenarioStatus(val ScenarioReach) {
+	s.ScenarioStatus = val
+}
+
+// Ref: #/components/schemas/ScenarioIsoSummary
+type ScenarioIsoSummary struct {
+	Origin      string  `json:"origin"`
+	Name        string  `json:"name"`
+	Minutes     int     `json:"minutes"`
+	BaseKm2     float64 `json:"baseKm2"`
+	ScenarioKm2 float64 `json:"scenarioKm2"`
+}
+
+// GetOrigin returns the value of Origin.
+func (s *ScenarioIsoSummary) GetOrigin() string {
+	return s.Origin
+}
+
+// GetName returns the value of Name.
+func (s *ScenarioIsoSummary) GetName() string {
+	return s.Name
+}
+
+// GetMinutes returns the value of Minutes.
+func (s *ScenarioIsoSummary) GetMinutes() int {
+	return s.Minutes
+}
+
+// GetBaseKm2 returns the value of BaseKm2.
+func (s *ScenarioIsoSummary) GetBaseKm2() float64 {
+	return s.BaseKm2
+}
+
+// GetScenarioKm2 returns the value of ScenarioKm2.
+func (s *ScenarioIsoSummary) GetScenarioKm2() float64 {
+	return s.ScenarioKm2
+}
+
+// SetOrigin sets the value of Origin.
+func (s *ScenarioIsoSummary) SetOrigin(val string) {
+	s.Origin = val
+}
+
+// SetName sets the value of Name.
+func (s *ScenarioIsoSummary) SetName(val string) {
+	s.Name = val
+}
+
+// SetMinutes sets the value of Minutes.
+func (s *ScenarioIsoSummary) SetMinutes(val int) {
+	s.Minutes = val
+}
+
+// SetBaseKm2 sets the value of BaseKm2.
+func (s *ScenarioIsoSummary) SetBaseKm2(val float64) {
+	s.BaseKm2 = val
+}
+
+// SetScenarioKm2 sets the value of ScenarioKm2.
+func (s *ScenarioIsoSummary) SetScenarioKm2(val float64) {
+	s.ScenarioKm2 = val
+}
+
+type ScenarioIsochronesOK map[string]jx.Raw
+
+func (s *ScenarioIsochronesOK) init() ScenarioIsochronesOK {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/ScenarioNewFacility
+type ScenarioNewFacility struct {
+	Name OptString `json:"name"`
+	Lon  float64   `json:"lon"`
+	Lat  float64   `json:"lat"`
+}
+
+// GetName returns the value of Name.
+func (s *ScenarioNewFacility) GetName() OptString {
+	return s.Name
+}
+
+// GetLon returns the value of Lon.
+func (s *ScenarioNewFacility) GetLon() float64 {
+	return s.Lon
+}
+
+// GetLat returns the value of Lat.
+func (s *ScenarioNewFacility) GetLat() float64 {
+	return s.Lat
+}
+
+// SetName sets the value of Name.
+func (s *ScenarioNewFacility) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetLon sets the value of Lon.
+func (s *ScenarioNewFacility) SetLon(val float64) {
+	s.Lon = val
+}
+
+// SetLat sets the value of Lat.
+func (s *ScenarioNewFacility) SetLat(val float64) {
+	s.Lat = val
+}
+
+// Ref: #/components/schemas/ScenarioParams
+type ScenarioParams struct {
+	// Код типового профиля ТС.
+	Profile string `json:"profile"`
+	// Учитывать правила зон пропусков (иначе — физическая
+	// доступность по сети).
+	Zones  bool          `json:"zones"`
+	Passes []VehiclePass `json:"passes"`
+	Depart OptDateTime   `json:"depart"`
+	// Решение по зоне в сценарии: true — открыта для профиля,
+	// false — закрыта.
+	ZoneOverrides       OptScenarioParamsZoneOverrides `json:"zoneOverrides"`
+	Closures            []ScenarioClosure              `json:"closures"`
+	NewFacility         OptScenarioNewFacility         `json:"newFacility"`
+	Targets             []ScenarioTargetKind           `json:"targets"`
+	IsochroneMinutes    []int                          `json:"isochroneMinutes"`
+	IsochroneFacilities []uuid.UUID                    `json:"isochroneFacilities"`
+}
+
+// GetProfile returns the value of Profile.
+func (s *ScenarioParams) GetProfile() string {
+	return s.Profile
+}
+
+// GetZones returns the value of Zones.
+func (s *ScenarioParams) GetZones() bool {
+	return s.Zones
+}
+
+// GetPasses returns the value of Passes.
+func (s *ScenarioParams) GetPasses() []VehiclePass {
+	return s.Passes
+}
+
+// GetDepart returns the value of Depart.
+func (s *ScenarioParams) GetDepart() OptDateTime {
+	return s.Depart
+}
+
+// GetZoneOverrides returns the value of ZoneOverrides.
+func (s *ScenarioParams) GetZoneOverrides() OptScenarioParamsZoneOverrides {
+	return s.ZoneOverrides
+}
+
+// GetClosures returns the value of Closures.
+func (s *ScenarioParams) GetClosures() []ScenarioClosure {
+	return s.Closures
+}
+
+// GetNewFacility returns the value of NewFacility.
+func (s *ScenarioParams) GetNewFacility() OptScenarioNewFacility {
+	return s.NewFacility
+}
+
+// GetTargets returns the value of Targets.
+func (s *ScenarioParams) GetTargets() []ScenarioTargetKind {
+	return s.Targets
+}
+
+// GetIsochroneMinutes returns the value of IsochroneMinutes.
+func (s *ScenarioParams) GetIsochroneMinutes() []int {
+	return s.IsochroneMinutes
+}
+
+// GetIsochroneFacilities returns the value of IsochroneFacilities.
+func (s *ScenarioParams) GetIsochroneFacilities() []uuid.UUID {
+	return s.IsochroneFacilities
+}
+
+// SetProfile sets the value of Profile.
+func (s *ScenarioParams) SetProfile(val string) {
+	s.Profile = val
+}
+
+// SetZones sets the value of Zones.
+func (s *ScenarioParams) SetZones(val bool) {
+	s.Zones = val
+}
+
+// SetPasses sets the value of Passes.
+func (s *ScenarioParams) SetPasses(val []VehiclePass) {
+	s.Passes = val
+}
+
+// SetDepart sets the value of Depart.
+func (s *ScenarioParams) SetDepart(val OptDateTime) {
+	s.Depart = val
+}
+
+// SetZoneOverrides sets the value of ZoneOverrides.
+func (s *ScenarioParams) SetZoneOverrides(val OptScenarioParamsZoneOverrides) {
+	s.ZoneOverrides = val
+}
+
+// SetClosures sets the value of Closures.
+func (s *ScenarioParams) SetClosures(val []ScenarioClosure) {
+	s.Closures = val
+}
+
+// SetNewFacility sets the value of NewFacility.
+func (s *ScenarioParams) SetNewFacility(val OptScenarioNewFacility) {
+	s.NewFacility = val
+}
+
+// SetTargets sets the value of Targets.
+func (s *ScenarioParams) SetTargets(val []ScenarioTargetKind) {
+	s.Targets = val
+}
+
+// SetIsochroneMinutes sets the value of IsochroneMinutes.
+func (s *ScenarioParams) SetIsochroneMinutes(val []int) {
+	s.IsochroneMinutes = val
+}
+
+// SetIsochroneFacilities sets the value of IsochroneFacilities.
+func (s *ScenarioParams) SetIsochroneFacilities(val []uuid.UUID) {
+	s.IsochroneFacilities = val
+}
+
+// Решение по зоне в сценарии: true — открыта для профиля,
+// false — закрыта.
+type ScenarioParamsZoneOverrides map[string]bool
+
+func (s *ScenarioParamsZoneOverrides) init() ScenarioParamsZoneOverrides {
+	m := *s
+	if m == nil {
+		m = map[string]bool{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/ScenarioProgress
+type ScenarioProgress struct {
+	Stage OptString `json:"stage"`
+	Done  int       `json:"done"`
+	Total int       `json:"total"`
+}
+
+// GetStage returns the value of Stage.
+func (s *ScenarioProgress) GetStage() OptString {
+	return s.Stage
+}
+
+// GetDone returns the value of Done.
+func (s *ScenarioProgress) GetDone() int {
+	return s.Done
+}
+
+// GetTotal returns the value of Total.
+func (s *ScenarioProgress) GetTotal() int {
+	return s.Total
+}
+
+// SetStage sets the value of Stage.
+func (s *ScenarioProgress) SetStage(val OptString) {
+	s.Stage = val
+}
+
+// SetDone sets the value of Done.
+func (s *ScenarioProgress) SetDone(val int) {
+	s.Done = val
+}
+
+// SetTotal sets the value of Total.
+func (s *ScenarioProgress) SetTotal(val int) {
+	s.Total = val
+}
+
+// Ok — достижимо, unreachable — путь не найден, blocked — в
+// закрытой зоне.
+// Ref: #/components/schemas/ScenarioReach
+type ScenarioReach string
+
+const (
+	ScenarioReachOk          ScenarioReach = "ok"
+	ScenarioReachUnreachable ScenarioReach = "unreachable"
+	ScenarioReachBlocked     ScenarioReach = "blocked"
+)
+
+// AllValues returns all ScenarioReach values.
+func (ScenarioReach) AllValues() []ScenarioReach {
+	return []ScenarioReach{
+		ScenarioReachOk,
+		ScenarioReachUnreachable,
+		ScenarioReachBlocked,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScenarioReach) MarshalText() ([]byte, error) {
+	switch s {
+	case ScenarioReachOk:
+		return []byte(s), nil
+	case ScenarioReachUnreachable:
+		return []byte(s), nil
+	case ScenarioReachBlocked:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScenarioReach) UnmarshalText(data []byte) error {
+	switch ScenarioReach(data) {
+	case ScenarioReachOk:
+		*s = ScenarioReachOk
+		return nil
+	case ScenarioReachUnreachable:
+		*s = ScenarioReachUnreachable
+		return nil
+	case ScenarioReachBlocked:
+		*s = ScenarioReachBlocked
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ScenarioRequest
+type ScenarioRequest struct {
+	Name        string         `json:"name"`
+	Description OptString      `json:"description"`
+	Params      ScenarioParams `json:"params"`
+}
+
+// GetName returns the value of Name.
+func (s *ScenarioRequest) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *ScenarioRequest) GetDescription() OptString {
+	return s.Description
+}
+
+// GetParams returns the value of Params.
+func (s *ScenarioRequest) GetParams() ScenarioParams {
+	return s.Params
+}
+
+// SetName sets the value of Name.
+func (s *ScenarioRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *ScenarioRequest) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetParams sets the value of Params.
+func (s *ScenarioRequest) SetParams(val ScenarioParams) {
+	s.Params = val
+}
+
+// Ref: #/components/schemas/ScenarioSegment
+type ScenarioSegment struct {
+	ID      uuid.UUID `json:"id"`
+	Name    string    `json:"name"`
+	Class   string    `json:"class"`
+	LengthM float64   `json:"lengthM"`
+	// Линия GeoJSON.
+	Geometry ScenarioSegmentGeometry `json:"geometry"`
+}
+
+// GetID returns the value of ID.
+func (s *ScenarioSegment) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *ScenarioSegment) GetName() string {
+	return s.Name
+}
+
+// GetClass returns the value of Class.
+func (s *ScenarioSegment) GetClass() string {
+	return s.Class
+}
+
+// GetLengthM returns the value of LengthM.
+func (s *ScenarioSegment) GetLengthM() float64 {
+	return s.LengthM
+}
+
+// GetGeometry returns the value of Geometry.
+func (s *ScenarioSegment) GetGeometry() ScenarioSegmentGeometry {
+	return s.Geometry
+}
+
+// SetID sets the value of ID.
+func (s *ScenarioSegment) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *ScenarioSegment) SetName(val string) {
+	s.Name = val
+}
+
+// SetClass sets the value of Class.
+func (s *ScenarioSegment) SetClass(val string) {
+	s.Class = val
+}
+
+// SetLengthM sets the value of LengthM.
+func (s *ScenarioSegment) SetLengthM(val float64) {
+	s.LengthM = val
+}
+
+// SetGeometry sets the value of Geometry.
+func (s *ScenarioSegment) SetGeometry(val ScenarioSegmentGeometry) {
+	s.Geometry = val
+}
+
+// Линия GeoJSON.
+type ScenarioSegmentGeometry map[string]jx.Raw
+
+func (s *ScenarioSegmentGeometry) init() ScenarioSegmentGeometry {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ScenarioStatus string
+
+const (
+	ScenarioStatusQueued  ScenarioStatus = "queued"
+	ScenarioStatusRunning ScenarioStatus = "running"
+	ScenarioStatusDone    ScenarioStatus = "done"
+	ScenarioStatusFailed  ScenarioStatus = "failed"
+)
+
+// AllValues returns all ScenarioStatus values.
+func (ScenarioStatus) AllValues() []ScenarioStatus {
+	return []ScenarioStatus{
+		ScenarioStatusQueued,
+		ScenarioStatusRunning,
+		ScenarioStatusDone,
+		ScenarioStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScenarioStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ScenarioStatusQueued:
+		return []byte(s), nil
+	case ScenarioStatusRunning:
+		return []byte(s), nil
+	case ScenarioStatusDone:
+		return []byte(s), nil
+	case ScenarioStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScenarioStatus) UnmarshalText(data []byte) error {
+	switch ScenarioStatus(data) {
+	case ScenarioStatusQueued:
+		*s = ScenarioStatusQueued
+		return nil
+	case ScenarioStatusRunning:
+		*s = ScenarioStatusRunning
+		return nil
+	case ScenarioStatusDone:
+		*s = ScenarioStatusDone
+		return nil
+	case ScenarioStatusFailed:
+		*s = ScenarioStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ScenarioSummary
+type ScenarioSummary struct {
+	Targets     []ScenarioTargetSummary `json:"targets"`
+	Closures    []ScenarioClosureInfo   `json:"closures"`
+	NewFacility []ScenarioEntityTime    `json:"newFacility"`
+	Isochrones  []ScenarioIsoSummary    `json:"isochrones"`
+	Zones       []ScenarioZoneChange    `json:"zones"`
+	// База взята из показателей доступности (тот же граф).
+	BaseReused bool `json:"baseReused"`
+	Facilities int  `json:"facilities"`
+	DurationMs int  `json:"durationMs"`
+}
+
+// GetTargets returns the value of Targets.
+func (s *ScenarioSummary) GetTargets() []ScenarioTargetSummary {
+	return s.Targets
+}
+
+// GetClosures returns the value of Closures.
+func (s *ScenarioSummary) GetClosures() []ScenarioClosureInfo {
+	return s.Closures
+}
+
+// GetNewFacility returns the value of NewFacility.
+func (s *ScenarioSummary) GetNewFacility() []ScenarioEntityTime {
+	return s.NewFacility
+}
+
+// GetIsochrones returns the value of Isochrones.
+func (s *ScenarioSummary) GetIsochrones() []ScenarioIsoSummary {
+	return s.Isochrones
+}
+
+// GetZones returns the value of Zones.
+func (s *ScenarioSummary) GetZones() []ScenarioZoneChange {
+	return s.Zones
+}
+
+// GetBaseReused returns the value of BaseReused.
+func (s *ScenarioSummary) GetBaseReused() bool {
+	return s.BaseReused
+}
+
+// GetFacilities returns the value of Facilities.
+func (s *ScenarioSummary) GetFacilities() int {
+	return s.Facilities
+}
+
+// GetDurationMs returns the value of DurationMs.
+func (s *ScenarioSummary) GetDurationMs() int {
+	return s.DurationMs
+}
+
+// SetTargets sets the value of Targets.
+func (s *ScenarioSummary) SetTargets(val []ScenarioTargetSummary) {
+	s.Targets = val
+}
+
+// SetClosures sets the value of Closures.
+func (s *ScenarioSummary) SetClosures(val []ScenarioClosureInfo) {
+	s.Closures = val
+}
+
+// SetNewFacility sets the value of NewFacility.
+func (s *ScenarioSummary) SetNewFacility(val []ScenarioEntityTime) {
+	s.NewFacility = val
+}
+
+// SetIsochrones sets the value of Isochrones.
+func (s *ScenarioSummary) SetIsochrones(val []ScenarioIsoSummary) {
+	s.Isochrones = val
+}
+
+// SetZones sets the value of Zones.
+func (s *ScenarioSummary) SetZones(val []ScenarioZoneChange) {
+	s.Zones = val
+}
+
+// SetBaseReused sets the value of BaseReused.
+func (s *ScenarioSummary) SetBaseReused(val bool) {
+	s.BaseReused = val
+}
+
+// SetFacilities sets the value of Facilities.
+func (s *ScenarioSummary) SetFacilities(val int) {
+	s.Facilities = val
+}
+
+// SetDurationMs sets the value of DurationMs.
+func (s *ScenarioSummary) SetDurationMs(val int) {
+	s.DurationMs = val
+}
+
+// Цель доступности: МКАД, ТТК, центр, ж/д грузовые пункты.
+// Ref: #/components/schemas/ScenarioTargetKind
+type ScenarioTargetKind string
+
+const (
+	ScenarioTargetKindMkad        ScenarioTargetKind = "mkad"
+	ScenarioTargetKindTtk         ScenarioTargetKind = "ttk"
+	ScenarioTargetKindCenter      ScenarioTargetKind = "center"
+	ScenarioTargetKindRailFreight ScenarioTargetKind = "rail_freight"
+)
+
+// AllValues returns all ScenarioTargetKind values.
+func (ScenarioTargetKind) AllValues() []ScenarioTargetKind {
+	return []ScenarioTargetKind{
+		ScenarioTargetKindMkad,
+		ScenarioTargetKindTtk,
+		ScenarioTargetKindCenter,
+		ScenarioTargetKindRailFreight,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScenarioTargetKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ScenarioTargetKindMkad:
+		return []byte(s), nil
+	case ScenarioTargetKindTtk:
+		return []byte(s), nil
+	case ScenarioTargetKindCenter:
+		return []byte(s), nil
+	case ScenarioTargetKindRailFreight:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScenarioTargetKind) UnmarshalText(data []byte) error {
+	switch ScenarioTargetKind(data) {
+	case ScenarioTargetKindMkad:
+		*s = ScenarioTargetKindMkad
+		return nil
+	case ScenarioTargetKindTtk:
+		*s = ScenarioTargetKindTtk
+		return nil
+	case ScenarioTargetKindCenter:
+		*s = ScenarioTargetKindCenter
+		return nil
+	case ScenarioTargetKindRailFreight:
+		*s = ScenarioTargetKindRailFreight
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ScenarioTargetSummary
+type ScenarioTargetSummary struct {
+	Kind ScenarioTargetKind `json:"kind"`
+	// Объектов с приростом времени.
+	Affected int `json:"affected"`
+	// Объектов с сокращением времени.
+	Improved int `json:"improved"`
+	// Потеряли доступ.
+	Lost int `json:"lost"`
+	// Получили доступ.
+	Gained int `json:"gained"`
+	// В закрытой зоне в сценарии.
+	Blocked int `json:"blocked"`
+	// Суммарный прирост, объекто-минуты.
+	DelayMin       float64 `json:"delayMin"`
+	MeanDelay      float64 `json:"meanDelay"`
+	MaxDelay       float64 `json:"maxDelay"`
+	BaseMedian     float64 `json:"baseMedian"`
+	ScenarioMedian float64 `json:"scenarioMedian"`
+}
+
+// GetKind returns the value of Kind.
+func (s *ScenarioTargetSummary) GetKind() ScenarioTargetKind {
+	return s.Kind
+}
+
+// GetAffected returns the value of Affected.
+func (s *ScenarioTargetSummary) GetAffected() int {
+	return s.Affected
+}
+
+// GetImproved returns the value of Improved.
+func (s *ScenarioTargetSummary) GetImproved() int {
+	return s.Improved
+}
+
+// GetLost returns the value of Lost.
+func (s *ScenarioTargetSummary) GetLost() int {
+	return s.Lost
+}
+
+// GetGained returns the value of Gained.
+func (s *ScenarioTargetSummary) GetGained() int {
+	return s.Gained
+}
+
+// GetBlocked returns the value of Blocked.
+func (s *ScenarioTargetSummary) GetBlocked() int {
+	return s.Blocked
+}
+
+// GetDelayMin returns the value of DelayMin.
+func (s *ScenarioTargetSummary) GetDelayMin() float64 {
+	return s.DelayMin
+}
+
+// GetMeanDelay returns the value of MeanDelay.
+func (s *ScenarioTargetSummary) GetMeanDelay() float64 {
+	return s.MeanDelay
+}
+
+// GetMaxDelay returns the value of MaxDelay.
+func (s *ScenarioTargetSummary) GetMaxDelay() float64 {
+	return s.MaxDelay
+}
+
+// GetBaseMedian returns the value of BaseMedian.
+func (s *ScenarioTargetSummary) GetBaseMedian() float64 {
+	return s.BaseMedian
+}
+
+// GetScenarioMedian returns the value of ScenarioMedian.
+func (s *ScenarioTargetSummary) GetScenarioMedian() float64 {
+	return s.ScenarioMedian
+}
+
+// SetKind sets the value of Kind.
+func (s *ScenarioTargetSummary) SetKind(val ScenarioTargetKind) {
+	s.Kind = val
+}
+
+// SetAffected sets the value of Affected.
+func (s *ScenarioTargetSummary) SetAffected(val int) {
+	s.Affected = val
+}
+
+// SetImproved sets the value of Improved.
+func (s *ScenarioTargetSummary) SetImproved(val int) {
+	s.Improved = val
+}
+
+// SetLost sets the value of Lost.
+func (s *ScenarioTargetSummary) SetLost(val int) {
+	s.Lost = val
+}
+
+// SetGained sets the value of Gained.
+func (s *ScenarioTargetSummary) SetGained(val int) {
+	s.Gained = val
+}
+
+// SetBlocked sets the value of Blocked.
+func (s *ScenarioTargetSummary) SetBlocked(val int) {
+	s.Blocked = val
+}
+
+// SetDelayMin sets the value of DelayMin.
+func (s *ScenarioTargetSummary) SetDelayMin(val float64) {
+	s.DelayMin = val
+}
+
+// SetMeanDelay sets the value of MeanDelay.
+func (s *ScenarioTargetSummary) SetMeanDelay(val float64) {
+	s.MeanDelay = val
+}
+
+// SetMaxDelay sets the value of MaxDelay.
+func (s *ScenarioTargetSummary) SetMaxDelay(val float64) {
+	s.MaxDelay = val
+}
+
+// SetBaseMedian sets the value of BaseMedian.
+func (s *ScenarioTargetSummary) SetBaseMedian(val float64) {
+	s.BaseMedian = val
+}
+
+// SetScenarioMedian sets the value of ScenarioMedian.
+func (s *ScenarioTargetSummary) SetScenarioMedian(val float64) {
+	s.ScenarioMedian = val
+}
+
+// Ref: #/components/schemas/ScenarioZoneChange
+type ScenarioZoneChange struct {
+	Zone           ScenarioZoneChangeZone `json:"zone"`
+	BaseClosed     bool                   `json:"baseClosed"`
+	ScenarioClosed bool                   `json:"scenarioClosed"`
+}
+
+// GetZone returns the value of Zone.
+func (s *ScenarioZoneChange) GetZone() ScenarioZoneChangeZone {
+	return s.Zone
+}
+
+// GetBaseClosed returns the value of BaseClosed.
+func (s *ScenarioZoneChange) GetBaseClosed() bool {
+	return s.BaseClosed
+}
+
+// GetScenarioClosed returns the value of ScenarioClosed.
+func (s *ScenarioZoneChange) GetScenarioClosed() bool {
+	return s.ScenarioClosed
+}
+
+// SetZone sets the value of Zone.
+func (s *ScenarioZoneChange) SetZone(val ScenarioZoneChangeZone) {
+	s.Zone = val
+}
+
+// SetBaseClosed sets the value of BaseClosed.
+func (s *ScenarioZoneChange) SetBaseClosed(val bool) {
+	s.BaseClosed = val
+}
+
+// SetScenarioClosed sets the value of ScenarioClosed.
+func (s *ScenarioZoneChange) SetScenarioClosed(val bool) {
+	s.ScenarioClosed = val
+}
+
+type ScenarioZoneChangeZone string
+
+const (
+	ScenarioZoneChangeZoneSk   ScenarioZoneChangeZone = "sk"
+	ScenarioZoneChangeZoneTtk  ScenarioZoneChangeZone = "ttk"
+	ScenarioZoneChangeZoneMkad ScenarioZoneChangeZone = "mkad"
+)
+
+// AllValues returns all ScenarioZoneChangeZone values.
+func (ScenarioZoneChangeZone) AllValues() []ScenarioZoneChangeZone {
+	return []ScenarioZoneChangeZone{
+		ScenarioZoneChangeZoneSk,
+		ScenarioZoneChangeZoneTtk,
+		ScenarioZoneChangeZoneMkad,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScenarioZoneChangeZone) MarshalText() ([]byte, error) {
+	switch s {
+	case ScenarioZoneChangeZoneSk:
+		return []byte(s), nil
+	case ScenarioZoneChangeZoneTtk:
+		return []byte(s), nil
+	case ScenarioZoneChangeZoneMkad:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScenarioZoneChangeZone) UnmarshalText(data []byte) error {
+	switch ScenarioZoneChangeZone(data) {
+	case ScenarioZoneChangeZoneSk:
+		*s = ScenarioZoneChangeZoneSk
+		return nil
+	case ScenarioZoneChangeZoneTtk:
+		*s = ScenarioZoneChangeZoneTtk
+		return nil
+	case ScenarioZoneChangeZoneMkad:
+		*s = ScenarioZoneChangeZoneMkad
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/SearchChip

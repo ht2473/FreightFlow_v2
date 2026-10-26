@@ -27,6 +27,7 @@ import (
 	"freightflow/internal/regulation"
 	"freightflow/internal/report"
 	"freightflow/internal/routing"
+	"freightflow/internal/scenario"
 	"freightflow/internal/search"
 	"freightflow/internal/territory"
 	"freightflow/internal/tiles"
@@ -58,11 +59,13 @@ type Deps struct {
 	// Regulation — зоны, правила и статистика регулирования.
 	Regulation *regulation.Service
 	// Routing — маршруты грузовиков.
-	Routing  *routing.Service
-	Sessions *session.Manager
-	Mailer   Mailer
-	BaseURL  string
-	Log      *slog.Logger
+	Routing *routing.Service
+	// Scenarios — сценарии и оценка локации.
+	Scenarios *scenario.Service
+	Sessions  *session.Manager
+	Mailer    Mailer
+	BaseURL   string
+	Log       *slog.Logger
 	// Meters и Tracers — метрики и трассы операций; nil — глобальные провайдеры OpenTelemetry.
 	Meters  metric.MeterProvider
 	Tracers trace.TracerProvider
@@ -81,6 +84,7 @@ type Server struct {
 	layers      *tiles.Service
 	regulation  *regulation.Service
 	routing     *routing.Service
+	scenarios   *scenario.Service
 	facilities  *facility.Service
 	reports     *report.Service
 	views       *views.Service
@@ -104,7 +108,7 @@ func New(d Deps) (http.Handler, error) {
 		return nil, err
 	}
 	s := &Server{
-		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, facilities: d.Facilities, reports: d.Reports, views: d.Views, territories: d.Territories, search: d.Search, analytics: d.Analytics, sessions: d.Sessions, mailer: d.Mailer,
+		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, scenarios: d.Scenarios, facilities: d.Facilities, reports: d.Reports, views: d.Views, territories: d.Territories, search: d.Search, analytics: d.Analytics, sessions: d.Sessions, mailer: d.Mailer,
 		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), routeLimit: d.RoutingLimit,
 	}
 	if s.routeLimit == nil {

@@ -221,8 +221,10 @@ type IsochroneRequest struct {
 	Costing string
 	Truck   *Truck
 	Exclude []Ring
-	Minutes []int
-	Depart  time.Time
+	// ExcludeLocations — закрытые участки (сценарий).
+	ExcludeLocations []ExcludePoint
+	Minutes          []int
+	Depart           time.Time
 }
 
 // Isochrone возвращает изохроны в GeoJSON (FeatureCollection многоугольников).
@@ -232,14 +234,15 @@ func (c *Client) Isochrone(ctx context.Context, req IsochroneRequest) (json.RawM
 		contours[i] = map[string]int{"time": m}
 	}
 	body := map[string]any{
-		"locations":        locations([]Point{req.Origin}, 0),
-		"costing":          req.Costing,
-		"costing_options":  costingOptions(req.Costing, req.Truck),
-		"exclude_polygons": excludePolygons(req.Exclude),
-		"contours":         contours,
-		"polygons":         true,
-		"denoise":          0.3,
-		"generalize":       50,
+		"locations":         locations([]Point{req.Origin}, 0),
+		"costing":           req.Costing,
+		"costing_options":   costingOptions(req.Costing, req.Truck),
+		"exclude_polygons":  excludePolygons(req.Exclude),
+		"exclude_locations": excludeLocations(req.ExcludeLocations),
+		"contours":          contours,
+		"polygons":          true,
+		"denoise":           0.3,
+		"generalize":        50,
 	}
 	if !req.Depart.IsZero() {
 		body["date_time"] = map[string]any{"type": 1, "value": req.Depart.Format("2006-01-02T15:04")}

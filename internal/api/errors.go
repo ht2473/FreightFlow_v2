@@ -16,6 +16,7 @@ import (
 	"freightflow/internal/platform/problem"
 	"freightflow/internal/report"
 	"freightflow/internal/routing"
+	"freightflow/internal/scenario"
 	"freightflow/internal/territory"
 	"freightflow/internal/views"
 )
@@ -110,6 +111,16 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 	case errors.Is(err, routing.ErrLimit):
 		return problem.New(http.StatusUnprocessableEntity, "routing_limit", "Превышен предел службы маршрутизации").
 			WithDetail(err.Error())
+	case errors.As(err, new(*scenario.ErrInvalid)):
+		var inv *scenario.ErrInvalid
+		errors.As(err, &inv)
+		return problem.New(http.StatusUnprocessableEntity, "invalid_scenario", inv.Reason)
+	case errors.Is(err, scenario.ErrNotFound):
+		return problem.New(http.StatusNotFound, "scenario_not_found", "Сценарий не найден")
+	case errors.Is(err, scenario.ErrBusy):
+		return problem.New(http.StatusConflict, "scenario_busy", "Сценарий ещё считается")
+	case errors.Is(err, routing.ErrNoSegment):
+		return problem.New(http.StatusNotFound, "no_segment", "Рядом с точкой нет участка дорожной сети")
 	case errors.Is(err, routing.ErrUnavailable):
 		return problem.New(http.StatusServiceUnavailable, "routing_unavailable", "Служба маршрутизации недоступна")
 	case errors.As(err, new(*routing.Error)):
