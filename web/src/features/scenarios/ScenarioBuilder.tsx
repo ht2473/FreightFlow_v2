@@ -68,7 +68,7 @@ let seq = 0;
 const nextKey = () => `c${++seq}`;
 
 function ScenarioBuilder() {
-  const { from } = useSearch({ from: "/scenarios/new" });
+  const { from, element } = useSearch({ from: "/scenarios/new" });
   const navigate = useNavigate();
   const profiles = $api.useQuery("get", "/routing/profiles");
   const create = $api.useMutation("post", "/scenarios");
@@ -111,6 +111,37 @@ function ScenarioBuilder() {
     }
     setProfile((list.find((p) => p.code === "truck_12") ?? list[0])?.code ?? null);
   }, [profiles.data, profile, from]);
+
+  // Переход из рейтинга устойчивости: перекрытие выбранным элементом.
+  const elements = $api.useQuery(
+    "get",
+    "/scenarios/elements",
+    { params: { query: { limit: 200 } } },
+    { enabled: element !== undefined },
+  );
+  const [elementAdded, setElementAdded] = useState(false);
+  useEffect(() => {
+    const e = elements.data?.find((x) => x.id === element);
+    if (elementAdded || !e) {
+      return;
+    }
+    setElementAdded(true);
+    setName(`Выпадение: ${e.name || "элемент сети"}`);
+    setClosures([
+      {
+        key: nextKey(),
+        closure: { kind: "element", element: e.id, label: e.name },
+        title: e.name || "Без названия",
+        note: `${e.kind === "bridge" ? "Мост" : "Участок"}, место ${e.rank} в рейтинге критичности`,
+        feature: geoFeature(e.geometry, {}),
+      },
+    ]);
+    setTargets(new Set(["mkad", "ttk", "rail_freight"]));
+    const box = extentOf(coordsOf({ features: [geoFeature(e.geometry, {})] }));
+    if (box) {
+      setFit(box);
+    }
+  }, [elements.data, element, elementAdded]);
 
   // Копия существующего сценария: параметры и геометрия перекрытий.
   const [copied, setCopied] = useState(false);

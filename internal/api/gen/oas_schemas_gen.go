@@ -9032,6 +9032,52 @@ func (o OptMetricValuesLevel) Or(d MetricValuesLevel) MetricValuesLevel {
 	return d
 }
 
+// NewOptResilienceRun returns new OptResilienceRun with value set to v.
+func NewOptResilienceRun(v ResilienceRun) OptResilienceRun {
+	return OptResilienceRun{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptResilienceRun is optional ResilienceRun.
+type OptResilienceRun struct {
+	Value ResilienceRun
+	Set   bool
+}
+
+// IsSet returns true if OptResilienceRun was set.
+func (o OptResilienceRun) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptResilienceRun) Reset() {
+	var v ResilienceRun
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptResilienceRun) SetTo(v ResilienceRun) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptResilienceRun) Get() (v ResilienceRun, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptResilienceRun) Or(d ResilienceRun) ResilienceRun {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptRouteLine returns new OptRouteLine with value set to v.
 func NewOptRouteLine(v RouteLine) OptRouteLine {
 	return OptRouteLine{
@@ -10483,6 +10529,469 @@ type ResetIndexConfigNoContent struct{}
 // ResetUserTotpNoContent is response for ResetUserTotp operation.
 type ResetUserTotpNoContent struct{}
 
+// Ref: #/components/schemas/Resilience
+type Resilience struct {
+	Run      OptResilienceRun    `json:"run"`
+	Running  OptResilienceRun    `json:"running"`
+	Elements []ResilienceElement `json:"elements"`
+}
+
+// GetRun returns the value of Run.
+func (s *Resilience) GetRun() OptResilienceRun {
+	return s.Run
+}
+
+// GetRunning returns the value of Running.
+func (s *Resilience) GetRunning() OptResilienceRun {
+	return s.Running
+}
+
+// GetElements returns the value of Elements.
+func (s *Resilience) GetElements() []ResilienceElement {
+	return s.Elements
+}
+
+// SetRun sets the value of Run.
+func (s *Resilience) SetRun(val OptResilienceRun) {
+	s.Run = val
+}
+
+// SetRunning sets the value of Running.
+func (s *Resilience) SetRunning(val OptResilienceRun) {
+	s.Running = val
+}
+
+// SetElements sets the value of Elements.
+func (s *Resilience) SetElements(val []ResilienceElement) {
+	s.Elements = val
+}
+
+// Ref: #/components/schemas/ResilienceElement
+type ResilienceElement struct {
+	// Номер в последнем сетевом анализе (перекрытие
+	// элементом в сценарии).
+	ElementId int                   `json:"elementId"`
+	Kind      ResilienceElementKind `json:"kind"`
+	Name      string                `json:"name"`
+	// Место по ущербу.
+	Rank int `json:"rank"`
+	// Место в рейтинге критичности (до МКАД по графу).
+	CriticalityRank int `json:"criticalityRank"`
+	// Объектов в радиусе.
+	Candidates  int                `json:"candidates"`
+	Affected    int                `json:"affected"`
+	Lost        int                `json:"lost"`
+	DelayMin    float64            `json:"delayMin"`
+	MaxDelayMin float64            `json:"maxDelayMin"`
+	Damage      float64            `json:"damage"`
+	ByTarget    []ResilienceTarget `json:"byTarget"`
+	Point       LngLat             `json:"point"`
+}
+
+// GetElementId returns the value of ElementId.
+func (s *ResilienceElement) GetElementId() int {
+	return s.ElementId
+}
+
+// GetKind returns the value of Kind.
+func (s *ResilienceElement) GetKind() ResilienceElementKind {
+	return s.Kind
+}
+
+// GetName returns the value of Name.
+func (s *ResilienceElement) GetName() string {
+	return s.Name
+}
+
+// GetRank returns the value of Rank.
+func (s *ResilienceElement) GetRank() int {
+	return s.Rank
+}
+
+// GetCriticalityRank returns the value of CriticalityRank.
+func (s *ResilienceElement) GetCriticalityRank() int {
+	return s.CriticalityRank
+}
+
+// GetCandidates returns the value of Candidates.
+func (s *ResilienceElement) GetCandidates() int {
+	return s.Candidates
+}
+
+// GetAffected returns the value of Affected.
+func (s *ResilienceElement) GetAffected() int {
+	return s.Affected
+}
+
+// GetLost returns the value of Lost.
+func (s *ResilienceElement) GetLost() int {
+	return s.Lost
+}
+
+// GetDelayMin returns the value of DelayMin.
+func (s *ResilienceElement) GetDelayMin() float64 {
+	return s.DelayMin
+}
+
+// GetMaxDelayMin returns the value of MaxDelayMin.
+func (s *ResilienceElement) GetMaxDelayMin() float64 {
+	return s.MaxDelayMin
+}
+
+// GetDamage returns the value of Damage.
+func (s *ResilienceElement) GetDamage() float64 {
+	return s.Damage
+}
+
+// GetByTarget returns the value of ByTarget.
+func (s *ResilienceElement) GetByTarget() []ResilienceTarget {
+	return s.ByTarget
+}
+
+// GetPoint returns the value of Point.
+func (s *ResilienceElement) GetPoint() LngLat {
+	return s.Point
+}
+
+// SetElementId sets the value of ElementId.
+func (s *ResilienceElement) SetElementId(val int) {
+	s.ElementId = val
+}
+
+// SetKind sets the value of Kind.
+func (s *ResilienceElement) SetKind(val ResilienceElementKind) {
+	s.Kind = val
+}
+
+// SetName sets the value of Name.
+func (s *ResilienceElement) SetName(val string) {
+	s.Name = val
+}
+
+// SetRank sets the value of Rank.
+func (s *ResilienceElement) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetCriticalityRank sets the value of CriticalityRank.
+func (s *ResilienceElement) SetCriticalityRank(val int) {
+	s.CriticalityRank = val
+}
+
+// SetCandidates sets the value of Candidates.
+func (s *ResilienceElement) SetCandidates(val int) {
+	s.Candidates = val
+}
+
+// SetAffected sets the value of Affected.
+func (s *ResilienceElement) SetAffected(val int) {
+	s.Affected = val
+}
+
+// SetLost sets the value of Lost.
+func (s *ResilienceElement) SetLost(val int) {
+	s.Lost = val
+}
+
+// SetDelayMin sets the value of DelayMin.
+func (s *ResilienceElement) SetDelayMin(val float64) {
+	s.DelayMin = val
+}
+
+// SetMaxDelayMin sets the value of MaxDelayMin.
+func (s *ResilienceElement) SetMaxDelayMin(val float64) {
+	s.MaxDelayMin = val
+}
+
+// SetDamage sets the value of Damage.
+func (s *ResilienceElement) SetDamage(val float64) {
+	s.Damage = val
+}
+
+// SetByTarget sets the value of ByTarget.
+func (s *ResilienceElement) SetByTarget(val []ResilienceTarget) {
+	s.ByTarget = val
+}
+
+// SetPoint sets the value of Point.
+func (s *ResilienceElement) SetPoint(val LngLat) {
+	s.Point = val
+}
+
+type ResilienceElementKind string
+
+const (
+	ResilienceElementKindBridge  ResilienceElementKind = "bridge"
+	ResilienceElementKindSegment ResilienceElementKind = "segment"
+)
+
+// AllValues returns all ResilienceElementKind values.
+func (ResilienceElementKind) AllValues() []ResilienceElementKind {
+	return []ResilienceElementKind{
+		ResilienceElementKindBridge,
+		ResilienceElementKindSegment,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ResilienceElementKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ResilienceElementKindBridge:
+		return []byte(s), nil
+	case ResilienceElementKindSegment:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ResilienceElementKind) UnmarshalText(data []byte) error {
+	switch ResilienceElementKind(data) {
+	case ResilienceElementKindBridge:
+		*s = ResilienceElementKindBridge
+		return nil
+	case ResilienceElementKindSegment:
+		*s = ResilienceElementKindSegment
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ResilienceRun
+type ResilienceRun struct {
+	ID           int                  `json:"id"`
+	GraphBuiltAt time.Time            `json:"graphBuiltAt"`
+	Profile      string               `json:"profile"`
+	Targets      []ScenarioTargetKind `json:"targets"`
+	// Объекты в этом радиусе от элемента пересчитываются.
+	RadiusKm   float64             `json:"radiusKm"`
+	Status     ResilienceRunStatus `json:"status"`
+	Elements   int                 `json:"elements"`
+	Error      OptString           `json:"error"`
+	StartedAt  time.Time           `json:"startedAt"`
+	FinishedAt OptDateTime         `json:"finishedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *ResilienceRun) GetID() int {
+	return s.ID
+}
+
+// GetGraphBuiltAt returns the value of GraphBuiltAt.
+func (s *ResilienceRun) GetGraphBuiltAt() time.Time {
+	return s.GraphBuiltAt
+}
+
+// GetProfile returns the value of Profile.
+func (s *ResilienceRun) GetProfile() string {
+	return s.Profile
+}
+
+// GetTargets returns the value of Targets.
+func (s *ResilienceRun) GetTargets() []ScenarioTargetKind {
+	return s.Targets
+}
+
+// GetRadiusKm returns the value of RadiusKm.
+func (s *ResilienceRun) GetRadiusKm() float64 {
+	return s.RadiusKm
+}
+
+// GetStatus returns the value of Status.
+func (s *ResilienceRun) GetStatus() ResilienceRunStatus {
+	return s.Status
+}
+
+// GetElements returns the value of Elements.
+func (s *ResilienceRun) GetElements() int {
+	return s.Elements
+}
+
+// GetError returns the value of Error.
+func (s *ResilienceRun) GetError() OptString {
+	return s.Error
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *ResilienceRun) GetStartedAt() time.Time {
+	return s.StartedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *ResilienceRun) GetFinishedAt() OptDateTime {
+	return s.FinishedAt
+}
+
+// SetID sets the value of ID.
+func (s *ResilienceRun) SetID(val int) {
+	s.ID = val
+}
+
+// SetGraphBuiltAt sets the value of GraphBuiltAt.
+func (s *ResilienceRun) SetGraphBuiltAt(val time.Time) {
+	s.GraphBuiltAt = val
+}
+
+// SetProfile sets the value of Profile.
+func (s *ResilienceRun) SetProfile(val string) {
+	s.Profile = val
+}
+
+// SetTargets sets the value of Targets.
+func (s *ResilienceRun) SetTargets(val []ScenarioTargetKind) {
+	s.Targets = val
+}
+
+// SetRadiusKm sets the value of RadiusKm.
+func (s *ResilienceRun) SetRadiusKm(val float64) {
+	s.RadiusKm = val
+}
+
+// SetStatus sets the value of Status.
+func (s *ResilienceRun) SetStatus(val ResilienceRunStatus) {
+	s.Status = val
+}
+
+// SetElements sets the value of Elements.
+func (s *ResilienceRun) SetElements(val int) {
+	s.Elements = val
+}
+
+// SetError sets the value of Error.
+func (s *ResilienceRun) SetError(val OptString) {
+	s.Error = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *ResilienceRun) SetStartedAt(val time.Time) {
+	s.StartedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *ResilienceRun) SetFinishedAt(val OptDateTime) {
+	s.FinishedAt = val
+}
+
+type ResilienceRunStatus string
+
+const (
+	ResilienceRunStatusRunning ResilienceRunStatus = "running"
+	ResilienceRunStatusDone    ResilienceRunStatus = "done"
+	ResilienceRunStatusFailed  ResilienceRunStatus = "failed"
+)
+
+// AllValues returns all ResilienceRunStatus values.
+func (ResilienceRunStatus) AllValues() []ResilienceRunStatus {
+	return []ResilienceRunStatus{
+		ResilienceRunStatusRunning,
+		ResilienceRunStatusDone,
+		ResilienceRunStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ResilienceRunStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ResilienceRunStatusRunning:
+		return []byte(s), nil
+	case ResilienceRunStatusDone:
+		return []byte(s), nil
+	case ResilienceRunStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ResilienceRunStatus) UnmarshalText(data []byte) error {
+	switch ResilienceRunStatus(data) {
+	case ResilienceRunStatusRunning:
+		*s = ResilienceRunStatusRunning
+		return nil
+	case ResilienceRunStatusDone:
+		*s = ResilienceRunStatusDone
+		return nil
+	case ResilienceRunStatusFailed:
+		*s = ResilienceRunStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ResilienceTarget
+type ResilienceTarget struct {
+	Kind     ScenarioTargetKind `json:"kind"`
+	Affected int                `json:"affected"`
+	Lost     int                `json:"lost"`
+	DelayMin float64            `json:"delayMin"`
+	MaxDelay float64            `json:"maxDelay"`
+	Damage   float64            `json:"damage"`
+}
+
+// GetKind returns the value of Kind.
+func (s *ResilienceTarget) GetKind() ScenarioTargetKind {
+	return s.Kind
+}
+
+// GetAffected returns the value of Affected.
+func (s *ResilienceTarget) GetAffected() int {
+	return s.Affected
+}
+
+// GetLost returns the value of Lost.
+func (s *ResilienceTarget) GetLost() int {
+	return s.Lost
+}
+
+// GetDelayMin returns the value of DelayMin.
+func (s *ResilienceTarget) GetDelayMin() float64 {
+	return s.DelayMin
+}
+
+// GetMaxDelay returns the value of MaxDelay.
+func (s *ResilienceTarget) GetMaxDelay() float64 {
+	return s.MaxDelay
+}
+
+// GetDamage returns the value of Damage.
+func (s *ResilienceTarget) GetDamage() float64 {
+	return s.Damage
+}
+
+// SetKind sets the value of Kind.
+func (s *ResilienceTarget) SetKind(val ScenarioTargetKind) {
+	s.Kind = val
+}
+
+// SetAffected sets the value of Affected.
+func (s *ResilienceTarget) SetAffected(val int) {
+	s.Affected = val
+}
+
+// SetLost sets the value of Lost.
+func (s *ResilienceTarget) SetLost(val int) {
+	s.Lost = val
+}
+
+// SetDelayMin sets the value of DelayMin.
+func (s *ResilienceTarget) SetDelayMin(val float64) {
+	s.DelayMin = val
+}
+
+// SetMaxDelay sets the value of MaxDelay.
+func (s *ResilienceTarget) SetMaxDelay(val float64) {
+	s.MaxDelay = val
+}
+
+// SetDamage sets the value of Damage.
+func (s *ResilienceTarget) SetDamage(val float64) {
+	s.Damage = val
+}
+
 type ResolveFacilityReportReq struct {
 	Status     ResolveFacilityReportReqStatus `json:"status"`
 	Resolution OptString                      `json:"resolution"`
@@ -11191,6 +11700,9 @@ func (s *RunLogEntryLevel) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+// RunResilienceAccepted is response for RunResilience operation.
+type RunResilienceAccepted struct{}
 
 type RunStats map[string]int64
 

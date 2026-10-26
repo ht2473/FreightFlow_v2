@@ -259,6 +259,18 @@ type Handler interface {
 	//
 	// GET /regulation
 	GetRegulation(ctx context.Context) (*RegulationOverview, error)
+	// GetResilience implements getResilience operation.
+	//
+	// Пакет сценариев выпадения верхних элементов рейтинга
+	// критичности: для каждого элемента — перекрытие в
+	// службе маршрутизации и время объектов в радиусе до
+	// МКАД, ТТК и ж/д грузовых пунктов. Ущерб — сумма
+	// прироста времени (объекто-минуты) и 60 минут за каждую
+	// потерю доступа. Пакет пересчитывается при смене графа
+	// маршрутизации или сетевого анализа.
+	//
+	// GET /scenarios/resilience
+	GetResilience(ctx context.Context) (*Resilience, error)
 	// GetRoutingStatus implements getRoutingStatus operation.
 	//
 	// Состояние службы маршрутизации и графа.
@@ -504,6 +516,12 @@ type Handler interface {
 	//
 	// DELETE /me/tokens/{tokenId}
 	RevokeToken(ctx context.Context, params RevokeTokenParams) error
+	// RunResilience implements runResilience operation.
+	//
+	// Пересчитать пакет устойчивости.
+	//
+	// POST /scenarios/resilience/run
+	RunResilience(ctx context.Context) error
 	// SaveDashboard implements saveDashboard operation.
 	//
 	// Сохранить свои виджеты (пустой список не допускается

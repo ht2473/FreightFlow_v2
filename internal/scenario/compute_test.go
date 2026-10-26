@@ -25,6 +25,8 @@ type fakeRouting struct {
 	target  routing.Point
 	calls   atomic.Int64
 	isoReqs atomic.Int64
+	// top — рейтинг критичности для пакета устойчивости.
+	top []routing.CriticalElementRef
 }
 
 var fakeExclusion = routing.Point{Lon: 37.72, Lat: 55.735}
@@ -110,7 +112,7 @@ func (f *fakeRouting) Element(_ context.Context, id int) (routing.CriticalElemen
 }
 
 func (f *fakeRouting) TopElements(context.Context, int) ([]routing.CriticalElementRef, error) {
-	return nil, nil
+	return f.top, nil
 }
 
 func (f *fakeRouting) Targets(context.Context) (map[string][]routing.Point, error) {

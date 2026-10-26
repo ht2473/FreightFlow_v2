@@ -212,3 +212,58 @@ func (s *Server) ScenarioClosures(ctx context.Context, params gen.ScenarioClosur
 	obj, err := rawObject(raw)
 	return gen.ScenarioClosuresOK(obj), err
 }
+
+func toResilienceRun(r *scenario.ResilienceRun) gen.ResilienceRun {
+	out := gen.ResilienceRun{
+		ID: r.ID, GraphBuiltAt: r.GraphBuiltAt, Profile: r.Profile, RadiusKm: r.RadiusKm,
+		Status: gen.ResilienceRunStatus(r.Status), Elements: r.Elements, StartedAt: r.StartedAt,
+	}
+	for _, t := range r.Targets {
+		out.Targets = append(out.Targets, gen.ScenarioTargetKind(t))
+	}
+	if r.Error != nil {
+		out.Error = gen.NewOptString(*r.Error)
+	}
+	if r.FinishedAt != nil {
+		out.FinishedAt = gen.NewOptDateTime(*r.FinishedAt)
+	}
+	return out
+}
+
+func (s *Server) GetResilience(ctx context.Context) (*gen.Resilience, error) {
+	last, running, rows, err := s.scenarios.Resilience(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := &gen.Resilience{Elements: make([]gen.ResilienceElement, len(rows))}
+	if last != nil {
+		out.Run = gen.NewOptResilienceRun(toResilienceRun(last))
+	}
+	if running != nil {
+		out.Running = gen.NewOptResilienceRun(toResilienceRun(running))
+	}
+	for i, r := range rows {
+		by := make([]gen.ResilienceTarget, len(r.ByTarget))
+		for j, t := range r.ByTarget {
+			by[j] = gen.ResilienceTarget{
+				Kind: gen.ScenarioTargetKind(t.Kind), Affected: t.Affected, Lost: t.Lost, DelayMin: t.DelayMin,
+				MaxDelay: t.MaxDelay, Damage: t.Damage,
+			}
+		}
+		out.Elements[i] = gen.ResilienceElement{
+			ElementId: r.ElementID, Kind: gen.ResilienceElementKind(r.Kind), Name: r.Name, Rank: r.Rank,
+			CriticalityRank: r.CriticalityRank, Candidates: r.Candidates, Affected: r.Affected, Lost: r.Lost,
+			DelayMin: r.DelayMin, MaxDelayMin: r.MaxDelayMin, Damage: r.Damage, ByTarget: by,
+			Point: gen.LngLat{Lon: r.Lon, Lat: r.Lat},
+		}
+	}
+	return out, nil
+}
+
+func (s *Server) RunResilience(ctx context.Context) error {
+	p := principal(ctx)
+	if err := s.scenarios.EnqueueResilience(ctx); err != nil {
+		return err
+	}
+	return s.identity.Audit(ctx, &p, identity.AuditEntry{Action: "resilience.queued", EntityType: "resilience"}, meta(ctx))
+}

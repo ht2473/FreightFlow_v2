@@ -36,3 +36,8 @@
   color: var(--tx2);
   font-size: 12px;
 }
+
+.rowActions {
+  display: inline-flex;
+  gap: 4px;
+}

@@ -129,6 +129,7 @@ const routeTree = rootRoute.addChildren([
     path: "/scenarios/new",
     validateSearch: (search: Record<string, unknown>) => ({
       from: typeof search.from === "string" ? search.from : undefined,
+      element: typeof search.element === "number" ? search.element : undefined,
     }),
     component: lazyRouteComponent(() => import("@/features/scenarios/ScenarioBuilder"), "ScenarioBuilderPage"),
   }),

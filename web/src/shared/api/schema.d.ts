@@ -1234,6 +1234,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scenarios/resilience": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Устойчивость сети — ущерб от выпадения мостов и участков
+         * @description Пакет сценариев выпадения верхних элементов рейтинга критичности: для каждого элемента —
+         *     перекрытие в службе маршрутизации и время объектов в радиусе до МКАД, ТТК и ж/д грузовых
+         *     пунктов. Ущерб — сумма прироста времени (объекто-минуты) и 60 минут за каждую потерю
+         *     доступа. Пакет пересчитывается при смене графа маршрутизации или сетевого анализа.
+         */
+        get: operations["getResilience"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/resilience/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Пересчитать пакет устойчивости */
+        post: operations["runResilience"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/scenarios/segment-at": {
         parameters: {
             query?: never;
@@ -2718,6 +2758,56 @@ export interface components {
             geometry: {
                 [key: string]: unknown;
             };
+        };
+        ResilienceRun: {
+            id: number;
+            /** Format: date-time */
+            graphBuiltAt: string;
+            profile: string;
+            targets: components["schemas"]["ScenarioTargetKind"][];
+            /** @description Объекты в этом радиусе от элемента пересчитываются */
+            radiusKm: number;
+            /** @enum {string} */
+            status: "running" | "done" | "failed";
+            elements: number;
+            error?: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            finishedAt?: string;
+        };
+        ResilienceTarget: {
+            kind: components["schemas"]["ScenarioTargetKind"];
+            affected: number;
+            lost: number;
+            delayMin: number;
+            maxDelay: number;
+            damage: number;
+        };
+        ResilienceElement: {
+            /** @description Номер в последнем сетевом анализе (перекрытие элементом в сценарии) */
+            elementId: number;
+            /** @enum {string} */
+            kind: "bridge" | "segment";
+            name: string;
+            /** @description Место по ущербу */
+            rank: number;
+            /** @description Место в рейтинге критичности (до МКАД по графу) */
+            criticalityRank: number;
+            /** @description Объектов в радиусе */
+            candidates: number;
+            affected: number;
+            lost: number;
+            delayMin: number;
+            maxDelayMin: number;
+            damage: number;
+            byTarget: components["schemas"]["ResilienceTarget"][];
+            point: components["schemas"]["LngLat"];
+        };
+        Resilience: {
+            run?: components["schemas"]["ResilienceRun"];
+            running?: components["schemas"]["ResilienceRun"];
+            elements: components["schemas"]["ResilienceElement"][];
         };
     };
     responses: {
@@ -4754,6 +4844,46 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ScenarioElement"][];
                 };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getResilience: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Последний пакет и рейтинг */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Resilience"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    runResilience: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Пересчёт поставлен в очередь */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             default: components["responses"]["Problem"];
         };

@@ -369,6 +369,21 @@ func (UnimplementedHandler) GetRegulation(ctx context.Context) (r *RegulationOve
 	return r, ht.ErrNotImplemented
 }
 
+// GetResilience implements getResilience operation.
+//
+// Пакет сценариев выпадения верхних элементов рейтинга
+// критичности: для каждого элемента — перекрытие в
+// службе маршрутизации и время объектов в радиусе до
+// МКАД, ТТК и ж/д грузовых пунктов. Ущерб — сумма
+// прироста времени (объекто-минуты) и 60 минут за каждую
+// потерю доступа. Пакет пересчитывается при смене графа
+// маршрутизации или сетевого анализа.
+//
+// GET /scenarios/resilience
+func (UnimplementedHandler) GetResilience(ctx context.Context) (r *Resilience, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRoutingStatus implements getRoutingStatus operation.
 //
 // Состояние службы маршрутизации и графа.
@@ -725,6 +740,15 @@ func (UnimplementedHandler) RevokeCuration(ctx context.Context, params RevokeCur
 //
 // DELETE /me/tokens/{tokenId}
 func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenParams) error {
+	return ht.ErrNotImplemented
+}
+
+// RunResilience implements runResilience operation.
+//
+// Пересчитать пакет устойчивости.
+//
+// POST /scenarios/resilience/run
+func (UnimplementedHandler) RunResilience(ctx context.Context) error {
 	return ht.ErrNotImplemented
 }
 

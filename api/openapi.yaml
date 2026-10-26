@@ -1660,6 +1660,36 @@ paths:
                 items: { $ref: "#/components/schemas/ScenarioElement" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /scenarios/resilience:
+    get:
+      tags: [scenarios]
+      operationId: getResilience
+      summary: Устойчивость сети — ущерб от выпадения мостов и участков
+      description: |
+        Пакет сценариев выпадения верхних элементов рейтинга критичности: для каждого элемента —
+        перекрытие в службе маршрутизации и время объектов в радиусе до МКАД, ТТК и ж/д грузовых
+        пунктов. Ущерб — сумма прироста времени (объекто-минуты) и 60 минут за каждую потерю
+        доступа. Пакет пересчитывается при смене графа маршрутизации или сетевого анализа.
+      x-permission: analytics.view
+      responses:
+        "200":
+          description: Последний пакет и рейтинг
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Resilience" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/resilience/run:
+    post:
+      tags: [scenarios]
+      operationId: runResilience
+      summary: Пересчитать пакет устойчивости
+      x-permission: data.manage
+      responses:
+        "202":
+          description: Пересчёт поставлен в очередь
+        default: { $ref: "#/components/responses/Problem" }
+
   /scenarios/segment-at:
     get:
       tags: [scenarios]
@@ -3844,3 +3874,61 @@ components:
           type: object
           description: Линия GeoJSON
           additionalProperties: {}
+
+    ResilienceRun:
+      type: object
+      required: [id, graphBuiltAt, profile, targets, radiusKm, status, elements, startedAt]
+      properties:
+        id: { type: integer }
+        graphBuiltAt: { type: string, format: date-time }
+        profile: { type: string }
+        targets:
+          type: array
+          items: { $ref: "#/components/schemas/ScenarioTargetKind" }
+        radiusKm: { type: number, description: "Объекты в этом радиусе от элемента пересчитываются" }
+        status: { type: string, enum: [running, done, failed] }
+        elements: { type: integer }
+        error: { type: string }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+
+    ResilienceTarget:
+      type: object
+      required: [kind, affected, lost, delayMin, maxDelay, damage]
+      properties:
+        kind: { $ref: "#/components/schemas/ScenarioTargetKind" }
+        affected: { type: integer }
+        lost: { type: integer }
+        delayMin: { type: number }
+        maxDelay: { type: number }
+        damage: { type: number }
+
+    ResilienceElement:
+      type: object
+      required: [elementId, kind, name, rank, criticalityRank, candidates, affected, lost, delayMin, maxDelayMin, damage, byTarget, point]
+      properties:
+        elementId: { type: integer, description: "Номер в последнем сетевом анализе (перекрытие элементом в сценарии)" }
+        kind: { type: string, enum: [bridge, segment] }
+        name: { type: string }
+        rank: { type: integer, description: "Место по ущербу" }
+        criticalityRank: { type: integer, description: "Место в рейтинге критичности (до МКАД по графу)" }
+        candidates: { type: integer, description: "Объектов в радиусе" }
+        affected: { type: integer }
+        lost: { type: integer }
+        delayMin: { type: number }
+        maxDelayMin: { type: number }
+        damage: { type: number }
+        byTarget:
+          type: array
+          items: { $ref: "#/components/schemas/ResilienceTarget" }
+        point: { $ref: "#/components/schemas/LngLat" }
+
+    Resilience:
+      type: object
+      required: [elements]
+      properties:
+        run: { $ref: "#/components/schemas/ResilienceRun" }
+        running: { $ref: "#/components/schemas/ResilienceRun" }
+        elements:
+          type: array
+          items: { $ref: "#/components/schemas/ResilienceElement" }

@@ -31,7 +31,10 @@ func (w *RunWorker) Work(ctx context.Context, job *river.Job[RunArgs]) error {
 	return nil
 }
 
-// Register добавляет обработчики модуля.
+// Register добавляет обработчики модуля и ежечасную проверку пакета устойчивости (считается
+// заново, только если сменились граф маршрутизации или сетевой анализ).
 func Register(reg *jobs.Registry, svc *Service, log *slog.Logger) {
 	jobs.Register(reg, &RunWorker{Service: svc, Log: log})
+	jobs.Register(reg, &ResilienceWorker{Service: svc, Log: log})
+	reg.Every(ResilienceArgs{}.Kind(), time.Hour, ResilienceArgs{}, resilienceOpts(), true)
 }
