@@ -59,7 +59,8 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	layers := tiles.NewService(pool, mods.ingest, tileLog)
 	bm := tiles.NewBasemap(cfg.DataDir, tileLog)
 	defer bm.Close()
-	mapHandler := tiles.New(tiles.Deps{Basemap: bm, Data: layers, Auth: tiles.NewAuth(ids, sessions), Log: tileLog})
+	auth := tiles.NewAuth(ids, sessions)
+	mapHandler := tiles.New(tiles.Deps{Basemap: bm, Data: layers, Auth: auth, Log: tileLog})
 
 	routingClient := routing.NewClient(cfg.ValhallaURL)
 	apiHandler, err := api.New(api.Deps{
@@ -80,6 +81,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthz", healthz())
 	mux.Handle("GET /readyz", readyz(pool, routingClient))
+	mux.Handle("GET /api/v1/events", api.Events(rt.bus, auth, env.Log.With("component", "events")))
 	mux.Handle("/api/v1/", apiHandler)
 	mux.Handle("/map/", mapHandler)
 	mux.Handle("/tiles/", mapHandler)
