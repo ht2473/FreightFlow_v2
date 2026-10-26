@@ -119,6 +119,19 @@ func (UnimplementedHandler) CreateInvite(ctx context.Context, req *CreateInvite)
 	return r, ht.ErrNotImplemented
 }
 
+// CreateScenario implements createScenario operation.
+//
+// Сценарий считается фоновой задачей: ответ — сценарий
+// со статусом `queued`. Ход расчёта — события `job.progress` потока
+// `GET /events` и поле `progress`; о завершении сообщает событие
+// `scenario.computed`. База и сценарий считаются с одинаковыми
+// параметрами, различаются только изменения сценария.
+//
+// POST /scenarios
+func (UnimplementedHandler) CreateScenario(ctx context.Context, req *ScenarioRequest) (r *Scenario, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateToken implements createToken operation.
 //
 // Выпустить токен API.
@@ -166,6 +179,24 @@ func (UnimplementedHandler) DataUpdates(ctx context.Context, params DataUpdatesP
 	return r, ht.ErrNotImplemented
 }
 
+// DeleteScenario implements deleteScenario operation.
+//
+// Удалить сценарий с результатами.
+//
+// DELETE /scenarios/{scenarioId}
+func (UnimplementedHandler) DeleteScenario(ctx context.Context, params DeleteScenarioParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteSiteRun implements deleteSiteRun operation.
+//
+// Удалить сохранённую оценку.
+//
+// DELETE /site-selection/runs/{runId}
+func (UnimplementedHandler) DeleteSiteRun(ctx context.Context, params DeleteSiteRunParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DeleteView implements deleteView operation.
 //
 // Удалить свой вид.
@@ -191,6 +222,21 @@ func (UnimplementedHandler) DisableTotp(ctx context.Context, req *PasswordConfir
 //
 // GET /metrics/entity
 func (UnimplementedHandler) EntityMetrics(ctx context.Context, params EntityMetricsParams) (r []MetricValue, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// EvaluateSite implements evaluateSite operation.
+//
+// Ячейки с долей любой выбранной исключающей зоны не
+// меньше порога исключаются; остальные ранжируются TOPSIS
+// (векторная нормировка, пропуск — худшее значение
+// критерия). Веса — прямые или по матрице попарных
+// сравнений МАИ (главный собственный вектор, CR Saaty).
+// Лучшие кандидаты — с разнесением; вклад критериев и
+// чувствительность к весам ±20 %.
+//
+// POST /site-selection/evaluate
+func (UnimplementedHandler) EvaluateSite(ctx context.Context, req *SiteParams) (r *SiteResult, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -347,6 +393,21 @@ func (UnimplementedHandler) GetRegulation(ctx context.Context) (r *RegulationOve
 	return r, ht.ErrNotImplemented
 }
 
+// GetResilience implements getResilience operation.
+//
+// Пакет сценариев выпадения верхних элементов рейтинга
+// критичности: для каждого элемента — перекрытие в
+// службе маршрутизации и время объектов в радиусе до
+// МКАД, ТТК и ж/д грузовых пунктов. Ущерб — сумма
+// прироста времени (объекто-минуты) и 60 минут за каждую
+// потерю доступа. Пакет пересчитывается при смене графа
+// маршрутизации или сетевого анализа.
+//
+// GET /scenarios/resilience
+func (UnimplementedHandler) GetResilience(ctx context.Context) (r *Resilience, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRoutingStatus implements getRoutingStatus operation.
 //
 // Состояние службы маршрутизации и графа.
@@ -362,6 +423,15 @@ func (UnimplementedHandler) GetRoutingStatus(ctx context.Context) (r *RoutingSta
 //
 // GET /data/runs/{runId}
 func (UnimplementedHandler) GetRun(ctx context.Context, params GetRunParams) (r *RunDetail, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetScenario implements getScenario operation.
+//
+// Сценарий, ход расчёта и итог.
+//
+// GET /scenarios/{scenarioId}
+func (UnimplementedHandler) GetScenario(ctx context.Context, params GetScenarioParams) (r *Scenario, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -384,6 +454,15 @@ func (UnimplementedHandler) GetSettings(ctx context.Context) (r *Settings, _ err
 //
 // GET /regulation/signs
 func (UnimplementedHandler) GetSignQuality(ctx context.Context) (r *SignQuality, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetSiteRun implements getSiteRun operation.
+//
+// Сохранённая оценка.
+//
+// GET /site-selection/runs/{runId}
+func (UnimplementedHandler) GetSiteRun(ctx context.Context, params GetSiteRunParams) (r *SiteRun, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -510,6 +589,33 @@ func (UnimplementedHandler) ListRuns(ctx context.Context, params ListRunsParams)
 	return r, ht.ErrNotImplemented
 }
 
+// ListScenarioElements implements listScenarioElements operation.
+//
+// Мосты и участки рейтинга критичности для перекрытия.
+//
+// GET /scenarios/elements
+func (UnimplementedHandler) ListScenarioElements(ctx context.Context, params ListScenarioElementsParams) (r []ScenarioElement, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListScenarios implements listScenarios operation.
+//
+// Мои сценарии.
+//
+// GET /scenarios
+func (UnimplementedHandler) ListScenarios(ctx context.Context) (r []Scenario, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListSiteRuns implements listSiteRuns operation.
+//
+// Мои сохранённые оценки локации.
+//
+// GET /site-selection/runs
+func (UnimplementedHandler) ListSiteRuns(ctx context.Context) (r []SiteRun, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListSources implements listSources operation.
 //
 // Источники данных со свежестью и последним запуском.
@@ -604,6 +710,16 @@ func (UnimplementedHandler) ReportFacilityIssue(ctx context.Context, req *Report
 	return r, ht.ErrNotImplemented
 }
 
+// RerunScenario implements rerunScenario operation.
+//
+// Пересчитать сценарий (например, после обновления
+// графа).
+//
+// POST /scenarios/{scenarioId}/rerun
+func (UnimplementedHandler) RerunScenario(ctx context.Context, params RerunScenarioParams) (r *Scenario, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ResetDashboard implements resetDashboard operation.
 //
 // Вернуть дашборд по умолчанию.
@@ -669,6 +785,15 @@ func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenP
 	return ht.ErrNotImplemented
 }
 
+// RunResilience implements runResilience operation.
+//
+// Пересчитать пакет устойчивости.
+//
+// POST /scenarios/resilience/run
+func (UnimplementedHandler) RunResilience(ctx context.Context) error {
+	return ht.ErrNotImplemented
+}
+
 // SaveDashboard implements saveDashboard operation.
 //
 // Сохранить свои виджеты (пустой список не допускается
@@ -687,6 +812,60 @@ func (UnimplementedHandler) SaveDashboard(ctx context.Context, req *SaveDashboar
 // PUT /indexes/{code}/config
 func (UnimplementedHandler) SaveIndexConfig(ctx context.Context, req *SaveIndexConfigReq, params SaveIndexConfigParams) error {
 	return ht.ErrNotImplemented
+}
+
+// SaveSiteRun implements saveSiteRun operation.
+//
+// Сохранить оценку (параметры и лучших кандидатов).
+//
+// POST /site-selection/runs
+func (UnimplementedHandler) SaveSiteRun(ctx context.Context, req *SiteRunRequest) (r *SiteRun, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ScenarioClosures implements scenarioClosures operation.
+//
+// Перекрытия сценария (GeoJSON).
+//
+// GET /scenarios/{scenarioId}/closures
+func (UnimplementedHandler) ScenarioClosures(ctx context.Context, params ScenarioClosuresParams) (r ScenarioClosuresOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ScenarioDistricts implements scenarioDistricts operation.
+//
+// Изменения доступности по районам.
+//
+// GET /scenarios/{scenarioId}/districts
+func (UnimplementedHandler) ScenarioDistricts(ctx context.Context, params ScenarioDistrictsParams) (r []ScenarioDistrict, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ScenarioFacilities implements scenarioFacilities operation.
+//
+// Изменение времени объектов до цели.
+//
+// GET /scenarios/{scenarioId}/facilities
+func (UnimplementedHandler) ScenarioFacilities(ctx context.Context, params ScenarioFacilitiesParams) (r []ScenarioFacility, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ScenarioIsochrones implements scenarioIsochrones operation.
+//
+// Изохроны базы и сценария (GeoJSON).
+//
+// GET /scenarios/{scenarioId}/isochrones
+func (UnimplementedHandler) ScenarioIsochrones(ctx context.Context, params ScenarioIsochronesParams) (r ScenarioIsochronesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ScenarioSegmentAt implements scenarioSegmentAt operation.
+//
+// Участок сети у точки (для перекрытия щелчком по карте).
+//
+// GET /scenarios/segment-at
+func (UnimplementedHandler) ScenarioSegmentAt(ctx context.Context, params ScenarioSegmentAtParams) (r *ScenarioSegment, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // Search implements search operation.
@@ -718,6 +897,24 @@ func (UnimplementedHandler) SearchParse(ctx context.Context, params SearchParseP
 //
 // GET /search/suggest
 func (UnimplementedHandler) SearchSuggest(ctx context.Context, params SearchSuggestParams) (r []SearchHit, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SiteCatalog implements siteCatalog operation.
+//
+// Критерии и исключающие зоны оценки локации.
+//
+// GET /site-selection/catalog
+func (UnimplementedHandler) SiteCatalog(ctx context.Context) (r *SiteCatalog, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SiteCells implements siteCells operation.
+//
+// Сетка ячеек H3 Москвы (GeoJSON) для карты пригодности.
+//
+// GET /site-selection/cells
+func (UnimplementedHandler) SiteCells(ctx context.Context, params SiteCellsParams) (r SiteCellsOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

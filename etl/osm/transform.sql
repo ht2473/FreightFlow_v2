@@ -431,3 +431,15 @@ SELECT uuidv7(), s.id, coalesce(s.tags->>'bridge:name', s.name),
        s.geom, s.osm_id, current_setting('ff.source'), current_setting('ff.snapshot')::uuid
 FROM network.road_segment s
 WHERE s.last_seen_at = now() AND s.bridge AND s.class NOT IN ('service', 'track');
+
+-- 7. Земельный покров для оценки локации: жилая застройка, зелёные зоны, вода -----------------
+
+DELETE FROM territory.land_cover WHERE source_code = current_setting('ff.source');
+
+INSERT INTO territory.land_cover (id, kind, name, geom, area_m2, osm_type, osm_id, source_code, snapshot_id)
+SELECT uuidv7(), a.kind, a.tags->>'name', g.geom, ST_Area(g.geom::geography), a.osm_type, a.osm_id,
+       current_setting('ff.source'), current_setting('ff.snapshot')::uuid
+FROM osm_stage.areas a
+CROSS JOIN LATERAL (SELECT ST_Multi(ST_CollectionExtract(ST_MakeValid(a.geom), 3)) AS geom) g, scope s
+WHERE a.kind IN ('residential', 'green', 'water') AND ST_Intersects(s.geom, a.geom)
+  AND ST_Area(a.geom::geography) >= 2000 AND NOT ST_IsEmpty(g.geom);

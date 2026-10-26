@@ -119,8 +119,30 @@ const routeTree = rootRoute.addChildren([
     path: "/analytics/methods",
     component: lazyRouteComponent(() => import("@/features/analytics/MethodsPage"), "MethodsPage"),
   }),
-  sectionRoute("/scenarios"),
-  sectionRoute("/site-selection"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/scenarios",
+    component: lazyRouteComponent(() => import("@/features/scenarios/ScenariosPage"), "ScenariosPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/scenarios/new",
+    validateSearch: (search: Record<string, unknown>) => ({
+      from: typeof search.from === "string" ? search.from : undefined,
+      element: typeof search.element === "number" ? search.element : undefined,
+    }),
+    component: lazyRouteComponent(() => import("@/features/scenarios/ScenarioBuilder"), "ScenarioBuilderPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/scenarios/$scenarioId",
+    component: lazyRouteComponent(() => import("@/features/scenarios/ScenarioResult"), "ScenarioResultPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/site-selection",
+    component: lazyRouteComponent(() => import("@/features/site-selection/SitePage"), "SitePage"),
+  }),
   sectionRoute("/reports"),
   createRoute({
     getParentRoute: () => rootRoute,

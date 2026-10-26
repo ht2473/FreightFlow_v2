@@ -23,6 +23,7 @@ import (
 	"freightflow/internal/platform/telemetry"
 	"freightflow/internal/report"
 	"freightflow/internal/routing"
+	"freightflow/internal/scenario"
 	"freightflow/internal/search"
 )
 
@@ -82,6 +83,7 @@ type modules struct {
 	ingest     *ingest.Service
 	facilities *facility.Service
 	reports    *report.Service
+	scenarios  *scenario.Service
 	inserter   *jobs.Client
 }
 
@@ -101,9 +103,11 @@ func newModules(ctx context.Context, env *Env, rt *runtime) (*modules, error) {
 		return nil, err
 	}
 	facilities := facility.New(rt.pool)
+	routes := routing.NewService(rt.pool, routing.NewClient(env.Config.ValhallaURL))
 	return &modules{
 		identity: ids, ingest: ing, facilities: facilities,
-		reports: report.New(rt.pool, inserter, rt.blobs, facilities), inserter: inserter,
+		reports: report.New(rt.pool, inserter, rt.blobs, facilities), scenarios: scenario.New(rt.pool, inserter, routes, analytics.New(rt.pool)),
+		inserter: inserter,
 	}, nil
 }
 
@@ -117,6 +121,7 @@ func (m *modules) registry(env *Env, pool *pgxpool.Pool) *jobs.Registry {
 	report.Register(reg, m.reports, env.Log.With("component", "report"))
 	search.Register(reg, search.New(pool, m.facilities), env.Log.With("component", "search"))
 	analytics.Register(reg, analytics.New(pool), env.Log.With("component", "analytics"))
+	scenario.Register(reg, m.scenarios, env.Log.With("component", "scenario"))
 	return reg
 }
 

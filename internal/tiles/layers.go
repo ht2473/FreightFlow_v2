@@ -418,6 +418,30 @@ var Registry = []Layer{
 		},
 	},
 	{
+		Code: "resilience", Group: "network", Title: "Устойчивость сети",
+		Description: "Ущерб от выпадения моста или участка для грузовика 12 т: рост времени объектов до МКАД, ТТК и " +
+			"ж/д грузовых пунктов и потеря доступа (час за объект) по сценариям Valhalla; цвет — место в рейтинге",
+		Geometry: "line", MinZoom: 9, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"resilience"},
+		Attribution: mixedAttribution,
+		Style: Style{Kind: "category", Property: "level", Categories: []Category{
+			{Values: []string{"top10"}, Label: "Первые 10 по ущербу", Color: "crit"},
+			{Values: []string{"other"}, Label: "Остальные с ущербом", Color: "warn"},
+			{Values: []string{"none"}, Label: "Без ущерба (есть объезд)", Color: "ok"},
+		}},
+		Properties: []Property{
+			{Name: "name", Title: "Название", Kind: "text"},
+			{Name: "kind", Title: "Элемент", Kind: "enum", Labels: map[string]string{
+				"bridge": "мост, путепровод", "segment": "участок дороги",
+			}},
+			{Name: "rank", Title: "Место по ущербу", Kind: "number"},
+			{Name: "criticality_rank", Title: "Место в рейтинге критичности", Kind: "number"},
+			{Name: "damage", Title: "Ущерб", Kind: "number", Unit: "объекто-мин"},
+			{Name: "affected", Title: "Затронуто объектов", Kind: "number"},
+			{Name: "lost", Title: "Потерь доступа", Kind: "number"},
+			{Name: "max_delay_min", Title: "Наибольший рост", Kind: "number", Unit: "мин"},
+		},
+	},
+	{
 		Code: "road_works", Group: "operations", Title: "Дорожные работы",
 		Description: "Плановый и аварийный ремонт, ограничения движения на период работ — на дату шкалы", Geometry: "line",
 		MinZoom: 10, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"operations"},

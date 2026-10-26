@@ -122,6 +122,20 @@ func encodeCreateInviteRequest(
 	return nil
 }
 
+func encodeCreateScenarioRequest(
+	req *ScenarioRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateTokenRequest(
 	req *CreateToken,
 	r *http.Request,
@@ -180,6 +194,20 @@ func encodeCurateFacilityRequest(
 
 func encodeDisableTotpRequest(
 	req *PasswordConfirmation,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeEvaluateSiteRequest(
+	req *SiteParams,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -278,6 +306,20 @@ func encodeSaveDashboardRequest(
 
 func encodeSaveIndexConfigRequest(
 	req *SaveIndexConfigReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeSaveSiteRunRequest(
+	req *SiteRunRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

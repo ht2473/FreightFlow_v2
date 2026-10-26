@@ -7,6 +7,7 @@ import { cellClass, EmptyState, PageHeader, Section, Skeleton, tableClass } from
 import { KpiTile } from "@/shared/ui/KpiTile";
 import s from "./analysis.module.css";
 import { accuracyText, damageText, detourText, elementLabel, limitText, mapCenter, segmentsLabel } from "./labels";
+import { ResilienceSection } from "./ResilienceSection";
 
 type Analysis = Schemas["NetworkAnalysis"];
 
@@ -63,6 +64,7 @@ function NetworkAnalysis() {
           <Overview a={q.data} />
           <Streets a={q.data} />
           <Critical a={q.data} />
+          <ResilienceSection />
           <Bottlenecks a={q.data} />
           <Method a={q.data} />
         </>

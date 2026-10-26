@@ -168,6 +168,11 @@ local function area_kind(t)
         return 'green'
     end
     if t.man_made == 'bridge' then return 'bridge' end
+    -- Водные объекты (исключаются при оценке локации): реки, пруды, водохранилища.
+    if t.natural == 'water' or t.waterway == 'riverbank' or t.landuse == 'reservoir'
+        or t.landuse == 'basin' then
+        return 'water'
+    end
     return nil
 end
 

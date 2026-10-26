@@ -11,11 +11,11 @@ import (
 
 // runRouting — граф и расчёты маршрутизации: prepare — наложение ограничений из знаков на
 // выгрузку OSM (контейнер worker, нужен osmium; граф собирает Valhalla — task routing:build);
-// accessibility — доступность объектов по текущему графу; analyze — сетевой анализ (значимость
-// участков, узкие места по габаритам).
+// accessibility — доступность объектов по текущему графу; cells — доступность ячеек H3 (критерий
+// оценки локации); analyze — сетевой анализ (значимость участков, узкие места по габаритам).
 func runRouting(ctx context.Context, env *Env, args []string) error {
-	if len(args) != 1 || (args[0] != "prepare" && args[0] != "accessibility" && args[0] != "analyze") {
-		fmt.Fprintln(env.Stderr, "Использование: freightflow routing prepare | accessibility | analyze")
+	if len(args) != 1 || (args[0] != "prepare" && args[0] != "accessibility" && args[0] != "cells" && args[0] != "analyze") {
+		fmt.Fprintln(env.Stderr, "Использование: freightflow routing prepare | accessibility | cells | analyze")
 		return ErrUsage
 	}
 	rt, err := startRuntime(ctx, env, "routing")
@@ -40,6 +40,16 @@ func runRouting(ctx context.Context, env *Env, args []string) error {
 		}
 		fmt.Fprintf(env.Stdout, "доступность: объектов %d, целей %d, профилей %d, запросов %d, недостижимо %d (граф %s)\n",
 			st.Facilities, st.Targets, st.Profiles, st.Requests, st.Unreachable, st.GraphBuiltAt.Format("02.01.2006 15:04"))
+		return nil
+	}
+	if args[0] == "cells" {
+		svc := routing.NewService(rt.pool, routing.NewClient(env.Config.ValhallaURL))
+		st, err := svc.RefreshCellAccess(ctx, true)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(env.Stdout, "доступность ячеек: %d ячеек, запросов %d, недостижимо %d за %s\n",
+			st.Cells, st.Requests, st.Unreachable, st.Duration.Round(time.Second))
 		return nil
 	}
 	dir := filepath.Join(env.Config.DataDir, "routing")

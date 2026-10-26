@@ -48,7 +48,12 @@ export function AppShell() {
   const user = me.data;
   const role = user.roles[0] ? roleTitle(user.roles[0]) : "";
   // Разделы с картой во всю высоту рабочей области.
-  const fullBleed = pathname.startsWith("/map") || pathname === "/network";
+  // Страницы с картой во всю высоту: карта, маршруты, конструктор и результаты сценария, оценка локации.
+  const fullBleed =
+    pathname.startsWith("/map") ||
+    pathname === "/network" ||
+    pathname.startsWith("/scenarios/") ||
+    pathname.startsWith("/site-selection");
 
   return (
     <div className={s.app}>
@@ -94,7 +99,7 @@ export function AppShell() {
           <div className={s.crumb}>
             Москва / <b>{title}</b>
           </div>
-          <AriaButton className={s.search} onPress={() => palette.setOpen(true)} aria-label="Поиск по системе (Ctrl K)">
+          <AriaButton className={s.search} onPress={() => palette.setOpen(true)}>
             <Search size={15} aria-hidden />
             <span className={s.searchLabel}>Поиск по системе</span>
             <kbd>Ctrl K</kbd>
@@ -145,7 +150,8 @@ function UserMenu({ name }: { name: string }) {
   return (
     <MenuTrigger>
       <AriaButton className={s.menuTrigger} aria-label="Меню пользователя">
-        <span className={s.avatar}>{initials(name)}</span>
+        {/* Инициалы — из атрибута через CSS: в имя кнопки входит только «Меню пользователя». */}
+        <span className={s.avatar} data-initials={initials(name)} aria-hidden />
       </AriaButton>
       <Popover className={popoverClass} placement="bottom end">
         <Menu onAction={onAction} aria-label="Меню пользователя">

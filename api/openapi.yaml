@@ -38,6 +38,8 @@ tags:
     description: Регулирование грузового движения
   - name: routing
     description: Маршруты грузовиков с учётом ограничений и зон
+  - name: scenarios
+    description: Сценарии «что если», устойчивость сети, оценка локации
 
 paths:
   /me:
@@ -1596,6 +1598,364 @@ paths:
               schema: { $ref: "#/components/schemas/NetworkAnalysis" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /scenarios:
+    get:
+      tags: [scenarios]
+      operationId: listScenarios
+      summary: Мои сценарии
+      x-permission: scenarios.manage
+      responses:
+        "200":
+          description: Сценарии, новые сверху
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Scenario" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [scenarios]
+      operationId: createScenario
+      summary: Создать и посчитать сценарий
+      description: |
+        Сценарий считается фоновой задачей: ответ — сценарий со статусом `queued`. Ход расчёта —
+        события `job.progress` потока `GET /events` и поле `progress`; о завершении сообщает
+        событие `scenario.computed`. База и сценарий считаются с одинаковыми параметрами,
+        различаются только изменения сценария.
+      x-permission: scenarios.manage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ScenarioRequest" }
+      responses:
+        "202":
+          description: Сценарий поставлен в расчёт
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Scenario" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/elements:
+    get:
+      tags: [scenarios]
+      operationId: listScenarioElements
+      summary: Мосты и участки рейтинга критичности для перекрытия
+      x-permission: scenarios.manage
+      parameters:
+        - name: q
+          in: query
+          description: Часть названия
+          schema: { type: string, maxLength: 100 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        "200":
+          description: Элементы по рейтингу
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ScenarioElement" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/resilience:
+    get:
+      tags: [scenarios]
+      operationId: getResilience
+      summary: Устойчивость сети — ущерб от выпадения мостов и участков
+      description: |
+        Пакет сценариев выпадения верхних элементов рейтинга критичности: для каждого элемента —
+        перекрытие в службе маршрутизации и время объектов в радиусе до МКАД, ТТК и ж/д грузовых
+        пунктов. Ущерб — сумма прироста времени (объекто-минуты) и 60 минут за каждую потерю
+        доступа. Пакет пересчитывается при смене графа маршрутизации или сетевого анализа.
+      x-permission: analytics.view
+      responses:
+        "200":
+          description: Последний пакет и рейтинг
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Resilience" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/resilience/run:
+    post:
+      tags: [scenarios]
+      operationId: runResilience
+      summary: Пересчитать пакет устойчивости
+      x-permission: data.manage
+      responses:
+        "202":
+          description: Пересчёт поставлен в очередь
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/segment-at:
+    get:
+      tags: [scenarios]
+      operationId: scenarioSegmentAt
+      summary: Участок сети у точки (для перекрытия щелчком по карте)
+      x-permission: scenarios.manage
+      parameters:
+        - name: lon
+          in: query
+          required: true
+          schema: { type: number, minimum: -180, maximum: 180 }
+        - name: lat
+          in: query
+          required: true
+          schema: { type: number, minimum: -85, maximum: 85 }
+      responses:
+        "200":
+          description: Ближайший участок в 50 м
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScenarioSegment" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/{scenarioId}:
+    get:
+      tags: [scenarios]
+      operationId: getScenario
+      summary: Сценарий, ход расчёта и итог
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/ScenarioId"
+      responses:
+        "200":
+          description: Сценарий
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Scenario" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [scenarios]
+      operationId: deleteScenario
+      summary: Удалить сценарий с результатами
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/ScenarioId"
+      responses:
+        "204":
+          description: Удалён
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/{scenarioId}/rerun:
+    post:
+      tags: [scenarios]
+      operationId: rerunScenario
+      summary: Пересчитать сценарий (например, после обновления графа)
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/ScenarioId"
+      responses:
+        "202":
+          description: Сценарий поставлен в расчёт
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Scenario" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/{scenarioId}/facilities:
+    get:
+      tags: [scenarios]
+      operationId: scenarioFacilities
+      summary: Изменение времени объектов до цели
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/ScenarioId"
+        - $ref: "#/components/parameters/ScenarioTarget"
+        - name: all
+          in: query
+          description: Все объекты, а не только изменившиеся
+          schema: { type: boolean, default: false }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 5000, default: 500 }
+      responses:
+        "200":
+          description: Объекты, сначала потерявшие доступ, затем по приросту времени
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ScenarioFacility" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/{scenarioId}/districts:
+    get:
+      tags: [scenarios]
+      operationId: scenarioDistricts
+      summary: Изменения доступности по районам
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/ScenarioId"
+        - $ref: "#/components/parameters/ScenarioTarget"
+      responses:
+        "200":
+          description: Районы с изменениями
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ScenarioDistrict" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/{scenarioId}/closures:
+    get:
+      tags: [scenarios]
+      operationId: scenarioClosures
+      summary: Перекрытия сценария (GeoJSON)
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/ScenarioId"
+      responses:
+        "200":
+          description: FeatureCollection, у перекрытия — index, kind, label; участки — линиями, области — многоугольниками
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+        default: { $ref: "#/components/responses/Problem" }
+
+  /scenarios/{scenarioId}/isochrones:
+    get:
+      tags: [scenarios]
+      operationId: scenarioIsochrones
+      summary: Изохроны базы и сценария (GeoJSON)
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/ScenarioId"
+      responses:
+        "200":
+          description: FeatureCollection, у контура — origin, name, minutes, variant (base, scenario), areaKm2
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+        default: { $ref: "#/components/responses/Problem" }
+
+  /site-selection/catalog:
+    get:
+      tags: [scenarios]
+      operationId: siteCatalog
+      summary: Критерии и исключающие зоны оценки локации
+      x-permission: scenarios.manage
+      responses:
+        "200":
+          description: Каталог
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SiteCatalog" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /site-selection/cells:
+    get:
+      tags: [scenarios]
+      operationId: siteCells
+      summary: Сетка ячеек H3 Москвы (GeoJSON) для карты пригодности
+      x-permission: scenarios.manage
+      parameters:
+        - name: resolution
+          in: query
+          required: true
+          schema: { type: integer, enum: [8, 9] }
+      responses:
+        "200":
+          description: FeatureCollection, у ячейки — h3
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+        default: { $ref: "#/components/responses/Problem" }
+
+  /site-selection/evaluate:
+    post:
+      tags: [scenarios]
+      operationId: evaluateSite
+      summary: Оценить ячейки H3 по критериям (МАИ или прямые веса, TOPSIS)
+      description: |
+        Ячейки с долей любой выбранной исключающей зоны не меньше порога исключаются; остальные
+        ранжируются TOPSIS (векторная нормировка, пропуск — худшее значение критерия). Веса — прямые
+        или по матрице попарных сравнений МАИ (главный собственный вектор, CR Saaty). Лучшие
+        кандидаты — с разнесением; вклад критериев и чувствительность к весам ±20 %.
+      x-permission: scenarios.manage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SiteParams" }
+      responses:
+        "200":
+          description: Оценка
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SiteResult" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /site-selection/runs:
+    get:
+      tags: [scenarios]
+      operationId: listSiteRuns
+      summary: Мои сохранённые оценки локации
+      x-permission: scenarios.manage
+      responses:
+        "200":
+          description: Оценки, новые сверху
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SiteRun" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [scenarios]
+      operationId: saveSiteRun
+      summary: Сохранить оценку (параметры и лучших кандидатов)
+      x-permission: scenarios.manage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SiteRunRequest" }
+      responses:
+        "201":
+          description: Сохранено
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SiteRun" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /site-selection/runs/{runId}:
+    get:
+      tags: [scenarios]
+      operationId: getSiteRun
+      summary: Сохранённая оценка
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/SiteRunId"
+      responses:
+        "200":
+          description: Оценка
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SiteRun" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [scenarios]
+      operationId: deleteSiteRun
+      summary: Удалить сохранённую оценку
+      x-permission: scenarios.manage
+      parameters:
+        - $ref: "#/components/parameters/SiteRunId"
+      responses:
+        "204":
+          description: Удалена
+        default: { $ref: "#/components/responses/Problem" }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -1625,6 +1985,21 @@ components:
 
     FacilityId:
       name: facilityId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ScenarioId:
+      name: scenarioId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ScenarioTarget:
+      name: target
+      in: query
+      required: true
+      schema: { $ref: "#/components/schemas/ScenarioTargetKind" }
+    SiteRunId:
+      name: runId
       in: path
       required: true
       schema: { type: string, format: uuid }
@@ -3386,3 +3761,452 @@ components:
           type: array
           items: { $ref: "#/components/schemas/ZoneVerdict" }
         blocked: { $ref: "#/components/schemas/BlockedPoint" }
+
+    ScenarioTargetKind:
+      type: string
+      description: "Цель доступности: МКАД, ТТК, центр, ж/д грузовые пункты"
+      enum: [mkad, ttk, center, rail_freight]
+
+    ScenarioClosure:
+      type: object
+      required: [kind]
+      description: |
+        Перекрытие: участки сети (`segments` — id участков), элемент рейтинга критичности
+        (`element` — номер в последнем сетевом анализе) или область (`polygon` — замкнутый контур).
+      properties:
+        kind: { type: string, enum: [segments, element, area] }
+        label: { type: string, maxLength: 200 }
+        segments:
+          type: array
+          maxItems: 100
+          items: { type: string, format: uuid }
+        element: { type: integer, minimum: 0 }
+        polygon:
+          type: array
+          maxItems: 500
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items: { type: number }
+
+    ScenarioNewFacility:
+      type: object
+      required: [lon, lat]
+      properties:
+        name: { type: string, maxLength: 200 }
+        lon: { type: number, minimum: -180, maximum: 180 }
+        lat: { type: number, minimum: -85, maximum: 85 }
+
+    ScenarioParams:
+      type: object
+      required: [profile, zones, targets]
+      properties:
+        profile: { type: string, description: "Код типового профиля ТС" }
+        zones: { type: boolean, description: "Учитывать правила зон пропусков (иначе — физическая доступность по сети)" }
+        passes:
+          type: array
+          maxItems: 6
+          items: { $ref: "#/components/schemas/VehiclePass" }
+        depart: { type: string, format: date-time }
+        zoneOverrides:
+          type: object
+          description: "Решение по зоне в сценарии: true — открыта для профиля, false — закрыта"
+          additionalProperties: { type: boolean }
+        closures:
+          type: array
+          maxItems: 20
+          items: { $ref: "#/components/schemas/ScenarioClosure" }
+        newFacility: { $ref: "#/components/schemas/ScenarioNewFacility" }
+        targets:
+          type: array
+          minItems: 1
+          maxItems: 4
+          items: { $ref: "#/components/schemas/ScenarioTargetKind" }
+        isochroneMinutes:
+          type: array
+          maxItems: 4
+          items: { type: integer, minimum: 5, maximum: 90 }
+        isochroneFacilities:
+          type: array
+          maxItems: 5
+          items: { type: string, format: uuid }
+
+    ScenarioRequest:
+      type: object
+      required: [name, params]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 2000 }
+        params: { $ref: "#/components/schemas/ScenarioParams" }
+
+    ScenarioProgress:
+      type: object
+      required: [done, total]
+      properties:
+        stage: { type: string }
+        done: { type: integer }
+        total: { type: integer }
+
+    ScenarioTargetSummary:
+      type: object
+      required: [kind, affected, improved, lost, gained, blocked, delayMin, meanDelay, maxDelay, baseMedian, scenarioMedian]
+      properties:
+        kind: { $ref: "#/components/schemas/ScenarioTargetKind" }
+        affected: { type: integer, description: "Объектов с приростом времени" }
+        improved: { type: integer, description: "Объектов с сокращением времени" }
+        lost: { type: integer, description: "Потеряли доступ" }
+        gained: { type: integer, description: "Получили доступ" }
+        blocked: { type: integer, description: "В закрытой зоне в сценарии" }
+        delayMin: { type: number, description: "Суммарный прирост, объекто-минуты" }
+        meanDelay: { type: number }
+        maxDelay: { type: number }
+        baseMedian: { type: number }
+        scenarioMedian: { type: number }
+
+    ScenarioClosureInfo:
+      type: object
+      required: [kind, label, segments, lengthKm, excluded]
+      properties:
+        kind: { type: string, enum: [segments, element, area] }
+        label: { type: string }
+        segments: { type: integer }
+        lengthKm: { type: number }
+        areaKm2: { type: number }
+        excluded: { type: integer, description: "Рёбер графа, исключённых из расчёта (с направлениями)" }
+
+    ScenarioReach:
+      type: string
+      description: "ok — достижимо, unreachable — путь не найден, blocked — в закрытой зоне"
+      enum: [ok, unreachable, blocked]
+
+    ScenarioEntityTime:
+      type: object
+      required: [kind, baseStatus, scenarioStatus]
+      properties:
+        kind: { $ref: "#/components/schemas/ScenarioTargetKind" }
+        baseMin: { type: number }
+        scenarioMin: { type: number }
+        baseStatus: { $ref: "#/components/schemas/ScenarioReach" }
+        scenarioStatus: { $ref: "#/components/schemas/ScenarioReach" }
+
+    ScenarioIsoSummary:
+      type: object
+      required: [origin, name, minutes, baseKm2, scenarioKm2]
+      properties:
+        origin: { type: string }
+        name: { type: string }
+        minutes: { type: integer }
+        baseKm2: { type: number }
+        scenarioKm2: { type: number }
+
+    ScenarioZoneChange:
+      type: object
+      required: [zone, baseClosed, scenarioClosed]
+      properties:
+        zone: { type: string, enum: [sk, ttk, mkad] }
+        baseClosed: { type: boolean }
+        scenarioClosed: { type: boolean }
+
+    ScenarioSummary:
+      type: object
+      required: [targets, closures, baseReused, facilities, durationMs]
+      properties:
+        targets:
+          type: array
+          items: { $ref: "#/components/schemas/ScenarioTargetSummary" }
+        closures:
+          type: array
+          items: { $ref: "#/components/schemas/ScenarioClosureInfo" }
+        newFacility:
+          type: array
+          items: { $ref: "#/components/schemas/ScenarioEntityTime" }
+        isochrones:
+          type: array
+          items: { $ref: "#/components/schemas/ScenarioIsoSummary" }
+        zones:
+          type: array
+          items: { $ref: "#/components/schemas/ScenarioZoneChange" }
+        baseReused: { type: boolean, description: "База взята из показателей доступности (тот же граф)" }
+        facilities: { type: integer }
+        durationMs: { type: integer }
+
+    Scenario:
+      type: object
+      required: [id, name, description, params, status, progress, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string }
+        params: { $ref: "#/components/schemas/ScenarioParams" }
+        status: { type: string, enum: [queued, running, done, failed] }
+        progress: { $ref: "#/components/schemas/ScenarioProgress" }
+        summary: { $ref: "#/components/schemas/ScenarioSummary" }
+        error: { type: string }
+        graphBuiltAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+
+    ScenarioFacility:
+      type: object
+      required: [entity, name, district, point, baseStatus, scenarioStatus]
+      properties:
+        entity: { type: string, description: "id объекта реестра или new" }
+        name: { type: string }
+        district: { type: string }
+        point: { $ref: "#/components/schemas/LngLat" }
+        baseMin: { type: number }
+        scenarioMin: { type: number }
+        baseStatus: { $ref: "#/components/schemas/ScenarioReach" }
+        scenarioStatus: { $ref: "#/components/schemas/ScenarioReach" }
+
+    ScenarioDistrict:
+      type: object
+      required: [district, facilities, affected, lost, delayMin, maxDelay]
+      properties:
+        district: { type: string }
+        facilities: { type: integer }
+        affected: { type: integer }
+        lost: { type: integer }
+        delayMin: { type: number }
+        maxDelay: { type: number }
+
+    ScenarioElement:
+      type: object
+      required: [id, kind, name, rank, damageMin, geometry]
+      properties:
+        id: { type: integer }
+        kind: { type: string, enum: [bridge, segment] }
+        name: { type: string }
+        rank: { type: integer }
+        damageMin: { type: number, description: "Ущерб по рейтингу критичности, объекто-минуты" }
+        geometry:
+          type: object
+          description: Линия GeoJSON
+          additionalProperties: {}
+
+    ScenarioSegment:
+      type: object
+      required: [id, name, class, lengthM, geometry]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        class: { type: string }
+        lengthM: { type: number }
+        geometry:
+          type: object
+          description: Линия GeoJSON
+          additionalProperties: {}
+
+    ResilienceRun:
+      type: object
+      required: [id, graphBuiltAt, profile, targets, radiusKm, status, elements, startedAt]
+      properties:
+        id: { type: integer }
+        graphBuiltAt: { type: string, format: date-time }
+        profile: { type: string }
+        targets:
+          type: array
+          items: { $ref: "#/components/schemas/ScenarioTargetKind" }
+        radiusKm: { type: number, description: "Объекты в этом радиусе от элемента пересчитываются" }
+        status: { type: string, enum: [running, done, failed] }
+        elements: { type: integer }
+        error: { type: string }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+
+    ResilienceTarget:
+      type: object
+      required: [kind, affected, lost, delayMin, maxDelay, damage]
+      properties:
+        kind: { $ref: "#/components/schemas/ScenarioTargetKind" }
+        affected: { type: integer }
+        lost: { type: integer }
+        delayMin: { type: number }
+        maxDelay: { type: number }
+        damage: { type: number }
+
+    ResilienceElement:
+      type: object
+      required: [elementId, kind, name, rank, criticalityRank, candidates, affected, lost, delayMin, maxDelayMin, damage, byTarget, point]
+      properties:
+        elementId: { type: integer, description: "Номер в последнем сетевом анализе (перекрытие элементом в сценарии)" }
+        kind: { type: string, enum: [bridge, segment] }
+        name: { type: string }
+        rank: { type: integer, description: "Место по ущербу" }
+        criticalityRank: { type: integer, description: "Место в рейтинге критичности (до МКАД по графу)" }
+        candidates: { type: integer, description: "Объектов в радиусе" }
+        affected: { type: integer }
+        lost: { type: integer }
+        delayMin: { type: number }
+        maxDelayMin: { type: number }
+        damage: { type: number }
+        byTarget:
+          type: array
+          items: { $ref: "#/components/schemas/ResilienceTarget" }
+        point: { $ref: "#/components/schemas/LngLat" }
+
+    Resilience:
+      type: object
+      required: [elements]
+      properties:
+        run: { $ref: "#/components/schemas/ResilienceRun" }
+        running: { $ref: "#/components/schemas/ResilienceRun" }
+        elements:
+          type: array
+          items: { $ref: "#/components/schemas/ResilienceElement" }
+
+    SiteCriterionDef:
+      type: object
+      required: [metric, title, unit, benefit, note]
+      properties:
+        metric: { type: string }
+        title: { type: string }
+        unit: { type: string }
+        benefit: { type: boolean, description: "По умолчанию больше — лучше" }
+        note: { type: string }
+
+    SiteExclusionDef:
+      type: object
+      required: [code, title]
+      properties:
+        code: { type: string }
+        title: { type: string }
+
+    SiteCatalog:
+      type: object
+      required: [criteria, exclusions]
+      properties:
+        criteria:
+          type: array
+          items: { $ref: "#/components/schemas/SiteCriterionDef" }
+        exclusions:
+          type: array
+          items: { $ref: "#/components/schemas/SiteExclusionDef" }
+
+    SiteCriterion:
+      type: object
+      required: [metric, benefit, weight]
+      properties:
+        metric: { type: string }
+        benefit: { type: boolean }
+        weight: { type: number, minimum: 0 }
+
+    SiteParams:
+      type: object
+      required: [criteria]
+      properties:
+        resolution: { type: integer, enum: [8, 9] }
+        criteria:
+          type: array
+          minItems: 2
+          maxItems: 10
+          items: { $ref: "#/components/schemas/SiteCriterion" }
+        weighting: { type: string, enum: [direct, ahp] }
+        pairwise:
+          type: array
+          maxItems: 10
+          items:
+            type: array
+            maxItems: 10
+            items: { type: number, minimum: 0, exclusiveMinimum: true }
+        exclusions:
+          type: array
+          items: { type: string }
+        exclusionShare: { type: number, minimum: 1, maximum: 100 }
+        top: { type: integer, minimum: 1, maximum: 50 }
+        spacingKm: { type: number, minimum: 0, maximum: 20 }
+
+    SiteAhp:
+      type: object
+      required: [lambdaMax, ci, cr, consistent]
+      properties:
+        lambdaMax: { type: number }
+        ci: { type: number }
+        cr: { type: number }
+        consistent: { type: boolean, description: "CR не выше 0,1" }
+
+    SiteCell:
+      type: object
+      required: [h3, rank, score, district, lon, lat, values, contributions]
+      properties:
+        h3: { type: string }
+        rank: { type: integer }
+        score: { type: number, description: "Близость к идеальному решению TOPSIS, 0…1" }
+        district: { type: string }
+        lon: { type: number }
+        lat: { type: number }
+        values:
+          type: array
+          description: "Значения критериев по порядку; пусто — нет данных"
+          items: { type: number, nullable: true }
+        contributions:
+          type: array
+          description: "Доли критериев в оценке (сумма 1)"
+          items: { type: number }
+
+    SiteScore:
+      type: object
+      required: [h3, score]
+      properties:
+        h3: { type: string }
+        score: { type: number }
+
+    SiteSensitivity:
+      type: object
+      required: [metric, spearman, topKept]
+      properties:
+        metric: { type: string }
+        spearman: { type: number, description: "Худшая ранговая корреляция при весе ±20 %" }
+        topKept: { type: number, description: "Доля лучших кандидатов, оставшихся лучшими" }
+
+    SiteResult:
+      type: object
+      required: [weights, cells, candidates, excluded, top, scores, sensitivity, missing]
+      properties:
+        weights:
+          type: array
+          items: { type: number }
+        ahp: { $ref: "#/components/schemas/SiteAhp" }
+        cells: { type: integer }
+        candidates: { type: integer }
+        excluded:
+          type: array
+          items: { type: string }
+        top:
+          type: array
+          items: { $ref: "#/components/schemas/SiteCell" }
+        scores:
+          type: array
+          items: { $ref: "#/components/schemas/SiteScore" }
+        sensitivity:
+          type: array
+          items: { $ref: "#/components/schemas/SiteSensitivity" }
+        missing:
+          type: array
+          description: "Доля ячеек без значения критерия"
+          items: { type: number }
+
+    SiteRunRequest:
+      type: object
+      required: [name, params]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        params: { $ref: "#/components/schemas/SiteParams" }
+
+    SiteRun:
+      type: object
+      required: [id, name, params, top, weights, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        params: { $ref: "#/components/schemas/SiteParams" }
+        top:
+          type: array
+          items: { $ref: "#/components/schemas/SiteCell" }
+        weights:
+          type: array
+          items: { type: number }
+        ahp: { $ref: "#/components/schemas/SiteAhp" }
+        createdAt: { type: string, format: date-time }

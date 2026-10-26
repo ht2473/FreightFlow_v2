@@ -84,6 +84,16 @@ type Handler interface {
 	//
 	// POST /admin/invites
 	CreateInvite(ctx context.Context, req *CreateInvite) (*InviteCreated, error)
+	// CreateScenario implements createScenario operation.
+	//
+	// Сценарий считается фоновой задачей: ответ — сценарий
+	// со статусом `queued`. Ход расчёта — события `job.progress` потока
+	// `GET /events` и поле `progress`; о завершении сообщает событие
+	// `scenario.computed`. База и сценарий считаются с одинаковыми
+	// параметрами, различаются только изменения сценария.
+	//
+	// POST /scenarios
+	CreateScenario(ctx context.Context, req *ScenarioRequest) (*Scenario, error)
 	// CreateToken implements createToken operation.
 	//
 	// Выпустить токен API.
@@ -116,6 +126,18 @@ type Handler interface {
 	//
 	// GET /data/updates
 	DataUpdates(ctx context.Context, params DataUpdatesParams) ([]DataUpdatesOKItem, error)
+	// DeleteScenario implements deleteScenario operation.
+	//
+	// Удалить сценарий с результатами.
+	//
+	// DELETE /scenarios/{scenarioId}
+	DeleteScenario(ctx context.Context, params DeleteScenarioParams) error
+	// DeleteSiteRun implements deleteSiteRun operation.
+	//
+	// Удалить сохранённую оценку.
+	//
+	// DELETE /site-selection/runs/{runId}
+	DeleteSiteRun(ctx context.Context, params DeleteSiteRunParams) error
 	// DeleteView implements deleteView operation.
 	//
 	// Удалить свой вид.
@@ -135,6 +157,18 @@ type Handler interface {
 	//
 	// GET /metrics/entity
 	EntityMetrics(ctx context.Context, params EntityMetricsParams) ([]MetricValue, error)
+	// EvaluateSite implements evaluateSite operation.
+	//
+	// Ячейки с долей любой выбранной исключающей зоны не
+	// меньше порога исключаются; остальные ранжируются TOPSIS
+	// (векторная нормировка, пропуск — худшее значение
+	// критерия). Веса — прямые или по матрице попарных
+	// сравнений МАИ (главный собственный вектор, CR Saaty).
+	// Лучшие кандидаты — с разнесением; вклад критериев и
+	// чувствительность к весам ±20 %.
+	//
+	// POST /site-selection/evaluate
+	EvaluateSite(ctx context.Context, req *SiteParams) (*SiteResult, error)
 	// FacilityArea implements facilityArea operation.
 	//
 	// Объекты реестра (число, площади, типы, крупнейшие),
@@ -243,6 +277,18 @@ type Handler interface {
 	//
 	// GET /regulation
 	GetRegulation(ctx context.Context) (*RegulationOverview, error)
+	// GetResilience implements getResilience operation.
+	//
+	// Пакет сценариев выпадения верхних элементов рейтинга
+	// критичности: для каждого элемента — перекрытие в
+	// службе маршрутизации и время объектов в радиусе до
+	// МКАД, ТТК и ж/д грузовых пунктов. Ущерб — сумма
+	// прироста времени (объекто-минуты) и 60 минут за каждую
+	// потерю доступа. Пакет пересчитывается при смене графа
+	// маршрутизации или сетевого анализа.
+	//
+	// GET /scenarios/resilience
+	GetResilience(ctx context.Context) (*Resilience, error)
 	// GetRoutingStatus implements getRoutingStatus operation.
 	//
 	// Состояние службы маршрутизации и графа.
@@ -255,6 +301,12 @@ type Handler interface {
 	//
 	// GET /data/runs/{runId}
 	GetRun(ctx context.Context, params GetRunParams) (*RunDetail, error)
+	// GetScenario implements getScenario operation.
+	//
+	// Сценарий, ход расчёта и итог.
+	//
+	// GET /scenarios/{scenarioId}
+	GetScenario(ctx context.Context, params GetScenarioParams) (*Scenario, error)
 	// GetSettings implements getSettings operation.
 	//
 	// Личные настройки.
@@ -271,6 +323,12 @@ type Handler interface {
 	//
 	// GET /regulation/signs
 	GetSignQuality(ctx context.Context) (*SignQuality, error)
+	// GetSiteRun implements getSiteRun operation.
+	//
+	// Сохранённая оценка.
+	//
+	// GET /site-selection/runs/{runId}
+	GetSiteRun(ctx context.Context, params GetSiteRunParams) (*SiteRun, error)
 	// GetTerritory implements getTerritory operation.
 	//
 	// Профиль территории — показатели, граница, население,
@@ -355,6 +413,24 @@ type Handler interface {
 	//
 	// GET /data/sources/{code}/runs
 	ListRuns(ctx context.Context, params ListRunsParams) ([]Run, error)
+	// ListScenarioElements implements listScenarioElements operation.
+	//
+	// Мосты и участки рейтинга критичности для перекрытия.
+	//
+	// GET /scenarios/elements
+	ListScenarioElements(ctx context.Context, params ListScenarioElementsParams) ([]ScenarioElement, error)
+	// ListScenarios implements listScenarios operation.
+	//
+	// Мои сценарии.
+	//
+	// GET /scenarios
+	ListScenarios(ctx context.Context) ([]Scenario, error)
+	// ListSiteRuns implements listSiteRuns operation.
+	//
+	// Мои сохранённые оценки локации.
+	//
+	// GET /site-selection/runs
+	ListSiteRuns(ctx context.Context) ([]SiteRun, error)
 	// ListSources implements listSources operation.
 	//
 	// Источники данных со свежестью и последним запуском.
@@ -419,6 +495,13 @@ type Handler interface {
 	//
 	// POST /facilities/{facilityId}/reports
 	ReportFacilityIssue(ctx context.Context, req *ReportFacilityIssueReq, params ReportFacilityIssueParams) (*FacilityReport, error)
+	// RerunScenario implements rerunScenario operation.
+	//
+	// Пересчитать сценарий (например, после обновления
+	// графа).
+	//
+	// POST /scenarios/{scenarioId}/rerun
+	RerunScenario(ctx context.Context, params RerunScenarioParams) (*Scenario, error)
 	// ResetDashboard implements resetDashboard operation.
 	//
 	// Вернуть дашборд по умолчанию.
@@ -463,6 +546,12 @@ type Handler interface {
 	//
 	// DELETE /me/tokens/{tokenId}
 	RevokeToken(ctx context.Context, params RevokeTokenParams) error
+	// RunResilience implements runResilience operation.
+	//
+	// Пересчитать пакет устойчивости.
+	//
+	// POST /scenarios/resilience/run
+	RunResilience(ctx context.Context) error
 	// SaveDashboard implements saveDashboard operation.
 	//
 	// Сохранить свои виджеты (пустой список не допускается
@@ -477,6 +566,42 @@ type Handler interface {
 	//
 	// PUT /indexes/{code}/config
 	SaveIndexConfig(ctx context.Context, req *SaveIndexConfigReq, params SaveIndexConfigParams) error
+	// SaveSiteRun implements saveSiteRun operation.
+	//
+	// Сохранить оценку (параметры и лучших кандидатов).
+	//
+	// POST /site-selection/runs
+	SaveSiteRun(ctx context.Context, req *SiteRunRequest) (*SiteRun, error)
+	// ScenarioClosures implements scenarioClosures operation.
+	//
+	// Перекрытия сценария (GeoJSON).
+	//
+	// GET /scenarios/{scenarioId}/closures
+	ScenarioClosures(ctx context.Context, params ScenarioClosuresParams) (ScenarioClosuresOK, error)
+	// ScenarioDistricts implements scenarioDistricts operation.
+	//
+	// Изменения доступности по районам.
+	//
+	// GET /scenarios/{scenarioId}/districts
+	ScenarioDistricts(ctx context.Context, params ScenarioDistrictsParams) ([]ScenarioDistrict, error)
+	// ScenarioFacilities implements scenarioFacilities operation.
+	//
+	// Изменение времени объектов до цели.
+	//
+	// GET /scenarios/{scenarioId}/facilities
+	ScenarioFacilities(ctx context.Context, params ScenarioFacilitiesParams) ([]ScenarioFacility, error)
+	// ScenarioIsochrones implements scenarioIsochrones operation.
+	//
+	// Изохроны базы и сценария (GeoJSON).
+	//
+	// GET /scenarios/{scenarioId}/isochrones
+	ScenarioIsochrones(ctx context.Context, params ScenarioIsochronesParams) (ScenarioIsochronesOK, error)
+	// ScenarioSegmentAt implements scenarioSegmentAt operation.
+	//
+	// Участок сети у точки (для перекрытия щелчком по карте).
+	//
+	// GET /scenarios/segment-at
+	ScenarioSegmentAt(ctx context.Context, params ScenarioSegmentAtParams) (*ScenarioSegment, error)
 	// Search implements search operation.
 	//
 	// Запрос разбирается в фильтры объектов (тип, округ,
@@ -500,6 +625,18 @@ type Handler interface {
 	//
 	// GET /search/suggest
 	SearchSuggest(ctx context.Context, params SearchSuggestParams) ([]SearchHit, error)
+	// SiteCatalog implements siteCatalog operation.
+	//
+	// Критерии и исключающие зоны оценки локации.
+	//
+	// GET /site-selection/catalog
+	SiteCatalog(ctx context.Context) (*SiteCatalog, error)
+	// SiteCells implements siteCells operation.
+	//
+	// Сетка ячеек H3 Москвы (GeoJSON) для карты пригодности.
+	//
+	// GET /site-selection/cells
+	SiteCells(ctx context.Context, params SiteCellsParams) (SiteCellsOK, error)
 	// StartRun implements startRun operation.
 	//
 	// Запустить загрузку.
