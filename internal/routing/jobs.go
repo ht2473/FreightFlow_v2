@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
+	"github.com/riverqueue/river/rivertype"
 
 	"freightflow/internal/platform/jobs"
 )
@@ -96,13 +97,23 @@ func (w *AnalysisWorker) Work(ctx context.Context, _ *river.Job[AnalysisArgs]) e
 	return nil
 }
 
-// Register добавляет ежечасные проверки: граф маршрутизации — пересчёт доступности, дорожная
-// сеть — сетевой анализ.
+// Register добавляет ежечасные проверки: граф маршрутизации — пересчёт доступности объектов и
+// ячеек H3, дорожная сеть — сетевой анализ.
 func Register(reg *jobs.Registry, pool *pgxpool.Pool, valhallaURL string, log *slog.Logger) {
 	svc := NewService(pool, NewClient(valhallaURL))
 	jobs.Register(reg, &AccessibilityWorker{Service: svc, Log: log})
 	jobs.Register(reg, &AnalysisWorker{Service: svc, Log: log})
+	jobs.Register(reg, &CellAccessWorker{Service: svc, Log: log})
 	opts := &river.InsertOpts{Queue: jobs.QueueRouting, UniqueOpts: river.UniqueOpts{ByArgs: true}}
 	reg.Every(AccessibilityArgs{}.Kind(), time.Hour, AccessibilityArgs{}, opts, false)
 	reg.Every(AnalysisArgs{}.Kind(), time.Hour, AnalysisArgs{}, opts, false)
+	// Доступность ячеек — в очереди сценариев: сетевой анализ в routing идёт до двух часов.
+	// Уникальность — только среди стоящих в очереди и выполняющихся: завершённая проверка не
+	// мешает следующей.
+	active := []rivertype.JobState{
+		rivertype.JobStateAvailable, rivertype.JobStatePending, rivertype.JobStateRetryable,
+		rivertype.JobStateRunning, rivertype.JobStateScheduled,
+	}
+	reg.Every(CellAccessArgs{}.Kind(), time.Hour, CellAccessArgs{},
+		&river.InsertOpts{Queue: jobs.QueueScenario, UniqueOpts: river.UniqueOpts{ByArgs: true, ByState: active}}, true)
 }

@@ -119,3 +119,84 @@ var h3Metrics = []Metric{
 		GROUP BY a.level, a.entity`,
 	},
 }
+
+// parentJoin — ячейка разрешения 8 для значения: сама ячейка или родитель ячейки разрешения 9.
+const parentJoin = `CASE WHEN c.res = 8 THEN c.h3 ELSE h3_cell_to_parent(c.h3, 8) END`
+
+// h3Access — время от центра ячейки до ближайшей цели вида (доступность ячеек, разрешение 8).
+func h3Access(code, kind, title string) Metric {
+	return Metric{
+		Code: code, Title: title, Unit: "мин", Levels: h3Levels, Version: 1,
+		Formula: "время грузовика 12 т от центра ячейки H3 разрешения 8 до ближайшей цели по графу маршрутизации",
+		Method: "Матрицы службы маршрутизации (Valhalla) от центров ячеек разрешения 8 до ближайшей точки цели; " +
+			"центр ячейки привязывается к сети в 300 м. Ячейки разрешения 9 берут значение родительской ячейки. " +
+			"Правила зон пропусков не учитываются — физическая доступность по сети с ограничениями участков.",
+		Domains: []string{"cell_access", "territory"},
+		Compute: cells + `
+			SELECT c.level, c.entity, NULL::date, a.minutes::float8, jsonb_build_object('km', round(a.km::numeric, 1))
+			FROM c JOIN analytics.cell_access a ON a.h3 = ` + parentJoin + ` AND a.target_kind = '` + kind + `'
+			WHERE a.minutes IS NOT NULL`,
+	}
+}
+
+// h3Share — доля ячейки, покрытая слоем: по центрам дочерних ячеек разрешения 10 (49 на ячейку
+// разрешения 8, 7 — разрешения 9), процентов.
+func h3Share(code, title, from, cond, method string) Metric {
+	return Metric{
+		Code: code, Title: title, Unit: "%", Levels: h3Levels, Version: 1,
+		Formula: "доля центров дочерних ячеек H3 разрешения 10 внутри слоя × 100",
+		Method:  method + " Доля оценивается по центрам дочерних ячеек разрешения 10 (≈ 0,015 км²).",
+		Domains: []string{"territory", "infra"},
+		Compute: cells + `,
+			ch AS (SELECT c9.h3, h3_cell_to_geometry(x) AS pt
+			       FROM territory.h3_cell c9 CROSS JOIN LATERAL h3_cell_to_children(c9.h3, 10) x WHERE c9.res = 9),
+			s9 AS (SELECT ch.h3, avg((EXISTS (SELECT 1 FROM ` + from + ` l
+			                                  WHERE l.geom && ch.pt AND ST_Intersects(l.geom, ch.pt)` + cond + `))::int) AS share
+			       FROM ch GROUP BY ch.h3),
+			s8 AS (SELECT h3_cell_to_parent(h3, 8) AS h3, avg(share) AS share FROM s9 GROUP BY 1)
+			SELECT c.level, c.entity, NULL::date,
+			       round(100 * coalesce(CASE WHEN c.res = 9 THEN s9.share ELSE s8.share END, 0), 1)::float8, '{}'::jsonb
+			FROM c LEFT JOIN s9 ON c.res = 9 AND s9.h3 = c.h3 LEFT JOIN s8 ON c.res = 8 AND s8.h3 = c.h3`,
+	}
+}
+
+// Критерии оценки локации: доступность ячеек, спрос (население в радиусе), землепользование.
+var siteMetrics = []Metric{
+	h3Access("h3.access_mkad_min", "mkad", "Время от ячейки до МКАД"),
+	h3Access("h3.access_ttk_min", "ttk", "Время от ячейки до ТТК"),
+	h3Access("h3.access_rail_min", "rail_freight", "Время от ячейки до ж/д грузовых пунктов"),
+	{
+		Code: "h3.population_5km", Title: "Население в 5 км (модель)", Unit: "чел.", Levels: h3Levels, Version: 1,
+		Formula: "Σ населения ячеек разрешения 8, центр которых в 5 км по прямой от центра ячейки",
+		Method: "Спрос последней мили: модельное население ячеек H3 разрешения 8 (показатель «Население ячейки») " +
+			"в 5 км по прямой. Ячейки разрешения 9 берут значение родительской ячейки.",
+		Domains:   []string{"territory"},
+		DependsOn: []string{"h3.population"},
+		Compute: cells + `,
+			p AS (SELECT entity::h3index AS h3, value FROM analytics.metric_value
+			      WHERE metric_code = 'h3.population' AND level = 'h3_8' AND period IS NULL),
+			r AS MATERIALIZED (
+			    SELECT c8.h3, sum(p.value) AS pop
+			    FROM territory.h3_cell c8
+			    CROSS JOIN LATERAL h3_grid_disk(c8.h3, 6) AS d (h3)
+			    JOIN p ON p.h3 = d.h3
+			    WHERE c8.res = 8
+			      AND ST_DWithin(h3_cell_to_geometry(c8.h3)::geography, h3_cell_to_geometry(d.h3)::geography, 5000)
+			    GROUP BY c8.h3)
+			SELECT c.level, c.entity, NULL::date, round(coalesce(r.pop, 0))::float8, '{}'::jsonb
+			FROM c LEFT JOIN r ON r.h3 = ` + parentJoin,
+	},
+	h3Share("h3.share_industrial", "Доля промзон в ячейке", "infra.industrial_zone", "",
+		"Промышленные и производственные территории OSM (landuse=industrial) — совместимое землепользование."),
+	h3Share("h3.share_residential", "Доля жилой застройки в ячейке", "territory.land_cover", " AND l.kind = 'residential'",
+		"Жилая застройка OSM (landuse=residential) — исключающая зона оценки локации."),
+	h3Share("h3.share_green", "Доля парков и природных территорий в ячейке", "territory.land_cover", " AND l.kind = 'green'",
+		"Парки, заповедники и охраняемые природные территории OSM."),
+	h3Share("h3.share_water", "Доля водных объектов в ячейке", "territory.land_cover", " AND l.kind = 'water'",
+		"Реки, пруды и водохранилища OSM."),
+	h3Share("h3.share_heritage", "Доля зон охраны ОКН в ячейке", "territory.constraint_zone",
+		" AND l.kind IN ('heritage_protection', 'heritage_territory')",
+		"Зоны охраны и территории объектов культурного наследия (портал открытых данных Москвы)."),
+	h3Share("h3.share_parks", "Доля парковых территорий Москвы в ячейке", "territory.constraint_zone", " AND l.kind = 'park'",
+		"Парковые территории (портал открытых данных Москвы)."),
+}

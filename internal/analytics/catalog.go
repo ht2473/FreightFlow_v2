@@ -53,6 +53,7 @@ func Catalog() []Metric {
 	out = append(out, segmentMetrics...)
 	out = append(out, cityMetrics...)
 	out = append(out, h3Metrics...)
+	out = append(out, siteMetrics...)
 	return out
 }
 
