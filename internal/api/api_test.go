@@ -17,6 +17,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	spec "freightflow/api"
+	"freightflow/internal/alerting"
 	"freightflow/internal/analytics"
 	"freightflow/internal/facility"
 	"freightflow/internal/identity"
@@ -108,7 +109,8 @@ func newFixture(t *testing.T) *fixture {
 	h, err := New(Deps{
 		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
 		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facilities,
-		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Territories: territory.New(pool, facilities), Search: search.New(pool, facilities), Analytics: analytics.New(pool), Sessions: sessions, Mailer: mailer,
+		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Territories: territory.New(pool, facilities), Search: search.New(pool, facilities), Analytics: analytics.New(pool),
+		Alerts: alerting.New(pool, inserter, slog.New(slog.DiscardHandler)), Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})

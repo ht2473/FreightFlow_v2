@@ -8,6 +8,26 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// ActOnAlert implements actOnAlert operation.
+	//
+	// Статус и назначение меняют владелец правила и
+	// оператор; комментировать может каждый, кому алерт
+	// виден. К любому действию можно приложить комментарий.
+	//
+	// POST /alerts/{alertId}/actions
+	ActOnAlert(ctx context.Context, req *AlertAction, params ActOnAlertParams) (*AlertDetail, error)
+	// AlertRuleOptions implements alertRuleOptions operation.
+	//
+	// Справочники конструктора правил.
+	//
+	// GET /alert-rules/options
+	AlertRuleOptions(ctx context.Context) (*AlertRuleOptions, error)
+	// AlertSummary implements alertSummary operation.
+	//
+	// Число открытых алертов.
+	//
+	// GET /alerts/summary
+	AlertSummary(ctx context.Context) (*AlertSummary, error)
 	// BeginTotpSetup implements beginTotpSetup operation.
 	//
 	// Начать подключение двухфакторной защиты.
@@ -50,6 +70,12 @@ type Handler interface {
 	//
 	// POST /me/password
 	ChangePassword(ctx context.Context, req *ChangePassword) error
+	// CheckAlertRule implements checkAlertRule operation.
+	//
+	// Проверить правило сейчас.
+	//
+	// POST /alert-rules/{ruleId}/check
+	CheckAlertRule(ctx context.Context, params CheckAlertRuleParams) (*AlertRuleCheck, error)
 	// CompareFacilities implements compareFacilities operation.
 	//
 	// Сравнение объектов (2–4).
@@ -69,6 +95,13 @@ type Handler interface {
 	//
 	// POST /me/totp/confirm
 	ConfirmTotp(ctx context.Context, req *TotpCode) (*RecoveryCodes, error)
+	// CreateAlertRule implements createAlertRule operation.
+	//
+	// Первая проверка запоминает текущее состояние данных:
+	// о том, что было до создания правила, оно не сообщает.
+	//
+	// POST /alert-rules
+	CreateAlertRule(ctx context.Context, req *AlertRuleInput) (*AlertRule, error)
 	// CreateExport implements createExport operation.
 	//
 	// Выгрузка формируется фоновой задачей: ответ — задание
@@ -126,6 +159,12 @@ type Handler interface {
 	//
 	// GET /data/updates
 	DataUpdates(ctx context.Context, params DataUpdatesParams) ([]DataUpdatesOKItem, error)
+	// DeleteAlertRule implements deleteAlertRule operation.
+	//
+	// Удалить своё правило с его алертами.
+	//
+	// DELETE /alert-rules/{ruleId}
+	DeleteAlertRule(ctx context.Context, params DeleteAlertRuleParams) error
 	// DeleteScenario implements deleteScenario operation.
 	//
 	// Удалить сценарий с результатами.
@@ -211,6 +250,18 @@ type Handler interface {
 	//
 	// GET /geocode
 	Geocode(ctx context.Context, params GeocodeParams) ([]SearchHit, error)
+	// GetAlert implements getAlert operation.
+	//
+	// Алерт с журналом.
+	//
+	// GET /alerts/{alertId}
+	GetAlert(ctx context.Context, params GetAlertParams) (*AlertDetail, error)
+	// GetAlertRule implements getAlertRule operation.
+	//
+	// Правило.
+	//
+	// GET /alert-rules/{ruleId}
+	GetAlertRule(ctx context.Context, params GetAlertRuleParams) (*AlertRule, error)
 	// GetDashboard implements getDashboard operation.
 	//
 	// Виджеты главного дашборда пользователя.
@@ -348,6 +399,27 @@ type Handler interface {
 	//
 	// POST /analytics/hotspots
 	Hotspots(ctx context.Context, req *HotspotsReq) (*HotspotResult, error)
+	// ListAlertAssignees implements listAlertAssignees operation.
+	//
+	// Кому можно назначить алерт.
+	//
+	// GET /alerts/assignees
+	ListAlertAssignees(ctx context.Context) ([]AlertUser, error)
+	// ListAlertRules implements listAlertRules operation.
+	//
+	// Правила оповещений.
+	//
+	// GET /alert-rules
+	ListAlertRules(ctx context.Context, params ListAlertRulesParams) ([]AlertRule, error)
+	// ListAlerts implements listAlerts operation.
+	//
+	// Новые сверху. Владелец правил видит алерты своих
+	// правил и назначенные ему, оператор (`alerts.manage`) — все.
+	// Новые и изменённые алерты — события `alert.created` и
+	// `alert.updated` потока `GET /events`.
+	//
+	// GET /alerts
+	ListAlerts(ctx context.Context, params ListAlertsParams) (*AlertPage, error)
 	// ListAudit implements listAudit operation.
 	//
 	// Журнал аудита.
@@ -643,6 +715,13 @@ type Handler interface {
 	//
 	// POST /data/sources/{code}/runs
 	StartRun(ctx context.Context, req *StartRun, params StartRunParams) (*Run, error)
+	// UpdateAlertRule implements updateAlertRule operation.
+	//
+	// Смена области или параметров сбрасывает запомненное
+	// состояние.
+	//
+	// PUT /alert-rules/{ruleId}
+	UpdateAlertRule(ctx context.Context, req *AlertRuleInput, params UpdateAlertRuleParams) (*AlertRule, error)
 	// UpdateMe implements updateMe operation.
 	//
 	// Изменить имя.

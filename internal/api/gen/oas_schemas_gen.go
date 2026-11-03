@@ -16,6 +16,1937 @@ func (s *ProblemStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
+// Ref: #/components/schemas/Alert
+type Alert struct {
+	ID       uuid.UUID     `json:"id"`
+	RuleId   uuid.UUID     `json:"ruleId"`
+	RuleName string        `json:"ruleName"`
+	Kind     AlertRuleKind `json:"kind"`
+	OwnerId  uuid.UUID     `json:"ownerId"`
+	// Что затронуто — «road_work:», «facility:», «source:<код>», «restrictions».
+	Entity   string        `json:"entity"`
+	Severity AlertSeverity `json:"severity"`
+	Status   AlertStatus   `json:"status"`
+	Title    string        `json:"title"`
+	Summary  string        `json:"summary"`
+	// Подробности вида правила (работа, изменения
+	// ограничений, время до цели).
+	Details AlertDetails `json:"details"`
+	// Место алерта, GeoJSON.
+	Geometry OptAlertGeometry `json:"geometry"`
+	// Срабатываний по этой сущности.
+	Occurrences    int         `json:"occurrences"`
+	AssigneeId     OptUUID     `json:"assigneeId"`
+	AssigneeName   OptString   `json:"assigneeName"`
+	AcknowledgedAt OptDateTime `json:"acknowledgedAt"`
+	ClosedAt       OptDateTime `json:"closedAt"`
+	// Auto — причина исчезла (работа завершена, источник
+	// загрузился).
+	Resolution OptAlertResolution `json:"resolution"`
+	CreatedAt  time.Time          `json:"createdAt"`
+	UpdatedAt  time.Time          `json:"updatedAt"`
+	LastSeenAt time.Time          `json:"lastSeenAt"`
+}
+
+// GetID returns the value of ID.
+func (s *Alert) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetRuleId returns the value of RuleId.
+func (s *Alert) GetRuleId() uuid.UUID {
+	return s.RuleId
+}
+
+// GetRuleName returns the value of RuleName.
+func (s *Alert) GetRuleName() string {
+	return s.RuleName
+}
+
+// GetKind returns the value of Kind.
+func (s *Alert) GetKind() AlertRuleKind {
+	return s.Kind
+}
+
+// GetOwnerId returns the value of OwnerId.
+func (s *Alert) GetOwnerId() uuid.UUID {
+	return s.OwnerId
+}
+
+// GetEntity returns the value of Entity.
+func (s *Alert) GetEntity() string {
+	return s.Entity
+}
+
+// GetSeverity returns the value of Severity.
+func (s *Alert) GetSeverity() AlertSeverity {
+	return s.Severity
+}
+
+// GetStatus returns the value of Status.
+func (s *Alert) GetStatus() AlertStatus {
+	return s.Status
+}
+
+// GetTitle returns the value of Title.
+func (s *Alert) GetTitle() string {
+	return s.Title
+}
+
+// GetSummary returns the value of Summary.
+func (s *Alert) GetSummary() string {
+	return s.Summary
+}
+
+// GetDetails returns the value of Details.
+func (s *Alert) GetDetails() AlertDetails {
+	return s.Details
+}
+
+// GetGeometry returns the value of Geometry.
+func (s *Alert) GetGeometry() OptAlertGeometry {
+	return s.Geometry
+}
+
+// GetOccurrences returns the value of Occurrences.
+func (s *Alert) GetOccurrences() int {
+	return s.Occurrences
+}
+
+// GetAssigneeId returns the value of AssigneeId.
+func (s *Alert) GetAssigneeId() OptUUID {
+	return s.AssigneeId
+}
+
+// GetAssigneeName returns the value of AssigneeName.
+func (s *Alert) GetAssigneeName() OptString {
+	return s.AssigneeName
+}
+
+// GetAcknowledgedAt returns the value of AcknowledgedAt.
+func (s *Alert) GetAcknowledgedAt() OptDateTime {
+	return s.AcknowledgedAt
+}
+
+// GetClosedAt returns the value of ClosedAt.
+func (s *Alert) GetClosedAt() OptDateTime {
+	return s.ClosedAt
+}
+
+// GetResolution returns the value of Resolution.
+func (s *Alert) GetResolution() OptAlertResolution {
+	return s.Resolution
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Alert) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Alert) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// GetLastSeenAt returns the value of LastSeenAt.
+func (s *Alert) GetLastSeenAt() time.Time {
+	return s.LastSeenAt
+}
+
+// SetID sets the value of ID.
+func (s *Alert) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetRuleId sets the value of RuleId.
+func (s *Alert) SetRuleId(val uuid.UUID) {
+	s.RuleId = val
+}
+
+// SetRuleName sets the value of RuleName.
+func (s *Alert) SetRuleName(val string) {
+	s.RuleName = val
+}
+
+// SetKind sets the value of Kind.
+func (s *Alert) SetKind(val AlertRuleKind) {
+	s.Kind = val
+}
+
+// SetOwnerId sets the value of OwnerId.
+func (s *Alert) SetOwnerId(val uuid.UUID) {
+	s.OwnerId = val
+}
+
+// SetEntity sets the value of Entity.
+func (s *Alert) SetEntity(val string) {
+	s.Entity = val
+}
+
+// SetSeverity sets the value of Severity.
+func (s *Alert) SetSeverity(val AlertSeverity) {
+	s.Severity = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Alert) SetStatus(val AlertStatus) {
+	s.Status = val
+}
+
+// SetTitle sets the value of Title.
+func (s *Alert) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetSummary sets the value of Summary.
+func (s *Alert) SetSummary(val string) {
+	s.Summary = val
+}
+
+// SetDetails sets the value of Details.
+func (s *Alert) SetDetails(val AlertDetails) {
+	s.Details = val
+}
+
+// SetGeometry sets the value of Geometry.
+func (s *Alert) SetGeometry(val OptAlertGeometry) {
+	s.Geometry = val
+}
+
+// SetOccurrences sets the value of Occurrences.
+func (s *Alert) SetOccurrences(val int) {
+	s.Occurrences = val
+}
+
+// SetAssigneeId sets the value of AssigneeId.
+func (s *Alert) SetAssigneeId(val OptUUID) {
+	s.AssigneeId = val
+}
+
+// SetAssigneeName sets the value of AssigneeName.
+func (s *Alert) SetAssigneeName(val OptString) {
+	s.AssigneeName = val
+}
+
+// SetAcknowledgedAt sets the value of AcknowledgedAt.
+func (s *Alert) SetAcknowledgedAt(val OptDateTime) {
+	s.AcknowledgedAt = val
+}
+
+// SetClosedAt sets the value of ClosedAt.
+func (s *Alert) SetClosedAt(val OptDateTime) {
+	s.ClosedAt = val
+}
+
+// SetResolution sets the value of Resolution.
+func (s *Alert) SetResolution(val OptAlertResolution) {
+	s.Resolution = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Alert) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Alert) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// SetLastSeenAt sets the value of LastSeenAt.
+func (s *Alert) SetLastSeenAt(val time.Time) {
+	s.LastSeenAt = val
+}
+
+// Ref: #/components/schemas/AlertAction
+type AlertAction struct {
+	Action AlertActionAction `json:"action"`
+	// Для assign; без поля — снять назначение.
+	AssigneeId OptUUID   `json:"assigneeId"`
+	Comment    OptString `json:"comment"`
+}
+
+// GetAction returns the value of Action.
+func (s *AlertAction) GetAction() AlertActionAction {
+	return s.Action
+}
+
+// GetAssigneeId returns the value of AssigneeId.
+func (s *AlertAction) GetAssigneeId() OptUUID {
+	return s.AssigneeId
+}
+
+// GetComment returns the value of Comment.
+func (s *AlertAction) GetComment() OptString {
+	return s.Comment
+}
+
+// SetAction sets the value of Action.
+func (s *AlertAction) SetAction(val AlertActionAction) {
+	s.Action = val
+}
+
+// SetAssigneeId sets the value of AssigneeId.
+func (s *AlertAction) SetAssigneeId(val OptUUID) {
+	s.AssigneeId = val
+}
+
+// SetComment sets the value of Comment.
+func (s *AlertAction) SetComment(val OptString) {
+	s.Comment = val
+}
+
+type AlertActionAction string
+
+const (
+	AlertActionActionAcknowledge AlertActionAction = "acknowledge"
+	AlertActionActionClose       AlertActionAction = "close"
+	AlertActionActionReopen      AlertActionAction = "reopen"
+	AlertActionActionAssign      AlertActionAction = "assign"
+	AlertActionActionComment     AlertActionAction = "comment"
+)
+
+// AllValues returns all AlertActionAction values.
+func (AlertActionAction) AllValues() []AlertActionAction {
+	return []AlertActionAction{
+		AlertActionActionAcknowledge,
+		AlertActionActionClose,
+		AlertActionActionReopen,
+		AlertActionActionAssign,
+		AlertActionActionComment,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertActionAction) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertActionActionAcknowledge:
+		return []byte(s), nil
+	case AlertActionActionClose:
+		return []byte(s), nil
+	case AlertActionActionReopen:
+		return []byte(s), nil
+	case AlertActionActionAssign:
+		return []byte(s), nil
+	case AlertActionActionComment:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertActionAction) UnmarshalText(data []byte) error {
+	switch AlertActionAction(data) {
+	case AlertActionActionAcknowledge:
+		*s = AlertActionActionAcknowledge
+		return nil
+	case AlertActionActionClose:
+		*s = AlertActionActionClose
+		return nil
+	case AlertActionActionReopen:
+		*s = AlertActionActionReopen
+		return nil
+	case AlertActionActionAssign:
+		*s = AlertActionActionAssign
+		return nil
+	case AlertActionActionComment:
+		*s = AlertActionActionComment
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AlertChannel
+type AlertChannel string
+
+const (
+	AlertChannelInApp    AlertChannel = "in_app"
+	AlertChannelEmail    AlertChannel = "email"
+	AlertChannelTelegram AlertChannel = "telegram"
+	AlertChannelWebhook  AlertChannel = "webhook"
+)
+
+// AllValues returns all AlertChannel values.
+func (AlertChannel) AllValues() []AlertChannel {
+	return []AlertChannel{
+		AlertChannelInApp,
+		AlertChannelEmail,
+		AlertChannelTelegram,
+		AlertChannelWebhook,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertChannel) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertChannelInApp:
+		return []byte(s), nil
+	case AlertChannelEmail:
+		return []byte(s), nil
+	case AlertChannelTelegram:
+		return []byte(s), nil
+	case AlertChannelWebhook:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertChannel) UnmarshalText(data []byte) error {
+	switch AlertChannel(data) {
+	case AlertChannelInApp:
+		*s = AlertChannelInApp
+		return nil
+	case AlertChannelEmail:
+		*s = AlertChannelEmail
+		return nil
+	case AlertChannelTelegram:
+		*s = AlertChannelTelegram
+		return nil
+	case AlertChannelWebhook:
+		*s = AlertChannelWebhook
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AlertDetail
+type AlertDetail struct {
+	Alert Alert           `json:"alert"`
+	Log   []AlertLogEntry `json:"log"`
+	// Может менять статус и назначение.
+	CanManage bool `json:"canManage"`
+	// Область правила, мультиполигон GeoJSON.
+	RuleArea OptAlertDetailRuleArea `json:"ruleArea"`
+}
+
+// GetAlert returns the value of Alert.
+func (s *AlertDetail) GetAlert() Alert {
+	return s.Alert
+}
+
+// GetLog returns the value of Log.
+func (s *AlertDetail) GetLog() []AlertLogEntry {
+	return s.Log
+}
+
+// GetCanManage returns the value of CanManage.
+func (s *AlertDetail) GetCanManage() bool {
+	return s.CanManage
+}
+
+// GetRuleArea returns the value of RuleArea.
+func (s *AlertDetail) GetRuleArea() OptAlertDetailRuleArea {
+	return s.RuleArea
+}
+
+// SetAlert sets the value of Alert.
+func (s *AlertDetail) SetAlert(val Alert) {
+	s.Alert = val
+}
+
+// SetLog sets the value of Log.
+func (s *AlertDetail) SetLog(val []AlertLogEntry) {
+	s.Log = val
+}
+
+// SetCanManage sets the value of CanManage.
+func (s *AlertDetail) SetCanManage(val bool) {
+	s.CanManage = val
+}
+
+// SetRuleArea sets the value of RuleArea.
+func (s *AlertDetail) SetRuleArea(val OptAlertDetailRuleArea) {
+	s.RuleArea = val
+}
+
+// Область правила, мультиполигон GeoJSON.
+type AlertDetailRuleArea map[string]jx.Raw
+
+func (s *AlertDetailRuleArea) init() AlertDetailRuleArea {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Подробности вида правила (работа, изменения
+// ограничений, время до цели).
+type AlertDetails map[string]jx.Raw
+
+func (s *AlertDetails) init() AlertDetails {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Место алерта, GeoJSON.
+type AlertGeometry map[string]jx.Raw
+
+func (s *AlertGeometry) init() AlertGeometry {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/AlertKindOption
+type AlertKindOption struct {
+	Code        AlertRuleKind               `json:"code"`
+	Title       string                      `json:"title"`
+	Description string                      `json:"description"`
+	Scopes      []AlertKindOptionScopesItem `json:"scopes"`
+}
+
+// GetCode returns the value of Code.
+func (s *AlertKindOption) GetCode() AlertRuleKind {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *AlertKindOption) GetTitle() string {
+	return s.Title
+}
+
+// GetDescription returns the value of Description.
+func (s *AlertKindOption) GetDescription() string {
+	return s.Description
+}
+
+// GetScopes returns the value of Scopes.
+func (s *AlertKindOption) GetScopes() []AlertKindOptionScopesItem {
+	return s.Scopes
+}
+
+// SetCode sets the value of Code.
+func (s *AlertKindOption) SetCode(val AlertRuleKind) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *AlertKindOption) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetDescription sets the value of Description.
+func (s *AlertKindOption) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetScopes sets the value of Scopes.
+func (s *AlertKindOption) SetScopes(val []AlertKindOptionScopesItem) {
+	s.Scopes = val
+}
+
+type AlertKindOptionScopesItem string
+
+const (
+	AlertKindOptionScopesItemCorridor   AlertKindOptionScopesItem = "corridor"
+	AlertKindOptionScopesItemFacilities AlertKindOptionScopesItem = "facilities"
+	AlertKindOptionScopesItemArea       AlertKindOptionScopesItem = "area"
+	AlertKindOptionScopesItemCity       AlertKindOptionScopesItem = "city"
+	AlertKindOptionScopesItemNone       AlertKindOptionScopesItem = "none"
+)
+
+// AllValues returns all AlertKindOptionScopesItem values.
+func (AlertKindOptionScopesItem) AllValues() []AlertKindOptionScopesItem {
+	return []AlertKindOptionScopesItem{
+		AlertKindOptionScopesItemCorridor,
+		AlertKindOptionScopesItemFacilities,
+		AlertKindOptionScopesItemArea,
+		AlertKindOptionScopesItemCity,
+		AlertKindOptionScopesItemNone,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertKindOptionScopesItem) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertKindOptionScopesItemCorridor:
+		return []byte(s), nil
+	case AlertKindOptionScopesItemFacilities:
+		return []byte(s), nil
+	case AlertKindOptionScopesItemArea:
+		return []byte(s), nil
+	case AlertKindOptionScopesItemCity:
+		return []byte(s), nil
+	case AlertKindOptionScopesItemNone:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertKindOptionScopesItem) UnmarshalText(data []byte) error {
+	switch AlertKindOptionScopesItem(data) {
+	case AlertKindOptionScopesItemCorridor:
+		*s = AlertKindOptionScopesItemCorridor
+		return nil
+	case AlertKindOptionScopesItemFacilities:
+		*s = AlertKindOptionScopesItemFacilities
+		return nil
+	case AlertKindOptionScopesItemArea:
+		*s = AlertKindOptionScopesItemArea
+		return nil
+	case AlertKindOptionScopesItemCity:
+		*s = AlertKindOptionScopesItemCity
+		return nil
+	case AlertKindOptionScopesItemNone:
+		*s = AlertKindOptionScopesItemNone
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AlertLogEntry
+type AlertLogEntry struct {
+	ID        int64                `json:"id"`
+	At        time.Time            `json:"at"`
+	ActorId   OptUUID              `json:"actorId"`
+	ActorName OptString            `json:"actorName"`
+	Action    AlertLogEntryAction  `json:"action"`
+	Comment   OptString            `json:"comment"`
+	Details   AlertLogEntryDetails `json:"details"`
+}
+
+// GetID returns the value of ID.
+func (s *AlertLogEntry) GetID() int64 {
+	return s.ID
+}
+
+// GetAt returns the value of At.
+func (s *AlertLogEntry) GetAt() time.Time {
+	return s.At
+}
+
+// GetActorId returns the value of ActorId.
+func (s *AlertLogEntry) GetActorId() OptUUID {
+	return s.ActorId
+}
+
+// GetActorName returns the value of ActorName.
+func (s *AlertLogEntry) GetActorName() OptString {
+	return s.ActorName
+}
+
+// GetAction returns the value of Action.
+func (s *AlertLogEntry) GetAction() AlertLogEntryAction {
+	return s.Action
+}
+
+// GetComment returns the value of Comment.
+func (s *AlertLogEntry) GetComment() OptString {
+	return s.Comment
+}
+
+// GetDetails returns the value of Details.
+func (s *AlertLogEntry) GetDetails() AlertLogEntryDetails {
+	return s.Details
+}
+
+// SetID sets the value of ID.
+func (s *AlertLogEntry) SetID(val int64) {
+	s.ID = val
+}
+
+// SetAt sets the value of At.
+func (s *AlertLogEntry) SetAt(val time.Time) {
+	s.At = val
+}
+
+// SetActorId sets the value of ActorId.
+func (s *AlertLogEntry) SetActorId(val OptUUID) {
+	s.ActorId = val
+}
+
+// SetActorName sets the value of ActorName.
+func (s *AlertLogEntry) SetActorName(val OptString) {
+	s.ActorName = val
+}
+
+// SetAction sets the value of Action.
+func (s *AlertLogEntry) SetAction(val AlertLogEntryAction) {
+	s.Action = val
+}
+
+// SetComment sets the value of Comment.
+func (s *AlertLogEntry) SetComment(val OptString) {
+	s.Comment = val
+}
+
+// SetDetails sets the value of Details.
+func (s *AlertLogEntry) SetDetails(val AlertLogEntryDetails) {
+	s.Details = val
+}
+
+type AlertLogEntryAction string
+
+const (
+	AlertLogEntryActionCreated      AlertLogEntryAction = "created"
+	AlertLogEntryActionRepeated     AlertLogEntryAction = "repeated"
+	AlertLogEntryActionAcknowledged AlertLogEntryAction = "acknowledged"
+	AlertLogEntryActionClosed       AlertLogEntryAction = "closed"
+	AlertLogEntryActionReopened     AlertLogEntryAction = "reopened"
+	AlertLogEntryActionAssigned     AlertLogEntryAction = "assigned"
+	AlertLogEntryActionCommented    AlertLogEntryAction = "commented"
+	AlertLogEntryActionResolved     AlertLogEntryAction = "resolved"
+)
+
+// AllValues returns all AlertLogEntryAction values.
+func (AlertLogEntryAction) AllValues() []AlertLogEntryAction {
+	return []AlertLogEntryAction{
+		AlertLogEntryActionCreated,
+		AlertLogEntryActionRepeated,
+		AlertLogEntryActionAcknowledged,
+		AlertLogEntryActionClosed,
+		AlertLogEntryActionReopened,
+		AlertLogEntryActionAssigned,
+		AlertLogEntryActionCommented,
+		AlertLogEntryActionResolved,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertLogEntryAction) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertLogEntryActionCreated:
+		return []byte(s), nil
+	case AlertLogEntryActionRepeated:
+		return []byte(s), nil
+	case AlertLogEntryActionAcknowledged:
+		return []byte(s), nil
+	case AlertLogEntryActionClosed:
+		return []byte(s), nil
+	case AlertLogEntryActionReopened:
+		return []byte(s), nil
+	case AlertLogEntryActionAssigned:
+		return []byte(s), nil
+	case AlertLogEntryActionCommented:
+		return []byte(s), nil
+	case AlertLogEntryActionResolved:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertLogEntryAction) UnmarshalText(data []byte) error {
+	switch AlertLogEntryAction(data) {
+	case AlertLogEntryActionCreated:
+		*s = AlertLogEntryActionCreated
+		return nil
+	case AlertLogEntryActionRepeated:
+		*s = AlertLogEntryActionRepeated
+		return nil
+	case AlertLogEntryActionAcknowledged:
+		*s = AlertLogEntryActionAcknowledged
+		return nil
+	case AlertLogEntryActionClosed:
+		*s = AlertLogEntryActionClosed
+		return nil
+	case AlertLogEntryActionReopened:
+		*s = AlertLogEntryActionReopened
+		return nil
+	case AlertLogEntryActionAssigned:
+		*s = AlertLogEntryActionAssigned
+		return nil
+	case AlertLogEntryActionCommented:
+		*s = AlertLogEntryActionCommented
+		return nil
+	case AlertLogEntryActionResolved:
+		*s = AlertLogEntryActionResolved
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type AlertLogEntryDetails map[string]jx.Raw
+
+func (s *AlertLogEntryDetails) init() AlertLogEntryDetails {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/AlertOption
+type AlertOption struct {
+	Code  string `json:"code"`
+	Title string `json:"title"`
+}
+
+// GetCode returns the value of Code.
+func (s *AlertOption) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *AlertOption) GetTitle() string {
+	return s.Title
+}
+
+// SetCode sets the value of Code.
+func (s *AlertOption) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *AlertOption) SetTitle(val string) {
+	s.Title = val
+}
+
+// Ref: #/components/schemas/AlertPage
+type AlertPage struct {
+	Items []Alert `json:"items"`
+	// Курсор следующей страницы.
+	Next OptString `json:"next"`
+}
+
+// GetItems returns the value of Items.
+func (s *AlertPage) GetItems() []Alert {
+	return s.Items
+}
+
+// GetNext returns the value of Next.
+func (s *AlertPage) GetNext() OptString {
+	return s.Next
+}
+
+// SetItems sets the value of Items.
+func (s *AlertPage) SetItems(val []Alert) {
+	s.Items = val
+}
+
+// SetNext sets the value of Next.
+func (s *AlertPage) SetNext(val OptString) {
+	s.Next = val
+}
+
+// Auto — причина исчезла (работа завершена, источник
+// загрузился).
+type AlertResolution string
+
+const (
+	AlertResolutionManual AlertResolution = "manual"
+	AlertResolutionAuto   AlertResolution = "auto"
+)
+
+// AllValues returns all AlertResolution values.
+func (AlertResolution) AllValues() []AlertResolution {
+	return []AlertResolution{
+		AlertResolutionManual,
+		AlertResolutionAuto,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertResolution) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertResolutionManual:
+		return []byte(s), nil
+	case AlertResolutionAuto:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertResolution) UnmarshalText(data []byte) error {
+	switch AlertResolution(data) {
+	case AlertResolutionManual:
+		*s = AlertResolutionManual
+		return nil
+	case AlertResolutionAuto:
+		*s = AlertResolutionAuto
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AlertRule
+type AlertRule struct {
+	ID        uuid.UUID       `json:"id"`
+	OwnerId   uuid.UUID       `json:"ownerId"`
+	OwnerName string          `json:"ownerName"`
+	Name      string          `json:"name"`
+	Kind      AlertRuleKind   `json:"kind"`
+	Scope     AlertScope      `json:"scope"`
+	Params    AlertRuleParams `json:"params"`
+	Severity  AlertSeverity   `json:"severity"`
+	Channels  []AlertChannel  `json:"channels"`
+	Enabled   bool            `json:"enabled"`
+	// Вычисленная область, мультиполигон GeoJSON.
+	Area      OptAlertRuleArea `json:"area"`
+	CheckedAt OptDateTime      `json:"checkedAt"`
+	// Почему последняя проверка не удалась.
+	CheckError OptString `json:"checkError"`
+	OpenAlerts int       `json:"openAlerts"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *AlertRule) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetOwnerId returns the value of OwnerId.
+func (s *AlertRule) GetOwnerId() uuid.UUID {
+	return s.OwnerId
+}
+
+// GetOwnerName returns the value of OwnerName.
+func (s *AlertRule) GetOwnerName() string {
+	return s.OwnerName
+}
+
+// GetName returns the value of Name.
+func (s *AlertRule) GetName() string {
+	return s.Name
+}
+
+// GetKind returns the value of Kind.
+func (s *AlertRule) GetKind() AlertRuleKind {
+	return s.Kind
+}
+
+// GetScope returns the value of Scope.
+func (s *AlertRule) GetScope() AlertScope {
+	return s.Scope
+}
+
+// GetParams returns the value of Params.
+func (s *AlertRule) GetParams() AlertRuleParams {
+	return s.Params
+}
+
+// GetSeverity returns the value of Severity.
+func (s *AlertRule) GetSeverity() AlertSeverity {
+	return s.Severity
+}
+
+// GetChannels returns the value of Channels.
+func (s *AlertRule) GetChannels() []AlertChannel {
+	return s.Channels
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *AlertRule) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetArea returns the value of Area.
+func (s *AlertRule) GetArea() OptAlertRuleArea {
+	return s.Area
+}
+
+// GetCheckedAt returns the value of CheckedAt.
+func (s *AlertRule) GetCheckedAt() OptDateTime {
+	return s.CheckedAt
+}
+
+// GetCheckError returns the value of CheckError.
+func (s *AlertRule) GetCheckError() OptString {
+	return s.CheckError
+}
+
+// GetOpenAlerts returns the value of OpenAlerts.
+func (s *AlertRule) GetOpenAlerts() int {
+	return s.OpenAlerts
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *AlertRule) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *AlertRule) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *AlertRule) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetOwnerId sets the value of OwnerId.
+func (s *AlertRule) SetOwnerId(val uuid.UUID) {
+	s.OwnerId = val
+}
+
+// SetOwnerName sets the value of OwnerName.
+func (s *AlertRule) SetOwnerName(val string) {
+	s.OwnerName = val
+}
+
+// SetName sets the value of Name.
+func (s *AlertRule) SetName(val string) {
+	s.Name = val
+}
+
+// SetKind sets the value of Kind.
+func (s *AlertRule) SetKind(val AlertRuleKind) {
+	s.Kind = val
+}
+
+// SetScope sets the value of Scope.
+func (s *AlertRule) SetScope(val AlertScope) {
+	s.Scope = val
+}
+
+// SetParams sets the value of Params.
+func (s *AlertRule) SetParams(val AlertRuleParams) {
+	s.Params = val
+}
+
+// SetSeverity sets the value of Severity.
+func (s *AlertRule) SetSeverity(val AlertSeverity) {
+	s.Severity = val
+}
+
+// SetChannels sets the value of Channels.
+func (s *AlertRule) SetChannels(val []AlertChannel) {
+	s.Channels = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *AlertRule) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetArea sets the value of Area.
+func (s *AlertRule) SetArea(val OptAlertRuleArea) {
+	s.Area = val
+}
+
+// SetCheckedAt sets the value of CheckedAt.
+func (s *AlertRule) SetCheckedAt(val OptDateTime) {
+	s.CheckedAt = val
+}
+
+// SetCheckError sets the value of CheckError.
+func (s *AlertRule) SetCheckError(val OptString) {
+	s.CheckError = val
+}
+
+// SetOpenAlerts sets the value of OpenAlerts.
+func (s *AlertRule) SetOpenAlerts(val int) {
+	s.OpenAlerts = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *AlertRule) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *AlertRule) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// Вычисленная область, мультиполигон GeoJSON.
+type AlertRuleArea map[string]jx.Raw
+
+func (s *AlertRuleArea) init() AlertRuleArea {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/AlertRuleCheck
+type AlertRuleCheck struct {
+	Rule AlertRule `json:"rule"`
+	// Новых срабатываний.
+	Hits int `json:"hits"`
+}
+
+// GetRule returns the value of Rule.
+func (s *AlertRuleCheck) GetRule() AlertRule {
+	return s.Rule
+}
+
+// GetHits returns the value of Hits.
+func (s *AlertRuleCheck) GetHits() int {
+	return s.Hits
+}
+
+// SetRule sets the value of Rule.
+func (s *AlertRuleCheck) SetRule(val AlertRule) {
+	s.Rule = val
+}
+
+// SetHits sets the value of Hits.
+func (s *AlertRuleCheck) SetHits(val int) {
+	s.Hits = val
+}
+
+// Ref: #/components/schemas/AlertRuleInput
+type AlertRuleInput struct {
+	Name     string             `json:"name"`
+	Kind     AlertRuleKind      `json:"kind"`
+	Scope    AlertScope         `json:"scope"`
+	Params   OptAlertRuleParams `json:"params"`
+	Severity OptAlertSeverity   `json:"severity"`
+	Channels []AlertChannel     `json:"channels"`
+	Enabled  OptBool            `json:"enabled"`
+}
+
+// GetName returns the value of Name.
+func (s *AlertRuleInput) GetName() string {
+	return s.Name
+}
+
+// GetKind returns the value of Kind.
+func (s *AlertRuleInput) GetKind() AlertRuleKind {
+	return s.Kind
+}
+
+// GetScope returns the value of Scope.
+func (s *AlertRuleInput) GetScope() AlertScope {
+	return s.Scope
+}
+
+// GetParams returns the value of Params.
+func (s *AlertRuleInput) GetParams() OptAlertRuleParams {
+	return s.Params
+}
+
+// GetSeverity returns the value of Severity.
+func (s *AlertRuleInput) GetSeverity() OptAlertSeverity {
+	return s.Severity
+}
+
+// GetChannels returns the value of Channels.
+func (s *AlertRuleInput) GetChannels() []AlertChannel {
+	return s.Channels
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *AlertRuleInput) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// SetName sets the value of Name.
+func (s *AlertRuleInput) SetName(val string) {
+	s.Name = val
+}
+
+// SetKind sets the value of Kind.
+func (s *AlertRuleInput) SetKind(val AlertRuleKind) {
+	s.Kind = val
+}
+
+// SetScope sets the value of Scope.
+func (s *AlertRuleInput) SetScope(val AlertScope) {
+	s.Scope = val
+}
+
+// SetParams sets the value of Params.
+func (s *AlertRuleInput) SetParams(val OptAlertRuleParams) {
+	s.Params = val
+}
+
+// SetSeverity sets the value of Severity.
+func (s *AlertRuleInput) SetSeverity(val OptAlertSeverity) {
+	s.Severity = val
+}
+
+// SetChannels sets the value of Channels.
+func (s *AlertRuleInput) SetChannels(val []AlertChannel) {
+	s.Channels = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *AlertRuleInput) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+// Roadworks — новые и изменённые дорожные работы в области;
+// restrictions — изменения ограничений для грузовиков в
+// области; accessibility — ухудшение доступности объектов;
+// facilities — новые объекты реестра; sources — сбой и
+// устаревание источников данных.
+// Ref: #/components/schemas/AlertRuleKind
+type AlertRuleKind string
+
+const (
+	AlertRuleKindRoadworks     AlertRuleKind = "roadworks"
+	AlertRuleKindRestrictions  AlertRuleKind = "restrictions"
+	AlertRuleKindAccessibility AlertRuleKind = "accessibility"
+	AlertRuleKindFacilities    AlertRuleKind = "facilities"
+	AlertRuleKindSources       AlertRuleKind = "sources"
+)
+
+// AllValues returns all AlertRuleKind values.
+func (AlertRuleKind) AllValues() []AlertRuleKind {
+	return []AlertRuleKind{
+		AlertRuleKindRoadworks,
+		AlertRuleKindRestrictions,
+		AlertRuleKindAccessibility,
+		AlertRuleKindFacilities,
+		AlertRuleKindSources,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertRuleKind) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertRuleKindRoadworks:
+		return []byte(s), nil
+	case AlertRuleKindRestrictions:
+		return []byte(s), nil
+	case AlertRuleKindAccessibility:
+		return []byte(s), nil
+	case AlertRuleKindFacilities:
+		return []byte(s), nil
+	case AlertRuleKindSources:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertRuleKind) UnmarshalText(data []byte) error {
+	switch AlertRuleKind(data) {
+	case AlertRuleKindRoadworks:
+		*s = AlertRuleKindRoadworks
+		return nil
+	case AlertRuleKindRestrictions:
+		*s = AlertRuleKindRestrictions
+		return nil
+	case AlertRuleKindAccessibility:
+		*s = AlertRuleKindAccessibility
+		return nil
+	case AlertRuleKindFacilities:
+		*s = AlertRuleKindFacilities
+		return nil
+	case AlertRuleKindSources:
+		*s = AlertRuleKindSources
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AlertRuleOptions
+type AlertRuleOptions struct {
+	Kinds            []AlertKindOption `json:"kinds"`
+	WorkKinds        []AlertOption     `json:"workKinds"`
+	Changes          []AlertOption     `json:"changes"`
+	RestrictionKinds []AlertOption     `json:"restrictionKinds"`
+	Targets          []AlertOption     `json:"targets"`
+	FacilityTypes    []AlertOption     `json:"facilityTypes"`
+	Profiles         []AlertOption     `json:"profiles"`
+	Sources          []AlertOption     `json:"sources"`
+}
+
+// GetKinds returns the value of Kinds.
+func (s *AlertRuleOptions) GetKinds() []AlertKindOption {
+	return s.Kinds
+}
+
+// GetWorkKinds returns the value of WorkKinds.
+func (s *AlertRuleOptions) GetWorkKinds() []AlertOption {
+	return s.WorkKinds
+}
+
+// GetChanges returns the value of Changes.
+func (s *AlertRuleOptions) GetChanges() []AlertOption {
+	return s.Changes
+}
+
+// GetRestrictionKinds returns the value of RestrictionKinds.
+func (s *AlertRuleOptions) GetRestrictionKinds() []AlertOption {
+	return s.RestrictionKinds
+}
+
+// GetTargets returns the value of Targets.
+func (s *AlertRuleOptions) GetTargets() []AlertOption {
+	return s.Targets
+}
+
+// GetFacilityTypes returns the value of FacilityTypes.
+func (s *AlertRuleOptions) GetFacilityTypes() []AlertOption {
+	return s.FacilityTypes
+}
+
+// GetProfiles returns the value of Profiles.
+func (s *AlertRuleOptions) GetProfiles() []AlertOption {
+	return s.Profiles
+}
+
+// GetSources returns the value of Sources.
+func (s *AlertRuleOptions) GetSources() []AlertOption {
+	return s.Sources
+}
+
+// SetKinds sets the value of Kinds.
+func (s *AlertRuleOptions) SetKinds(val []AlertKindOption) {
+	s.Kinds = val
+}
+
+// SetWorkKinds sets the value of WorkKinds.
+func (s *AlertRuleOptions) SetWorkKinds(val []AlertOption) {
+	s.WorkKinds = val
+}
+
+// SetChanges sets the value of Changes.
+func (s *AlertRuleOptions) SetChanges(val []AlertOption) {
+	s.Changes = val
+}
+
+// SetRestrictionKinds sets the value of RestrictionKinds.
+func (s *AlertRuleOptions) SetRestrictionKinds(val []AlertOption) {
+	s.RestrictionKinds = val
+}
+
+// SetTargets sets the value of Targets.
+func (s *AlertRuleOptions) SetTargets(val []AlertOption) {
+	s.Targets = val
+}
+
+// SetFacilityTypes sets the value of FacilityTypes.
+func (s *AlertRuleOptions) SetFacilityTypes(val []AlertOption) {
+	s.FacilityTypes = val
+}
+
+// SetProfiles sets the value of Profiles.
+func (s *AlertRuleOptions) SetProfiles(val []AlertOption) {
+	s.Profiles = val
+}
+
+// SetSources sets the value of Sources.
+func (s *AlertRuleOptions) SetSources(val []AlertOption) {
+	s.Sources = val
+}
+
+// Параметры вида правила; поля чужих видов при
+// сохранении сбрасываются.
+// Ref: #/components/schemas/AlertRuleParams
+type AlertRuleParams struct {
+	WorkKinds        []AlertRuleParamsWorkKindsItem `json:"workKinds"`
+	ClosureOnly      OptBool                        `json:"closureOnly"`
+	Changes          []AlertRuleParamsChangesItem   `json:"changes"`
+	RestrictionKinds []string                       `json:"restrictionKinds"`
+	Profile          OptString                      `json:"profile"`
+	Target           OptAlertRuleParamsTarget       `json:"target"`
+	ThresholdMin     OptFloat64                     `json:"thresholdMin"`
+	FacilityTypes    []string                       `json:"facilityTypes"`
+	Sources          []string                       `json:"sources"`
+	StaleFactor      OptFloat64                     `json:"staleFactor"`
+}
+
+// GetWorkKinds returns the value of WorkKinds.
+func (s *AlertRuleParams) GetWorkKinds() []AlertRuleParamsWorkKindsItem {
+	return s.WorkKinds
+}
+
+// GetClosureOnly returns the value of ClosureOnly.
+func (s *AlertRuleParams) GetClosureOnly() OptBool {
+	return s.ClosureOnly
+}
+
+// GetChanges returns the value of Changes.
+func (s *AlertRuleParams) GetChanges() []AlertRuleParamsChangesItem {
+	return s.Changes
+}
+
+// GetRestrictionKinds returns the value of RestrictionKinds.
+func (s *AlertRuleParams) GetRestrictionKinds() []string {
+	return s.RestrictionKinds
+}
+
+// GetProfile returns the value of Profile.
+func (s *AlertRuleParams) GetProfile() OptString {
+	return s.Profile
+}
+
+// GetTarget returns the value of Target.
+func (s *AlertRuleParams) GetTarget() OptAlertRuleParamsTarget {
+	return s.Target
+}
+
+// GetThresholdMin returns the value of ThresholdMin.
+func (s *AlertRuleParams) GetThresholdMin() OptFloat64 {
+	return s.ThresholdMin
+}
+
+// GetFacilityTypes returns the value of FacilityTypes.
+func (s *AlertRuleParams) GetFacilityTypes() []string {
+	return s.FacilityTypes
+}
+
+// GetSources returns the value of Sources.
+func (s *AlertRuleParams) GetSources() []string {
+	return s.Sources
+}
+
+// GetStaleFactor returns the value of StaleFactor.
+func (s *AlertRuleParams) GetStaleFactor() OptFloat64 {
+	return s.StaleFactor
+}
+
+// SetWorkKinds sets the value of WorkKinds.
+func (s *AlertRuleParams) SetWorkKinds(val []AlertRuleParamsWorkKindsItem) {
+	s.WorkKinds = val
+}
+
+// SetClosureOnly sets the value of ClosureOnly.
+func (s *AlertRuleParams) SetClosureOnly(val OptBool) {
+	s.ClosureOnly = val
+}
+
+// SetChanges sets the value of Changes.
+func (s *AlertRuleParams) SetChanges(val []AlertRuleParamsChangesItem) {
+	s.Changes = val
+}
+
+// SetRestrictionKinds sets the value of RestrictionKinds.
+func (s *AlertRuleParams) SetRestrictionKinds(val []string) {
+	s.RestrictionKinds = val
+}
+
+// SetProfile sets the value of Profile.
+func (s *AlertRuleParams) SetProfile(val OptString) {
+	s.Profile = val
+}
+
+// SetTarget sets the value of Target.
+func (s *AlertRuleParams) SetTarget(val OptAlertRuleParamsTarget) {
+	s.Target = val
+}
+
+// SetThresholdMin sets the value of ThresholdMin.
+func (s *AlertRuleParams) SetThresholdMin(val OptFloat64) {
+	s.ThresholdMin = val
+}
+
+// SetFacilityTypes sets the value of FacilityTypes.
+func (s *AlertRuleParams) SetFacilityTypes(val []string) {
+	s.FacilityTypes = val
+}
+
+// SetSources sets the value of Sources.
+func (s *AlertRuleParams) SetSources(val []string) {
+	s.Sources = val
+}
+
+// SetStaleFactor sets the value of StaleFactor.
+func (s *AlertRuleParams) SetStaleFactor(val OptFloat64) {
+	s.StaleFactor = val
+}
+
+type AlertRuleParamsChangesItem string
+
+const (
+	AlertRuleParamsChangesItemAppeared AlertRuleParamsChangesItem = "appeared"
+	AlertRuleParamsChangesItemChanged  AlertRuleParamsChangesItem = "changed"
+	AlertRuleParamsChangesItemStarted  AlertRuleParamsChangesItem = "started"
+)
+
+// AllValues returns all AlertRuleParamsChangesItem values.
+func (AlertRuleParamsChangesItem) AllValues() []AlertRuleParamsChangesItem {
+	return []AlertRuleParamsChangesItem{
+		AlertRuleParamsChangesItemAppeared,
+		AlertRuleParamsChangesItemChanged,
+		AlertRuleParamsChangesItemStarted,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertRuleParamsChangesItem) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertRuleParamsChangesItemAppeared:
+		return []byte(s), nil
+	case AlertRuleParamsChangesItemChanged:
+		return []byte(s), nil
+	case AlertRuleParamsChangesItemStarted:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertRuleParamsChangesItem) UnmarshalText(data []byte) error {
+	switch AlertRuleParamsChangesItem(data) {
+	case AlertRuleParamsChangesItemAppeared:
+		*s = AlertRuleParamsChangesItemAppeared
+		return nil
+	case AlertRuleParamsChangesItemChanged:
+		*s = AlertRuleParamsChangesItemChanged
+		return nil
+	case AlertRuleParamsChangesItemStarted:
+		*s = AlertRuleParamsChangesItemStarted
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type AlertRuleParamsTarget string
+
+const (
+	AlertRuleParamsTargetMkad        AlertRuleParamsTarget = "mkad"
+	AlertRuleParamsTargetTtk         AlertRuleParamsTarget = "ttk"
+	AlertRuleParamsTargetCenter      AlertRuleParamsTarget = "center"
+	AlertRuleParamsTargetRailFreight AlertRuleParamsTarget = "rail_freight"
+)
+
+// AllValues returns all AlertRuleParamsTarget values.
+func (AlertRuleParamsTarget) AllValues() []AlertRuleParamsTarget {
+	return []AlertRuleParamsTarget{
+		AlertRuleParamsTargetMkad,
+		AlertRuleParamsTargetTtk,
+		AlertRuleParamsTargetCenter,
+		AlertRuleParamsTargetRailFreight,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertRuleParamsTarget) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertRuleParamsTargetMkad:
+		return []byte(s), nil
+	case AlertRuleParamsTargetTtk:
+		return []byte(s), nil
+	case AlertRuleParamsTargetCenter:
+		return []byte(s), nil
+	case AlertRuleParamsTargetRailFreight:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertRuleParamsTarget) UnmarshalText(data []byte) error {
+	switch AlertRuleParamsTarget(data) {
+	case AlertRuleParamsTargetMkad:
+		*s = AlertRuleParamsTargetMkad
+		return nil
+	case AlertRuleParamsTargetTtk:
+		*s = AlertRuleParamsTargetTtk
+		return nil
+	case AlertRuleParamsTargetCenter:
+		*s = AlertRuleParamsTargetCenter
+		return nil
+	case AlertRuleParamsTargetRailFreight:
+		*s = AlertRuleParamsTargetRailFreight
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type AlertRuleParamsWorkKindsItem string
+
+const (
+	AlertRuleParamsWorkKindsItemRepair    AlertRuleParamsWorkKindsItem = "repair"
+	AlertRuleParamsWorkKindsItemEmergency AlertRuleParamsWorkKindsItem = "emergency"
+	AlertRuleParamsWorkKindsItemClosure   AlertRuleParamsWorkKindsItem = "closure"
+)
+
+// AllValues returns all AlertRuleParamsWorkKindsItem values.
+func (AlertRuleParamsWorkKindsItem) AllValues() []AlertRuleParamsWorkKindsItem {
+	return []AlertRuleParamsWorkKindsItem{
+		AlertRuleParamsWorkKindsItemRepair,
+		AlertRuleParamsWorkKindsItemEmergency,
+		AlertRuleParamsWorkKindsItemClosure,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertRuleParamsWorkKindsItem) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertRuleParamsWorkKindsItemRepair:
+		return []byte(s), nil
+	case AlertRuleParamsWorkKindsItemEmergency:
+		return []byte(s), nil
+	case AlertRuleParamsWorkKindsItemClosure:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertRuleParamsWorkKindsItem) UnmarshalText(data []byte) error {
+	switch AlertRuleParamsWorkKindsItem(data) {
+	case AlertRuleParamsWorkKindsItemRepair:
+		*s = AlertRuleParamsWorkKindsItemRepair
+		return nil
+	case AlertRuleParamsWorkKindsItemEmergency:
+		*s = AlertRuleParamsWorkKindsItemEmergency
+		return nil
+	case AlertRuleParamsWorkKindsItemClosure:
+		*s = AlertRuleParamsWorkKindsItemClosure
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Как задана область: corridor — линия с буфером, facilities —
+// объекты реестра с радиусом, area — многоугольник, city —
+// весь охват данных, none — без области.
+// Ref: #/components/schemas/AlertScope
+type AlertScope struct {
+	Type AlertScopeType `json:"type"`
+	// Линия GeoJSON (corridor).
+	Line OptAlertScopeLine `json:"line"`
+	// Ширина коридора в каждую сторону, м.
+	BufferM     OptInt      `json:"bufferM"`
+	FacilityIds []uuid.UUID `json:"facilityIds"`
+	RadiusM     OptInt      `json:"radiusM"`
+	// Многоугольник GeoJSON (area).
+	Polygon OptAlertScopePolygon `json:"polygon"`
+}
+
+// GetType returns the value of Type.
+func (s *AlertScope) GetType() AlertScopeType {
+	return s.Type
+}
+
+// GetLine returns the value of Line.
+func (s *AlertScope) GetLine() OptAlertScopeLine {
+	return s.Line
+}
+
+// GetBufferM returns the value of BufferM.
+func (s *AlertScope) GetBufferM() OptInt {
+	return s.BufferM
+}
+
+// GetFacilityIds returns the value of FacilityIds.
+func (s *AlertScope) GetFacilityIds() []uuid.UUID {
+	return s.FacilityIds
+}
+
+// GetRadiusM returns the value of RadiusM.
+func (s *AlertScope) GetRadiusM() OptInt {
+	return s.RadiusM
+}
+
+// GetPolygon returns the value of Polygon.
+func (s *AlertScope) GetPolygon() OptAlertScopePolygon {
+	return s.Polygon
+}
+
+// SetType sets the value of Type.
+func (s *AlertScope) SetType(val AlertScopeType) {
+	s.Type = val
+}
+
+// SetLine sets the value of Line.
+func (s *AlertScope) SetLine(val OptAlertScopeLine) {
+	s.Line = val
+}
+
+// SetBufferM sets the value of BufferM.
+func (s *AlertScope) SetBufferM(val OptInt) {
+	s.BufferM = val
+}
+
+// SetFacilityIds sets the value of FacilityIds.
+func (s *AlertScope) SetFacilityIds(val []uuid.UUID) {
+	s.FacilityIds = val
+}
+
+// SetRadiusM sets the value of RadiusM.
+func (s *AlertScope) SetRadiusM(val OptInt) {
+	s.RadiusM = val
+}
+
+// SetPolygon sets the value of Polygon.
+func (s *AlertScope) SetPolygon(val OptAlertScopePolygon) {
+	s.Polygon = val
+}
+
+// Линия GeoJSON (corridor).
+type AlertScopeLine map[string]jx.Raw
+
+func (s *AlertScopeLine) init() AlertScopeLine {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Многоугольник GeoJSON (area).
+type AlertScopePolygon map[string]jx.Raw
+
+func (s *AlertScopePolygon) init() AlertScopePolygon {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type AlertScopeType string
+
+const (
+	AlertScopeTypeCorridor   AlertScopeType = "corridor"
+	AlertScopeTypeFacilities AlertScopeType = "facilities"
+	AlertScopeTypeArea       AlertScopeType = "area"
+	AlertScopeTypeCity       AlertScopeType = "city"
+	AlertScopeTypeNone       AlertScopeType = "none"
+)
+
+// AllValues returns all AlertScopeType values.
+func (AlertScopeType) AllValues() []AlertScopeType {
+	return []AlertScopeType{
+		AlertScopeTypeCorridor,
+		AlertScopeTypeFacilities,
+		AlertScopeTypeArea,
+		AlertScopeTypeCity,
+		AlertScopeTypeNone,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertScopeType) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertScopeTypeCorridor:
+		return []byte(s), nil
+	case AlertScopeTypeFacilities:
+		return []byte(s), nil
+	case AlertScopeTypeArea:
+		return []byte(s), nil
+	case AlertScopeTypeCity:
+		return []byte(s), nil
+	case AlertScopeTypeNone:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertScopeType) UnmarshalText(data []byte) error {
+	switch AlertScopeType(data) {
+	case AlertScopeTypeCorridor:
+		*s = AlertScopeTypeCorridor
+		return nil
+	case AlertScopeTypeFacilities:
+		*s = AlertScopeTypeFacilities
+		return nil
+	case AlertScopeTypeArea:
+		*s = AlertScopeTypeArea
+		return nil
+	case AlertScopeTypeCity:
+		*s = AlertScopeTypeCity
+		return nil
+	case AlertScopeTypeNone:
+		*s = AlertScopeTypeNone
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AlertSeverity
+type AlertSeverity string
+
+const (
+	AlertSeverityInfo     AlertSeverity = "info"
+	AlertSeverityWarning  AlertSeverity = "warning"
+	AlertSeverityCritical AlertSeverity = "critical"
+)
+
+// AllValues returns all AlertSeverity values.
+func (AlertSeverity) AllValues() []AlertSeverity {
+	return []AlertSeverity{
+		AlertSeverityInfo,
+		AlertSeverityWarning,
+		AlertSeverityCritical,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertSeverity) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertSeverityInfo:
+		return []byte(s), nil
+	case AlertSeverityWarning:
+		return []byte(s), nil
+	case AlertSeverityCritical:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertSeverity) UnmarshalText(data []byte) error {
+	switch AlertSeverity(data) {
+	case AlertSeverityInfo:
+		*s = AlertSeverityInfo
+		return nil
+	case AlertSeverityWarning:
+		*s = AlertSeverityWarning
+		return nil
+	case AlertSeverityCritical:
+		*s = AlertSeverityCritical
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AlertStatus
+type AlertStatus string
+
+const (
+	AlertStatusActive       AlertStatus = "active"
+	AlertStatusAcknowledged AlertStatus = "acknowledged"
+	AlertStatusClosed       AlertStatus = "closed"
+)
+
+// AllValues returns all AlertStatus values.
+func (AlertStatus) AllValues() []AlertStatus {
+	return []AlertStatus{
+		AlertStatusActive,
+		AlertStatusAcknowledged,
+		AlertStatusClosed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AlertStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case AlertStatusActive:
+		return []byte(s), nil
+	case AlertStatusAcknowledged:
+		return []byte(s), nil
+	case AlertStatusClosed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AlertStatus) UnmarshalText(data []byte) error {
+	switch AlertStatus(data) {
+	case AlertStatusActive:
+		*s = AlertStatusActive
+		return nil
+	case AlertStatusAcknowledged:
+		*s = AlertStatusAcknowledged
+		return nil
+	case AlertStatusClosed:
+		*s = AlertStatusClosed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AlertSummary
+type AlertSummary struct {
+	Active       int `json:"active"`
+	Acknowledged int `json:"acknowledged"`
+	// Активные по важности.
+	BySeverity AlertSummaryBySeverity `json:"bySeverity"`
+}
+
+// GetActive returns the value of Active.
+func (s *AlertSummary) GetActive() int {
+	return s.Active
+}
+
+// GetAcknowledged returns the value of Acknowledged.
+func (s *AlertSummary) GetAcknowledged() int {
+	return s.Acknowledged
+}
+
+// GetBySeverity returns the value of BySeverity.
+func (s *AlertSummary) GetBySeverity() AlertSummaryBySeverity {
+	return s.BySeverity
+}
+
+// SetActive sets the value of Active.
+func (s *AlertSummary) SetActive(val int) {
+	s.Active = val
+}
+
+// SetAcknowledged sets the value of Acknowledged.
+func (s *AlertSummary) SetAcknowledged(val int) {
+	s.Acknowledged = val
+}
+
+// SetBySeverity sets the value of BySeverity.
+func (s *AlertSummary) SetBySeverity(val AlertSummaryBySeverity) {
+	s.BySeverity = val
+}
+
+// Активные по важности.
+type AlertSummaryBySeverity map[string]int
+
+func (s *AlertSummaryBySeverity) init() AlertSummaryBySeverity {
+	m := *s
+	if m == nil {
+		m = map[string]int{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/AlertUser
+type AlertUser struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
+// GetID returns the value of ID.
+func (s *AlertUser) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *AlertUser) GetName() string {
+	return s.Name
+}
+
+// SetID sets the value of ID.
+func (s *AlertUser) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *AlertUser) SetName(val string) {
+	s.Name = val
+}
+
 // Ref: #/components/schemas/ApiToken
 type ApiToken struct {
 	ID         uuid.UUID   `json:"id"`
@@ -1974,6 +3905,9 @@ func (s *DataUpdatesOKItem) SetRecords(val OptInt64) {
 func (s *DataUpdatesOKItem) SetDomains(val []string) {
 	s.Domains = val
 }
+
+// DeleteAlertRuleNoContent is response for DeleteAlertRule operation.
+type DeleteAlertRuleNoContent struct{}
 
 // DeleteScenarioNoContent is response for DeleteScenario operation.
 type DeleteScenarioNoContent struct{}
@@ -8066,6 +10000,466 @@ func (s *OfficialPage) SetChangedAt(val time.Time) {
 // SetChangedSinceVerification sets the value of ChangedSinceVerification.
 func (s *OfficialPage) SetChangedSinceVerification(val bool) {
 	s.ChangedSinceVerification = val
+}
+
+// NewOptAlertDetailRuleArea returns new OptAlertDetailRuleArea with value set to v.
+func NewOptAlertDetailRuleArea(v AlertDetailRuleArea) OptAlertDetailRuleArea {
+	return OptAlertDetailRuleArea{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertDetailRuleArea is optional AlertDetailRuleArea.
+type OptAlertDetailRuleArea struct {
+	Value AlertDetailRuleArea
+	Set   bool
+}
+
+// IsSet returns true if OptAlertDetailRuleArea was set.
+func (o OptAlertDetailRuleArea) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertDetailRuleArea) Reset() {
+	var v AlertDetailRuleArea
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertDetailRuleArea) SetTo(v AlertDetailRuleArea) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertDetailRuleArea) Get() (v AlertDetailRuleArea, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertDetailRuleArea) Or(d AlertDetailRuleArea) AlertDetailRuleArea {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAlertGeometry returns new OptAlertGeometry with value set to v.
+func NewOptAlertGeometry(v AlertGeometry) OptAlertGeometry {
+	return OptAlertGeometry{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertGeometry is optional AlertGeometry.
+type OptAlertGeometry struct {
+	Value AlertGeometry
+	Set   bool
+}
+
+// IsSet returns true if OptAlertGeometry was set.
+func (o OptAlertGeometry) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertGeometry) Reset() {
+	var v AlertGeometry
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertGeometry) SetTo(v AlertGeometry) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertGeometry) Get() (v AlertGeometry, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertGeometry) Or(d AlertGeometry) AlertGeometry {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAlertResolution returns new OptAlertResolution with value set to v.
+func NewOptAlertResolution(v AlertResolution) OptAlertResolution {
+	return OptAlertResolution{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertResolution is optional AlertResolution.
+type OptAlertResolution struct {
+	Value AlertResolution
+	Set   bool
+}
+
+// IsSet returns true if OptAlertResolution was set.
+func (o OptAlertResolution) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertResolution) Reset() {
+	var v AlertResolution
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertResolution) SetTo(v AlertResolution) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertResolution) Get() (v AlertResolution, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertResolution) Or(d AlertResolution) AlertResolution {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAlertRuleArea returns new OptAlertRuleArea with value set to v.
+func NewOptAlertRuleArea(v AlertRuleArea) OptAlertRuleArea {
+	return OptAlertRuleArea{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertRuleArea is optional AlertRuleArea.
+type OptAlertRuleArea struct {
+	Value AlertRuleArea
+	Set   bool
+}
+
+// IsSet returns true if OptAlertRuleArea was set.
+func (o OptAlertRuleArea) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertRuleArea) Reset() {
+	var v AlertRuleArea
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertRuleArea) SetTo(v AlertRuleArea) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertRuleArea) Get() (v AlertRuleArea, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertRuleArea) Or(d AlertRuleArea) AlertRuleArea {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAlertRuleKind returns new OptAlertRuleKind with value set to v.
+func NewOptAlertRuleKind(v AlertRuleKind) OptAlertRuleKind {
+	return OptAlertRuleKind{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertRuleKind is optional AlertRuleKind.
+type OptAlertRuleKind struct {
+	Value AlertRuleKind
+	Set   bool
+}
+
+// IsSet returns true if OptAlertRuleKind was set.
+func (o OptAlertRuleKind) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertRuleKind) Reset() {
+	var v AlertRuleKind
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertRuleKind) SetTo(v AlertRuleKind) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertRuleKind) Get() (v AlertRuleKind, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertRuleKind) Or(d AlertRuleKind) AlertRuleKind {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAlertRuleParams returns new OptAlertRuleParams with value set to v.
+func NewOptAlertRuleParams(v AlertRuleParams) OptAlertRuleParams {
+	return OptAlertRuleParams{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertRuleParams is optional AlertRuleParams.
+type OptAlertRuleParams struct {
+	Value AlertRuleParams
+	Set   bool
+}
+
+// IsSet returns true if OptAlertRuleParams was set.
+func (o OptAlertRuleParams) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertRuleParams) Reset() {
+	var v AlertRuleParams
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertRuleParams) SetTo(v AlertRuleParams) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertRuleParams) Get() (v AlertRuleParams, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertRuleParams) Or(d AlertRuleParams) AlertRuleParams {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAlertRuleParamsTarget returns new OptAlertRuleParamsTarget with value set to v.
+func NewOptAlertRuleParamsTarget(v AlertRuleParamsTarget) OptAlertRuleParamsTarget {
+	return OptAlertRuleParamsTarget{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertRuleParamsTarget is optional AlertRuleParamsTarget.
+type OptAlertRuleParamsTarget struct {
+	Value AlertRuleParamsTarget
+	Set   bool
+}
+
+// IsSet returns true if OptAlertRuleParamsTarget was set.
+func (o OptAlertRuleParamsTarget) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertRuleParamsTarget) Reset() {
+	var v AlertRuleParamsTarget
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertRuleParamsTarget) SetTo(v AlertRuleParamsTarget) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertRuleParamsTarget) Get() (v AlertRuleParamsTarget, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertRuleParamsTarget) Or(d AlertRuleParamsTarget) AlertRuleParamsTarget {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAlertScopeLine returns new OptAlertScopeLine with value set to v.
+func NewOptAlertScopeLine(v AlertScopeLine) OptAlertScopeLine {
+	return OptAlertScopeLine{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertScopeLine is optional AlertScopeLine.
+type OptAlertScopeLine struct {
+	Value AlertScopeLine
+	Set   bool
+}
+
+// IsSet returns true if OptAlertScopeLine was set.
+func (o OptAlertScopeLine) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertScopeLine) Reset() {
+	var v AlertScopeLine
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertScopeLine) SetTo(v AlertScopeLine) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertScopeLine) Get() (v AlertScopeLine, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertScopeLine) Or(d AlertScopeLine) AlertScopeLine {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAlertScopePolygon returns new OptAlertScopePolygon with value set to v.
+func NewOptAlertScopePolygon(v AlertScopePolygon) OptAlertScopePolygon {
+	return OptAlertScopePolygon{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertScopePolygon is optional AlertScopePolygon.
+type OptAlertScopePolygon struct {
+	Value AlertScopePolygon
+	Set   bool
+}
+
+// IsSet returns true if OptAlertScopePolygon was set.
+func (o OptAlertScopePolygon) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertScopePolygon) Reset() {
+	var v AlertScopePolygon
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertScopePolygon) SetTo(v AlertScopePolygon) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertScopePolygon) Get() (v AlertScopePolygon, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertScopePolygon) Or(d AlertScopePolygon) AlertScopePolygon {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAlertSeverity returns new OptAlertSeverity with value set to v.
+func NewOptAlertSeverity(v AlertSeverity) OptAlertSeverity {
+	return OptAlertSeverity{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAlertSeverity is optional AlertSeverity.
+type OptAlertSeverity struct {
+	Value AlertSeverity
+	Set   bool
+}
+
+// IsSet returns true if OptAlertSeverity was set.
+func (o OptAlertSeverity) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAlertSeverity) Reset() {
+	var v AlertSeverity
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAlertSeverity) SetTo(v AlertSeverity) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAlertSeverity) Get() (v AlertSeverity, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAlertSeverity) Or(d AlertSeverity) AlertSeverity {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
 }
 
 // NewOptBlockedPoint returns new OptBlockedPoint with value set to v.

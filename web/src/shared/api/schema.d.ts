@@ -1487,6 +1487,178 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Лента алертов
+         * @description Новые сверху. Владелец правил видит алерты своих правил и назначенные ему, оператор
+         *     (`alerts.manage`) — все. Новые и изменённые алерты — события `alert.created` и
+         *     `alert.updated` потока `GET /events`.
+         */
+        get: operations["listAlerts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alerts/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Число открытых алертов */
+        get: operations["alertSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alerts/assignees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Кому можно назначить алерт */
+        get: operations["listAlertAssignees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alerts/{alertId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Алерт с журналом */
+        get: operations["getAlert"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alerts/{alertId}/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Подтвердить, закрыть, открыть заново, назначить или прокомментировать
+         * @description Статус и назначение меняют владелец правила и оператор; комментировать может каждый,
+         *     кому алерт виден. К любому действию можно приложить комментарий.
+         */
+        post: operations["actOnAlert"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alert-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Правила оповещений */
+        get: operations["listAlertRules"];
+        put?: never;
+        /**
+         * Создать правило
+         * @description Первая проверка запоминает текущее состояние данных: о том, что было до создания
+         *     правила, оно не сообщает.
+         */
+        post: operations["createAlertRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alert-rules/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Справочники конструктора правил */
+        get: operations["alertRuleOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alert-rules/{ruleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Правило */
+        get: operations["getAlertRule"];
+        /**
+         * Изменить своё правило
+         * @description Смена области или параметров сбрасывает запомненное состояние.
+         */
+        put: operations["updateAlertRule"];
+        post?: never;
+        /** Удалить своё правило с его алертами */
+        delete: operations["deleteAlertRule"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alert-rules/{ruleId}/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Проверить правило сейчас */
+        post: operations["checkAlertRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2993,6 +3165,212 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        /**
+         * @description roadworks — новые и изменённые дорожные работы в области; restrictions — изменения
+         *     ограничений для грузовиков в области; accessibility — ухудшение доступности объектов;
+         *     facilities — новые объекты реестра; sources — сбой и устаревание источников данных
+         * @enum {string}
+         */
+        AlertRuleKind: "roadworks" | "restrictions" | "accessibility" | "facilities" | "sources";
+        /** @enum {string} */
+        AlertSeverity: "info" | "warning" | "critical";
+        /** @enum {string} */
+        AlertStatus: "active" | "acknowledged" | "closed";
+        /** @enum {string} */
+        AlertChannel: "in_app" | "email" | "telegram" | "webhook";
+        /**
+         * @description Как задана область: corridor — линия с буфером, facilities — объекты реестра с
+         *     радиусом, area — многоугольник, city — весь охват данных, none — без области.
+         */
+        AlertScope: {
+            /** @enum {string} */
+            type: "corridor" | "facilities" | "area" | "city" | "none";
+            /** @description Линия GeoJSON (corridor) */
+            line?: {
+                [key: string]: unknown;
+            };
+            /** @description Ширина коридора в каждую сторону, м */
+            bufferM?: number;
+            facilityIds?: string[];
+            radiusM?: number;
+            /** @description Многоугольник GeoJSON (area) */
+            polygon?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description Параметры вида правила; поля чужих видов при сохранении сбрасываются */
+        AlertRuleParams: {
+            workKinds?: ("repair" | "emergency" | "closure")[];
+            closureOnly?: boolean;
+            changes?: ("appeared" | "changed" | "started")[];
+            restrictionKinds?: string[];
+            profile?: string;
+            /** @enum {string} */
+            target?: "mkad" | "ttk" | "center" | "rail_freight";
+            thresholdMin?: number;
+            facilityTypes?: string[];
+            sources?: string[];
+            staleFactor?: number;
+        };
+        AlertRuleInput: {
+            name: string;
+            kind: components["schemas"]["AlertRuleKind"];
+            scope: components["schemas"]["AlertScope"];
+            params?: components["schemas"]["AlertRuleParams"];
+            severity?: components["schemas"]["AlertSeverity"];
+            channels?: components["schemas"]["AlertChannel"][];
+            /** @default true */
+            enabled: boolean;
+        };
+        AlertRule: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerName: string;
+            name: string;
+            kind: components["schemas"]["AlertRuleKind"];
+            scope: components["schemas"]["AlertScope"];
+            params: components["schemas"]["AlertRuleParams"];
+            severity: components["schemas"]["AlertSeverity"];
+            channels: components["schemas"]["AlertChannel"][];
+            enabled: boolean;
+            /** @description Вычисленная область, мультиполигон GeoJSON */
+            area?: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            checkedAt?: string;
+            /** @description Почему последняя проверка не удалась */
+            checkError?: string;
+            openAlerts: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AlertRuleCheck: {
+            rule: components["schemas"]["AlertRule"];
+            /** @description Новых срабатываний */
+            hits: number;
+        };
+        AlertOption: {
+            code: string;
+            title: string;
+        };
+        AlertKindOption: {
+            code: components["schemas"]["AlertRuleKind"];
+            title: string;
+            description: string;
+            scopes: ("corridor" | "facilities" | "area" | "city" | "none")[];
+        };
+        AlertRuleOptions: {
+            kinds: components["schemas"]["AlertKindOption"][];
+            workKinds: components["schemas"]["AlertOption"][];
+            changes: components["schemas"]["AlertOption"][];
+            restrictionKinds: components["schemas"]["AlertOption"][];
+            targets: components["schemas"]["AlertOption"][];
+            facilityTypes: components["schemas"]["AlertOption"][];
+            profiles: components["schemas"]["AlertOption"][];
+            sources: components["schemas"]["AlertOption"][];
+        };
+        Alert: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            ruleId: string;
+            ruleName: string;
+            kind: components["schemas"]["AlertRuleKind"];
+            /** Format: uuid */
+            ownerId: string;
+            /** @description Что затронуто — «road_work:<id>», «facility:<id>», «source:<код>», «restrictions» */
+            entity: string;
+            severity: components["schemas"]["AlertSeverity"];
+            status: components["schemas"]["AlertStatus"];
+            title: string;
+            summary: string;
+            /** @description Подробности вида правила (работа, изменения ограничений, время до цели) */
+            details: {
+                [key: string]: unknown;
+            };
+            /** @description Место алерта, GeoJSON */
+            geometry?: {
+                [key: string]: unknown;
+            };
+            /** @description Срабатываний по этой сущности */
+            occurrences: number;
+            /** Format: uuid */
+            assigneeId?: string;
+            assigneeName?: string;
+            /** Format: date-time */
+            acknowledgedAt?: string;
+            /** Format: date-time */
+            closedAt?: string;
+            /**
+             * @description auto — причина исчезла (работа завершена, источник загрузился)
+             * @enum {string}
+             */
+            resolution?: "manual" | "auto";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: date-time */
+            lastSeenAt: string;
+        };
+        AlertLogEntry: {
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            at: string;
+            /** Format: uuid */
+            actorId?: string;
+            actorName?: string;
+            /** @enum {string} */
+            action: "created" | "repeated" | "acknowledged" | "closed" | "reopened" | "assigned" | "commented" | "resolved";
+            comment?: string;
+            details: {
+                [key: string]: unknown;
+            };
+        };
+        AlertDetail: {
+            alert: components["schemas"]["Alert"];
+            log: components["schemas"]["AlertLogEntry"][];
+            /** @description Может менять статус и назначение */
+            canManage: boolean;
+            /** @description Область правила, мультиполигон GeoJSON */
+            ruleArea?: {
+                [key: string]: unknown;
+            };
+        };
+        AlertPage: {
+            items: components["schemas"]["Alert"][];
+            /** @description Курсор следующей страницы */
+            next?: string;
+        };
+        AlertSummary: {
+            active: number;
+            acknowledged: number;
+            /** @description Активные по важности */
+            bySeverity: {
+                [key: string]: number;
+            };
+        };
+        AlertAction: {
+            /** @enum {string} */
+            action: "acknowledge" | "close" | "reopen" | "assign" | "comment";
+            /**
+             * Format: uuid
+             * @description Для assign; без поля — снять назначение
+             */
+            assigneeId?: string;
+            comment?: string;
+        };
+        AlertUser: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
     };
     responses: {
         /** @description Ошибка (RFC 9457) */
@@ -3006,6 +3384,8 @@ export interface components {
         };
     };
     parameters: {
+        AlertId: string;
+        AlertRuleId: string;
         SourceCode: string;
         UserId: string;
         TokenId: string;
@@ -5424,6 +5804,295 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listAlerts: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["AlertStatus"][];
+                severity?: components["schemas"]["AlertSeverity"][];
+                kind?: components["schemas"]["AlertRuleKind"];
+                ruleId?: string;
+                /** @description Только назначенные мне */
+                assigned?: boolean;
+                /** @description Текст в заголовке или описании */
+                q?: string;
+                /** @description Курсор следующей страницы из предыдущего ответа */
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница ленты */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertPage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    alertSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Открытые алерты по статусу и важности */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertSummary"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listAlertAssignees: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Активные пользователи с правом на алерты */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertUser"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getAlert: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alertId: components["parameters"]["AlertId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Алерт */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertDetail"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    actOnAlert: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alertId: components["parameters"]["AlertId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlertAction"];
+            };
+        };
+        responses: {
+            /** @description Алерт после действия */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertDetail"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listAlertRules: {
+        parameters: {
+            query?: {
+                /** @description Правила всех пользователей (оператору) */
+                all?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Правила, новые сверху */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRule"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createAlertRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlertRuleInput"];
+            };
+        };
+        responses: {
+            /** @description Правило */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRule"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    alertRuleOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Виды правил, области и значения параметров */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRuleOptions"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getAlertRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: components["parameters"]["AlertRuleId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Правило */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRule"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateAlertRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: components["parameters"]["AlertRuleId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlertRuleInput"];
+            };
+        };
+        responses: {
+            /** @description Правило */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRule"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteAlertRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: components["parameters"]["AlertRuleId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Удалено */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    checkAlertRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: components["parameters"]["AlertRuleId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Правило после проверки и число новых срабатываний */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRuleCheck"];
+                };
             };
             default: components["responses"]["Problem"];
         };

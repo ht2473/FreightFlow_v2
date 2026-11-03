@@ -13,6 +13,35 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// ActOnAlert implements actOnAlert operation.
+//
+// Статус и назначение меняют владелец правила и
+// оператор; комментировать может каждый, кому алерт
+// виден. К любому действию можно приложить комментарий.
+//
+// POST /alerts/{alertId}/actions
+func (UnimplementedHandler) ActOnAlert(ctx context.Context, req *AlertAction, params ActOnAlertParams) (r *AlertDetail, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// AlertRuleOptions implements alertRuleOptions operation.
+//
+// Справочники конструктора правил.
+//
+// GET /alert-rules/options
+func (UnimplementedHandler) AlertRuleOptions(ctx context.Context) (r *AlertRuleOptions, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// AlertSummary implements alertSummary operation.
+//
+// Число открытых алертов.
+//
+// GET /alerts/summary
+func (UnimplementedHandler) AlertSummary(ctx context.Context) (r *AlertSummary, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // BeginTotpSetup implements beginTotpSetup operation.
 //
 // Начать подключение двухфакторной защиты.
@@ -70,6 +99,15 @@ func (UnimplementedHandler) ChangePassword(ctx context.Context, req *ChangePassw
 	return ht.ErrNotImplemented
 }
 
+// CheckAlertRule implements checkAlertRule operation.
+//
+// Проверить правило сейчас.
+//
+// POST /alert-rules/{ruleId}/check
+func (UnimplementedHandler) CheckAlertRule(ctx context.Context, params CheckAlertRuleParams) (r *AlertRuleCheck, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CompareFacilities implements compareFacilities operation.
 //
 // Сравнение объектов (2–4).
@@ -95,6 +133,16 @@ func (UnimplementedHandler) ComputeIndex(ctx context.Context, req *ComputeIndexR
 //
 // POST /me/totp/confirm
 func (UnimplementedHandler) ConfirmTotp(ctx context.Context, req *TotpCode) (r *RecoveryCodes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateAlertRule implements createAlertRule operation.
+//
+// Первая проверка запоминает текущее состояние данных:
+// о том, что было до создания правила, оно не сообщает.
+//
+// POST /alert-rules
+func (UnimplementedHandler) CreateAlertRule(ctx context.Context, req *AlertRuleInput) (r *AlertRule, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -177,6 +225,15 @@ func (UnimplementedHandler) CurateFacility(ctx context.Context, req *CurationReq
 // GET /data/updates
 func (UnimplementedHandler) DataUpdates(ctx context.Context, params DataUpdatesParams) (r []DataUpdatesOKItem, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// DeleteAlertRule implements deleteAlertRule operation.
+//
+// Удалить своё правило с его алертами.
+//
+// DELETE /alert-rules/{ruleId}
+func (UnimplementedHandler) DeleteAlertRule(ctx context.Context, params DeleteAlertRuleParams) error {
+	return ht.ErrNotImplemented
 }
 
 // DeleteScenario implements deleteScenario operation.
@@ -297,6 +354,24 @@ func (UnimplementedHandler) FacilityPoints(ctx context.Context) (r []FacilityPoi
 //
 // GET /geocode
 func (UnimplementedHandler) Geocode(ctx context.Context, params GeocodeParams) (r []SearchHit, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAlert implements getAlert operation.
+//
+// Алерт с журналом.
+//
+// GET /alerts/{alertId}
+func (UnimplementedHandler) GetAlert(ctx context.Context, params GetAlertParams) (r *AlertDetail, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAlertRule implements getAlertRule operation.
+//
+// Правило.
+//
+// GET /alert-rules/{ruleId}
+func (UnimplementedHandler) GetAlertRule(ctx context.Context, params GetAlertRuleParams) (r *AlertRule, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -491,6 +566,36 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 //
 // POST /analytics/hotspots
 func (UnimplementedHandler) Hotspots(ctx context.Context, req *HotspotsReq) (r *HotspotResult, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListAlertAssignees implements listAlertAssignees operation.
+//
+// Кому можно назначить алерт.
+//
+// GET /alerts/assignees
+func (UnimplementedHandler) ListAlertAssignees(ctx context.Context) (r []AlertUser, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListAlertRules implements listAlertRules operation.
+//
+// Правила оповещений.
+//
+// GET /alert-rules
+func (UnimplementedHandler) ListAlertRules(ctx context.Context, params ListAlertRulesParams) (r []AlertRule, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListAlerts implements listAlerts operation.
+//
+// Новые сверху. Владелец правил видит алерты своих
+// правил и назначенные ему, оператор (`alerts.manage`) — все.
+// Новые и изменённые алерты — события `alert.created` и
+// `alert.updated` потока `GET /events`.
+//
+// GET /alerts
+func (UnimplementedHandler) ListAlerts(ctx context.Context, params ListAlertsParams) (r *AlertPage, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -924,6 +1029,16 @@ func (UnimplementedHandler) SiteCells(ctx context.Context, params SiteCellsParam
 //
 // POST /data/sources/{code}/runs
 func (UnimplementedHandler) StartRun(ctx context.Context, req *StartRun, params StartRunParams) (r *Run, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateAlertRule implements updateAlertRule operation.
+//
+// Смена области или параметров сбрасывает запомненное
+// состояние.
+//
+// PUT /alert-rules/{ruleId}
+func (UnimplementedHandler) UpdateAlertRule(ctx context.Context, req *AlertRuleInput, params UpdateAlertRuleParams) (r *AlertRule, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

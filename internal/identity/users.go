@@ -354,3 +354,28 @@ func (s *Service) UpdateSettings(ctx context.Context, userID uuid.UUID, in Setti
 	}
 	return Settings{Theme: row.Theme, Extras: row.Settings}, nil
 }
+
+// UserRef — пользователь в списке выбора.
+type UserRef struct {
+	ID   uuid.UUID
+	Name string
+}
+
+// UsersWithPermission — активные пользователи, у которых через роли есть хотя бы одно из прав,
+// по имени.
+func (s *Service) UsersWithPermission(ctx context.Context, perms ...Permission) ([]UserRef, error) {
+	codes := make([]string, len(perms))
+	for i, p := range perms {
+		codes[i] = string(p)
+	}
+	rows, err := s.pool.Query(ctx, `
+		SELECT DISTINCT u.id, u.name FROM core.app_user u
+		JOIN core.user_role ur ON ur.user_id = u.id
+		JOIN core.role_permission rp ON rp.role_code = ur.role_code
+		WHERE u.status = 'active' AND rp.permission = ANY($1)
+		ORDER BY u.name, u.id`, codes)
+	if err != nil {
+		return nil, fmt.Errorf("users with permission: %w", err)
+	}
+	return pgx.CollectRows(rows, pgx.RowToStructByPos[UserRef])
+}

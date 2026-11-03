@@ -11,6 +11,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"freightflow/internal/admin"
+	"freightflow/internal/alerting"
 	"freightflow/internal/analytics"
 	"freightflow/internal/facility"
 	"freightflow/internal/identity"
@@ -84,6 +85,7 @@ type modules struct {
 	facilities *facility.Service
 	reports    *report.Service
 	scenarios  *scenario.Service
+	alerts     *alerting.Service
 	inserter   *jobs.Client
 }
 
@@ -107,6 +109,7 @@ func newModules(ctx context.Context, env *Env, rt *runtime) (*modules, error) {
 	return &modules{
 		identity: ids, ingest: ing, facilities: facilities,
 		reports: report.New(rt.pool, inserter, rt.blobs, facilities), scenarios: scenario.New(rt.pool, inserter, routes, analytics.New(rt.pool)),
+		alerts:   alerting.New(rt.pool, inserter, env.Log.With("component", "alerting")),
 		inserter: inserter,
 	}, nil
 }
@@ -122,12 +125,13 @@ func (m *modules) registry(env *Env, pool *pgxpool.Pool) *jobs.Registry {
 	search.Register(reg, search.New(pool, m.facilities), env.Log.With("component", "search"))
 	analytics.Register(reg, analytics.New(pool), env.Log.With("component", "analytics"))
 	scenario.Register(reg, m.scenarios, env.Log.With("component", "scenario"))
+	alerting.Register(reg, m.alerts, env.Log.With("component", "alerting"))
 	return reg
 }
 
 // consumers — постоянные потребители событий модулей (исполняются вместе с фоновыми задачами).
 func (m *modules) consumers() []events.Consumer {
-	return nil
+	return []events.Consumer{m.alerts.Consumer()}
 }
 
 // runWorkers исполняет фоновые задачи до отмены ctx и дожидается текущих при остановке.

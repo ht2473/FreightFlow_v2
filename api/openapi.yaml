@@ -40,6 +40,8 @@ tags:
     description: Маршруты грузовиков с учётом ограничений и зон
   - name: scenarios
     description: Сценарии «что если», устойчивость сети, оценка локации
+  - name: alerts
+    description: Правила оповещений и алерты
 
 paths:
   /me:
@@ -1956,6 +1958,242 @@ paths:
           description: Удалена
         default: { $ref: "#/components/responses/Problem" }
 
+  /alerts:
+    get:
+      tags: [alerts]
+      operationId: listAlerts
+      summary: Лента алертов
+      description: |
+        Новые сверху. Владелец правил видит алерты своих правил и назначенные ему, оператор
+        (`alerts.manage`) — все. Новые и изменённые алерты — события `alert.created` и
+        `alert.updated` потока `GET /events`.
+      x-permission: alerts.own
+      parameters:
+        - name: status
+          in: query
+          explode: false
+          schema: { type: array, items: { $ref: "#/components/schemas/AlertStatus" } }
+        - name: severity
+          in: query
+          explode: false
+          schema: { type: array, items: { $ref: "#/components/schemas/AlertSeverity" } }
+        - name: kind
+          in: query
+          schema: { $ref: "#/components/schemas/AlertRuleKind" }
+        - name: ruleId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: assigned
+          in: query
+          description: Только назначенные мне
+          schema: { type: boolean, default: false }
+        - name: q
+          in: query
+          description: Текст в заголовке или описании
+          schema: { type: string, maxLength: 200 }
+        - name: cursor
+          in: query
+          description: Курсор следующей страницы из предыдущего ответа
+          schema: { type: string, maxLength: 200 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        "200":
+          description: Страница ленты
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertPage" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /alerts/summary:
+    get:
+      tags: [alerts]
+      operationId: alertSummary
+      summary: Число открытых алертов
+      x-permission: alerts.own
+      responses:
+        "200":
+          description: Открытые алерты по статусу и важности
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertSummary" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /alerts/assignees:
+    get:
+      tags: [alerts]
+      operationId: listAlertAssignees
+      summary: Кому можно назначить алерт
+      x-permission: alerts.manage
+      responses:
+        "200":
+          description: Активные пользователи с правом на алерты
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AlertUser" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /alerts/{alertId}:
+    get:
+      tags: [alerts]
+      operationId: getAlert
+      summary: Алерт с журналом
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/AlertId"
+      responses:
+        "200":
+          description: Алерт
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertDetail" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /alerts/{alertId}/actions:
+    post:
+      tags: [alerts]
+      operationId: actOnAlert
+      summary: Подтвердить, закрыть, открыть заново, назначить или прокомментировать
+      description: |
+        Статус и назначение меняют владелец правила и оператор; комментировать может каждый,
+        кому алерт виден. К любому действию можно приложить комментарий.
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/AlertId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AlertAction" }
+      responses:
+        "200":
+          description: Алерт после действия
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertDetail" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /alert-rules:
+    get:
+      tags: [alerts]
+      operationId: listAlertRules
+      summary: Правила оповещений
+      x-permission: alerts.own
+      parameters:
+        - name: all
+          in: query
+          description: Правила всех пользователей (оператору)
+          schema: { type: boolean, default: false }
+      responses:
+        "200":
+          description: Правила, новые сверху
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AlertRule" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [alerts]
+      operationId: createAlertRule
+      summary: Создать правило
+      description: |
+        Первая проверка запоминает текущее состояние данных: о том, что было до создания
+        правила, оно не сообщает.
+      x-permission: alerts.own
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AlertRuleInput" }
+      responses:
+        "201":
+          description: Правило
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertRule" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /alert-rules/options:
+    get:
+      tags: [alerts]
+      operationId: alertRuleOptions
+      summary: Справочники конструктора правил
+      x-permission: alerts.own
+      responses:
+        "200":
+          description: Виды правил, области и значения параметров
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertRuleOptions" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /alert-rules/{ruleId}:
+    get:
+      tags: [alerts]
+      operationId: getAlertRule
+      summary: Правило
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/AlertRuleId"
+      responses:
+        "200":
+          description: Правило
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertRule" }
+        default: { $ref: "#/components/responses/Problem" }
+    put:
+      tags: [alerts]
+      operationId: updateAlertRule
+      summary: Изменить своё правило
+      description: Смена области или параметров сбрасывает запомненное состояние.
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/AlertRuleId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AlertRuleInput" }
+      responses:
+        "200":
+          description: Правило
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertRule" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [alerts]
+      operationId: deleteAlertRule
+      summary: Удалить своё правило с его алертами
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/AlertRuleId"
+      responses:
+        "204":
+          description: Удалено
+        default: { $ref: "#/components/responses/Problem" }
+
+  /alert-rules/{ruleId}/check:
+    post:
+      tags: [alerts]
+      operationId: checkAlertRule
+      summary: Проверить правило сейчас
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/AlertRuleId"
+      responses:
+        "200":
+          description: Правило после проверки и число новых срабатываний
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertRuleCheck" }
+        default: { $ref: "#/components/responses/Problem" }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -1967,6 +2205,16 @@ components:
       scheme: bearer
 
   parameters:
+    AlertId:
+      name: alertId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    AlertRuleId:
+      name: ruleId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
     SourceCode:
       name: code
       in: path
@@ -4210,3 +4458,248 @@ components:
           items: { type: number }
         ahp: { $ref: "#/components/schemas/SiteAhp" }
         createdAt: { type: string, format: date-time }
+
+    AlertRuleKind:
+      type: string
+      description: |
+        roadworks — новые и изменённые дорожные работы в области; restrictions — изменения
+        ограничений для грузовиков в области; accessibility — ухудшение доступности объектов;
+        facilities — новые объекты реестра; sources — сбой и устаревание источников данных
+      enum: [roadworks, restrictions, accessibility, facilities, sources]
+    AlertSeverity:
+      type: string
+      enum: [info, warning, critical]
+    AlertStatus:
+      type: string
+      enum: [active, acknowledged, closed]
+    AlertChannel:
+      type: string
+      enum: [in_app, email, telegram, webhook]
+
+    AlertScope:
+      type: object
+      description: |
+        Как задана область: corridor — линия с буфером, facilities — объекты реестра с
+        радиусом, area — многоугольник, city — весь охват данных, none — без области.
+      required: [type]
+      properties:
+        type: { type: string, enum: [corridor, facilities, area, city, none] }
+        line:
+          type: object
+          description: Линия GeoJSON (corridor)
+          additionalProperties: {}
+        bufferM: { type: integer, minimum: 50, maximum: 2000, description: "Ширина коридора в каждую сторону, м" }
+        facilityIds:
+          type: array
+          maxItems: 50
+          items: { type: string, format: uuid }
+        radiusM: { type: integer, minimum: 100, maximum: 5000 }
+        polygon:
+          type: object
+          description: Многоугольник GeoJSON (area)
+          additionalProperties: {}
+
+    AlertRuleParams:
+      type: object
+      description: Параметры вида правила; поля чужих видов при сохранении сбрасываются
+      properties:
+        workKinds:
+          type: array
+          items: { type: string, enum: [repair, emergency, closure] }
+        closureOnly: { type: boolean }
+        changes:
+          type: array
+          items: { type: string, enum: [appeared, changed, started] }
+        restrictionKinds:
+          type: array
+          items: { type: string }
+        profile: { type: string }
+        target: { type: string, enum: [mkad, ttk, center, rail_freight] }
+        thresholdMin: { type: number, minimum: 1, maximum: 120 }
+        facilityTypes:
+          type: array
+          items: { type: string }
+        sources:
+          type: array
+          items: { type: string }
+        staleFactor: { type: number, minimum: 1.5, maximum: 10 }
+
+    AlertRuleInput:
+      type: object
+      required: [name, kind, scope]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        kind: { $ref: "#/components/schemas/AlertRuleKind" }
+        scope: { $ref: "#/components/schemas/AlertScope" }
+        params: { $ref: "#/components/schemas/AlertRuleParams" }
+        severity: { $ref: "#/components/schemas/AlertSeverity" }
+        channels:
+          type: array
+          items: { $ref: "#/components/schemas/AlertChannel" }
+        enabled: { type: boolean, default: true }
+
+    AlertRule:
+      type: object
+      required: [id, ownerId, ownerName, name, kind, scope, params, severity, channels, enabled, openAlerts, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        ownerId: { type: string, format: uuid }
+        ownerName: { type: string }
+        name: { type: string }
+        kind: { $ref: "#/components/schemas/AlertRuleKind" }
+        scope: { $ref: "#/components/schemas/AlertScope" }
+        params: { $ref: "#/components/schemas/AlertRuleParams" }
+        severity: { $ref: "#/components/schemas/AlertSeverity" }
+        channels:
+          type: array
+          items: { $ref: "#/components/schemas/AlertChannel" }
+        enabled: { type: boolean }
+        area:
+          type: object
+          description: Вычисленная область, мультиполигон GeoJSON
+          additionalProperties: {}
+        checkedAt: { type: string, format: date-time }
+        checkError: { type: string, description: Почему последняя проверка не удалась }
+        openAlerts: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    AlertRuleCheck:
+      type: object
+      required: [rule, hits]
+      properties:
+        rule: { $ref: "#/components/schemas/AlertRule" }
+        hits: { type: integer, description: Новых срабатываний }
+
+    AlertOption:
+      type: object
+      required: [code, title]
+      properties:
+        code: { type: string }
+        title: { type: string }
+
+    AlertKindOption:
+      type: object
+      required: [code, title, description, scopes]
+      properties:
+        code: { $ref: "#/components/schemas/AlertRuleKind" }
+        title: { type: string }
+        description: { type: string }
+        scopes:
+          type: array
+          items: { type: string, enum: [corridor, facilities, area, city, none] }
+
+    AlertRuleOptions:
+      type: object
+      required: [kinds, workKinds, changes, restrictionKinds, targets, facilityTypes, profiles, sources]
+      properties:
+        kinds:
+          type: array
+          items: { $ref: "#/components/schemas/AlertKindOption" }
+        workKinds: { type: array, items: { $ref: "#/components/schemas/AlertOption" } }
+        changes: { type: array, items: { $ref: "#/components/schemas/AlertOption" } }
+        restrictionKinds: { type: array, items: { $ref: "#/components/schemas/AlertOption" } }
+        targets: { type: array, items: { $ref: "#/components/schemas/AlertOption" } }
+        facilityTypes: { type: array, items: { $ref: "#/components/schemas/AlertOption" } }
+        profiles: { type: array, items: { $ref: "#/components/schemas/AlertOption" } }
+        sources: { type: array, items: { $ref: "#/components/schemas/AlertOption" } }
+
+    Alert:
+      type: object
+      required: [id, ruleId, ruleName, kind, ownerId, entity, severity, status, title, summary, details, occurrences, createdAt, updatedAt, lastSeenAt]
+      properties:
+        id: { type: string, format: uuid }
+        ruleId: { type: string, format: uuid }
+        ruleName: { type: string }
+        kind: { $ref: "#/components/schemas/AlertRuleKind" }
+        ownerId: { type: string, format: uuid }
+        entity:
+          type: string
+          description: Что затронуто — «road_work:<id>», «facility:<id>», «source:<код>», «restrictions»
+        severity: { $ref: "#/components/schemas/AlertSeverity" }
+        status: { $ref: "#/components/schemas/AlertStatus" }
+        title: { type: string }
+        summary: { type: string }
+        details:
+          type: object
+          description: Подробности вида правила (работа, изменения ограничений, время до цели)
+          additionalProperties: {}
+        geometry:
+          type: object
+          description: Место алерта, GeoJSON
+          additionalProperties: {}
+        occurrences: { type: integer, description: Срабатываний по этой сущности }
+        assigneeId: { type: string, format: uuid }
+        assigneeName: { type: string }
+        acknowledgedAt: { type: string, format: date-time }
+        closedAt: { type: string, format: date-time }
+        resolution: { type: string, enum: [manual, auto], description: "auto — причина исчезла (работа завершена, источник загрузился)" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        lastSeenAt: { type: string, format: date-time }
+
+    AlertLogEntry:
+      type: object
+      required: [id, at, action, details]
+      properties:
+        id: { type: integer, format: int64 }
+        at: { type: string, format: date-time }
+        actorId: { type: string, format: uuid }
+        actorName: { type: string }
+        action: { type: string, enum: [created, repeated, acknowledged, closed, reopened, assigned, commented, resolved] }
+        comment: { type: string }
+        details:
+          type: object
+          additionalProperties: {}
+
+    AlertDetail:
+      type: object
+      required: [alert, log, canManage]
+      properties:
+        alert: { $ref: "#/components/schemas/Alert" }
+        log:
+          type: array
+          items: { $ref: "#/components/schemas/AlertLogEntry" }
+        canManage: { type: boolean, description: Может менять статус и назначение }
+        ruleArea:
+          type: object
+          description: Область правила, мультиполигон GeoJSON
+          additionalProperties: {}
+
+    AlertPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Alert" }
+        next: { type: string, description: Курсор следующей страницы }
+
+    AlertSummary:
+      type: object
+      required: [active, acknowledged, bySeverity]
+      properties:
+        active: { type: integer }
+        acknowledged: { type: integer }
+        bySeverity:
+          type: object
+          description: Активные по важности
+          additionalProperties: { type: integer }
+
+    AlertAction:
+      type: object
+      required: [action]
+      properties:
+        action: { type: string, enum: [acknowledge, close, reopen, assign, comment] }
+        assigneeId:
+          type: string
+          format: uuid
+          description: Для assign; без поля — снять назначение
+        comment: { type: string, maxLength: 4000 }
+
+    AlertUser:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }

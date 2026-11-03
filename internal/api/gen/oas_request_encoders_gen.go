@@ -10,6 +10,20 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
+func encodeActOnAlertRequest(
+	req *AlertAction,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeBuildIsochroneRequest(
 	req *IsochroneRequest,
 	r *http.Request,
@@ -82,6 +96,20 @@ func encodeComputeIndexRequest(
 
 func encodeConfirmTotpRequest(
 	req *TotpCode,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateAlertRuleRequest(
+	req *AlertRuleInput,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -334,6 +362,20 @@ func encodeSaveSiteRunRequest(
 
 func encodeStartRunRequest(
 	req *StartRun,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateAlertRuleRequest(
+	req *AlertRuleInput,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
