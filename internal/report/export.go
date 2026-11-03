@@ -61,6 +61,7 @@ type Service struct {
 	jobs       *jobs.Client
 	blobs      *blob.Store
 	facilities *facility.Service
+	engine     *Engine
 }
 
 // New создаёт сервис.
@@ -203,7 +204,7 @@ func (s *Service) fail(ctx context.Context, id uuid.UUID, cause error) error {
 	return errors.Join(cause, err)
 }
 
-// cleanup удаляет просроченные выгрузки и их файлы (файл с тем же содержимым может принадлежать
+// cleanup удаляет просроченные выгрузки и отчёты и их файлы (файл с тем же содержимым может принадлежать
 // другой выгрузке — тогда он остаётся).
 func (s *Service) cleanup(ctx context.Context) (int, error) {
 	rows, err := s.pool.Query(ctx, `
@@ -218,6 +219,19 @@ func (s *Service) cleanup(ctx context.Context) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	rows, err = s.pool.Query(ctx, `
+		WITH gone AS (DELETE FROM report.report WHERE expires_at <= now() RETURNING file_path)
+		SELECT DISTINCT g.file_path FROM gone g
+		WHERE g.file_path IS NOT NULL
+		  AND NOT EXISTS (SELECT 1 FROM report.report r WHERE r.file_path = g.file_path AND r.expires_at > now())`)
+	if err != nil {
+		return 0, err
+	}
+	more, err := pgx.CollectRows(rows, pgx.RowTo[string])
+	if err != nil {
+		return 0, err
+	}
+	paths = append(paths, more...)
 	for _, p := range paths {
 		if err := s.blobs.Remove(p); err != nil {
 			return 0, err

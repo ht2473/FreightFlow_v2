@@ -1831,6 +1831,184 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/report-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Шаблоны отчётов */
+        get: operations["listReportTemplates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Мои отчёты
+         * @description Отчёты хранятся неделю.
+         */
+        get: operations["listReports"];
+        put?: never;
+        /**
+         * Сформировать отчёт
+         * @description Отчёт формируется фоновой задачей: страница печати открывается в службе pdf с теми же
+         *     графиками и картами, что в интерфейсе. О готовности сообщает уведомление
+         *     (`notification.created`).
+         */
+        post: operations["createReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/{reportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Отчёт */
+        get: operations["getReport"];
+        put?: never;
+        post?: never;
+        /** Удалить отчёт */
+        delete: operations["deleteReport"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/{reportId}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Файл отчёта */
+        get: operations["getReportFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/report-schedules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Расписания отчётов */
+        get: operations["listReportSchedules"];
+        put?: never;
+        /**
+         * Создать расписание
+         * @description Отчёт формируется в выбранный час по Москве и рассылается получателям письмом с файлом.
+         */
+        post: operations["createReportSchedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/report-schedules/{scheduleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Изменить расписание */
+        put: operations["updateReportSchedule"];
+        post?: never;
+        /** Удалить расписание */
+        delete: operations["deleteReportSchedule"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/report-data/passability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Проходимость территории для профиля ТС
+         * @description Ограничения на участках территории (без неё — всего города) по видам, участки, которые
+         *     профиль не проходит (запреты и пределы меньше габаритов), протяжённость сети.
+         */
+        get: operations["reportPassability"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/report-data/roadworks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Дорожные работы и влияние
+         * @description Идущие работы и те, что начнутся в ближайшие дни, с объектами рядом и затронутыми участками.
+         */
+        get: operations["reportRoadworks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/report-data/quality": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Качество данных
+         * @description Свежесть источников, неудачные загрузки и проверки, полнота реестра объектов.
+         */
+        get: operations["reportQuality"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3640,6 +3818,88 @@ export interface components {
             /** Format: date-time */
             sentAt?: string;
         };
+        ReportTemplateParam: {
+            name: string;
+            title: string;
+            /** @enum {string} */
+            kind: "uuid" | "int" | "profile";
+            required: boolean;
+            min?: number;
+            max?: number;
+        };
+        ReportTemplate: {
+            code: string;
+            title: string;
+            description: string;
+            params: components["schemas"]["ReportTemplateParam"][];
+            /** @description Право на данные шаблона */
+            permission: string;
+        };
+        /** @enum {string} */
+        ReportFormat: "pdf" | "xlsx";
+        ReportRequest: {
+            template: string;
+            format: components["schemas"]["ReportFormat"];
+            params?: {
+                [key: string]: string;
+            };
+        };
+        Report: {
+            /** Format: uuid */
+            id: string;
+            template: string;
+            format: components["schemas"]["ReportFormat"];
+            params: {
+                [key: string]: string;
+            };
+            title: string;
+            /** @enum {string} */
+            status: "queued" | "running" | "done" | "failed";
+            /** Format: int64 */
+            fileSize?: number;
+            error?: string;
+            /** Format: uuid */
+            scheduleId?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        ReportScheduleInput: {
+            template: string;
+            format: components["schemas"]["ReportFormat"];
+            params?: {
+                [key: string]: string;
+            };
+            title?: string;
+            /** @enum {string} */
+            frequency: "daily" | "weekly" | "monthly";
+            /** @description 1 — понедельник (weekly) */
+            weekday?: number;
+            /** @description День месяца (monthly) */
+            monthDay?: number;
+            /** @description Час по Москве */
+            hour: number;
+            recipients?: string[];
+            /** @default true */
+            enabled: boolean;
+        };
+        ReportSchedule: components["schemas"]["ReportScheduleInput"] & {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            nextRunAt: string;
+            /** Format: date-time */
+            lastRunAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description Сводка для страницы отчёта; поля — по шаблону (см. описание операции) */
+        ReportData: {
+            [key: string]: unknown;
+        };
     };
     responses: {
         /** @description Ошибка (RFC 9457) */
@@ -3653,6 +3913,8 @@ export interface components {
         };
     };
     parameters: {
+        ReportId: string;
+        ScheduleId: string;
         WebhookId: string;
         AlertId: string;
         AlertRuleId: string;
@@ -6656,6 +6918,304 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebhookDelivery"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listReportTemplates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Шаблоны с параметрами */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportTemplate"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listReports: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Отчёты, новые сверху */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportRequest"];
+            };
+        };
+        responses: {
+            /** @description Отчёт поставлен в очередь */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: components["parameters"]["ReportId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Отчёт */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: components["parameters"]["ReportId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Удалён */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getReportFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: components["parameters"]["ReportId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PDF или XLSX */
+            200: {
+                headers: {
+                    "Content-Disposition"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listReportSchedules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Расписания */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportSchedule"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createReportSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportScheduleInput"];
+            };
+        };
+        responses: {
+            /** @description Расписание */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportSchedule"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateReportSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scheduleId: components["parameters"]["ScheduleId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportScheduleInput"];
+            };
+        };
+        responses: {
+            /** @description Расписание */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportSchedule"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteReportSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scheduleId: components["parameters"]["ScheduleId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Удалено */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    reportPassability: {
+        parameters: {
+            query: {
+                territoryId?: string;
+                profile: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сводка проходимости */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportData"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    reportRoadworks: {
+        parameters: {
+            query?: {
+                territoryId?: string;
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сводка работ */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportData"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    reportQuality: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сводка качества */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportData"];
                 };
             };
             default: components["responses"]["Problem"];

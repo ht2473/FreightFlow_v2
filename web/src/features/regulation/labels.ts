@@ -122,6 +122,7 @@ export function monthRange(first: string, last: string): string[] {
 export const restrictionKind: Record<string, string> = {
   hgv_ban: "запрет грузовых",
   motor_vehicle_ban: "запрет движения",
+  hgv_destination: "грузовым только к месту назначения",
   hazmat_ban: "опасные грузы",
   maxweight: "масса",
   maxaxleload: "нагрузка на ось",

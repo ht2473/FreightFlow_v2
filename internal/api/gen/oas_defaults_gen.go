@@ -9,3 +9,19 @@ func (s *AlertRuleInput) setDefaults() {
 		s.Enabled.SetTo(val)
 	}
 }
+
+// setDefaults set default value of fields.
+func (s *ReportSchedule) setDefaults() {
+	{
+		val := bool(true)
+		s.Enabled = val
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *ReportScheduleInput) setDefaults() {
+	{
+		val := bool(true)
+		s.Enabled.SetTo(val)
+	}
+}

@@ -539,6 +539,136 @@ func decodeDeleteAlertRuleParams(args [1]string, argsEscaped bool, r *http.Reque
 	return params, nil
 }
 
+// DeleteReportParams is parameters of deleteReport operation.
+type DeleteReportParams struct {
+	ReportId uuid.UUID
+}
+
+func unpackDeleteReportParams(packed middleware.Parameters) (params DeleteReportParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "reportId",
+			In:   "path",
+		}
+		params.ReportId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteReportParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteReportParams, _ error) {
+	// Decode path: reportId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "reportId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ReportId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "reportId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DeleteReportScheduleParams is parameters of deleteReportSchedule operation.
+type DeleteReportScheduleParams struct {
+	ScheduleId uuid.UUID
+}
+
+func unpackDeleteReportScheduleParams(packed middleware.Parameters) (params DeleteReportScheduleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scheduleId",
+			In:   "path",
+		}
+		params.ScheduleId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteReportScheduleParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteReportScheduleParams, _ error) {
+	// Decode path: scheduleId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "scheduleId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ScheduleId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scheduleId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DeleteScenarioParams is parameters of deleteScenario operation.
 type DeleteScenarioParams struct {
 	ScenarioId uuid.UUID
@@ -2639,6 +2769,136 @@ func decodeGetNetworkAnalysisParams(args [0]string, argsEscaped bool, r *http.Re
 		return params, &ogenerrors.DecodeParamError{
 			Name: "top",
 			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetReportParams is parameters of getReport operation.
+type GetReportParams struct {
+	ReportId uuid.UUID
+}
+
+func unpackGetReportParams(packed middleware.Parameters) (params GetReportParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "reportId",
+			In:   "path",
+		}
+		params.ReportId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetReportParams(args [1]string, argsEscaped bool, r *http.Request) (params GetReportParams, _ error) {
+	// Decode path: reportId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "reportId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ReportId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "reportId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetReportFileParams is parameters of getReportFile operation.
+type GetReportFileParams struct {
+	ReportId uuid.UUID
+}
+
+func unpackGetReportFileParams(packed middleware.Parameters) (params GetReportFileParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "reportId",
+			In:   "path",
+		}
+		params.ReportId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetReportFileParams(args [1]string, argsEscaped bool, r *http.Request) (params GetReportFileParams, _ error) {
+	// Decode path: reportId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "reportId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ReportId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "reportId",
+			In:   "path",
 			Err:  err,
 		}
 	}
@@ -6785,6 +7045,279 @@ func decodeReportFacilityIssueParams(args [1]string, argsEscaped bool, r *http.R
 	return params, nil
 }
 
+// ReportPassabilityParams is parameters of reportPassability operation.
+type ReportPassabilityParams struct {
+	TerritoryId OptUUID `json:",omitempty,omitzero"`
+	Profile     string
+}
+
+func unpackReportPassabilityParams(packed middleware.Parameters) (params ReportPassabilityParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "territoryId",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TerritoryId = v.(OptUUID)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "profile",
+			In:   "query",
+		}
+		params.Profile = packed[key].(string)
+	}
+	return params
+}
+
+func decodeReportPassabilityParams(args [0]string, argsEscaped bool, r *http.Request) (params ReportPassabilityParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: territoryId.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "territoryId",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTerritoryIdVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTerritoryIdVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TerritoryId.SetTo(paramsDotTerritoryIdVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "territoryId",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: profile.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "profile",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Profile = c
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     50,
+					MaxLengthSet:  true,
+					Email:         false,
+					Hostname:      false,
+					Regex:         nil,
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.Profile)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "profile",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ReportRoadworksParams is parameters of reportRoadworks operation.
+type ReportRoadworksParams struct {
+	TerritoryId OptUUID `json:",omitempty,omitzero"`
+	Days        OptInt  `json:",omitempty,omitzero"`
+}
+
+func unpackReportRoadworksParams(packed middleware.Parameters) (params ReportRoadworksParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "territoryId",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TerritoryId = v.(OptUUID)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "days",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Days = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeReportRoadworksParams(args [0]string, argsEscaped bool, r *http.Request) (params ReportRoadworksParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: territoryId.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "territoryId",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTerritoryIdVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTerritoryIdVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TerritoryId.SetTo(paramsDotTerritoryIdVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "territoryId",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: days.
+	{
+		val := int(14)
+		params.Days.SetTo(val)
+	}
+	// Decode query: days.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "days",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotDaysVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDaysVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Days.SetTo(paramsDotDaysVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Days.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           7,
+							MaxSet:        true,
+							Max:           90,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "days",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // RerunScenarioParams is parameters of rerunScenario operation.
 type RerunScenarioParams struct {
 	ScenarioId uuid.UUID
@@ -9091,6 +9624,71 @@ func decodeUpdateAlertRuleParams(args [1]string, argsEscaped bool, r *http.Reque
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "ruleId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateReportScheduleParams is parameters of updateReportSchedule operation.
+type UpdateReportScheduleParams struct {
+	ScheduleId uuid.UUID
+}
+
+func unpackUpdateReportScheduleParams(packed middleware.Parameters) (params UpdateReportScheduleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scheduleId",
+			In:   "path",
+		}
+		params.ScheduleId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeUpdateReportScheduleParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateReportScheduleParams, _ error) {
+	// Decode path: scheduleId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "scheduleId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ScheduleId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scheduleId",
 			In:   "path",
 			Err:  err,
 		}

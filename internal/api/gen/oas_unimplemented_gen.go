@@ -167,6 +167,28 @@ func (UnimplementedHandler) CreateInvite(ctx context.Context, req *CreateInvite)
 	return r, ht.ErrNotImplemented
 }
 
+// CreateReport implements createReport operation.
+//
+// Отчёт формируется фоновой задачей: страница печати
+// открывается в службе pdf с теми же графиками и картами,
+// что в интерфейсе. О готовности сообщает уведомление
+// (`notification.created`).
+//
+// POST /reports
+func (UnimplementedHandler) CreateReport(ctx context.Context, req *ReportRequest) (r *Report, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateReportSchedule implements createReportSchedule operation.
+//
+// Отчёт формируется в выбранный час по Москве и
+// рассылается получателям письмом с файлом.
+//
+// POST /report-schedules
+func (UnimplementedHandler) CreateReportSchedule(ctx context.Context, req *ReportScheduleInput) (r *ReportSchedule, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateScenario implements createScenario operation.
 //
 // Сценарий считается фоновой задачей: ответ — сценарий
@@ -245,6 +267,24 @@ func (UnimplementedHandler) DataUpdates(ctx context.Context, params DataUpdatesP
 //
 // DELETE /alert-rules/{ruleId}
 func (UnimplementedHandler) DeleteAlertRule(ctx context.Context, params DeleteAlertRuleParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteReport implements deleteReport operation.
+//
+// Удалить отчёт.
+//
+// DELETE /reports/{reportId}
+func (UnimplementedHandler) DeleteReport(ctx context.Context, params DeleteReportParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteReportSchedule implements deleteReportSchedule operation.
+//
+// Удалить расписание.
+//
+// DELETE /report-schedules/{scheduleId}
+func (UnimplementedHandler) DeleteReportSchedule(ctx context.Context, params DeleteReportScheduleParams) error {
 	return ht.ErrNotImplemented
 }
 
@@ -498,6 +538,24 @@ func (UnimplementedHandler) GetRegulation(ctx context.Context) (r *RegulationOve
 	return r, ht.ErrNotImplemented
 }
 
+// GetReport implements getReport operation.
+//
+// Отчёт.
+//
+// GET /reports/{reportId}
+func (UnimplementedHandler) GetReport(ctx context.Context, params GetReportParams) (r *Report, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetReportFile implements getReportFile operation.
+//
+// Файл отчёта.
+//
+// GET /reports/{reportId}/file
+func (UnimplementedHandler) GetReportFile(ctx context.Context, params GetReportFileParams) (r *GetReportFileOKHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetResilience implements getResilience operation.
 //
 // Пакет сценариев выпадения верхних элементов рейтинга
@@ -736,6 +794,33 @@ func (UnimplementedHandler) ListPermissions(ctx context.Context) (r []Permission
 	return r, ht.ErrNotImplemented
 }
 
+// ListReportSchedules implements listReportSchedules operation.
+//
+// Расписания отчётов.
+//
+// GET /report-schedules
+func (UnimplementedHandler) ListReportSchedules(ctx context.Context) (r []ReportSchedule, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListReportTemplates implements listReportTemplates operation.
+//
+// Шаблоны отчётов.
+//
+// GET /report-templates
+func (UnimplementedHandler) ListReportTemplates(ctx context.Context) (r []ReportTemplate, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListReports implements listReports operation.
+//
+// Отчёты хранятся неделю.
+//
+// GET /reports
+func (UnimplementedHandler) ListReports(ctx context.Context) (r []Report, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListRoles implements listRoles operation.
 //
 // Роли и права.
@@ -899,6 +984,38 @@ func (UnimplementedHandler) MetricValues(ctx context.Context, params MetricValue
 //
 // POST /facilities/{facilityId}/reports
 func (UnimplementedHandler) ReportFacilityIssue(ctx context.Context, req *ReportFacilityIssueReq, params ReportFacilityIssueParams) (r *FacilityReport, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ReportPassability implements reportPassability operation.
+//
+// Ограничения на участках территории (без неё — всего
+// города) по видам, участки, которые профиль не проходит
+// (запреты и пределы меньше габаритов), протяжённость
+// сети.
+//
+// GET /report-data/passability
+func (UnimplementedHandler) ReportPassability(ctx context.Context, params ReportPassabilityParams) (r ReportData, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ReportQuality implements reportQuality operation.
+//
+// Свежесть источников, неудачные загрузки и проверки,
+// полнота реестра объектов.
+//
+// GET /report-data/quality
+func (UnimplementedHandler) ReportQuality(ctx context.Context) (r ReportData, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ReportRoadworks implements reportRoadworks operation.
+//
+// Идущие работы и те, что начнутся в ближайшие дни, с
+// объектами рядом и затронутыми участками.
+//
+// GET /report-data/roadworks
+func (UnimplementedHandler) ReportRoadworks(ctx context.Context, params ReportRoadworksParams) (r ReportData, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1163,6 +1280,15 @@ func (UnimplementedHandler) UpdateMe(ctx context.Context, req *UpdateProfile) (r
 //
 // PUT /me/notification-settings
 func (UnimplementedHandler) UpdateNotificationSettings(ctx context.Context, req *NotificationSettings) (r *NotificationSettings, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateReportSchedule implements updateReportSchedule operation.
+//
+// Изменить расписание.
+//
+// PUT /report-schedules/{scheduleId}
+func (UnimplementedHandler) UpdateReportSchedule(ctx context.Context, req *ReportScheduleInput, params UpdateReportScheduleParams) (r *ReportSchedule, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

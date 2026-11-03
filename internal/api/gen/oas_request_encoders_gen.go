@@ -150,6 +150,34 @@ func encodeCreateInviteRequest(
 	return nil
 }
 
+func encodeCreateReportRequest(
+	req *ReportRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateReportScheduleRequest(
+	req *ReportScheduleInput,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateScenarioRequest(
 	req *ScenarioRequest,
 	r *http.Request,
@@ -432,6 +460,20 @@ func encodeUpdateMeRequest(
 
 func encodeUpdateNotificationSettingsRequest(
 	req *NotificationSettings,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateReportScheduleRequest(
+	req *ReportScheduleInput,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

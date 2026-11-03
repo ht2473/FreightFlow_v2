@@ -38,6 +38,9 @@ type Config struct {
 
 	ValhallaURL string `env:"FF_VALHALLA_URL" envDefault:"http://localhost:8002"`
 	PDFCDPURL   string `env:"FF_PDF_CDP_URL" envDefault:"ws://localhost:9222"`
+	// PrintBaseURL — адрес приложения, как его видит служба pdf (страницы печати отчётов);
+	// пусто — http://host.docker.internal:<порт> в разработке, http://app:8080 в рабочем режиме.
+	PrintBaseURL string `env:"FF_PRINT_BASE_URL"`
 
 	LogLevel     string  `env:"FF_LOG_LEVEL" envDefault:"info"`
 	LogFormat    string  `env:"FF_LOG_FORMAT" envDefault:"text"`

@@ -44,6 +44,8 @@ tags:
     description: Правила оповещений и алерты
   - name: notifications
     description: Центр уведомлений, каналы доставки и предпочтения
+  - name: reports
+    description: Отчёты PDF и XLSX по шаблонам и расписания рассылки
 
 paths:
   /me:
@@ -2408,6 +2410,234 @@ paths:
                 items: { $ref: "#/components/schemas/WebhookDelivery" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /report-templates:
+    get:
+      tags: [reports]
+      operationId: listReportTemplates
+      summary: Шаблоны отчётов
+      x-permission: reports.view
+      responses:
+        "200":
+          description: Шаблоны с параметрами
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ReportTemplate" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /reports:
+    get:
+      tags: [reports]
+      operationId: listReports
+      summary: Мои отчёты
+      description: Отчёты хранятся неделю.
+      x-permission: reports.view
+      responses:
+        "200":
+          description: Отчёты, новые сверху
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Report" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [reports]
+      operationId: createReport
+      summary: Сформировать отчёт
+      description: |
+        Отчёт формируется фоновой задачей: страница печати открывается в службе pdf с теми же
+        графиками и картами, что в интерфейсе. О готовности сообщает уведомление
+        (`notification.created`).
+      x-permission: reports.create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReportRequest" }
+      responses:
+        "202":
+          description: Отчёт поставлен в очередь
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Report" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /reports/{reportId}:
+    get:
+      tags: [reports]
+      operationId: getReport
+      summary: Отчёт
+      x-permission: reports.view
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: Отчёт
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Report" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [reports]
+      operationId: deleteReport
+      summary: Удалить отчёт
+      x-permission: reports.view
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "204":
+          description: Удалён
+        default: { $ref: "#/components/responses/Problem" }
+
+  /reports/{reportId}/file:
+    get:
+      tags: [reports]
+      operationId: getReportFile
+      summary: Файл отчёта
+      x-permission: reports.view
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: PDF или XLSX
+          headers:
+            Content-Disposition:
+              schema: { type: string }
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /report-schedules:
+    get:
+      tags: [reports]
+      operationId: listReportSchedules
+      summary: Расписания отчётов
+      x-permission: reports.create
+      responses:
+        "200":
+          description: Расписания
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ReportSchedule" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [reports]
+      operationId: createReportSchedule
+      summary: Создать расписание
+      description: Отчёт формируется в выбранный час по Москве и рассылается получателям письмом с файлом.
+      x-permission: reports.create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReportScheduleInput" }
+      responses:
+        "201":
+          description: Расписание
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportSchedule" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /report-schedules/{scheduleId}:
+    put:
+      tags: [reports]
+      operationId: updateReportSchedule
+      summary: Изменить расписание
+      x-permission: reports.create
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReportScheduleInput" }
+      responses:
+        "200":
+          description: Расписание
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportSchedule" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [reports]
+      operationId: deleteReportSchedule
+      summary: Удалить расписание
+      x-permission: reports.create
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+      responses:
+        "204":
+          description: Удалено
+        default: { $ref: "#/components/responses/Problem" }
+
+  /report-data/passability:
+    get:
+      tags: [reports]
+      operationId: reportPassability
+      summary: Проходимость территории для профиля ТС
+      description: |
+        Ограничения на участках территории (без неё — всего города) по видам, участки, которые
+        профиль не проходит (запреты и пределы меньше габаритов), протяжённость сети.
+      x-permission: routing.use
+      parameters:
+        - name: territoryId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: profile
+          in: query
+          required: true
+          schema: { type: string, maxLength: 50 }
+      responses:
+        "200":
+          description: Сводка проходимости
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportData" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /report-data/roadworks:
+    get:
+      tags: [reports]
+      operationId: reportRoadworks
+      summary: Дорожные работы и влияние
+      description: Идущие работы и те, что начнутся в ближайшие дни, с объектами рядом и затронутыми участками.
+      x-permission: map.view
+      parameters:
+        - name: territoryId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: days
+          in: query
+          schema: { type: integer, minimum: 7, maximum: 90, default: 14 }
+      responses:
+        "200":
+          description: Сводка работ
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportData" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /report-data/quality:
+    get:
+      tags: [reports]
+      operationId: reportQuality
+      summary: Качество данных
+      description: Свежесть источников, неудачные загрузки и проверки, полнота реестра объектов.
+      x-permission: reports.view
+      responses:
+        "200":
+          description: Сводка качества
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportData" }
+        default: { $ref: "#/components/responses/Problem" }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -2419,6 +2649,16 @@ components:
       scheme: bearer
 
   parameters:
+    ReportId:
+      name: reportId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ScheduleId:
+      name: scheduleId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
     WebhookId:
       name: webhookId
       in: path
@@ -5034,3 +5274,95 @@ components:
         lastError: { type: string }
         createdAt: { type: string, format: date-time }
         sentAt: { type: string, format: date-time }
+
+    ReportTemplateParam:
+      type: object
+      required: [name, title, kind, required]
+      properties:
+        name: { type: string }
+        title: { type: string }
+        kind: { type: string, enum: [uuid, int, profile] }
+        required: { type: boolean }
+        min: { type: integer }
+        max: { type: integer }
+
+    ReportTemplate:
+      type: object
+      required: [code, title, description, params, permission]
+      properties:
+        code: { type: string }
+        title: { type: string }
+        description: { type: string }
+        params:
+          type: array
+          items: { $ref: "#/components/schemas/ReportTemplateParam" }
+        permission: { type: string, description: Право на данные шаблона }
+
+    ReportFormat:
+      type: string
+      enum: [pdf, xlsx]
+
+    ReportRequest:
+      type: object
+      required: [template, format]
+      properties:
+        template: { type: string, maxLength: 50 }
+        format: { $ref: "#/components/schemas/ReportFormat" }
+        params:
+          type: object
+          additionalProperties: { type: string, maxLength: 100 }
+
+    Report:
+      type: object
+      required: [id, template, format, params, title, status, createdAt, expiresAt]
+      properties:
+        id: { type: string, format: uuid }
+        template: { type: string }
+        format: { $ref: "#/components/schemas/ReportFormat" }
+        params:
+          type: object
+          additionalProperties: { type: string }
+        title: { type: string }
+        status: { type: string, enum: [queued, running, done, failed] }
+        fileSize: { type: integer, format: int64 }
+        error: { type: string }
+        scheduleId: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+
+    ReportScheduleInput:
+      type: object
+      required: [template, format, frequency, hour]
+      properties:
+        template: { type: string, maxLength: 50 }
+        format: { $ref: "#/components/schemas/ReportFormat" }
+        params:
+          type: object
+          additionalProperties: { type: string, maxLength: 100 }
+        title: { type: string, maxLength: 200 }
+        frequency: { type: string, enum: [daily, weekly, monthly] }
+        weekday: { type: integer, minimum: 1, maximum: 7, description: 1 — понедельник (weekly) }
+        monthDay: { type: integer, minimum: 1, maximum: 28, description: День месяца (monthly) }
+        hour: { type: integer, minimum: 0, maximum: 23, description: Час по Москве }
+        recipients:
+          type: array
+          maxItems: 10
+          items: { type: string, maxLength: 254 }
+        enabled: { type: boolean, default: true }
+
+    ReportSchedule:
+      allOf:
+        - $ref: "#/components/schemas/ReportScheduleInput"
+        - type: object
+          required: [id, nextRunAt, createdAt, params, title, recipients, enabled]
+          properties:
+            id: { type: string, format: uuid }
+            nextRunAt: { type: string, format: date-time }
+            lastRunAt: { type: string, format: date-time }
+            createdAt: { type: string, format: date-time }
+
+    ReportData:
+      type: object
+      description: Сводка для страницы отчёта; поля — по шаблону (см. описание операции)
+      additionalProperties: {}

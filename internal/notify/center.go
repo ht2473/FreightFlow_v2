@@ -11,6 +11,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+
+	"freightflow/internal/platform/events"
+	"freightflow/internal/platform/ids"
 )
 
 // Page — страница центра уведомлений.
@@ -200,4 +203,21 @@ func (p Preferences) quietUntil(now time.Time) time.Time {
 		end = end.AddDate(0, 0, 1)
 	}
 	return end
+}
+
+// Post кладёт уведомление пользователю в центр уведомлений в транзакции другого модуля
+// (готовность отчёта) и сообщает о нём событием notification.created.
+func Post(ctx context.Context, tx pgx.Tx, userID uuid.UUID, kind, severity, title, body, link string) error {
+	id := ids.New()
+	var linkArg *string
+	if link != "" {
+		linkArg = &link
+	}
+	if _, err := tx.Exec(ctx, `INSERT INTO notify.notification (id, user_id, kind, severity, title, body, link)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)`, id, userID, kind, severity, title, body, linkArg); err != nil {
+		return fmt.Errorf("post notification: %w", err)
+	}
+	return events.Publish(ctx, tx, events.NotificationCreated, map[string]any{
+		"userId": userID, "notificationId": id, "severity": severity, "title": title,
+	})
 }

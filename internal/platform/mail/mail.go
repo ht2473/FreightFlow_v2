@@ -2,6 +2,7 @@
 package mail
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
@@ -10,10 +11,17 @@ import (
 
 // Message — письмо. HTML необязателен; текстовая версия обязательна.
 type Message struct {
-	To      string
-	Subject string
-	Text    string
-	HTML    string
+	To          string
+	Subject     string
+	Text        string
+	HTML        string
+	Attachments []Attachment
+}
+
+// Attachment — вложение письма.
+type Attachment struct {
+	Name string
+	Data []byte
 }
 
 // Config — параметры SMTP-сервера.
@@ -49,6 +57,9 @@ func (s *Sender) Send(ctx context.Context, m Message) error {
 	msg.SetBodyString(gomail.TypeTextPlain, m.Text)
 	if m.HTML != "" {
 		msg.AddAlternativeString(gomail.TypeTextHTML, m.HTML)
+	}
+	for _, a := range m.Attachments {
+		msg.AttachReadSeeker(a.Name, bytes.NewReader(a.Data))
 	}
 
 	opts := []gomail.Option{gomail.WithPort(s.cfg.Port)}

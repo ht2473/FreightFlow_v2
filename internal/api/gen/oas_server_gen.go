@@ -117,6 +117,22 @@ type Handler interface {
 	//
 	// POST /admin/invites
 	CreateInvite(ctx context.Context, req *CreateInvite) (*InviteCreated, error)
+	// CreateReport implements createReport operation.
+	//
+	// Отчёт формируется фоновой задачей: страница печати
+	// открывается в службе pdf с теми же графиками и картами,
+	// что в интерфейсе. О готовности сообщает уведомление
+	// (`notification.created`).
+	//
+	// POST /reports
+	CreateReport(ctx context.Context, req *ReportRequest) (*Report, error)
+	// CreateReportSchedule implements createReportSchedule operation.
+	//
+	// Отчёт формируется в выбранный час по Москве и
+	// рассылается получателям письмом с файлом.
+	//
+	// POST /report-schedules
+	CreateReportSchedule(ctx context.Context, req *ReportScheduleInput) (*ReportSchedule, error)
 	// CreateScenario implements createScenario operation.
 	//
 	// Сценарий считается фоновой задачей: ответ — сценарий
@@ -174,6 +190,18 @@ type Handler interface {
 	//
 	// DELETE /alert-rules/{ruleId}
 	DeleteAlertRule(ctx context.Context, params DeleteAlertRuleParams) error
+	// DeleteReport implements deleteReport operation.
+	//
+	// Удалить отчёт.
+	//
+	// DELETE /reports/{reportId}
+	DeleteReport(ctx context.Context, params DeleteReportParams) error
+	// DeleteReportSchedule implements deleteReportSchedule operation.
+	//
+	// Удалить расписание.
+	//
+	// DELETE /report-schedules/{scheduleId}
+	DeleteReportSchedule(ctx context.Context, params DeleteReportScheduleParams) error
 	// DeleteScenario implements deleteScenario operation.
 	//
 	// Удалить сценарий с результатами.
@@ -349,6 +377,18 @@ type Handler interface {
 	//
 	// GET /regulation
 	GetRegulation(ctx context.Context) (*RegulationOverview, error)
+	// GetReport implements getReport operation.
+	//
+	// Отчёт.
+	//
+	// GET /reports/{reportId}
+	GetReport(ctx context.Context, params GetReportParams) (*Report, error)
+	// GetReportFile implements getReportFile operation.
+	//
+	// Файл отчёта.
+	//
+	// GET /reports/{reportId}/file
+	GetReportFile(ctx context.Context, params GetReportFileParams) (*GetReportFileOKHeaders, error)
 	// GetResilience implements getResilience operation.
 	//
 	// Пакет сценариев выпадения верхних элементов рейтинга
@@ -515,6 +555,24 @@ type Handler interface {
 	//
 	// GET /permissions
 	ListPermissions(ctx context.Context) ([]PermissionInfo, error)
+	// ListReportSchedules implements listReportSchedules operation.
+	//
+	// Расписания отчётов.
+	//
+	// GET /report-schedules
+	ListReportSchedules(ctx context.Context) ([]ReportSchedule, error)
+	// ListReportTemplates implements listReportTemplates operation.
+	//
+	// Шаблоны отчётов.
+	//
+	// GET /report-templates
+	ListReportTemplates(ctx context.Context) ([]ReportTemplate, error)
+	// ListReports implements listReports operation.
+	//
+	// Отчёты хранятся неделю.
+	//
+	// GET /reports
+	ListReports(ctx context.Context) ([]Report, error)
 	// ListRoles implements listRoles operation.
 	//
 	// Роли и права.
@@ -627,6 +685,29 @@ type Handler interface {
 	//
 	// POST /facilities/{facilityId}/reports
 	ReportFacilityIssue(ctx context.Context, req *ReportFacilityIssueReq, params ReportFacilityIssueParams) (*FacilityReport, error)
+	// ReportPassability implements reportPassability operation.
+	//
+	// Ограничения на участках территории (без неё — всего
+	// города) по видам, участки, которые профиль не проходит
+	// (запреты и пределы меньше габаритов), протяжённость
+	// сети.
+	//
+	// GET /report-data/passability
+	ReportPassability(ctx context.Context, params ReportPassabilityParams) (ReportData, error)
+	// ReportQuality implements reportQuality operation.
+	//
+	// Свежесть источников, неудачные загрузки и проверки,
+	// полнота реестра объектов.
+	//
+	// GET /report-data/quality
+	ReportQuality(ctx context.Context) (ReportData, error)
+	// ReportRoadworks implements reportRoadworks operation.
+	//
+	// Идущие работы и те, что начнутся в ближайшие дни, с
+	// объектами рядом и затронутыми участками.
+	//
+	// GET /report-data/roadworks
+	ReportRoadworks(ctx context.Context, params ReportRoadworksParams) (ReportData, error)
 	// RerunScenario implements rerunScenario operation.
 	//
 	// Пересчитать сценарий (например, после обновления
@@ -807,6 +888,12 @@ type Handler interface {
 	//
 	// PUT /me/notification-settings
 	UpdateNotificationSettings(ctx context.Context, req *NotificationSettings) (*NotificationSettings, error)
+	// UpdateReportSchedule implements updateReportSchedule operation.
+	//
+	// Изменить расписание.
+	//
+	// PUT /report-schedules/{scheduleId}
+	UpdateReportSchedule(ctx context.Context, req *ReportScheduleInput, params UpdateReportScheduleParams) (*ReportSchedule, error)
 	// UpdateSettings implements updateSettings operation.
 	//
 	// Сохранить личные настройки.

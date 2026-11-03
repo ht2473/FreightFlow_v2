@@ -22,8 +22,16 @@ const themes: { id: Theme; title: string }[] = [
 
 /** Оболочка рабочего пространства: меню разделов, верхняя строка, содержимое. */
 export function AppShell() {
-  const me = useMe();
   const pathname = useRouterState({ select: (st) => st.location.pathname });
+  // Страница печати отчёта — без меню, шапки и событий: её печатает служба pdf.
+  if (pathname.startsWith("/print/")) {
+    return <Outlet />;
+  }
+  return <Workspace pathname={pathname} />;
+}
+
+function Workspace({ pathname }: { pathname: string }) {
+  const me = useMe();
   const title = titleFor(pathname);
   const palette = useCommandPalette();
   useThemeSync();

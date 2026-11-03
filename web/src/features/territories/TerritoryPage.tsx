@@ -1,10 +1,11 @@
 import { Link, useParams } from "@tanstack/react-router";
 import type { Geometry } from "geojson";
-import { Building2, Map as MapIcon } from "lucide-react";
+import { Building2, FileText, Map as MapIcon } from "lucide-react";
 import type { LayerSpecification, Map as MapLibreMap } from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Guard } from "@/app/Guard";
 import { $api, problemMessage, type Schemas } from "@/shared/api/client";
+import { can, useMe } from "@/shared/auth";
 import { num } from "@/shared/format";
 import { basemapStyle } from "@/shared/map/basemap";
 import { buildDataLayers, color, readPalette } from "@/shared/map/dataLayers";
@@ -46,6 +47,7 @@ function Territory() {
   const q = $api.useQuery("get", "/territories/{territoryId}", { params: { path: { territoryId } } });
   const p = q.data;
   const okrug = p?.kind === "okrug";
+  const me = useMe();
   const [sort, setSort] = useState(parseSort(undefined));
   return (
     <>
@@ -65,6 +67,11 @@ function Territory() {
               <Link to="/facilities" search={okrug ? { okrug: p.id } : { district: p.id }} className="btn btn-sm">
                 <Building2 size={14} aria-hidden /> Объекты в реестре
               </Link>
+              {can(me.data, "reports.create") && (
+                <Link to="/reports" search={{ template: "territory", territoryId: p.id }} className="btn btn-sm">
+                  <FileText size={14} aria-hidden /> Сводка PDF
+                </Link>
+              )}
             </div>
           )
         }

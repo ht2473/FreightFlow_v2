@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"freightflow/internal/notify"
 	"freightflow/internal/operations"
 	"freightflow/internal/platform/blob"
+	"freightflow/internal/platform/config"
 	"freightflow/internal/platform/events"
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/jobs"
@@ -127,9 +129,14 @@ func newModules(ctx context.Context, env *Env, rt *runtime) (*modules, error) {
 	if err != nil {
 		return nil, err
 	}
+	reports := report.New(rt.pool, inserter, rt.blobs, facilities)
+	reports.SetEngine(report.Engine{
+		Renderer: &report.Chrome{CDP: cfg.PDFCDPURL, Base: printBase(cfg)},
+		Tokens:   ids.IssuePrintToken, Mailer: mailer, BaseURL: cfg.BaseURL, Log: env.Log.With("component", "report"),
+	})
 	return &modules{
 		identity: ids, ingest: ing, facilities: facilities,
-		reports: report.New(rt.pool, inserter, rt.blobs, facilities), scenarios: scenario.New(rt.pool, inserter, routes, analytics.New(rt.pool)),
+		reports: reports, scenarios: scenario.New(rt.pool, inserter, routes, analytics.New(rt.pool)),
 		alerts: alerts, notify: notifier, mailer: mailer,
 		inserter: inserter,
 	}, nil
@@ -195,4 +202,20 @@ func runWorker(ctx context.Context, env *Env, _ []string) error {
 	g.Go(func() error { return events.RunConsumers(gctx, rt.pool, rt.bus, env.Log, mods.consumers()...) })
 	g.Go(func() error { return mods.notify.PollTelegram(gctx) })
 	return g.Wait()
+}
+
+// printBase — адрес страниц печати для службы pdf: из настроек или по режиму.
+func printBase(cfg config.Config) string {
+	if cfg.PrintBaseURL != "" {
+		return cfg.PrintBaseURL
+	}
+	if cfg.IsDev() {
+		// В разработке страницы отдаёт Vite (он же проксирует API на сервер приложения).
+		port := "5173"
+		if u, err := url.Parse(cfg.DevViteURL); err == nil && u.Port() != "" {
+			port = u.Port()
+		}
+		return "http://host.docker.internal:" + port
+	}
+	return "http://app:8080"
 }

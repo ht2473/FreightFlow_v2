@@ -1,0 +1,144 @@
+/* Документ для печати на A4 (поля задаёт служба pdf). */
+.body {
+  background: #fff;
+}
+
+.doc {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 4px;
+  color: #1f2330;
+  background: #fff;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.head {
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #4f46e5;
+}
+
+.brand {
+  color: #4f46e5;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.title {
+  margin: 4px 0 2px;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.subtitle {
+  margin: 0;
+  color: #3c4050;
+  font-size: 13px;
+}
+
+.meta {
+  margin: 4px 0 0;
+  color: #6b6f80;
+  font-size: 11px;
+}
+
+.section {
+  margin: 16px 0;
+  break-inside: avoid-page;
+}
+
+.section h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.facts div {
+  padding: 6px 8px;
+  border: 1px solid #e3e4ea;
+  border-radius: 6px;
+}
+
+.facts dt {
+  color: #6b6f80;
+  font-size: 10.5px;
+}
+
+.facts dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.table th,
+.table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #e3e4ea;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: #6b6f80;
+  font-weight: 600;
+  border-bottom-color: #c8cad3;
+}
+
+.table tr {
+  break-inside: avoid;
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.map {
+  width: 100%;
+  border: 1px solid #e3e4ea;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.sources {
+  margin-top: 20px;
+  padding-top: 8px;
+  border-top: 1px solid #e3e4ea;
+  color: #6b6f80;
+  font-size: 10.5px;
+  break-inside: avoid;
+}
+
+.sources h2 {
+  margin: 0 0 4px;
+  font-size: 11px;
+}
+
+.sources ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.note {
+  color: #6b6f80;
+  font-size: 11px;
+}
+
+@media print {
+  .doc {
+    max-width: none;
+  }
+}

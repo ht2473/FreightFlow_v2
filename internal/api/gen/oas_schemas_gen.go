@@ -3909,6 +3909,12 @@ func (s *DataUpdatesOKItem) SetDomains(val []string) {
 // DeleteAlertRuleNoContent is response for DeleteAlertRule operation.
 type DeleteAlertRuleNoContent struct{}
 
+// DeleteReportNoContent is response for DeleteReport operation.
+type DeleteReportNoContent struct{}
+
+// DeleteReportScheduleNoContent is response for DeleteReportSchedule operation.
+type DeleteReportScheduleNoContent struct{}
+
 // DeleteScenarioNoContent is response for DeleteScenario operation.
 type DeleteScenarioNoContent struct{}
 
@@ -6194,6 +6200,46 @@ func (s *GetExportFileOKHeaders) SetContentDisposition(val OptString) {
 
 // SetResponse sets the value of Response.
 func (s *GetExportFileOKHeaders) SetResponse(val GetExportFileOK) {
+	s.Response = val
+}
+
+type GetReportFileOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s GetReportFileOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// GetReportFileOKHeaders wraps GetReportFileOK with response headers.
+type GetReportFileOKHeaders struct {
+	ContentDisposition OptString
+	Response           GetReportFileOK
+}
+
+// GetContentDisposition returns the value of ContentDisposition.
+func (s *GetReportFileOKHeaders) GetContentDisposition() OptString {
+	return s.ContentDisposition
+}
+
+// GetResponse returns the value of Response.
+func (s *GetReportFileOKHeaders) GetResponse() GetReportFileOK {
+	return s.Response
+}
+
+// SetContentDisposition sets the value of ContentDisposition.
+func (s *GetReportFileOKHeaders) SetContentDisposition(val OptString) {
+	s.ContentDisposition = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetReportFileOKHeaders) SetResponse(val GetReportFileOK) {
 	s.Response = val
 }
 
@@ -11831,6 +11877,98 @@ func (o OptMetricValuesLevel) Or(d MetricValuesLevel) MetricValuesLevel {
 	return d
 }
 
+// NewOptReportRequestParams returns new OptReportRequestParams with value set to v.
+func NewOptReportRequestParams(v ReportRequestParams) OptReportRequestParams {
+	return OptReportRequestParams{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptReportRequestParams is optional ReportRequestParams.
+type OptReportRequestParams struct {
+	Value ReportRequestParams
+	Set   bool
+}
+
+// IsSet returns true if OptReportRequestParams was set.
+func (o OptReportRequestParams) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptReportRequestParams) Reset() {
+	var v ReportRequestParams
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptReportRequestParams) SetTo(v ReportRequestParams) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptReportRequestParams) Get() (v ReportRequestParams, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptReportRequestParams) Or(d ReportRequestParams) ReportRequestParams {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptReportScheduleInputParams returns new OptReportScheduleInputParams with value set to v.
+func NewOptReportScheduleInputParams(v ReportScheduleInputParams) OptReportScheduleInputParams {
+	return OptReportScheduleInputParams{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptReportScheduleInputParams is optional ReportScheduleInputParams.
+type OptReportScheduleInputParams struct {
+	Value ReportScheduleInputParams
+	Set   bool
+}
+
+// IsSet returns true if OptReportScheduleInputParams was set.
+func (o OptReportScheduleInputParams) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptReportScheduleInputParams) Reset() {
+	var v ReportScheduleInputParams
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptReportScheduleInputParams) SetTo(v ReportScheduleInputParams) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptReportScheduleInputParams) Get() (v ReportScheduleInputParams, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptReportScheduleInputParams) Or(d ReportScheduleInputParams) ReportScheduleInputParams {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptResilienceRun returns new OptResilienceRun with value set to v.
 func NewOptResilienceRun(v ResilienceRun) OptResilienceRun {
 	return OptResilienceRun{
@@ -13489,6 +13627,156 @@ func (s *RegulationOverview) SetCargoFrame(val CargoFrame) {
 	s.CargoFrame = val
 }
 
+// Ref: #/components/schemas/Report
+type Report struct {
+	ID         uuid.UUID    `json:"id"`
+	Template   string       `json:"template"`
+	Format     ReportFormat `json:"format"`
+	Params     ReportParams `json:"params"`
+	Title      string       `json:"title"`
+	Status     ReportStatus `json:"status"`
+	FileSize   OptInt64     `json:"fileSize"`
+	Error      OptString    `json:"error"`
+	ScheduleId OptUUID      `json:"scheduleId"`
+	CreatedAt  time.Time    `json:"createdAt"`
+	FinishedAt OptDateTime  `json:"finishedAt"`
+	ExpiresAt  time.Time    `json:"expiresAt"`
+}
+
+// GetID returns the value of ID.
+func (s *Report) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetTemplate returns the value of Template.
+func (s *Report) GetTemplate() string {
+	return s.Template
+}
+
+// GetFormat returns the value of Format.
+func (s *Report) GetFormat() ReportFormat {
+	return s.Format
+}
+
+// GetParams returns the value of Params.
+func (s *Report) GetParams() ReportParams {
+	return s.Params
+}
+
+// GetTitle returns the value of Title.
+func (s *Report) GetTitle() string {
+	return s.Title
+}
+
+// GetStatus returns the value of Status.
+func (s *Report) GetStatus() ReportStatus {
+	return s.Status
+}
+
+// GetFileSize returns the value of FileSize.
+func (s *Report) GetFileSize() OptInt64 {
+	return s.FileSize
+}
+
+// GetError returns the value of Error.
+func (s *Report) GetError() OptString {
+	return s.Error
+}
+
+// GetScheduleId returns the value of ScheduleId.
+func (s *Report) GetScheduleId() OptUUID {
+	return s.ScheduleId
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Report) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *Report) GetFinishedAt() OptDateTime {
+	return s.FinishedAt
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *Report) GetExpiresAt() time.Time {
+	return s.ExpiresAt
+}
+
+// SetID sets the value of ID.
+func (s *Report) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetTemplate sets the value of Template.
+func (s *Report) SetTemplate(val string) {
+	s.Template = val
+}
+
+// SetFormat sets the value of Format.
+func (s *Report) SetFormat(val ReportFormat) {
+	s.Format = val
+}
+
+// SetParams sets the value of Params.
+func (s *Report) SetParams(val ReportParams) {
+	s.Params = val
+}
+
+// SetTitle sets the value of Title.
+func (s *Report) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Report) SetStatus(val ReportStatus) {
+	s.Status = val
+}
+
+// SetFileSize sets the value of FileSize.
+func (s *Report) SetFileSize(val OptInt64) {
+	s.FileSize = val
+}
+
+// SetError sets the value of Error.
+func (s *Report) SetError(val OptString) {
+	s.Error = val
+}
+
+// SetScheduleId sets the value of ScheduleId.
+func (s *Report) SetScheduleId(val OptUUID) {
+	s.ScheduleId = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Report) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *Report) SetFinishedAt(val OptDateTime) {
+	s.FinishedAt = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *Report) SetExpiresAt(val time.Time) {
+	s.ExpiresAt = val
+}
+
+// Сводка для страницы отчёта; поля — по шаблону (см.
+// описание операции).
+// Ref: #/components/schemas/ReportData
+type ReportData map[string]jx.Raw
+
+func (s *ReportData) init() ReportData {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 type ReportFacilityIssueReq struct {
 	Message string `json:"message"`
 }
@@ -13501,6 +13789,737 @@ func (s *ReportFacilityIssueReq) GetMessage() string {
 // SetMessage sets the value of Message.
 func (s *ReportFacilityIssueReq) SetMessage(val string) {
 	s.Message = val
+}
+
+// Ref: #/components/schemas/ReportFormat
+type ReportFormat string
+
+const (
+	ReportFormatPdf  ReportFormat = "pdf"
+	ReportFormatXlsx ReportFormat = "xlsx"
+)
+
+// AllValues returns all ReportFormat values.
+func (ReportFormat) AllValues() []ReportFormat {
+	return []ReportFormat{
+		ReportFormatPdf,
+		ReportFormatXlsx,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ReportFormat) MarshalText() ([]byte, error) {
+	switch s {
+	case ReportFormatPdf:
+		return []byte(s), nil
+	case ReportFormatXlsx:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ReportFormat) UnmarshalText(data []byte) error {
+	switch ReportFormat(data) {
+	case ReportFormatPdf:
+		*s = ReportFormatPdf
+		return nil
+	case ReportFormatXlsx:
+		*s = ReportFormatXlsx
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ReportParams map[string]string
+
+func (s *ReportParams) init() ReportParams {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/ReportRequest
+type ReportRequest struct {
+	Template string                 `json:"template"`
+	Format   ReportFormat           `json:"format"`
+	Params   OptReportRequestParams `json:"params"`
+}
+
+// GetTemplate returns the value of Template.
+func (s *ReportRequest) GetTemplate() string {
+	return s.Template
+}
+
+// GetFormat returns the value of Format.
+func (s *ReportRequest) GetFormat() ReportFormat {
+	return s.Format
+}
+
+// GetParams returns the value of Params.
+func (s *ReportRequest) GetParams() OptReportRequestParams {
+	return s.Params
+}
+
+// SetTemplate sets the value of Template.
+func (s *ReportRequest) SetTemplate(val string) {
+	s.Template = val
+}
+
+// SetFormat sets the value of Format.
+func (s *ReportRequest) SetFormat(val ReportFormat) {
+	s.Format = val
+}
+
+// SetParams sets the value of Params.
+func (s *ReportRequest) SetParams(val OptReportRequestParams) {
+	s.Params = val
+}
+
+type ReportRequestParams map[string]string
+
+func (s *ReportRequestParams) init() ReportRequestParams {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+// Merged schema.
+// Ref: #/components/schemas/ReportSchedule
+type ReportSchedule struct {
+	Template  string                  `json:"template"`
+	Format    ReportFormat            `json:"format"`
+	Params    ReportScheduleParams    `json:"params"`
+	Title     string                  `json:"title"`
+	Frequency ReportScheduleFrequency `json:"frequency"`
+	// 1 — понедельник (weekly).
+	Weekday OptInt `json:"weekday"`
+	// День месяца (monthly).
+	MonthDay OptInt `json:"monthDay"`
+	// Час по Москве.
+	Hour       int         `json:"hour"`
+	Recipients []string    `json:"recipients"`
+	Enabled    bool        `json:"enabled"`
+	ID         uuid.UUID   `json:"id"`
+	NextRunAt  time.Time   `json:"nextRunAt"`
+	LastRunAt  OptDateTime `json:"lastRunAt"`
+	CreatedAt  time.Time   `json:"createdAt"`
+}
+
+// GetTemplate returns the value of Template.
+func (s *ReportSchedule) GetTemplate() string {
+	return s.Template
+}
+
+// GetFormat returns the value of Format.
+func (s *ReportSchedule) GetFormat() ReportFormat {
+	return s.Format
+}
+
+// GetParams returns the value of Params.
+func (s *ReportSchedule) GetParams() ReportScheduleParams {
+	return s.Params
+}
+
+// GetTitle returns the value of Title.
+func (s *ReportSchedule) GetTitle() string {
+	return s.Title
+}
+
+// GetFrequency returns the value of Frequency.
+func (s *ReportSchedule) GetFrequency() ReportScheduleFrequency {
+	return s.Frequency
+}
+
+// GetWeekday returns the value of Weekday.
+func (s *ReportSchedule) GetWeekday() OptInt {
+	return s.Weekday
+}
+
+// GetMonthDay returns the value of MonthDay.
+func (s *ReportSchedule) GetMonthDay() OptInt {
+	return s.MonthDay
+}
+
+// GetHour returns the value of Hour.
+func (s *ReportSchedule) GetHour() int {
+	return s.Hour
+}
+
+// GetRecipients returns the value of Recipients.
+func (s *ReportSchedule) GetRecipients() []string {
+	return s.Recipients
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *ReportSchedule) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetID returns the value of ID.
+func (s *ReportSchedule) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetNextRunAt returns the value of NextRunAt.
+func (s *ReportSchedule) GetNextRunAt() time.Time {
+	return s.NextRunAt
+}
+
+// GetLastRunAt returns the value of LastRunAt.
+func (s *ReportSchedule) GetLastRunAt() OptDateTime {
+	return s.LastRunAt
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *ReportSchedule) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// SetTemplate sets the value of Template.
+func (s *ReportSchedule) SetTemplate(val string) {
+	s.Template = val
+}
+
+// SetFormat sets the value of Format.
+func (s *ReportSchedule) SetFormat(val ReportFormat) {
+	s.Format = val
+}
+
+// SetParams sets the value of Params.
+func (s *ReportSchedule) SetParams(val ReportScheduleParams) {
+	s.Params = val
+}
+
+// SetTitle sets the value of Title.
+func (s *ReportSchedule) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetFrequency sets the value of Frequency.
+func (s *ReportSchedule) SetFrequency(val ReportScheduleFrequency) {
+	s.Frequency = val
+}
+
+// SetWeekday sets the value of Weekday.
+func (s *ReportSchedule) SetWeekday(val OptInt) {
+	s.Weekday = val
+}
+
+// SetMonthDay sets the value of MonthDay.
+func (s *ReportSchedule) SetMonthDay(val OptInt) {
+	s.MonthDay = val
+}
+
+// SetHour sets the value of Hour.
+func (s *ReportSchedule) SetHour(val int) {
+	s.Hour = val
+}
+
+// SetRecipients sets the value of Recipients.
+func (s *ReportSchedule) SetRecipients(val []string) {
+	s.Recipients = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *ReportSchedule) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetID sets the value of ID.
+func (s *ReportSchedule) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetNextRunAt sets the value of NextRunAt.
+func (s *ReportSchedule) SetNextRunAt(val time.Time) {
+	s.NextRunAt = val
+}
+
+// SetLastRunAt sets the value of LastRunAt.
+func (s *ReportSchedule) SetLastRunAt(val OptDateTime) {
+	s.LastRunAt = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *ReportSchedule) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+type ReportScheduleFrequency string
+
+const (
+	ReportScheduleFrequencyDaily   ReportScheduleFrequency = "daily"
+	ReportScheduleFrequencyWeekly  ReportScheduleFrequency = "weekly"
+	ReportScheduleFrequencyMonthly ReportScheduleFrequency = "monthly"
+)
+
+// AllValues returns all ReportScheduleFrequency values.
+func (ReportScheduleFrequency) AllValues() []ReportScheduleFrequency {
+	return []ReportScheduleFrequency{
+		ReportScheduleFrequencyDaily,
+		ReportScheduleFrequencyWeekly,
+		ReportScheduleFrequencyMonthly,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ReportScheduleFrequency) MarshalText() ([]byte, error) {
+	switch s {
+	case ReportScheduleFrequencyDaily:
+		return []byte(s), nil
+	case ReportScheduleFrequencyWeekly:
+		return []byte(s), nil
+	case ReportScheduleFrequencyMonthly:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ReportScheduleFrequency) UnmarshalText(data []byte) error {
+	switch ReportScheduleFrequency(data) {
+	case ReportScheduleFrequencyDaily:
+		*s = ReportScheduleFrequencyDaily
+		return nil
+	case ReportScheduleFrequencyWeekly:
+		*s = ReportScheduleFrequencyWeekly
+		return nil
+	case ReportScheduleFrequencyMonthly:
+		*s = ReportScheduleFrequencyMonthly
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ReportScheduleInput
+type ReportScheduleInput struct {
+	Template  string                       `json:"template"`
+	Format    ReportFormat                 `json:"format"`
+	Params    OptReportScheduleInputParams `json:"params"`
+	Title     OptString                    `json:"title"`
+	Frequency ReportScheduleInputFrequency `json:"frequency"`
+	// 1 — понедельник (weekly).
+	Weekday OptInt `json:"weekday"`
+	// День месяца (monthly).
+	MonthDay OptInt `json:"monthDay"`
+	// Час по Москве.
+	Hour       int      `json:"hour"`
+	Recipients []string `json:"recipients"`
+	Enabled    OptBool  `json:"enabled"`
+}
+
+// GetTemplate returns the value of Template.
+func (s *ReportScheduleInput) GetTemplate() string {
+	return s.Template
+}
+
+// GetFormat returns the value of Format.
+func (s *ReportScheduleInput) GetFormat() ReportFormat {
+	return s.Format
+}
+
+// GetParams returns the value of Params.
+func (s *ReportScheduleInput) GetParams() OptReportScheduleInputParams {
+	return s.Params
+}
+
+// GetTitle returns the value of Title.
+func (s *ReportScheduleInput) GetTitle() OptString {
+	return s.Title
+}
+
+// GetFrequency returns the value of Frequency.
+func (s *ReportScheduleInput) GetFrequency() ReportScheduleInputFrequency {
+	return s.Frequency
+}
+
+// GetWeekday returns the value of Weekday.
+func (s *ReportScheduleInput) GetWeekday() OptInt {
+	return s.Weekday
+}
+
+// GetMonthDay returns the value of MonthDay.
+func (s *ReportScheduleInput) GetMonthDay() OptInt {
+	return s.MonthDay
+}
+
+// GetHour returns the value of Hour.
+func (s *ReportScheduleInput) GetHour() int {
+	return s.Hour
+}
+
+// GetRecipients returns the value of Recipients.
+func (s *ReportScheduleInput) GetRecipients() []string {
+	return s.Recipients
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *ReportScheduleInput) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// SetTemplate sets the value of Template.
+func (s *ReportScheduleInput) SetTemplate(val string) {
+	s.Template = val
+}
+
+// SetFormat sets the value of Format.
+func (s *ReportScheduleInput) SetFormat(val ReportFormat) {
+	s.Format = val
+}
+
+// SetParams sets the value of Params.
+func (s *ReportScheduleInput) SetParams(val OptReportScheduleInputParams) {
+	s.Params = val
+}
+
+// SetTitle sets the value of Title.
+func (s *ReportScheduleInput) SetTitle(val OptString) {
+	s.Title = val
+}
+
+// SetFrequency sets the value of Frequency.
+func (s *ReportScheduleInput) SetFrequency(val ReportScheduleInputFrequency) {
+	s.Frequency = val
+}
+
+// SetWeekday sets the value of Weekday.
+func (s *ReportScheduleInput) SetWeekday(val OptInt) {
+	s.Weekday = val
+}
+
+// SetMonthDay sets the value of MonthDay.
+func (s *ReportScheduleInput) SetMonthDay(val OptInt) {
+	s.MonthDay = val
+}
+
+// SetHour sets the value of Hour.
+func (s *ReportScheduleInput) SetHour(val int) {
+	s.Hour = val
+}
+
+// SetRecipients sets the value of Recipients.
+func (s *ReportScheduleInput) SetRecipients(val []string) {
+	s.Recipients = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *ReportScheduleInput) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+type ReportScheduleInputFrequency string
+
+const (
+	ReportScheduleInputFrequencyDaily   ReportScheduleInputFrequency = "daily"
+	ReportScheduleInputFrequencyWeekly  ReportScheduleInputFrequency = "weekly"
+	ReportScheduleInputFrequencyMonthly ReportScheduleInputFrequency = "monthly"
+)
+
+// AllValues returns all ReportScheduleInputFrequency values.
+func (ReportScheduleInputFrequency) AllValues() []ReportScheduleInputFrequency {
+	return []ReportScheduleInputFrequency{
+		ReportScheduleInputFrequencyDaily,
+		ReportScheduleInputFrequencyWeekly,
+		ReportScheduleInputFrequencyMonthly,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ReportScheduleInputFrequency) MarshalText() ([]byte, error) {
+	switch s {
+	case ReportScheduleInputFrequencyDaily:
+		return []byte(s), nil
+	case ReportScheduleInputFrequencyWeekly:
+		return []byte(s), nil
+	case ReportScheduleInputFrequencyMonthly:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ReportScheduleInputFrequency) UnmarshalText(data []byte) error {
+	switch ReportScheduleInputFrequency(data) {
+	case ReportScheduleInputFrequencyDaily:
+		*s = ReportScheduleInputFrequencyDaily
+		return nil
+	case ReportScheduleInputFrequencyWeekly:
+		*s = ReportScheduleInputFrequencyWeekly
+		return nil
+	case ReportScheduleInputFrequencyMonthly:
+		*s = ReportScheduleInputFrequencyMonthly
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ReportScheduleInputParams map[string]string
+
+func (s *ReportScheduleInputParams) init() ReportScheduleInputParams {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+type ReportScheduleParams map[string]string
+
+func (s *ReportScheduleParams) init() ReportScheduleParams {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+type ReportStatus string
+
+const (
+	ReportStatusQueued  ReportStatus = "queued"
+	ReportStatusRunning ReportStatus = "running"
+	ReportStatusDone    ReportStatus = "done"
+	ReportStatusFailed  ReportStatus = "failed"
+)
+
+// AllValues returns all ReportStatus values.
+func (ReportStatus) AllValues() []ReportStatus {
+	return []ReportStatus{
+		ReportStatusQueued,
+		ReportStatusRunning,
+		ReportStatusDone,
+		ReportStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ReportStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ReportStatusQueued:
+		return []byte(s), nil
+	case ReportStatusRunning:
+		return []byte(s), nil
+	case ReportStatusDone:
+		return []byte(s), nil
+	case ReportStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ReportStatus) UnmarshalText(data []byte) error {
+	switch ReportStatus(data) {
+	case ReportStatusQueued:
+		*s = ReportStatusQueued
+		return nil
+	case ReportStatusRunning:
+		*s = ReportStatusRunning
+		return nil
+	case ReportStatusDone:
+		*s = ReportStatusDone
+		return nil
+	case ReportStatusFailed:
+		*s = ReportStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ReportTemplate
+type ReportTemplate struct {
+	Code        string                `json:"code"`
+	Title       string                `json:"title"`
+	Description string                `json:"description"`
+	Params      []ReportTemplateParam `json:"params"`
+	// Право на данные шаблона.
+	Permission string `json:"permission"`
+}
+
+// GetCode returns the value of Code.
+func (s *ReportTemplate) GetCode() string {
+	return s.Code
+}
+
+// GetTitle returns the value of Title.
+func (s *ReportTemplate) GetTitle() string {
+	return s.Title
+}
+
+// GetDescription returns the value of Description.
+func (s *ReportTemplate) GetDescription() string {
+	return s.Description
+}
+
+// GetParams returns the value of Params.
+func (s *ReportTemplate) GetParams() []ReportTemplateParam {
+	return s.Params
+}
+
+// GetPermission returns the value of Permission.
+func (s *ReportTemplate) GetPermission() string {
+	return s.Permission
+}
+
+// SetCode sets the value of Code.
+func (s *ReportTemplate) SetCode(val string) {
+	s.Code = val
+}
+
+// SetTitle sets the value of Title.
+func (s *ReportTemplate) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetDescription sets the value of Description.
+func (s *ReportTemplate) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetParams sets the value of Params.
+func (s *ReportTemplate) SetParams(val []ReportTemplateParam) {
+	s.Params = val
+}
+
+// SetPermission sets the value of Permission.
+func (s *ReportTemplate) SetPermission(val string) {
+	s.Permission = val
+}
+
+// Ref: #/components/schemas/ReportTemplateParam
+type ReportTemplateParam struct {
+	Name     string                  `json:"name"`
+	Title    string                  `json:"title"`
+	Kind     ReportTemplateParamKind `json:"kind"`
+	Required bool                    `json:"required"`
+	Min      OptInt                  `json:"min"`
+	Max      OptInt                  `json:"max"`
+}
+
+// GetName returns the value of Name.
+func (s *ReportTemplateParam) GetName() string {
+	return s.Name
+}
+
+// GetTitle returns the value of Title.
+func (s *ReportTemplateParam) GetTitle() string {
+	return s.Title
+}
+
+// GetKind returns the value of Kind.
+func (s *ReportTemplateParam) GetKind() ReportTemplateParamKind {
+	return s.Kind
+}
+
+// GetRequired returns the value of Required.
+func (s *ReportTemplateParam) GetRequired() bool {
+	return s.Required
+}
+
+// GetMin returns the value of Min.
+func (s *ReportTemplateParam) GetMin() OptInt {
+	return s.Min
+}
+
+// GetMax returns the value of Max.
+func (s *ReportTemplateParam) GetMax() OptInt {
+	return s.Max
+}
+
+// SetName sets the value of Name.
+func (s *ReportTemplateParam) SetName(val string) {
+	s.Name = val
+}
+
+// SetTitle sets the value of Title.
+func (s *ReportTemplateParam) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetKind sets the value of Kind.
+func (s *ReportTemplateParam) SetKind(val ReportTemplateParamKind) {
+	s.Kind = val
+}
+
+// SetRequired sets the value of Required.
+func (s *ReportTemplateParam) SetRequired(val bool) {
+	s.Required = val
+}
+
+// SetMin sets the value of Min.
+func (s *ReportTemplateParam) SetMin(val OptInt) {
+	s.Min = val
+}
+
+// SetMax sets the value of Max.
+func (s *ReportTemplateParam) SetMax(val OptInt) {
+	s.Max = val
+}
+
+type ReportTemplateParamKind string
+
+const (
+	ReportTemplateParamKindUUID    ReportTemplateParamKind = "uuid"
+	ReportTemplateParamKindInt     ReportTemplateParamKind = "int"
+	ReportTemplateParamKindProfile ReportTemplateParamKind = "profile"
+)
+
+// AllValues returns all ReportTemplateParamKind values.
+func (ReportTemplateParamKind) AllValues() []ReportTemplateParamKind {
+	return []ReportTemplateParamKind{
+		ReportTemplateParamKindUUID,
+		ReportTemplateParamKindInt,
+		ReportTemplateParamKindProfile,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ReportTemplateParamKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ReportTemplateParamKindUUID:
+		return []byte(s), nil
+	case ReportTemplateParamKindInt:
+		return []byte(s), nil
+	case ReportTemplateParamKindProfile:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ReportTemplateParamKind) UnmarshalText(data []byte) error {
+	switch ReportTemplateParamKind(data) {
+	case ReportTemplateParamKindUUID:
+		*s = ReportTemplateParamKindUUID
+		return nil
+	case ReportTemplateParamKindInt:
+		*s = ReportTemplateParamKindInt
+		return nil
+	case ReportTemplateParamKindProfile:
+		*s = ReportTemplateParamKindProfile
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // ResetDashboardNoContent is response for ResetDashboard operation.

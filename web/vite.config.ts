@@ -41,6 +41,8 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    // Служба pdf (Docker) открывает страницы печати отчётов через сервер приложения на хосте.
+    allowedHosts: ["host.docker.internal"],
     proxy: Object.fromEntries(proxied.map((p) => [p, { target: backend, changeOrigin: false }])),
   },
   build: {

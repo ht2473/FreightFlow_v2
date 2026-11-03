@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ExternalLink, GitCompare, Map as MapIcon, Maximize2, Route, Timer } from "lucide-react";
+import { ExternalLink, FileText, GitCompare, Map as MapIcon, Maximize2, Route, Timer } from "lucide-react";
 import { $api, problemMessage, type Schemas } from "@/shared/api/client";
 import { can, useMe } from "@/shared/auth";
 import { date, dateTime, num } from "@/shared/format";
@@ -92,6 +92,7 @@ export function Actions({ f }: { f: Schemas["FacilityItem"] }) {
   const inCompare = compare.ids.includes(f.id);
   const from = formatCenter(f.point.lon, f.point.lat);
   const name = f.name ?? f.typeName;
+  const me = useMe();
   return (
     <div className={s.actions}>
       <Link to="/network" search={{ mode: "route", from, name }} className="btn btn-sm">
@@ -110,6 +111,11 @@ export function Actions({ f }: { f: Schemas["FacilityItem"] }) {
       <Link to="/map" search={{ c: from, z: 16, l: "facility_areas,facilities,restrictions" }} className="btn btn-sm">
         <MapIcon size={14} aria-hidden /> На карте
       </Link>
+      {can(me.data, "reports.create") && (
+        <Link to="/reports" search={{ template: "facility", facilityId: f.id }} className="btn btn-sm">
+          <FileText size={14} aria-hidden /> Паспорт PDF
+        </Link>
+      )}
     </div>
   );
 }

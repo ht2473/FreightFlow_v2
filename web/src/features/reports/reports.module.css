@@ -1,0 +1,21 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 380px;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.highlight td {
+  background: var(--acc-soft);
+}
+
+.error {
+  color: var(--crit);
+  font-size: 12.5px;
+}

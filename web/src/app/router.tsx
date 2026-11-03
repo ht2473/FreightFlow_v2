@@ -4,6 +4,8 @@ import { analyticsSearchSchema } from "@/features/analytics/AnalyticsPage";
 import { compareSearchSchema, facilitySearchSchema } from "@/features/facilities/search";
 import { mapSearchSchema } from "@/features/map/state";
 import { networkSearchSchema } from "@/features/network/search";
+import { printSearchSchema } from "@/features/print/PrintPage";
+import { reportsSearchSchema } from "@/features/reports/ReportsPage";
 import { territorySearchSchema } from "@/features/territories/search";
 import { ErrorPage, PendingPage } from "./ErrorPage";
 import { NotFound } from "./NotFound";
@@ -51,6 +53,12 @@ const routeTree = rootRoute.addChildren([
     component: lazyRouteComponent(() => import("@/features/map/MapPage"), "MapPage"),
   }),
   sectionRoute("/operations"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/print/$template",
+    validateSearch: printSearchSchema,
+    component: lazyRouteComponent(() => import("@/features/print/PrintPage"), "PrintPage"),
+  }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: "/alerts",
@@ -159,7 +167,12 @@ const routeTree = rootRoute.addChildren([
     path: "/site-selection",
     component: lazyRouteComponent(() => import("@/features/site-selection/SitePage"), "SitePage"),
   }),
-  sectionRoute("/reports"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/reports",
+    validateSearch: reportsSearchSchema,
+    component: lazyRouteComponent(() => import("@/features/reports/ReportsPage"), "ReportsPage"),
+  }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: "/data",
