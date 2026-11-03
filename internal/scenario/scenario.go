@@ -277,8 +277,8 @@ type ClosureInfo struct {
 // EntityTime — время до цели: база и сценарий (nil — недостижимо или в закрытой зоне).
 type EntityTime struct {
 	Kind           string   `json:"kind"`
-	BaseMin        *float64 `json:"baseMin"`
-	ScenarioMin    *float64 `json:"scenarioMin"`
+	BaseMin        *float64 `json:"baseMin,omitempty"`
+	ScenarioMin    *float64 `json:"scenarioMin,omitempty"`
 	BaseStatus     string   `json:"baseStatus"`
 	ScenarioStatus string   `json:"scenarioStatus"`
 }
