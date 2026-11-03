@@ -9,8 +9,6 @@ import { reportsSearchSchema } from "@/features/reports/ReportsPage";
 import { territorySearchSchema } from "@/features/territories/search";
 import { ErrorPage, PendingPage } from "./ErrorPage";
 import { NotFound } from "./NotFound";
-import { SectionPage } from "./SectionPage";
-import { sections } from "./sections";
 import { AppShell } from "./shell/AppShell";
 
 const rootRoute = createRootRoute({
@@ -26,19 +24,6 @@ const indexRoute = createRoute({
   },
 });
 
-/** Раздел, наполнение которого появляется вместе с данными; пока — описание и пустое состояние. */
-function sectionRoute<P extends string>(path: P) {
-  const section = sections.find((sec) => sec.path === path);
-  if (!section) {
-    throw new Error(`нет описания раздела ${path}`);
-  }
-  return createRoute({
-    getParentRoute: () => rootRoute,
-    path,
-    component: () => <SectionPage section={section} />,
-  });
-}
-
 const routeTree = rootRoute.addChildren([
   indexRoute,
   createRoute({
@@ -52,7 +37,11 @@ const routeTree = rootRoute.addChildren([
     validateSearch: (search: Record<string, unknown>) => mapSearchSchema.parse(search),
     component: lazyRouteComponent(() => import("@/features/map/MapPage"), "MapPage"),
   }),
-  sectionRoute("/operations"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/operations",
+    component: lazyRouteComponent(() => import("@/features/operations/OperationsPage"), "OperationsPage"),
+  }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: "/api-docs",

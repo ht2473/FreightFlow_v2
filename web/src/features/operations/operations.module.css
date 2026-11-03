@@ -1,0 +1,69 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.page > * {
+  margin-top: 0;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1000px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  padding: 0 20px 16px;
+}
+
+.filters > :global(.field) {
+  min-width: 260px;
+}
+
+.count {
+  margin-left: auto;
+  padding-bottom: 8px;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.scroll {
+  overflow-x: auto;
+  border-top: 1px solid var(--line);
+}
+
+.title {
+  font-weight: 500;
+}
+
+.muted {
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.mapLink {
+  white-space: nowrap;
+  font-size: 13px;
+}

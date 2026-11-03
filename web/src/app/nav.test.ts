@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { navGroups, navItemFor, titleFor } from "./nav";
-import { sections } from "./sections";
+import { navItemFor, titleFor } from "./nav";
 
 describe("titleFor", () => {
   it("находит раздел по адресу и вложенному адресу", () => {
@@ -13,16 +12,5 @@ describe("titleFor", () => {
   it("не путает разделы с общим началом адреса", () => {
     expect(navItemFor("/mapping")).toBeUndefined();
     expect(titleFor("/unknown")).toBe("FreightFlow");
-  });
-});
-
-describe("sections", () => {
-  it("у каждого раздела-заглушки есть пункт меню с тем же правом", () => {
-    const items = navGroups.flatMap((g) => g.items);
-    for (const sec of sections) {
-      const item = items.find((it) => it.to === sec.path);
-      expect(item, sec.path).toBeDefined();
-      expect(item?.permission).toBe(sec.permission);
-    }
   });
 });
