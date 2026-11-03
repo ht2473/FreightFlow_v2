@@ -44,6 +44,10 @@ type Deps struct {
 	Dev      bool
 	DevVite  string
 	Log      *slog.Logger
+	// Help — каталог показателей и источников для справки.
+	Help HelpData
+	// Version — версия сборки (страница «О системе»).
+	Version string
 }
 
 type handler struct {
@@ -81,6 +85,12 @@ func New(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /password/forgot", h.forgot)
 	mux.HandleFunc("GET /password/reset/{token}", h.resetForm)
 	mux.HandleFunc("POST /password/reset/{token}", h.reset)
+	mux.HandleFunc("GET /help", h.helpIndex)
+	mux.HandleFunc("GET /help/guide", h.helpGuide)
+	mux.HandleFunc("GET /help/methods", h.helpMethods)
+	mux.HandleFunc("GET /help/sources", h.helpSources)
+	mux.HandleFunc("GET /help/glossary", h.helpGlossary)
+	mux.HandleFunc("GET /help/about", h.helpAbout)
 	mux.HandleFunc("GET /", h.app)
 	return mux, nil
 }

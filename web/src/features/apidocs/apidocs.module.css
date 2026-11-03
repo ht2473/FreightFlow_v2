@@ -15,13 +15,14 @@
 .code {
   margin: 8px 0;
   padding: 10px 12px;
-  overflow-x: auto;
+  /* Строки переносятся: без прокрутки блок не нужно делать фокусируемым (WCAG 2.1.1). */
+  overflow-wrap: anywhere;
   font-size: 12.5px;
   line-height: 1.5;
   background: var(--bg2, var(--panel));
   border: 1px solid var(--line);
   border-radius: var(--r2);
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .columns {

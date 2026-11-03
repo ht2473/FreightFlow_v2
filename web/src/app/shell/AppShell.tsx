@@ -1,5 +1,5 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Check, LogOut, Search, User } from "lucide-react";
+import { Check, CircleHelp, Compass, LogOut, Search, User } from "lucide-react";
 import { useEffect } from "react";
 import { Button as AriaButton, Menu, MenuItem, MenuTrigger, Popover, Separator } from "react-aria-components";
 import { navGroups, titleFor } from "@/app/nav";
@@ -13,6 +13,7 @@ import { ToastRegion } from "@/shared/ui/toast";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
 import { NotificationBell } from "./NotificationBell";
 import s from "./shell.module.css";
+import { startTour, Tour } from "./Tour";
 
 const themes: { id: Theme; title: string }[] = [
   { id: "light", title: "Светлая тема" },
@@ -116,6 +117,7 @@ function Workspace({ pathname }: { pathname: string }) {
       <CommandPalette me={user} isOpen={palette.isOpen} onOpenChange={palette.setOpen} />
       <ToastRegion />
       <ServerSync />
+      <Tour />
     </div>
   );
 }
@@ -134,6 +136,15 @@ function UserMenu({ name }: { name: string }) {
       void navigate({ to: "/profile" });
       return;
     }
+    if (k === "help") {
+      // Справка — серверные страницы вне приложения.
+      window.location.assign("/help/guide");
+      return;
+    }
+    if (k === "tour") {
+      startTour();
+      return;
+    }
     const t = themes.find((x) => x.id === k);
     if (t) {
       change(t.id);
@@ -150,6 +161,12 @@ function UserMenu({ name }: { name: string }) {
         <Menu onAction={onAction} aria-label="Меню пользователя">
           <MenuItem id="profile" className={menuItemClass}>
             <User size={15} aria-hidden /> Профиль
+          </MenuItem>
+          <MenuItem id="help" className={menuItemClass}>
+            <CircleHelp size={15} aria-hidden /> Справка
+          </MenuItem>
+          <MenuItem id="tour" className={menuItemClass}>
+            <Compass size={15} aria-hidden /> Знакомство с системой
           </MenuItem>
           <Separator className={menuSeparatorClass} />
           {themes.map((t) => (

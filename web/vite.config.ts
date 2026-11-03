@@ -24,6 +24,7 @@ const proxied = [
   "/logout",
   "/setup-2fa",
   "/invite",
+  "/help",
   "/password",
   "/static",
   // Ресурсы карты; сама страница /map — маршрут SPA.

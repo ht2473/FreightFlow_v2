@@ -13,7 +13,11 @@ export function account(prefix: string): Account {
 const sessions = new Map<string, Cookie[]>();
 
 /** Вход и переход на next; fresh — всегда через форму (проверка самого входа). */
-export async function login(page: Page, acc: Account, next = "/", opts: { fresh?: boolean } = {}) {
+export async function login(page: Page, acc: Account, next = "/", opts: { fresh?: boolean; tour?: boolean } = {}) {
+  // Знакомство с системой при первом входе не мешает остальным проверкам (своя проверка — tour: true).
+  if (!opts.tour) {
+    await page.addInitScript(() => localStorage.setItem("ff.tour", "done"));
+  }
   const saved = opts.fresh ? undefined : sessions.get(acc.email);
   if (saved) {
     await page.context().addCookies(saved);

@@ -70,6 +70,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	}
 	webHandler, err := web.New(web.Deps{
 		Identity: ids, Sessions: sessions, Mailer: mailer, BaseURL: cfg.BaseURL, Dev: cfg.IsDev(), DevVite: cfg.DevViteURL, Log: env.Log,
+		Help: web.NewHelpData(analytics.New(pool), mods.ingest), Version: Version,
 	})
 	if err != nil {
 		return err

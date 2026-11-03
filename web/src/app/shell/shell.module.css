@@ -361,3 +361,9 @@
   color: var(--tx2);
   font-size: 12px;
 }
+
+.tourStep {
+  margin-right: auto;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
