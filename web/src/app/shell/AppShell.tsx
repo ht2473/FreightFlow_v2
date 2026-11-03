@@ -54,6 +54,7 @@ export function AppShell() {
     pathname.startsWith("/map") ||
     pathname === "/network" ||
     pathname.startsWith("/scenarios/") ||
+    pathname.startsWith("/alerts/rules/") ||
     pathname.startsWith("/site-selection");
 
   return (

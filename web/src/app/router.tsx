@@ -1,4 +1,5 @@
 import { createRootRoute, createRoute, createRouter, lazyRouteComponent, redirect } from "@tanstack/react-router";
+import { alertsSearchSchema } from "@/features/alerts/AlertsPage";
 import { analyticsSearchSchema } from "@/features/analytics/AnalyticsPage";
 import { compareSearchSchema, facilitySearchSchema } from "@/features/facilities/search";
 import { mapSearchSchema } from "@/features/map/state";
@@ -50,7 +51,22 @@ const routeTree = rootRoute.addChildren([
     component: lazyRouteComponent(() => import("@/features/map/MapPage"), "MapPage"),
   }),
   sectionRoute("/operations"),
-  sectionRoute("/alerts"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/alerts",
+    validateSearch: alertsSearchSchema,
+    component: lazyRouteComponent(() => import("@/features/alerts/AlertsPage"), "AlertsPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/alerts/rules/new",
+    component: lazyRouteComponent(() => import("@/features/alerts/RuleEditor"), "RuleEditorPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/alerts/rules/$ruleId",
+    component: lazyRouteComponent(() => import("@/features/alerts/RuleEditor"), "RuleEditorPage"),
+  }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: "/facilities",
