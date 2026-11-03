@@ -3918,6 +3918,9 @@ type DeleteSiteRunNoContent struct{}
 // DeleteViewNoContent is response for DeleteView operation.
 type DeleteViewNoContent struct{}
 
+// DeleteWebhookNoContent is response for DeleteWebhook operation.
+type DeleteWebhookNoContent struct{}
+
 // DisableTotpNoContent is response for DisableTotp operation.
 type DisableTotpNoContent struct{}
 
@@ -8122,6 +8125,9 @@ func (s *MapLayerGeometry) UnmarshalText(data []byte) error {
 	}
 }
 
+// MarkNotificationsReadNoContent is response for MarkNotificationsRead operation.
+type MarkNotificationsReadNoContent struct{}
+
 // Пустая ячейка — пути нет.
 // Ref: #/components/schemas/MatrixCell
 type MatrixCell struct {
@@ -9930,6 +9936,357 @@ func (o NilFloat64) Or(d float64) float64 {
 		return v
 	}
 	return d
+}
+
+// Ref: #/components/schemas/Notification
+type Notification struct {
+	ID       uuid.UUID        `json:"id"`
+	Kind     NotificationKind `json:"kind"`
+	Severity AlertSeverity    `json:"severity"`
+	Title    string           `json:"title"`
+	Body     string           `json:"body"`
+	// Адрес в приложении.
+	Link      OptString   `json:"link"`
+	AlertId   OptUUID     `json:"alertId"`
+	ReadAt    OptDateTime `json:"readAt"`
+	CreatedAt time.Time   `json:"createdAt"`
+}
+
+// GetID returns the value of ID.
+func (s *Notification) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetKind returns the value of Kind.
+func (s *Notification) GetKind() NotificationKind {
+	return s.Kind
+}
+
+// GetSeverity returns the value of Severity.
+func (s *Notification) GetSeverity() AlertSeverity {
+	return s.Severity
+}
+
+// GetTitle returns the value of Title.
+func (s *Notification) GetTitle() string {
+	return s.Title
+}
+
+// GetBody returns the value of Body.
+func (s *Notification) GetBody() string {
+	return s.Body
+}
+
+// GetLink returns the value of Link.
+func (s *Notification) GetLink() OptString {
+	return s.Link
+}
+
+// GetAlertId returns the value of AlertId.
+func (s *Notification) GetAlertId() OptUUID {
+	return s.AlertId
+}
+
+// GetReadAt returns the value of ReadAt.
+func (s *Notification) GetReadAt() OptDateTime {
+	return s.ReadAt
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Notification) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// SetID sets the value of ID.
+func (s *Notification) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetKind sets the value of Kind.
+func (s *Notification) SetKind(val NotificationKind) {
+	s.Kind = val
+}
+
+// SetSeverity sets the value of Severity.
+func (s *Notification) SetSeverity(val AlertSeverity) {
+	s.Severity = val
+}
+
+// SetTitle sets the value of Title.
+func (s *Notification) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetBody sets the value of Body.
+func (s *Notification) SetBody(val string) {
+	s.Body = val
+}
+
+// SetLink sets the value of Link.
+func (s *Notification) SetLink(val OptString) {
+	s.Link = val
+}
+
+// SetAlertId sets the value of AlertId.
+func (s *Notification) SetAlertId(val OptUUID) {
+	s.AlertId = val
+}
+
+// SetReadAt sets the value of ReadAt.
+func (s *Notification) SetReadAt(val OptDateTime) {
+	s.ReadAt = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Notification) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+type NotificationKind string
+
+const (
+	NotificationKindAlertCreated  NotificationKind = "alert_created"
+	NotificationKindAlertAssigned NotificationKind = "alert_assigned"
+	NotificationKindTest          NotificationKind = "test"
+)
+
+// AllValues returns all NotificationKind values.
+func (NotificationKind) AllValues() []NotificationKind {
+	return []NotificationKind{
+		NotificationKindAlertCreated,
+		NotificationKindAlertAssigned,
+		NotificationKindTest,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s NotificationKind) MarshalText() ([]byte, error) {
+	switch s {
+	case NotificationKindAlertCreated:
+		return []byte(s), nil
+	case NotificationKindAlertAssigned:
+		return []byte(s), nil
+	case NotificationKindTest:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *NotificationKind) UnmarshalText(data []byte) error {
+	switch NotificationKind(data) {
+	case NotificationKindAlertCreated:
+		*s = NotificationKindAlertCreated
+		return nil
+	case NotificationKindAlertAssigned:
+		*s = NotificationKindAlertAssigned
+		return nil
+	case NotificationKindTest:
+		*s = NotificationKindTest
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/NotificationPage
+type NotificationPage struct {
+	Items  []Notification `json:"items"`
+	Next   OptString      `json:"next"`
+	Unread int            `json:"unread"`
+}
+
+// GetItems returns the value of Items.
+func (s *NotificationPage) GetItems() []Notification {
+	return s.Items
+}
+
+// GetNext returns the value of Next.
+func (s *NotificationPage) GetNext() OptString {
+	return s.Next
+}
+
+// GetUnread returns the value of Unread.
+func (s *NotificationPage) GetUnread() int {
+	return s.Unread
+}
+
+// SetItems sets the value of Items.
+func (s *NotificationPage) SetItems(val []Notification) {
+	s.Items = val
+}
+
+// SetNext sets the value of Next.
+func (s *NotificationPage) SetNext(val OptString) {
+	s.Next = val
+}
+
+// SetUnread sets the value of Unread.
+func (s *NotificationPage) SetUnread(val int) {
+	s.Unread = val
+}
+
+// Ref: #/components/schemas/NotificationSettings
+type NotificationSettings struct {
+	// Почта сразу, раз в сутки дайджестом или не отправлять.
+	EmailMode NotificationSettingsEmailMode `json:"emailMode"`
+	// Час дайджеста по Москве.
+	DigestHour int `json:"digestHour"`
+	// Начало тихих часов по Москве.
+	QuietFrom OptInt `json:"quietFrom"`
+	// Конец тихих часов.
+	QuietTo     OptInt        `json:"quietTo"`
+	MinSeverity AlertSeverity `json:"minSeverity"`
+	// Получать уведомления обо всех алертах (оператор).
+	SubscribeAll      bool          `json:"subscribeAll"`
+	SubscribeSeverity AlertSeverity `json:"subscribeSeverity"`
+}
+
+// GetEmailMode returns the value of EmailMode.
+func (s *NotificationSettings) GetEmailMode() NotificationSettingsEmailMode {
+	return s.EmailMode
+}
+
+// GetDigestHour returns the value of DigestHour.
+func (s *NotificationSettings) GetDigestHour() int {
+	return s.DigestHour
+}
+
+// GetQuietFrom returns the value of QuietFrom.
+func (s *NotificationSettings) GetQuietFrom() OptInt {
+	return s.QuietFrom
+}
+
+// GetQuietTo returns the value of QuietTo.
+func (s *NotificationSettings) GetQuietTo() OptInt {
+	return s.QuietTo
+}
+
+// GetMinSeverity returns the value of MinSeverity.
+func (s *NotificationSettings) GetMinSeverity() AlertSeverity {
+	return s.MinSeverity
+}
+
+// GetSubscribeAll returns the value of SubscribeAll.
+func (s *NotificationSettings) GetSubscribeAll() bool {
+	return s.SubscribeAll
+}
+
+// GetSubscribeSeverity returns the value of SubscribeSeverity.
+func (s *NotificationSettings) GetSubscribeSeverity() AlertSeverity {
+	return s.SubscribeSeverity
+}
+
+// SetEmailMode sets the value of EmailMode.
+func (s *NotificationSettings) SetEmailMode(val NotificationSettingsEmailMode) {
+	s.EmailMode = val
+}
+
+// SetDigestHour sets the value of DigestHour.
+func (s *NotificationSettings) SetDigestHour(val int) {
+	s.DigestHour = val
+}
+
+// SetQuietFrom sets the value of QuietFrom.
+func (s *NotificationSettings) SetQuietFrom(val OptInt) {
+	s.QuietFrom = val
+}
+
+// SetQuietTo sets the value of QuietTo.
+func (s *NotificationSettings) SetQuietTo(val OptInt) {
+	s.QuietTo = val
+}
+
+// SetMinSeverity sets the value of MinSeverity.
+func (s *NotificationSettings) SetMinSeverity(val AlertSeverity) {
+	s.MinSeverity = val
+}
+
+// SetSubscribeAll sets the value of SubscribeAll.
+func (s *NotificationSettings) SetSubscribeAll(val bool) {
+	s.SubscribeAll = val
+}
+
+// SetSubscribeSeverity sets the value of SubscribeSeverity.
+func (s *NotificationSettings) SetSubscribeSeverity(val AlertSeverity) {
+	s.SubscribeSeverity = val
+}
+
+// Почта сразу, раз в сутки дайджестом или не отправлять.
+type NotificationSettingsEmailMode string
+
+const (
+	NotificationSettingsEmailModeInstant NotificationSettingsEmailMode = "instant"
+	NotificationSettingsEmailModeDigest  NotificationSettingsEmailMode = "digest"
+	NotificationSettingsEmailModeFalse   NotificationSettingsEmailMode = "false"
+)
+
+// AllValues returns all NotificationSettingsEmailMode values.
+func (NotificationSettingsEmailMode) AllValues() []NotificationSettingsEmailMode {
+	return []NotificationSettingsEmailMode{
+		NotificationSettingsEmailModeInstant,
+		NotificationSettingsEmailModeDigest,
+		NotificationSettingsEmailModeFalse,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s NotificationSettingsEmailMode) MarshalText() ([]byte, error) {
+	switch s {
+	case NotificationSettingsEmailModeInstant:
+		return []byte(s), nil
+	case NotificationSettingsEmailModeDigest:
+		return []byte(s), nil
+	case NotificationSettingsEmailModeFalse:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *NotificationSettingsEmailMode) UnmarshalText(data []byte) error {
+	switch NotificationSettingsEmailMode(data) {
+	case NotificationSettingsEmailModeInstant:
+		*s = NotificationSettingsEmailModeInstant
+		return nil
+	case NotificationSettingsEmailModeDigest:
+		*s = NotificationSettingsEmailModeDigest
+		return nil
+	case NotificationSettingsEmailModeFalse:
+		*s = NotificationSettingsEmailModeFalse
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/NotificationsRead
+type NotificationsRead struct {
+	Ids []uuid.UUID `json:"ids"`
+	// Все непрочитанные.
+	All OptBool `json:"all"`
+}
+
+// GetIds returns the value of Ids.
+func (s *NotificationsRead) GetIds() []uuid.UUID {
+	return s.Ids
+}
+
+// GetAll returns the value of All.
+func (s *NotificationsRead) GetAll() OptBool {
+	return s.All
+}
+
+// SetIds sets the value of Ids.
+func (s *NotificationsRead) SetIds(val []uuid.UUID) {
+	s.Ids = val
+}
+
+// SetAll sets the value of All.
+func (s *NotificationsRead) SetAll(val OptBool) {
+	s.All = val
 }
 
 // Ref: #/components/schemas/OfficialPage
@@ -12112,6 +12469,52 @@ func (o OptUpdateUserStatus) Get() (v UpdateUserStatus, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptUpdateUserStatus) Or(d UpdateUserStatus) UpdateUserStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptWebhookLastStatus returns new OptWebhookLastStatus with value set to v.
+func NewOptWebhookLastStatus(v WebhookLastStatus) OptWebhookLastStatus {
+	return OptWebhookLastStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWebhookLastStatus is optional WebhookLastStatus.
+type OptWebhookLastStatus struct {
+	Value WebhookLastStatus
+	Set   bool
+}
+
+// IsSet returns true if OptWebhookLastStatus was set.
+func (o OptWebhookLastStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWebhookLastStatus) Reset() {
+	var v WebhookLastStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWebhookLastStatus) SetTo(v WebhookLastStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWebhookLastStatus) Get() (v WebhookLastStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWebhookLastStatus) Or(d WebhookLastStatus) WebhookLastStatus {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -18081,6 +18484,92 @@ func (s *StreetRank) SetPoint(val LngLat) {
 	s.Point = val
 }
 
+// Ref: #/components/schemas/TelegramLink
+type TelegramLink struct {
+	Code      string    `json:"code"`
+	URL       string    `json:"url"`
+	ExpiresAt time.Time `json:"expiresAt"`
+}
+
+// GetCode returns the value of Code.
+func (s *TelegramLink) GetCode() string {
+	return s.Code
+}
+
+// GetURL returns the value of URL.
+func (s *TelegramLink) GetURL() string {
+	return s.URL
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *TelegramLink) GetExpiresAt() time.Time {
+	return s.ExpiresAt
+}
+
+// SetCode sets the value of Code.
+func (s *TelegramLink) SetCode(val string) {
+	s.Code = val
+}
+
+// SetURL sets the value of URL.
+func (s *TelegramLink) SetURL(val string) {
+	s.URL = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *TelegramLink) SetExpiresAt(val time.Time) {
+	s.ExpiresAt = val
+}
+
+// Ref: #/components/schemas/TelegramStatus
+type TelegramStatus struct {
+	// Бот настроен на сервере.
+	Configured bool        `json:"configured"`
+	Bound      bool        `json:"bound"`
+	Username   OptString   `json:"username"`
+	BoundAt    OptDateTime `json:"boundAt"`
+}
+
+// GetConfigured returns the value of Configured.
+func (s *TelegramStatus) GetConfigured() bool {
+	return s.Configured
+}
+
+// GetBound returns the value of Bound.
+func (s *TelegramStatus) GetBound() bool {
+	return s.Bound
+}
+
+// GetUsername returns the value of Username.
+func (s *TelegramStatus) GetUsername() OptString {
+	return s.Username
+}
+
+// GetBoundAt returns the value of BoundAt.
+func (s *TelegramStatus) GetBoundAt() OptDateTime {
+	return s.BoundAt
+}
+
+// SetConfigured sets the value of Configured.
+func (s *TelegramStatus) SetConfigured(val bool) {
+	s.Configured = val
+}
+
+// SetBound sets the value of Bound.
+func (s *TelegramStatus) SetBound(val bool) {
+	s.Bound = val
+}
+
+// SetUsername sets the value of Username.
+func (s *TelegramStatus) SetUsername(val OptString) {
+	s.Username = val
+}
+
+// SetBoundAt sets the value of BoundAt.
+func (s *TelegramStatus) SetBoundAt(val OptDateTime) {
+	s.BoundAt = val
+}
+
 // Merged schema.
 // Ref: #/components/schemas/TerritoryProfile
 type TerritoryProfile struct {
@@ -18620,6 +19109,9 @@ func (s *TotpSetup) SetURL(val string) {
 	s.URL = val
 }
 
+// UnlinkTelegramNoContent is response for UnlinkTelegram operation.
+type UnlinkTelegramNoContent struct{}
+
 // Ref: #/components/schemas/UpdateProfile
 type UpdateProfile struct {
 	Name string `json:"name"`
@@ -18727,6 +19219,9 @@ func (s *UpdateUserStatus) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+// UpdateWebhookNoContent is response for UpdateWebhook operation.
+type UpdateWebhookNoContent struct{}
 
 // Ref: #/components/schemas/User
 type User struct {
@@ -19183,6 +19678,371 @@ func (s *VehicleProfile) SetEcoClass(val int) {
 // SetHazmat sets the value of Hazmat.
 func (s *VehicleProfile) SetHazmat(val bool) {
 	s.Hazmat = val
+}
+
+// Ref: #/components/schemas/Webhook
+type Webhook struct {
+	ID         uuid.UUID            `json:"id"`
+	Name       string               `json:"name"`
+	URL        string               `json:"url"`
+	Enabled    bool                 `json:"enabled"`
+	CreatedAt  time.Time            `json:"createdAt"`
+	LastStatus OptWebhookLastStatus `json:"lastStatus"`
+	LastAt     OptDateTime          `json:"lastAt"`
+}
+
+// GetID returns the value of ID.
+func (s *Webhook) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *Webhook) GetName() string {
+	return s.Name
+}
+
+// GetURL returns the value of URL.
+func (s *Webhook) GetURL() string {
+	return s.URL
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *Webhook) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Webhook) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetLastStatus returns the value of LastStatus.
+func (s *Webhook) GetLastStatus() OptWebhookLastStatus {
+	return s.LastStatus
+}
+
+// GetLastAt returns the value of LastAt.
+func (s *Webhook) GetLastAt() OptDateTime {
+	return s.LastAt
+}
+
+// SetID sets the value of ID.
+func (s *Webhook) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *Webhook) SetName(val string) {
+	s.Name = val
+}
+
+// SetURL sets the value of URL.
+func (s *Webhook) SetURL(val string) {
+	s.URL = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *Webhook) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Webhook) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetLastStatus sets the value of LastStatus.
+func (s *Webhook) SetLastStatus(val OptWebhookLastStatus) {
+	s.LastStatus = val
+}
+
+// SetLastAt sets the value of LastAt.
+func (s *Webhook) SetLastAt(val OptDateTime) {
+	s.LastAt = val
+}
+
+// Ref: #/components/schemas/WebhookCreated
+type WebhookCreated struct {
+	Webhook Webhook `json:"webhook"`
+	// Секрет подписи; показывается один раз.
+	Secret string `json:"secret"`
+}
+
+// GetWebhook returns the value of Webhook.
+func (s *WebhookCreated) GetWebhook() Webhook {
+	return s.Webhook
+}
+
+// GetSecret returns the value of Secret.
+func (s *WebhookCreated) GetSecret() string {
+	return s.Secret
+}
+
+// SetWebhook sets the value of Webhook.
+func (s *WebhookCreated) SetWebhook(val Webhook) {
+	s.Webhook = val
+}
+
+// SetSecret sets the value of Secret.
+func (s *WebhookCreated) SetSecret(val string) {
+	s.Secret = val
+}
+
+// Ref: #/components/schemas/WebhookDelivery
+type WebhookDelivery struct {
+	ID           uuid.UUID             `json:"id"`
+	Event        string                `json:"event"`
+	Status       WebhookDeliveryStatus `json:"status"`
+	Attempts     int                   `json:"attempts"`
+	ResponseCode OptInt                `json:"responseCode"`
+	LastError    OptString             `json:"lastError"`
+	CreatedAt    time.Time             `json:"createdAt"`
+	SentAt       OptDateTime           `json:"sentAt"`
+}
+
+// GetID returns the value of ID.
+func (s *WebhookDelivery) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetEvent returns the value of Event.
+func (s *WebhookDelivery) GetEvent() string {
+	return s.Event
+}
+
+// GetStatus returns the value of Status.
+func (s *WebhookDelivery) GetStatus() WebhookDeliveryStatus {
+	return s.Status
+}
+
+// GetAttempts returns the value of Attempts.
+func (s *WebhookDelivery) GetAttempts() int {
+	return s.Attempts
+}
+
+// GetResponseCode returns the value of ResponseCode.
+func (s *WebhookDelivery) GetResponseCode() OptInt {
+	return s.ResponseCode
+}
+
+// GetLastError returns the value of LastError.
+func (s *WebhookDelivery) GetLastError() OptString {
+	return s.LastError
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WebhookDelivery) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetSentAt returns the value of SentAt.
+func (s *WebhookDelivery) GetSentAt() OptDateTime {
+	return s.SentAt
+}
+
+// SetID sets the value of ID.
+func (s *WebhookDelivery) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetEvent sets the value of Event.
+func (s *WebhookDelivery) SetEvent(val string) {
+	s.Event = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WebhookDelivery) SetStatus(val WebhookDeliveryStatus) {
+	s.Status = val
+}
+
+// SetAttempts sets the value of Attempts.
+func (s *WebhookDelivery) SetAttempts(val int) {
+	s.Attempts = val
+}
+
+// SetResponseCode sets the value of ResponseCode.
+func (s *WebhookDelivery) SetResponseCode(val OptInt) {
+	s.ResponseCode = val
+}
+
+// SetLastError sets the value of LastError.
+func (s *WebhookDelivery) SetLastError(val OptString) {
+	s.LastError = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WebhookDelivery) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetSentAt sets the value of SentAt.
+func (s *WebhookDelivery) SetSentAt(val OptDateTime) {
+	s.SentAt = val
+}
+
+type WebhookDeliveryStatus string
+
+const (
+	WebhookDeliveryStatusPending WebhookDeliveryStatus = "pending"
+	WebhookDeliveryStatusDigest  WebhookDeliveryStatus = "digest"
+	WebhookDeliveryStatusSent    WebhookDeliveryStatus = "sent"
+	WebhookDeliveryStatusFailed  WebhookDeliveryStatus = "failed"
+	WebhookDeliveryStatusSkipped WebhookDeliveryStatus = "skipped"
+)
+
+// AllValues returns all WebhookDeliveryStatus values.
+func (WebhookDeliveryStatus) AllValues() []WebhookDeliveryStatus {
+	return []WebhookDeliveryStatus{
+		WebhookDeliveryStatusPending,
+		WebhookDeliveryStatusDigest,
+		WebhookDeliveryStatusSent,
+		WebhookDeliveryStatusFailed,
+		WebhookDeliveryStatusSkipped,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookDeliveryStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookDeliveryStatusPending:
+		return []byte(s), nil
+	case WebhookDeliveryStatusDigest:
+		return []byte(s), nil
+	case WebhookDeliveryStatusSent:
+		return []byte(s), nil
+	case WebhookDeliveryStatusFailed:
+		return []byte(s), nil
+	case WebhookDeliveryStatusSkipped:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookDeliveryStatus) UnmarshalText(data []byte) error {
+	switch WebhookDeliveryStatus(data) {
+	case WebhookDeliveryStatusPending:
+		*s = WebhookDeliveryStatusPending
+		return nil
+	case WebhookDeliveryStatusDigest:
+		*s = WebhookDeliveryStatusDigest
+		return nil
+	case WebhookDeliveryStatusSent:
+		*s = WebhookDeliveryStatusSent
+		return nil
+	case WebhookDeliveryStatusFailed:
+		*s = WebhookDeliveryStatusFailed
+		return nil
+	case WebhookDeliveryStatusSkipped:
+		*s = WebhookDeliveryStatusSkipped
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/WebhookInput
+type WebhookInput struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
+// GetName returns the value of Name.
+func (s *WebhookInput) GetName() string {
+	return s.Name
+}
+
+// GetURL returns the value of URL.
+func (s *WebhookInput) GetURL() string {
+	return s.URL
+}
+
+// SetName sets the value of Name.
+func (s *WebhookInput) SetName(val string) {
+	s.Name = val
+}
+
+// SetURL sets the value of URL.
+func (s *WebhookInput) SetURL(val string) {
+	s.URL = val
+}
+
+type WebhookLastStatus string
+
+const (
+	WebhookLastStatusPending WebhookLastStatus = "pending"
+	WebhookLastStatusDigest  WebhookLastStatus = "digest"
+	WebhookLastStatusSent    WebhookLastStatus = "sent"
+	WebhookLastStatusFailed  WebhookLastStatus = "failed"
+	WebhookLastStatusSkipped WebhookLastStatus = "skipped"
+)
+
+// AllValues returns all WebhookLastStatus values.
+func (WebhookLastStatus) AllValues() []WebhookLastStatus {
+	return []WebhookLastStatus{
+		WebhookLastStatusPending,
+		WebhookLastStatusDigest,
+		WebhookLastStatusSent,
+		WebhookLastStatusFailed,
+		WebhookLastStatusSkipped,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookLastStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookLastStatusPending:
+		return []byte(s), nil
+	case WebhookLastStatusDigest:
+		return []byte(s), nil
+	case WebhookLastStatusSent:
+		return []byte(s), nil
+	case WebhookLastStatusFailed:
+		return []byte(s), nil
+	case WebhookLastStatusSkipped:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookLastStatus) UnmarshalText(data []byte) error {
+	switch WebhookLastStatus(data) {
+	case WebhookLastStatusPending:
+		*s = WebhookLastStatusPending
+		return nil
+	case WebhookLastStatusDigest:
+		*s = WebhookLastStatusDigest
+		return nil
+	case WebhookLastStatusSent:
+		*s = WebhookLastStatusSent
+		return nil
+	case WebhookLastStatusFailed:
+		*s = WebhookLastStatusFailed
+		return nil
+	case WebhookLastStatusSkipped:
+		*s = WebhookLastStatusSkipped
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/WebhookUpdate
+type WebhookUpdate struct {
+	Enabled bool `json:"enabled"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *WebhookUpdate) GetEnabled() bool {
+	return s.Enabled
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *WebhookUpdate) SetEnabled(val bool) {
+	s.Enabled = val
 }
 
 // Ref: #/components/schemas/Widget

@@ -206,6 +206,20 @@ func encodeCreateViewRequest(
 	return nil
 }
 
+func encodeCreateWebhookRequest(
+	req *WebhookInput,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCurateFacilityRequest(
 	req *CurationRequest,
 	r *http.Request,
@@ -278,6 +292,20 @@ func encodeFacilityClustersRequest(
 
 func encodeHotspotsRequest(
 	req *HotspotsReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeMarkNotificationsReadRequest(
+	req *NotificationsRead,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -402,6 +430,20 @@ func encodeUpdateMeRequest(
 	return nil
 }
 
+func encodeUpdateNotificationSettingsRequest(
+	req *NotificationSettings,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeUpdateSettingsRequest(
 	req *Settings,
 	r *http.Request,
@@ -432,6 +474,20 @@ func encodeUpdateSourceRequest(
 
 func encodeUpdateUserRequest(
 	req *UpdateUser,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateWebhookRequest(
+	req *WebhookUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

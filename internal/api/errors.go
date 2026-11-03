@@ -48,6 +48,9 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 	if status, code, title, ok := alertProblem(err); ok {
 		return problem.New(status, code, title)
 	}
+	if status, code, title, ok := notifyProblem(err); ok {
+		return problem.New(status, code, title)
+	}
 	switch {
 	case errors.As(err, &pr):
 		return pr

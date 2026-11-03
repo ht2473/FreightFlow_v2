@@ -1659,6 +1659,178 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Центр уведомлений
+         * @description Новые уведомления приходят событием `notification.created` потока `GET /events`.
+         */
+        get: operations["listNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/notifications/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Отметить прочитанными */
+        post: operations["markNotificationsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/notification-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Предпочтения доставки */
+        get: operations["getNotificationSettings"];
+        /**
+         * Сохранить предпочтения доставки
+         * @description Подписка на все алерты сохраняется только у оператора (`alerts.manage`).
+         */
+        put: operations["updateNotificationSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Привязка Telegram */
+        get: operations["getTelegram"];
+        put?: never;
+        post?: never;
+        /** Отвязать Telegram */
+        delete: operations["unlinkTelegram"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/telegram/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Код привязки Telegram
+         * @description Одноразовый код на 15 минут. Ссылка открывает бота; бот получает «/start код» и
+         *     привязывает чат. Отвязать — командой /stop боту или `DELETE /me/telegram`.
+         */
+        post: operations["linkTelegram"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/webhooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Мои вебхуки */
+        get: operations["listWebhooks"];
+        put?: never;
+        /**
+         * Добавить вебхук
+         * @description Только HTTPS, адреса внутренней сети не принимаются. Запросы подписаны:
+         *     `X-FreightFlow-Signature: sha256=<hex HMAC-SHA256 секрета от «X-FreightFlow-Timestamp.тело»>`.
+         *     Секрет возвращается один раз.
+         */
+        post: operations["createWebhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/webhooks/{webhookId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Удалить вебхук с журналом доставок */
+        delete: operations["deleteWebhook"];
+        options?: never;
+        head?: never;
+        /** Включить или выключить вебхук */
+        patch: operations["updateWebhook"];
+        trace?: never;
+    };
+    "/me/webhooks/{webhookId}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Отправить пробное событие ping */
+        post: operations["testWebhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/webhooks/{webhookId}/deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Журнал доставок вебхука */
+        get: operations["listWebhookDeliveries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3371,6 +3543,103 @@ export interface components {
             id: string;
             name: string;
         };
+        Notification: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "alert_created" | "alert_assigned" | "test";
+            severity: components["schemas"]["AlertSeverity"];
+            title: string;
+            body: string;
+            /** @description Адрес в приложении */
+            link?: string;
+            /** Format: uuid */
+            alertId?: string;
+            /** Format: date-time */
+            readAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        NotificationPage: {
+            items: components["schemas"]["Notification"][];
+            next?: string;
+            unread: number;
+        };
+        NotificationsRead: {
+            ids?: string[];
+            /** @description Все непрочитанные */
+            all?: boolean;
+        };
+        NotificationSettings: {
+            /**
+             * @description Почта сразу, раз в сутки дайджестом или не отправлять
+             * @enum {string}
+             */
+            emailMode: "instant" | "digest" | "off";
+            /** @description Час дайджеста по Москве */
+            digestHour: number;
+            /** @description Начало тихих часов по Москве */
+            quietFrom?: number;
+            /** @description Конец тихих часов */
+            quietTo?: number;
+            minSeverity: components["schemas"]["AlertSeverity"];
+            /** @description Получать уведомления обо всех алертах (оператор) */
+            subscribeAll: boolean;
+            subscribeSeverity: components["schemas"]["AlertSeverity"];
+        };
+        TelegramStatus: {
+            /** @description Бот настроен на сервере */
+            configured: boolean;
+            bound: boolean;
+            username?: string;
+            /** Format: date-time */
+            boundAt?: string;
+        };
+        TelegramLink: {
+            code: string;
+            url: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        Webhook: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            url: string;
+            enabled: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** @enum {string} */
+            lastStatus?: "pending" | "digest" | "sent" | "failed" | "skipped";
+            /** Format: date-time */
+            lastAt?: string;
+        };
+        WebhookInput: {
+            name: string;
+            url: string;
+        };
+        WebhookUpdate: {
+            enabled: boolean;
+        };
+        WebhookCreated: {
+            webhook: components["schemas"]["Webhook"];
+            /** @description Секрет подписи; показывается один раз */
+            secret: string;
+        };
+        WebhookDelivery: {
+            /** Format: uuid */
+            id: string;
+            event: string;
+            /** @enum {string} */
+            status: "pending" | "digest" | "sent" | "failed" | "skipped";
+            attempts: number;
+            responseCode?: number;
+            lastError?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            sentAt?: string;
+        };
     };
     responses: {
         /** @description Ошибка (RFC 9457) */
@@ -3384,6 +3653,7 @@ export interface components {
         };
     };
     parameters: {
+        WebhookId: string;
         AlertId: string;
         AlertRuleId: string;
         SourceCode: string;
@@ -6092,6 +6362,300 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AlertRuleCheck"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listNotifications: {
+        parameters: {
+            query?: {
+                /** @description Только непрочитанные */
+                unread?: boolean;
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Уведомления, новые сверху, и число непрочитанных */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationPage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    markNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationsRead"];
+            };
+        };
+        responses: {
+            /** @description Отмечены */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getNotificationSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Предпочтения (по умолчанию, если не менялись) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationSettings"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateNotificationSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationSettings"];
+            };
+        };
+        responses: {
+            /** @description Сохранённые предпочтения */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationSettings"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getTelegram: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Настроен ли бот и привязан ли чат */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramStatus"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    unlinkTelegram: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Отвязан */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    linkTelegram: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Код и ссылка на бота */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramLink"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listWebhooks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Вебхуки со статусом последней доставки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Webhook"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WebhookInput"];
+            };
+        };
+        responses: {
+            /** @description Вебхук и секрет подписи */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookCreated"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                webhookId: components["parameters"]["WebhookId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Удалён */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                webhookId: components["parameters"]["WebhookId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WebhookUpdate"];
+            };
+        };
+        responses: {
+            /** @description Сохранено */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    testWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                webhookId: components["parameters"]["WebhookId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Результат доставки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookDelivery"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listWebhookDeliveries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                webhookId: components["parameters"]["WebhookId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Доставки, новые сверху (до 50) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookDelivery"][];
                 };
             };
             default: components["responses"]["Problem"];

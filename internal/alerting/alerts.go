@@ -344,3 +344,32 @@ func (s *Service) Act(ctx context.Context, a Actor, id uuid.UUID, c Change) (*Al
 	}
 	return s.Get(ctx, a, id)
 }
+
+// Notice — алерт для рассылки: каналы правила и его владелец.
+type Notice struct {
+	Alert    Alert
+	Channels []string
+}
+
+// Notice возвращает алерт для рассылки уведомлений без проверки видимости (вызывает доставщик).
+func (s *Service) Notice(ctx context.Context, id uuid.UUID) (*Notice, error) {
+	var n Notice
+	row := s.pool.QueryRow(ctx, `SELECT `+alertColumns+`, r.channels`+alertFrom+` WHERE a.id = $1`, id)
+	var details []byte
+	var geom *string
+	a := &n.Alert
+	err := row.Scan(&a.ID, &a.RuleID, &a.RuleName, &a.Kind, &a.OwnerID, &a.Entity, &a.Severity, &a.Status, &a.Title,
+		&a.Summary, &details, &geom, &a.Occurrences, &a.AssigneeID, &a.AssigneeName, &a.AcknowledgedAt, &a.ClosedAt,
+		&a.Resolution, &a.CreatedAt, &a.UpdatedAt, &a.LastSeenAt, &n.Channels)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	a.Details = details
+	if geom != nil {
+		a.Geometry = json.RawMessage(*geom)
+	}
+	return &n, nil
+}

@@ -734,6 +734,71 @@ func decodeDeleteViewParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// DeleteWebhookParams is parameters of deleteWebhook operation.
+type DeleteWebhookParams struct {
+	WebhookId uuid.UUID
+}
+
+func unpackDeleteWebhookParams(packed middleware.Parameters) (params DeleteWebhookParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "webhookId",
+			In:   "path",
+		}
+		params.WebhookId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteWebhookParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteWebhookParams, _ error) {
+	// Decode path: webhookId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "webhookId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.WebhookId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "webhookId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // EntityMetricsParams is parameters of entityMetrics operation.
 type EntityMetricsParams struct {
 	Level  EntityMetricsLevel
@@ -5229,6 +5294,235 @@ func decodeListFacilityReportsParams(args [0]string, argsEscaped bool, r *http.R
 	return params, nil
 }
 
+// ListNotificationsParams is parameters of listNotifications operation.
+type ListNotificationsParams struct {
+	// Только непрочитанные.
+	Unread OptBool   `json:",omitempty,omitzero"`
+	Cursor OptString `json:",omitempty,omitzero"`
+	Limit  OptInt    `json:",omitempty,omitzero"`
+}
+
+func unpackListNotificationsParams(packed middleware.Parameters) (params ListNotificationsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "unread",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Unread = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "cursor",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Cursor = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeListNotificationsParams(args [0]string, argsEscaped bool, r *http.Request) (params ListNotificationsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Set default value for query: unread.
+	{
+		val := bool(false)
+		params.Unread.SetTo(val)
+	}
+	// Decode query: unread.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "unread",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotUnreadVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotUnreadVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Unread.SetTo(paramsDotUnreadVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "unread",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: cursor.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCursorVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCursorVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Cursor.SetTo(paramsDotCursorVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Cursor.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     200,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "cursor",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(20)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           100,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ListRunsParams is parameters of listRuns operation.
 type ListRunsParams struct {
 	Code string
@@ -5760,6 +6054,71 @@ func decodeListViewsParams(args [0]string, argsEscaped bool, r *http.Request) (p
 		return params, &ogenerrors.DecodeParamError{
 			Name: "page",
 			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListWebhookDeliveriesParams is parameters of listWebhookDeliveries operation.
+type ListWebhookDeliveriesParams struct {
+	WebhookId uuid.UUID
+}
+
+func unpackListWebhookDeliveriesParams(packed middleware.Parameters) (params ListWebhookDeliveriesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "webhookId",
+			In:   "path",
+		}
+		params.WebhookId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeListWebhookDeliveriesParams(args [1]string, argsEscaped bool, r *http.Request) (params ListWebhookDeliveriesParams, _ error) {
+	// Decode path: webhookId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "webhookId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.WebhookId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "webhookId",
+			In:   "path",
 			Err:  err,
 		}
 	}
@@ -8609,6 +8968,71 @@ func decodeStartRunParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 	return params, nil
 }
 
+// TestWebhookParams is parameters of testWebhook operation.
+type TestWebhookParams struct {
+	WebhookId uuid.UUID
+}
+
+func unpackTestWebhookParams(packed middleware.Parameters) (params TestWebhookParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "webhookId",
+			In:   "path",
+		}
+		params.WebhookId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeTestWebhookParams(args [1]string, argsEscaped bool, r *http.Request) (params TestWebhookParams, _ error) {
+	// Decode path: webhookId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "webhookId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.WebhookId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "webhookId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UpdateAlertRuleParams is parameters of updateAlertRule operation.
 type UpdateAlertRuleParams struct {
 	RuleId uuid.UUID
@@ -8817,6 +9241,71 @@ func decodeUpdateUserParams(args [1]string, argsEscaped bool, r *http.Request) (
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "userId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateWebhookParams is parameters of updateWebhook operation.
+type UpdateWebhookParams struct {
+	WebhookId uuid.UUID
+}
+
+func unpackUpdateWebhookParams(packed middleware.Parameters) (params UpdateWebhookParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "webhookId",
+			In:   "path",
+		}
+		params.WebhookId = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeUpdateWebhookParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateWebhookParams, _ error) {
+	// Decode path: webhookId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "webhookId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.WebhookId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "webhookId",
 			In:   "path",
 			Err:  err,
 		}

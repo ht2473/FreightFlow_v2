@@ -1,0 +1,76 @@
+package notify
+
+// mailItem — алерт в письме.
+type mailItem struct {
+	Severity string
+	Title    string
+	Summary  string
+	Rule     string
+	When     string
+	Link     string
+}
+
+var severityLabels = map[string]string{"info": "Информация", "warning": "Предупреждение", "critical": "Критично"}
+
+var severityColors = map[string]string{"info": "#2563eb", "warning": "#b45309", "critical": "#b91c1c"}
+
+// Письма — таблицы со встроенными стилями: почтовые программы не поддерживают внешние стили.
+templ mailLayout(title string) {
+	<!DOCTYPE html>
+	<html lang="ru">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>{ title }</title>
+		</head>
+		<body style="margin:0;padding:24px;background:#f4f4f7;font-family:Arial,Helvetica,sans-serif;color:#1f2330;">
+			<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e3e4ea;border-radius:8px;">
+				<tr>
+					<td style="padding:16px 24px;border-bottom:1px solid #e3e4ea;font-weight:bold;font-size:15px;color:#4f46e5;">FreightFlow</td>
+				</tr>
+				<tr>
+					<td style="padding:20px 24px;">
+						{ children... }
+					</td>
+				</tr>
+				<tr>
+					<td style="padding:12px 24px;border-top:1px solid #e3e4ea;font-size:12px;color:#6b6f80;">
+						Уведомление по правилам оповещений FreightFlow. Каналы и тихие часы настраиваются в профиле.
+					</td>
+				</tr>
+			</table>
+		</body>
+	</html>
+}
+
+templ alertBlock(it mailItem) {
+	<p style={ "margin:0 0 6px;font-size:12px;font-weight:bold;color:" + severityColors[it.Severity] + ";" }>{ severityLabels[it.Severity] }</p>
+	<p style="margin:0 0 6px;font-size:16px;font-weight:bold;">{ it.Title }</p>
+	if it.Summary != "" {
+		<p style="margin:0 0 6px;font-size:14px;color:#3c4050;">{ it.Summary }</p>
+	}
+	<p style="margin:0 0 12px;font-size:12px;color:#6b6f80;">Правило «{ it.Rule }» · { it.When }</p>
+}
+
+templ alertEmail(it mailItem, heading string) {
+	@mailLayout(it.Title) {
+		if heading != "" {
+			<p style="margin:0 0 12px;font-size:14px;">{ heading }</p>
+		}
+		@alertBlock(it)
+		<a href={ templ.SafeURL(it.Link) } style="display:inline-block;padding:10px 16px;background:#4f46e5;color:#ffffff;text-decoration:none;border-radius:6px;font-size:14px;">Открыть алерт</a>
+	}
+}
+
+templ digestEmail(items []mailItem, link string) {
+	@mailLayout("Алерты за сутки") {
+		<p style="margin:0 0 16px;font-size:14px;">Новые алерты по вашим правилам: { len(items) }.</p>
+		for _, it := range items {
+			<div style="padding:12px 0;border-top:1px solid #e3e4ea;">
+				@alertBlock(it)
+				<a href={ templ.SafeURL(it.Link) } style="font-size:13px;color:#4f46e5;">Открыть</a>
+			</div>
+		}
+		<p style="margin:16px 0 0;"><a href={ templ.SafeURL(link) } style="font-size:14px;color:#4f46e5;">Все алерты</a></p>
+	}
+}

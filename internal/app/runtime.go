@@ -16,11 +16,14 @@ import (
 	"freightflow/internal/facility"
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
+	"freightflow/internal/notify"
 	"freightflow/internal/operations"
 	"freightflow/internal/platform/blob"
 	"freightflow/internal/platform/events"
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/jobs"
+	"freightflow/internal/platform/mail"
+	"freightflow/internal/platform/secret"
 	"freightflow/internal/platform/telemetry"
 	"freightflow/internal/report"
 	"freightflow/internal/routing"
@@ -86,6 +89,8 @@ type modules struct {
 	reports    *report.Service
 	scenarios  *scenario.Service
 	alerts     *alerting.Service
+	notify     *notify.Service
+	mailer     *mail.Sender
 	inserter   *jobs.Client
 }
 
@@ -106,10 +111,26 @@ func newModules(ctx context.Context, env *Env, rt *runtime) (*modules, error) {
 	}
 	facilities := facility.New(rt.pool)
 	routes := routing.NewService(rt.pool, routing.NewClient(env.Config.ValhallaURL))
+	cfg := env.Config
+	mailer := mail.NewSender(mail.Config{
+		Host: cfg.SMTP.Host, Port: cfg.SMTP.Port, User: cfg.SMTP.User, Password: cfg.SMTP.Password, From: cfg.SMTP.From,
+	})
+	box, err := secret.NewBox(cfg.EncryptionKey)
+	if err != nil {
+		return nil, err
+	}
+	alerts := alerting.New(rt.pool, inserter, env.Log.With("component", "alerting"))
+	notifier, err := notify.New(ctx, rt.pool, inserter, box, mailer, alerts, notify.Config{
+		BaseURL: cfg.BaseURL, TelegramToken: cfg.TelegramBotToken, TelegramAPI: cfg.TelegramAPIURL,
+		AllowPrivateWebhooks: cfg.IsDev(),
+	}, env.Log.With("component", "notify"))
+	if err != nil {
+		return nil, err
+	}
 	return &modules{
 		identity: ids, ingest: ing, facilities: facilities,
 		reports: report.New(rt.pool, inserter, rt.blobs, facilities), scenarios: scenario.New(rt.pool, inserter, routes, analytics.New(rt.pool)),
-		alerts:   alerting.New(rt.pool, inserter, env.Log.With("component", "alerting")),
+		alerts: alerts, notify: notifier, mailer: mailer,
 		inserter: inserter,
 	}, nil
 }
@@ -126,12 +147,13 @@ func (m *modules) registry(env *Env, pool *pgxpool.Pool) *jobs.Registry {
 	analytics.Register(reg, analytics.New(pool), env.Log.With("component", "analytics"))
 	scenario.Register(reg, m.scenarios, env.Log.With("component", "scenario"))
 	alerting.Register(reg, m.alerts, env.Log.With("component", "alerting"))
+	notify.Register(reg, m.notify, env.Log.With("component", "notify"))
 	return reg
 }
 
 // consumers — постоянные потребители событий модулей (исполняются вместе с фоновыми задачами).
 func (m *modules) consumers() []events.Consumer {
-	return []events.Consumer{m.alerts.Consumer()}
+	return []events.Consumer{m.alerts.Consumer(), m.notify.Consumer()}
 }
 
 // runWorkers исполняет фоновые задачи до отмены ctx и дожидается текущих при остановке.
@@ -171,5 +193,6 @@ func runWorker(ctx context.Context, env *Env, _ []string) error {
 	g.Go(func() error { return events.Listen(gctx, rt.pool, rt.bus, env.Log) })
 	g.Go(func() error { return rt.runWorkers(gctx, env, mods.registry(env, rt.pool)) })
 	g.Go(func() error { return events.RunConsumers(gctx, rt.pool, rt.bus, env.Log, mods.consumers()...) })
+	g.Go(func() error { return mods.notify.PollTelegram(gctx) })
 	return g.Wait()
 }

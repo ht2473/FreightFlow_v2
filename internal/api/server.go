@@ -21,6 +21,7 @@ import (
 	"freightflow/internal/facility"
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
+	"freightflow/internal/notify"
 	"freightflow/internal/platform/httpx"
 	"freightflow/internal/platform/mail"
 	"freightflow/internal/platform/ratelimit"
@@ -64,7 +65,9 @@ type Deps struct {
 	// Scenarios — сценарии и оценка локации.
 	Scenarios *scenario.Service
 	// Alerts — правила оповещений и алерты.
-	Alerts   *alerting.Service
+	Alerts *alerting.Service
+	// Notify — центр уведомлений и каналы доставки.
+	Notify   *notify.Service
 	Sessions *session.Manager
 	Mailer   Mailer
 	BaseURL  string
@@ -89,6 +92,7 @@ type Server struct {
 	routing     *routing.Service
 	scenarios   *scenario.Service
 	alerts      *alerting.Service
+	notify      *notify.Service
 	facilities  *facility.Service
 	reports     *report.Service
 	views       *views.Service
@@ -112,7 +116,7 @@ func New(d Deps) (http.Handler, error) {
 		return nil, err
 	}
 	s := &Server{
-		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, scenarios: d.Scenarios, alerts: d.Alerts, facilities: d.Facilities, reports: d.Reports, views: d.Views, territories: d.Territories, search: d.Search, analytics: d.Analytics, sessions: d.Sessions, mailer: d.Mailer,
+		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, scenarios: d.Scenarios, alerts: d.Alerts, notify: d.Notify, facilities: d.Facilities, reports: d.Reports, views: d.Views, territories: d.Territories, search: d.Search, analytics: d.Analytics, sessions: d.Sessions, mailer: d.Mailer,
 		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), routeLimit: d.RoutingLimit,
 	}
 	if s.routeLimit == nil {

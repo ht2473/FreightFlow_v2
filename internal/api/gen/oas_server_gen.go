@@ -145,6 +145,15 @@ type Handler interface {
 	//
 	// POST /views
 	CreateView(ctx context.Context, req *CreateViewReq) (*SavedView, error)
+	// CreateWebhook implements createWebhook operation.
+	//
+	// Только HTTPS, адреса внутренней сети не принимаются.
+	// Запросы подписаны:
+	// `X-FreightFlow-Signature: sha256=<hex HMAC-SHA256 секрета от «X-FreightFlow-Timestamp.тело»>`.
+	// Секрет возвращается один раз.
+	//
+	// POST /me/webhooks
+	CreateWebhook(ctx context.Context, req *WebhookInput) (*WebhookCreated, error)
 	// CurateFacility implements curateFacility operation.
 	//
 	// Действует последняя неотменённая правка поля; правки
@@ -183,6 +192,12 @@ type Handler interface {
 	//
 	// DELETE /views/{viewId}
 	DeleteView(ctx context.Context, params DeleteViewParams) error
+	// DeleteWebhook implements deleteWebhook operation.
+	//
+	// Удалить вебхук с журналом доставок.
+	//
+	// DELETE /me/webhooks/{webhookId}
+	DeleteWebhook(ctx context.Context, params DeleteWebhookParams) error
 	// DisableTotp implements disableTotp operation.
 	//
 	// Отключить двухфакторную защиту.
@@ -305,6 +320,12 @@ type Handler interface {
 	//
 	// GET /routing/analysis
 	GetNetworkAnalysis(ctx context.Context, params GetNetworkAnalysisParams) (*NetworkAnalysis, error)
+	// GetNotificationSettings implements getNotificationSettings operation.
+	//
+	// Предпочтения доставки.
+	//
+	// GET /me/notification-settings
+	GetNotificationSettings(ctx context.Context) (*NotificationSettings, error)
 	// GetPassStats implements getPassStats operation.
 	//
 	// Только агрегаты; номера пропусков и сведения о ТС не
@@ -380,6 +401,12 @@ type Handler interface {
 	//
 	// GET /site-selection/runs/{runId}
 	GetSiteRun(ctx context.Context, params GetSiteRunParams) (*SiteRun, error)
+	// GetTelegram implements getTelegram operation.
+	//
+	// Привязка Telegram.
+	//
+	// GET /me/telegram
+	GetTelegram(ctx context.Context) (*TelegramStatus, error)
 	// GetTerritory implements getTerritory operation.
 	//
 	// Профиль территории — показатели, граница, население,
@@ -399,6 +426,14 @@ type Handler interface {
 	//
 	// POST /analytics/hotspots
 	Hotspots(ctx context.Context, req *HotspotsReq) (*HotspotResult, error)
+	// LinkTelegram implements linkTelegram operation.
+	//
+	// Одноразовый код на 15 минут. Ссылка открывает бота; бот
+	// получает «/start код» и привязывает чат. Отвязать —
+	// командой /stop боту или `DELETE /me/telegram`.
+	//
+	// POST /me/telegram/link
+	LinkTelegram(ctx context.Context) (*TelegramLink, error)
 	// ListAlertAssignees implements listAlertAssignees operation.
 	//
 	// Кому можно назначить алерт.
@@ -467,6 +502,13 @@ type Handler interface {
 	//
 	// GET /metrics
 	ListMetrics(ctx context.Context) ([]MetricDef, error)
+	// ListNotifications implements listNotifications operation.
+	//
+	// Новые уведомления приходят событием `notification.created`
+	// потока `GET /events`.
+	//
+	// GET /me/notifications
+	ListNotifications(ctx context.Context, params ListNotificationsParams) (*NotificationPage, error)
 	// ListPermissions implements listPermissions operation.
 	//
 	// Справочник прав.
@@ -540,6 +582,24 @@ type Handler interface {
 	//
 	// GET /views
 	ListViews(ctx context.Context, params ListViewsParams) ([]SavedView, error)
+	// ListWebhookDeliveries implements listWebhookDeliveries operation.
+	//
+	// Журнал доставок вебхука.
+	//
+	// GET /me/webhooks/{webhookId}/deliveries
+	ListWebhookDeliveries(ctx context.Context, params ListWebhookDeliveriesParams) ([]WebhookDelivery, error)
+	// ListWebhooks implements listWebhooks operation.
+	//
+	// Мои вебхуки.
+	//
+	// GET /me/webhooks
+	ListWebhooks(ctx context.Context) ([]Webhook, error)
+	// MarkNotificationsRead implements markNotificationsRead operation.
+	//
+	// Отметить прочитанными.
+	//
+	// POST /me/notifications/read
+	MarkNotificationsRead(ctx context.Context, req *NotificationsRead) error
 	// MetricGeo implements metricGeo operation.
 	//
 	// Значения показателя с геометрией (GeoJSON) — картограмма
@@ -715,6 +775,18 @@ type Handler interface {
 	//
 	// POST /data/sources/{code}/runs
 	StartRun(ctx context.Context, req *StartRun, params StartRunParams) (*Run, error)
+	// TestWebhook implements testWebhook operation.
+	//
+	// Отправить пробное событие ping.
+	//
+	// POST /me/webhooks/{webhookId}/test
+	TestWebhook(ctx context.Context, params TestWebhookParams) (*WebhookDelivery, error)
+	// UnlinkTelegram implements unlinkTelegram operation.
+	//
+	// Отвязать Telegram.
+	//
+	// DELETE /me/telegram
+	UnlinkTelegram(ctx context.Context) error
 	// UpdateAlertRule implements updateAlertRule operation.
 	//
 	// Смена области или параметров сбрасывает запомненное
@@ -728,6 +800,13 @@ type Handler interface {
 	//
 	// PATCH /me
 	UpdateMe(ctx context.Context, req *UpdateProfile) (*Me, error)
+	// UpdateNotificationSettings implements updateNotificationSettings operation.
+	//
+	// Подписка на все алерты сохраняется только у оператора
+	// (`alerts.manage`).
+	//
+	// PUT /me/notification-settings
+	UpdateNotificationSettings(ctx context.Context, req *NotificationSettings) (*NotificationSettings, error)
 	// UpdateSettings implements updateSettings operation.
 	//
 	// Сохранить личные настройки.
@@ -746,6 +825,12 @@ type Handler interface {
 	//
 	// PATCH /admin/users/{userId}
 	UpdateUser(ctx context.Context, req *UpdateUser, params UpdateUserParams) (*User, error)
+	// UpdateWebhook implements updateWebhook operation.
+	//
+	// Включить или выключить вебхук.
+	//
+	// PATCH /me/webhooks/{webhookId}
+	UpdateWebhook(ctx context.Context, req *WebhookUpdate, params UpdateWebhookParams) error
 	// NewError creates *ProblemStatusCode from error returned by handler.
 	//
 	// Used for common default response.

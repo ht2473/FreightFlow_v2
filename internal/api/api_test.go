@@ -23,6 +23,7 @@ import (
 	"freightflow/internal/identity"
 	"freightflow/internal/ingest"
 	"freightflow/internal/ingest/sources/osm/osmtest"
+	"freightflow/internal/notify"
 	"freightflow/internal/platform/blob"
 	"freightflow/internal/platform/dbtest"
 	"freightflow/internal/platform/httpx"
@@ -106,11 +107,17 @@ func newFixture(t *testing.T) *fixture {
 		t.Fatal(err)
 	}
 	facilities := facility.New(pool)
+	alerts := alerting.New(pool, inserter, slog.New(slog.DiscardHandler))
+	notifier, err := notify.New(context.Background(), pool, inserter, box, mailer, alerts,
+		notify.Config{BaseURL: "http://test.local", AllowPrivateWebhooks: true}, slog.New(slog.DiscardHandler))
+	if err != nil {
+		t.Fatal(err)
+	}
 	h, err := New(Deps{
 		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
 		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facilities,
 		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Territories: territory.New(pool, facilities), Search: search.New(pool, facilities), Analytics: analytics.New(pool),
-		Alerts: alerting.New(pool, inserter, slog.New(slog.DiscardHandler)), Sessions: sessions, Mailer: mailer,
+		Alerts: alerts, Notify: notifier, Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})

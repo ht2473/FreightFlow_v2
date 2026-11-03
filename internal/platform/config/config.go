@@ -31,8 +31,10 @@ type Config struct {
 	SMTP SMTP
 
 	TelegramBotToken string `env:"FF_TELEGRAM_BOT_TOKEN"`
-	MosDataAPIKey    string `env:"FF_MOSDATA_API_KEY"`
-	RuCAFile         string `env:"FF_RU_CA_FILE"`
+	// TelegramAPIURL — адрес Bot API (подставной сервер в проверках).
+	TelegramAPIURL string `env:"FF_TELEGRAM_API_URL" envDefault:"https://api.telegram.org"`
+	MosDataAPIKey  string `env:"FF_MOSDATA_API_KEY"`
+	RuCAFile       string `env:"FF_RU_CA_FILE"`
 
 	ValhallaURL string `env:"FF_VALHALLA_URL" envDefault:"http://localhost:8002"`
 	PDFCDPURL   string `env:"FF_PDF_CDP_URL" envDefault:"ws://localhost:9222"`

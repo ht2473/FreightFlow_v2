@@ -42,6 +42,8 @@ tags:
     description: Сценарии «что если», устойчивость сети, оценка локации
   - name: alerts
     description: Правила оповещений и алерты
+  - name: notifications
+    description: Центр уведомлений, каналы доставки и предпочтения
 
 paths:
   /me:
@@ -2192,6 +2194,220 @@ paths:
               schema: { $ref: "#/components/schemas/AlertRuleCheck" }
         default: { $ref: "#/components/responses/Problem" }
 
+  /me/notifications:
+    get:
+      tags: [notifications]
+      operationId: listNotifications
+      summary: Центр уведомлений
+      description: Новые уведомления приходят событием `notification.created` потока `GET /events`.
+      x-permission: authenticated
+      parameters:
+        - name: unread
+          in: query
+          description: Только непрочитанные
+          schema: { type: boolean, default: false }
+        - name: cursor
+          in: query
+          schema: { type: string, maxLength: 200 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: Уведомления, новые сверху, и число непрочитанных
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationPage" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /me/notifications/read:
+    post:
+      tags: [notifications]
+      operationId: markNotificationsRead
+      summary: Отметить прочитанными
+      x-permission: authenticated
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotificationsRead" }
+      responses:
+        "204":
+          description: Отмечены
+        default: { $ref: "#/components/responses/Problem" }
+
+  /me/notification-settings:
+    get:
+      tags: [notifications]
+      operationId: getNotificationSettings
+      summary: Предпочтения доставки
+      x-permission: authenticated
+      responses:
+        "200":
+          description: Предпочтения (по умолчанию, если не менялись)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationSettings" }
+        default: { $ref: "#/components/responses/Problem" }
+    put:
+      tags: [notifications]
+      operationId: updateNotificationSettings
+      summary: Сохранить предпочтения доставки
+      description: Подписка на все алерты сохраняется только у оператора (`alerts.manage`).
+      x-permission: authenticated
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotificationSettings" }
+      responses:
+        "200":
+          description: Сохранённые предпочтения
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationSettings" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /me/telegram:
+    get:
+      tags: [notifications]
+      operationId: getTelegram
+      summary: Привязка Telegram
+      x-permission: authenticated
+      responses:
+        "200":
+          description: Настроен ли бот и привязан ли чат
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TelegramStatus" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [notifications]
+      operationId: unlinkTelegram
+      summary: Отвязать Telegram
+      x-permission: authenticated
+      responses:
+        "204":
+          description: Отвязан
+        default: { $ref: "#/components/responses/Problem" }
+
+  /me/telegram/link:
+    post:
+      tags: [notifications]
+      operationId: linkTelegram
+      summary: Код привязки Telegram
+      description: |
+        Одноразовый код на 15 минут. Ссылка открывает бота; бот получает «/start код» и
+        привязывает чат. Отвязать — командой /stop боту или `DELETE /me/telegram`.
+      x-permission: authenticated
+      responses:
+        "200":
+          description: Код и ссылка на бота
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TelegramLink" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /me/webhooks:
+    get:
+      tags: [notifications]
+      operationId: listWebhooks
+      summary: Мои вебхуки
+      x-permission: alerts.own
+      responses:
+        "200":
+          description: Вебхуки со статусом последней доставки
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Webhook" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [notifications]
+      operationId: createWebhook
+      summary: Добавить вебхук
+      description: |
+        Только HTTPS, адреса внутренней сети не принимаются. Запросы подписаны:
+        `X-FreightFlow-Signature: sha256=<hex HMAC-SHA256 секрета от «X-FreightFlow-Timestamp.тело»>`.
+        Секрет возвращается один раз.
+      x-permission: alerts.own
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebhookInput" }
+      responses:
+        "201":
+          description: Вебхук и секрет подписи
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebhookCreated" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /me/webhooks/{webhookId}:
+    patch:
+      tags: [notifications]
+      operationId: updateWebhook
+      summary: Включить или выключить вебхук
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/WebhookId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebhookUpdate" }
+      responses:
+        "204":
+          description: Сохранено
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [notifications]
+      operationId: deleteWebhook
+      summary: Удалить вебхук с журналом доставок
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/WebhookId"
+      responses:
+        "204":
+          description: Удалён
+        default: { $ref: "#/components/responses/Problem" }
+
+  /me/webhooks/{webhookId}/test:
+    post:
+      tags: [notifications]
+      operationId: testWebhook
+      summary: Отправить пробное событие ping
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/WebhookId"
+      responses:
+        "200":
+          description: Результат доставки
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebhookDelivery" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /me/webhooks/{webhookId}/deliveries:
+    get:
+      tags: [notifications]
+      operationId: listWebhookDeliveries
+      summary: Журнал доставок вебхука
+      x-permission: alerts.own
+      parameters:
+        - $ref: "#/components/parameters/WebhookId"
+      responses:
+        "200":
+          description: Доставки, новые сверху (до 50)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/WebhookDelivery" }
+        default: { $ref: "#/components/responses/Problem" }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -2203,6 +2419,11 @@ components:
       scheme: bearer
 
   parameters:
+    WebhookId:
+      name: webhookId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
     AlertId:
       name: alertId
       in: path
@@ -4701,3 +4922,115 @@ components:
       properties:
         id: { type: string, format: uuid }
         name: { type: string }
+
+    Notification:
+      type: object
+      required: [id, kind, severity, title, body, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [alert_created, alert_assigned, test] }
+        severity: { $ref: "#/components/schemas/AlertSeverity" }
+        title: { type: string }
+        body: { type: string }
+        link: { type: string, description: Адрес в приложении }
+        alertId: { type: string, format: uuid }
+        readAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    NotificationPage:
+      type: object
+      required: [items, unread]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Notification" }
+        next: { type: string }
+        unread: { type: integer }
+
+    NotificationsRead:
+      type: object
+      properties:
+        ids:
+          type: array
+          maxItems: 200
+          items: { type: string, format: uuid }
+        all: { type: boolean, description: Все непрочитанные }
+
+    NotificationSettings:
+      type: object
+      required: [emailMode, digestHour, minSeverity, subscribeAll, subscribeSeverity]
+      properties:
+        emailMode:
+          type: string
+          enum: [instant, digest, off]
+          description: Почта сразу, раз в сутки дайджестом или не отправлять
+        digestHour: { type: integer, minimum: 0, maximum: 23, description: Час дайджеста по Москве }
+        quietFrom: { type: integer, minimum: 0, maximum: 23, description: Начало тихих часов по Москве }
+        quietTo: { type: integer, minimum: 0, maximum: 23, description: Конец тихих часов }
+        minSeverity:
+          $ref: "#/components/schemas/AlertSeverity"
+        subscribeAll: { type: boolean, description: Получать уведомления обо всех алертах (оператор) }
+        subscribeSeverity:
+          $ref: "#/components/schemas/AlertSeverity"
+
+    TelegramStatus:
+      type: object
+      required: [configured, bound]
+      properties:
+        configured: { type: boolean, description: Бот настроен на сервере }
+        bound: { type: boolean }
+        username: { type: string }
+        boundAt: { type: string, format: date-time }
+
+    TelegramLink:
+      type: object
+      required: [code, url, expiresAt]
+      properties:
+        code: { type: string }
+        url: { type: string }
+        expiresAt: { type: string, format: date-time }
+
+    Webhook:
+      type: object
+      required: [id, name, url, enabled, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        url: { type: string }
+        enabled: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        lastStatus: { type: string, enum: [pending, digest, sent, failed, skipped] }
+        lastAt: { type: string, format: date-time }
+
+    WebhookInput:
+      type: object
+      required: [name, url]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 100 }
+        url: { type: string, minLength: 8, maxLength: 2000 }
+
+    WebhookUpdate:
+      type: object
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
+
+    WebhookCreated:
+      type: object
+      required: [webhook, secret]
+      properties:
+        webhook: { $ref: "#/components/schemas/Webhook" }
+        secret: { type: string, description: Секрет подписи; показывается один раз }
+
+    WebhookDelivery:
+      type: object
+      required: [id, event, status, attempts, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        event: { type: string }
+        status: { type: string, enum: [pending, digest, sent, failed, skipped] }
+        attempts: { type: integer }
+        responseCode: { type: integer }
+        lastError: { type: string }
+        createdAt: { type: string, format: date-time }
+        sentAt: { type: string, format: date-time }

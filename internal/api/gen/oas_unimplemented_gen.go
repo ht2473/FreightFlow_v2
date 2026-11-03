@@ -207,6 +207,18 @@ func (UnimplementedHandler) CreateView(ctx context.Context, req *CreateViewReq) 
 	return r, ht.ErrNotImplemented
 }
 
+// CreateWebhook implements createWebhook operation.
+//
+// Только HTTPS, адреса внутренней сети не принимаются.
+// Запросы подписаны:
+// `X-FreightFlow-Signature: sha256=<hex HMAC-SHA256 секрета от «X-FreightFlow-Timestamp.тело»>`.
+// Секрет возвращается один раз.
+//
+// POST /me/webhooks
+func (UnimplementedHandler) CreateWebhook(ctx context.Context, req *WebhookInput) (r *WebhookCreated, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CurateFacility implements curateFacility operation.
 //
 // Действует последняя неотменённая правка поля; правки
@@ -260,6 +272,15 @@ func (UnimplementedHandler) DeleteSiteRun(ctx context.Context, params DeleteSite
 //
 // DELETE /views/{viewId}
 func (UnimplementedHandler) DeleteView(ctx context.Context, params DeleteViewParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteWebhook implements deleteWebhook operation.
+//
+// Удалить вебхук с журналом доставок.
+//
+// DELETE /me/webhooks/{webhookId}
+func (UnimplementedHandler) DeleteWebhook(ctx context.Context, params DeleteWebhookParams) error {
 	return ht.ErrNotImplemented
 }
 
@@ -436,6 +457,15 @@ func (UnimplementedHandler) GetNetworkAnalysis(ctx context.Context, params GetNe
 	return r, ht.ErrNotImplemented
 }
 
+// GetNotificationSettings implements getNotificationSettings operation.
+//
+// Предпочтения доставки.
+//
+// GET /me/notification-settings
+func (UnimplementedHandler) GetNotificationSettings(ctx context.Context) (r *NotificationSettings, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetPassStats implements getPassStats operation.
 //
 // Только агрегаты; номера пропусков и сведения о ТС не
@@ -541,6 +571,15 @@ func (UnimplementedHandler) GetSiteRun(ctx context.Context, params GetSiteRunPar
 	return r, ht.ErrNotImplemented
 }
 
+// GetTelegram implements getTelegram operation.
+//
+// Привязка Telegram.
+//
+// GET /me/telegram
+func (UnimplementedHandler) GetTelegram(ctx context.Context) (r *TelegramStatus, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetTerritory implements getTerritory operation.
 //
 // Профиль территории — показатели, граница, население,
@@ -566,6 +605,17 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 //
 // POST /analytics/hotspots
 func (UnimplementedHandler) Hotspots(ctx context.Context, req *HotspotsReq) (r *HotspotResult, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// LinkTelegram implements linkTelegram operation.
+//
+// Одноразовый код на 15 минут. Ссылка открывает бота; бот
+// получает «/start код» и привязывает чат. Отвязать —
+// командой /stop боту или `DELETE /me/telegram`.
+//
+// POST /me/telegram/link
+func (UnimplementedHandler) LinkTelegram(ctx context.Context) (r *TelegramLink, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -664,6 +714,16 @@ func (UnimplementedHandler) ListLayers(ctx context.Context) (r *LayerCatalog, _ 
 //
 // GET /metrics
 func (UnimplementedHandler) ListMetrics(ctx context.Context) (r []MetricDef, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListNotifications implements listNotifications operation.
+//
+// Новые уведомления приходят событием `notification.created`
+// потока `GET /events`.
+//
+// GET /me/notifications
+func (UnimplementedHandler) ListNotifications(ctx context.Context, params ListNotificationsParams) (r *NotificationPage, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -774,6 +834,33 @@ func (UnimplementedHandler) ListVehicleProfiles(ctx context.Context) (r []Vehicl
 // GET /views
 func (UnimplementedHandler) ListViews(ctx context.Context, params ListViewsParams) (r []SavedView, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// ListWebhookDeliveries implements listWebhookDeliveries operation.
+//
+// Журнал доставок вебхука.
+//
+// GET /me/webhooks/{webhookId}/deliveries
+func (UnimplementedHandler) ListWebhookDeliveries(ctx context.Context, params ListWebhookDeliveriesParams) (r []WebhookDelivery, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListWebhooks implements listWebhooks operation.
+//
+// Мои вебхуки.
+//
+// GET /me/webhooks
+func (UnimplementedHandler) ListWebhooks(ctx context.Context) (r []Webhook, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MarkNotificationsRead implements markNotificationsRead operation.
+//
+// Отметить прочитанными.
+//
+// POST /me/notifications/read
+func (UnimplementedHandler) MarkNotificationsRead(ctx context.Context, req *NotificationsRead) error {
+	return ht.ErrNotImplemented
 }
 
 // MetricGeo implements metricGeo operation.
@@ -1032,6 +1119,24 @@ func (UnimplementedHandler) StartRun(ctx context.Context, req *StartRun, params 
 	return r, ht.ErrNotImplemented
 }
 
+// TestWebhook implements testWebhook operation.
+//
+// Отправить пробное событие ping.
+//
+// POST /me/webhooks/{webhookId}/test
+func (UnimplementedHandler) TestWebhook(ctx context.Context, params TestWebhookParams) (r *WebhookDelivery, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UnlinkTelegram implements unlinkTelegram operation.
+//
+// Отвязать Telegram.
+//
+// DELETE /me/telegram
+func (UnimplementedHandler) UnlinkTelegram(ctx context.Context) error {
+	return ht.ErrNotImplemented
+}
+
 // UpdateAlertRule implements updateAlertRule operation.
 //
 // Смена области или параметров сбрасывает запомненное
@@ -1048,6 +1153,16 @@ func (UnimplementedHandler) UpdateAlertRule(ctx context.Context, req *AlertRuleI
 //
 // PATCH /me
 func (UnimplementedHandler) UpdateMe(ctx context.Context, req *UpdateProfile) (r *Me, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateNotificationSettings implements updateNotificationSettings operation.
+//
+// Подписка на все алерты сохраняется только у оператора
+// (`alerts.manage`).
+//
+// PUT /me/notification-settings
+func (UnimplementedHandler) UpdateNotificationSettings(ctx context.Context, req *NotificationSettings) (r *NotificationSettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1076,6 +1191,15 @@ func (UnimplementedHandler) UpdateSource(ctx context.Context, req *UpdateSource,
 // PATCH /admin/users/{userId}
 func (UnimplementedHandler) UpdateUser(ctx context.Context, req *UpdateUser, params UpdateUserParams) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// UpdateWebhook implements updateWebhook operation.
+//
+// Включить или выключить вебхук.
+//
+// PATCH /me/webhooks/{webhookId}
+func (UnimplementedHandler) UpdateWebhook(ctx context.Context, req *WebhookUpdate, params UpdateWebhookParams) error {
+	return ht.ErrNotImplemented
 }
 
 // NewError creates *ProblemStatusCode from error returned by handler.

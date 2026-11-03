@@ -50,6 +50,11 @@ type Config struct {
 	AllowPrivate bool
 	// Cookies — хранить cookie между запросами клиента (сайты, где выгрузка требует сессии).
 	Cookies bool
+	// AnyHost — без списка хостов (адреса задают пользователи, например вебхуки); запрет
+	// внутренней сети при этом действует.
+	AnyHost bool
+	// NoRetry — без повторов внутри клиента (повторяет очередь задач).
+	NoRetry bool
 }
 
 // Client — HTTP-клиент источника.
@@ -62,7 +67,7 @@ type Client struct {
 
 // New создаёт клиент. Контекст ограничивает определение адресов системного прокси.
 func New(ctx context.Context, cfg Config) (*Client, error) {
-	if len(cfg.Hosts) == 0 {
+	if len(cfg.Hosts) == 0 && !cfg.AnyHost {
 		return nil, errors.New("outbound: allowlist is empty")
 	}
 	tlsCfg := &tls.Config{MinVersion: tls.VersionTLS12}
@@ -101,6 +106,9 @@ func New(ctx context.Context, cfg Config) (*Client, error) {
 	if retries == 0 {
 		retries = 3
 	}
+	if cfg.NoRetry {
+		retries = 0
+	}
 	ua := cfg.UserAgent
 	if ua == "" {
 		ua = "FreightFlow"
@@ -116,7 +124,7 @@ func New(ctx context.Context, cfg Config) (*Client, error) {
 	return &Client{
 		http: &http.Client{
 			Jar:       jar,
-			Transport: allowlist{hosts: cfg.Hosts, next: transport},
+			Transport: allowlist{hosts: cfg.Hosts, any: cfg.AnyHost, next: transport},
 			Timeout:   timeout,
 			CheckRedirect: func(_ *http.Request, via []*http.Request) error {
 				if len(via) >= 5 {
@@ -174,6 +182,16 @@ func (c *Client) PostJSON(ctx context.Context, rawURL string, body []byte) (*Res
 func (c *Client) Post(ctx context.Context, rawURL, contentType string, body []byte) (*Response, error) {
 	return c.send(ctx, http.MethodPost, rawURL, body, func(h http.Header) {
 		h.Set("Content-Type", contentType)
+	})
+}
+
+// PostHeaders выполняет POST с телом и дополнительными заголовками (подпись вебхука).
+func (c *Client) PostHeaders(ctx context.Context, rawURL, contentType string, body []byte, extra http.Header) (*Response, error) {
+	return c.send(ctx, http.MethodPost, rawURL, body, func(h http.Header) {
+		h.Set("Content-Type", contentType)
+		for k, v := range extra {
+			h[k] = v
+		}
 	})
 }
 
@@ -313,6 +331,7 @@ func redact(raw string) string {
 // allowlist пропускает запросы только к разрешённым хостам, в том числе при перенаправлениях.
 type allowlist struct {
 	hosts []string
+	any   bool
 	next  http.RoundTripper
 }
 
@@ -320,7 +339,7 @@ func (a allowlist) RoundTrip(req *http.Request) (*http.Response, error) {
 	if req.URL.Scheme != "https" && req.URL.Scheme != "http" {
 		return nil, fmt.Errorf("%w: scheme %s", ErrHostNotAllowed, req.URL.Scheme)
 	}
-	if !hostAllowed(a.hosts, req.URL.Hostname()) {
+	if !a.any && !hostAllowed(a.hosts, req.URL.Hostname()) {
 		return nil, fmt.Errorf("%w: %s", ErrHostNotAllowed, req.URL.Hostname())
 	}
 	return a.next.RoundTrip(req)
