@@ -105,6 +105,8 @@ type Server struct {
 	baseURL     string
 	log         *slog.Logger
 	perms       map[string]string
+	// readOps — операции GET: субъекту только для чтения (печать отчёта) доступны только они.
+	readOps map[string]bool
 }
 
 var _ gen.Handler = (*Server)(nil)
@@ -117,7 +119,7 @@ func New(d Deps) (http.Handler, error) {
 	}
 	s := &Server{
 		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, scenarios: d.Scenarios, alerts: d.Alerts, notify: d.Notify, facilities: d.Facilities, reports: d.Reports, views: d.Views, territories: d.Territories, search: d.Search, analytics: d.Analytics, sessions: d.Sessions, mailer: d.Mailer,
-		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), routeLimit: d.RoutingLimit,
+		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), readOps: readIndex(ops), routeLimit: d.RoutingLimit,
 	}
 	if s.routeLimit == nil {
 		s.routeLimit = ratelimit.New(time.Second, routingBurst)

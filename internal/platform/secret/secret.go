@@ -4,6 +4,7 @@ package secret
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
@@ -14,7 +15,8 @@ import (
 
 // Box шифрует данные AES-256-GCM. Формат шифротекста: nonce || ciphertext.
 type Box struct {
-	aead cipher.AEAD
+	aead   cipher.AEAD
+	macKey []byte
 }
 
 // NewBox создаёт шифратор из ключа в hex (32 байта).
@@ -34,7 +36,16 @@ func NewBox(hexKey string) (*Box, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create gcm: %w", err)
 	}
-	return &Box{aead: aead}, nil
+	// Ключ подписей выводится из ключа шифрования: один секрет в настройках, разные ключи.
+	mac := sha256.Sum256(append([]byte("freightflow-mac:"), key...))
+	return &Box{aead: aead, macKey: mac[:]}, nil
+}
+
+// MAC — подпись данных HMAC-SHA256 ключом, выведенным из ключа шифрования.
+func (b *Box) MAC(data []byte) []byte {
+	m := hmac.New(sha256.New, b.macKey)
+	m.Write(data)
+	return m.Sum(nil)
 }
 
 // Seal шифрует plaintext.

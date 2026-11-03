@@ -51,3 +51,14 @@ func permissionIndex(ops []Operation) map[string]string {
 	}
 	return idx
 }
+
+// readIndex — операции чтения (GET) по идентификатору в нижнем регистре.
+func readIndex(ops []Operation) map[string]bool {
+	idx := make(map[string]bool, len(ops))
+	for _, op := range ops {
+		if strings.EqualFold(op.Method, "get") {
+			idx[strings.ToLower(op.ID)] = true
+		}
+	}
+	return idx
+}

@@ -71,6 +71,9 @@ func (s *Server) authorize(ctx context.Context, op gen.OperationName, p identity
 	if perm != PermAuthenticated && !p.Has(identity.Permission(perm)) {
 		return ctx, errForbidden
 	}
+	if p.ReadOnly && !s.readOps[strings.ToLower(string(op))] {
+		return ctx, errForbidden
+	}
 	return context.WithValue(ctx, principalKey{}, p), nil
 }
 

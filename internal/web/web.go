@@ -428,7 +428,7 @@ func (h *handler) app(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	if _, _, ok := h.Sessions.UserID(r.Context()); !ok {
+	if _, _, ok := h.Sessions.UserID(r.Context()); !ok && !h.printToken(r) {
 		http.Redirect(w, r, "/login?next="+url.QueryEscape(r.URL.RequestURI()), http.StatusSeeOther)
 		return
 	}
@@ -461,4 +461,15 @@ func (h *handler) internalError(w http.ResponseWriter, r *http.Request, err erro
 	h.Log.ErrorContext(r.Context(), "web handler error", "request_id", httpx.RequestID(r.Context()), "error", err)
 	h.render(w, r, http.StatusInternalServerError, messagePage(h.page(r, "Ошибка"),
 		"Что-то пошло не так. Попробуйте ещё раз; если ошибка повторится — сообщите администратору.", "/", "На главную"))
+}
+
+// printToken — запрос страницы печати отчёта со службы pdf: токен печати в Authorization
+// вместо сессии (только страницы /print/).
+func (h *handler) printToken(r *http.Request) bool {
+	token, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
+	if !ok || !strings.HasPrefix(r.URL.Path, "/print/") {
+		return false
+	}
+	p, err := h.Identity.AuthenticateAPIToken(r.Context(), token)
+	return err == nil && p.ReadOnly
 }

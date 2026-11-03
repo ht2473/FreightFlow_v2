@@ -37,6 +37,8 @@ type Principal struct {
 	Roles       []string
 	Permissions []Permission
 	TokenID     *uuid.UUID
+	// ReadOnly — субъект токена печати отчёта: только чтение.
+	ReadOnly bool
 }
 
 // Has сообщает, есть ли у субъекта право.

@@ -72,6 +72,9 @@ func (s *Service) CreateAPIToken(ctx context.Context, owner Principal, name stri
 
 // AuthenticateAPIToken проверяет токен и возвращает субъекта с правами в пределах областей токена.
 func (s *Service) AuthenticateAPIToken(ctx context.Context, plain string) (Principal, error) {
+	if strings.HasPrefix(plain, printPrefix) {
+		return s.printPrincipal(ctx, plain)
+	}
 	if !strings.HasPrefix(plain, tokenPrefix) {
 		return Principal{}, ErrInvalidToken
 	}
