@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/http/pprof"
 	"net/url"
 	"os"
 	"time"
@@ -80,6 +81,13 @@ func (rt *runtime) close(ctx context.Context) {
 func (rt *runtime) serveMetrics(ctx context.Context, env *Env, addr string) error {
 	mux := http.NewServeMux()
 	mux.Handle("GET /metrics", rt.tel.Handler())
+	if env.Config.Pprof {
+		mux.HandleFunc("GET /debug/pprof/", pprof.Index)
+		mux.HandleFunc("GET /debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("GET /debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("GET /debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("GET /debug/pprof/trace", pprof.Trace)
+	}
 	return httpx.Serve(ctx, env.Log, "metrics", addr, mux)
 }
 

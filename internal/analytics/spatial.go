@@ -140,7 +140,7 @@ func (s *Service) Hotspots(ctx context.Context, p HotspotParams) (*HotspotResult
 		ids[i] = h.H3
 	}
 	geoms := map[string]json.RawMessage{}
-	grows, err := s.pool.Query(ctx, `SELECT h3::text, ST_AsGeoJSON(geom, 6) FROM territory.h3_cell WHERE h3::text = ANY($1)`, ids)
+	grows, err := s.pool.Query(ctx, `SELECT h3::text, ST_AsGeoJSON(geom, 6) FROM territory.h3_cell WHERE h3 = ANY($1::text[]::h3index[])`, ids)
 	if err != nil {
 		return nil, err
 	}

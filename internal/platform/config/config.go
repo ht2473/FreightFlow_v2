@@ -20,7 +20,9 @@ type Config struct {
 	MetricsAddr string `env:"FF_METRICS_ADDR" envDefault:"127.0.0.1:9090"`
 	// WorkerMetricsAddr — метрики отдельного процесса worker.
 	WorkerMetricsAddr string `env:"FF_WORKER_METRICS_ADDR" envDefault:"127.0.0.1:9091"`
-	DevViteURL        string `env:"FF_DEV_VITE_URL" envDefault:"http://localhost:5173"`
+	// Pprof — профилировщик /debug/pprof на адресе метрик (только для диагностики).
+	Pprof      bool   `env:"FF_PPROF" envDefault:"false"`
+	DevViteURL string `env:"FF_DEV_VITE_URL" envDefault:"http://localhost:5173"`
 
 	DatabaseURL string `env:"FF_DATABASE_URL,required"`
 	DataDir     string `env:"FF_DATA_DIR" envDefault:"./var"`

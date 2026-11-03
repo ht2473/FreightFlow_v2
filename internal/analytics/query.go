@@ -60,14 +60,19 @@ type Value struct {
 	Rank, Of int
 }
 
+// entityID — ключ объекта уровня как uuid (NULL, если ключ не uuid: у части участков сети это
+// составной ключ). Сравнение id = entityID идёт по первичному ключу; id::text = v.entity —
+// полным просмотром таблицы на каждую строку.
+const entityID = `(CASE WHEN v.entity ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN v.entity::uuid END)`
+
 // labels — подпись объекта уровня.
 const labels = `CASE v.level
 	WHEN 'city' THEN 'Москва'
-	WHEN 'district' THEN (SELECT name FROM territory.admin_area WHERE id::text = v.entity)
-	WHEN 'okrug' THEN (SELECT coalesce(short_name, name) FROM territory.admin_area WHERE id::text = v.entity)
+	WHEN 'district' THEN (SELECT name FROM territory.admin_area WHERE id = ` + entityID + `)
+	WHEN 'okrug' THEN (SELECT coalesce(short_name, name) FROM territory.admin_area WHERE id = ` + entityID + `)
 	WHEN 'facility' THEN (SELECT coalesce(f.name, t.name) FROM infra.facility f JOIN ref.facility_type t ON t.code = f.type_code
-	                      WHERE f.id::text = v.entity)
-	WHEN 'segment' THEN coalesce(v.inputs ->> 'name', (SELECT s.name FROM network.road_segment s WHERE s.id::text = v.entity))
+	                      WHERE f.id = ` + entityID + `)
+	WHEN 'segment' THEN coalesce(v.inputs ->> 'name', (SELECT s.name FROM network.road_segment s WHERE s.id = ` + entityID + `))
 	ELSE v.entity END`
 
 func scanValues(rows pgx.Rows) ([]Value, error) {
@@ -100,12 +105,15 @@ func (s *Service) Values(ctx context.Context, code, level string, series bool, l
 	if series {
 		order, cond = `v.period`, `v.period IS NOT NULL`
 	}
+	// Подписи — только для возвращаемых строк: место и число считаются по всем значениям уровня.
 	rows, err := s.pool.Query(ctx, `
-		SELECT v.metric_code, v.level, v.entity, `+labels+`, v.period, v.value, v.inputs,
-		       (rank() OVER (ORDER BY v.value DESC))::int, (count(*) OVER ())::int
-		FROM analytics.metric_value v
-		WHERE v.metric_code = $1 AND v.level = $2 AND `+cond+`
-		ORDER BY `+order+` LIMIT $3`, code, level, limit)
+		SELECT v.metric_code, v.level, v.entity, `+labels+`, v.period, v.value, v.inputs, v.rank, v.n FROM (
+			SELECT v.metric_code, v.level, v.entity, v.period, v.value, v.inputs,
+			       (rank() OVER (ORDER BY v.value DESC))::int AS rank, (count(*) OVER ())::int AS n
+			FROM analytics.metric_value v
+			WHERE v.metric_code = $1 AND v.level = $2 AND `+cond+`
+			ORDER BY `+order+` LIMIT $3
+		) v ORDER BY `+order, code, level, limit)
 	if err != nil {
 		return nil, err
 	}

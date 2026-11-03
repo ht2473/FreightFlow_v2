@@ -32,6 +32,9 @@ func Open(ctx context.Context, url string) (*pgxpool.Pool, error) {
 	cfg.MaxConnIdleTime = 5 * time.Minute
 	cfg.ConnConfig.RuntimeParams["application_name"] = "freightflow"
 	cfg.ConnConfig.RuntimeParams["timezone"] = "Europe/Moscow"
+	// Без JIT: стоимость пространственных запросов оценивается с большим запасом, и компиляция
+	// (сотни миллисекунд) срабатывала на коротких запросах интерфейса дольше самого выполнения.
+	cfg.ConnConfig.RuntimeParams["jit"] = "off"
 	// Трассы и метрики запросов берут глобальные провайдеры OpenTelemetry (platform/telemetry).
 	cfg.ConnConfig.Tracer = otelpgx.NewTracer(
 		otelpgx.WithSpanNameCtxFunc(queryName),

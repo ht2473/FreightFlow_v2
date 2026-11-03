@@ -122,9 +122,10 @@ func (s *Service) Geo(ctx context.Context, code, level string) (json.RawMessage,
 	var geom string
 	switch level {
 	case LevelDistrict, LevelOkrug:
-		geom = `(SELECT ST_SimplifyPreserveTopology(a.geom, 0.0003) FROM territory.admin_area a WHERE a.id::text = v.entity)`
+		geom = `(SELECT ST_SimplifyPreserveTopology(a.geom, 0.0003) FROM territory.admin_area a WHERE a.id = ` + entityID + `)`
 	case LevelH3r8, LevelH3r9:
-		geom = `(SELECT c.geom FROM territory.h3_cell c WHERE c.h3::text = v.entity)`
+		// Ключ ячейки — индекс H3: сравнение по типу h3index идёт по первичному ключу.
+		geom = `(SELECT c.geom FROM territory.h3_cell c WHERE c.h3 = v.entity::h3index)`
 	default:
 		return nil, fmt.Errorf("%w: карта уровня %s", ErrUnknown, level)
 	}

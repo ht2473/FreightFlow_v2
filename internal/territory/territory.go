@@ -100,7 +100,7 @@ const rowsFrom = `
 	) op ON true
 	LEFT JOIN LATERAL (
 		SELECT count(*)::int AS n, coalesce(sum(f.building_area_m2), 0)::float8 AS m2 FROM infra.facility f
-		WHERE f.status = 'active' AND (CASE a.kind WHEN 'district' THEN f.district_id ELSE f.okrug_id END) = a.id
+		WHERE f.status = 'active' AND (a.kind = 'district' AND f.district_id = a.id OR a.kind <> 'district' AND f.okrug_id = a.id)
 	) fc ON true
 	LEFT JOIN LATERAL (
 		SELECT count(*)::int AS n FROM infra.poi x WHERE x.point && a.geom AND ST_Intersects(x.point, a.geom)

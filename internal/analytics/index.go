@@ -306,8 +306,8 @@ func (s *Service) indexInputs(ctx context.Context, ix Index, level string) (map[
 	collect(ix)
 	rows, err := s.pool.Query(ctx, `
 		SELECT v.metric_code, v.entity, v.value,
-		       CASE v.level WHEN 'district' THEN (SELECT name FROM territory.admin_area WHERE id::text = v.entity)
-		                    WHEN 'okrug' THEN (SELECT coalesce(short_name, name) FROM territory.admin_area WHERE id::text = v.entity)
+		       CASE v.level WHEN 'district' THEN (SELECT name FROM territory.admin_area WHERE id = `+entityID+`)
+		                    WHEN 'okrug' THEN (SELECT coalesce(short_name, name) FROM territory.admin_area WHERE id = `+entityID+`)
 		                    ELSE v.entity END
 		FROM analytics.metric_value v
 		WHERE v.level = $1 AND v.period IS NULL AND v.metric_code = ANY($2)`, level, refs)
