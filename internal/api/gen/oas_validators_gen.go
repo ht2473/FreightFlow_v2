@@ -2383,6 +2383,8 @@ func (s ExportFormat) Validate() error {
 		return nil
 	case "geojson":
 		return nil
+	case "gpkg":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
@@ -2486,6 +2488,8 @@ func (s ExportRequestFormat) Validate() error {
 	case "xlsx":
 		return nil
 	case "geojson":
+		return nil
+	case "gpkg":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

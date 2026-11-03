@@ -4178,6 +4178,7 @@ const (
 	ExportFormatCsv     ExportFormat = "csv"
 	ExportFormatXlsx    ExportFormat = "xlsx"
 	ExportFormatGeojson ExportFormat = "geojson"
+	ExportFormatGpkg    ExportFormat = "gpkg"
 )
 
 // AllValues returns all ExportFormat values.
@@ -4186,6 +4187,7 @@ func (ExportFormat) AllValues() []ExportFormat {
 		ExportFormatCsv,
 		ExportFormatXlsx,
 		ExportFormatGeojson,
+		ExportFormatGpkg,
 	}
 }
 
@@ -4197,6 +4199,8 @@ func (s ExportFormat) MarshalText() ([]byte, error) {
 	case ExportFormatXlsx:
 		return []byte(s), nil
 	case ExportFormatGeojson:
+		return []byte(s), nil
+	case ExportFormatGpkg:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4214,6 +4218,9 @@ func (s *ExportFormat) UnmarshalText(data []byte) error {
 		return nil
 	case ExportFormatGeojson:
 		*s = ExportFormatGeojson
+		return nil
+	case ExportFormatGpkg:
+		*s = ExportFormatGpkg
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -4308,6 +4315,7 @@ const (
 	ExportRequestFormatCsv     ExportRequestFormat = "csv"
 	ExportRequestFormatXlsx    ExportRequestFormat = "xlsx"
 	ExportRequestFormatGeojson ExportRequestFormat = "geojson"
+	ExportRequestFormatGpkg    ExportRequestFormat = "gpkg"
 )
 
 // AllValues returns all ExportRequestFormat values.
@@ -4316,6 +4324,7 @@ func (ExportRequestFormat) AllValues() []ExportRequestFormat {
 		ExportRequestFormatCsv,
 		ExportRequestFormatXlsx,
 		ExportRequestFormatGeojson,
+		ExportRequestFormatGpkg,
 	}
 }
 
@@ -4327,6 +4336,8 @@ func (s ExportRequestFormat) MarshalText() ([]byte, error) {
 	case ExportRequestFormatXlsx:
 		return []byte(s), nil
 	case ExportRequestFormatGeojson:
+		return []byte(s), nil
+	case ExportRequestFormatGpkg:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4344,6 +4355,9 @@ func (s *ExportRequestFormat) UnmarshalText(data []byte) error {
 		return nil
 	case ExportRequestFormatGeojson:
 		*s = ExportRequestFormatGeojson
+		return nil
+	case ExportRequestFormatGpkg:
+		*s = ExportRequestFormatGpkg
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

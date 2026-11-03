@@ -105,6 +105,7 @@ func (w *ScheduleWorker) Work(ctx context.Context, _ *river.Job[ScheduleArgs]) e
 // Register добавляет задачи выгрузок и отчётов.
 func Register(reg *jobs.Registry, svc *Service, log *slog.Logger) {
 	jobs.Register(reg, &ExportWorker{Service: svc})
+	reg.RequireTools(jobs.QueueGIS, "ogr2ogr")
 	jobs.Register(reg, &RenderWorker{Service: svc})
 	jobs.Register(reg, &ScheduleWorker{Service: svc, Log: log})
 	jobs.Register(reg, &CleanupWorker{Service: svc, Log: log})

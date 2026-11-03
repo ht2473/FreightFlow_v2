@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -80,7 +81,7 @@ func TestFacilityExports(t *testing.T) {
 		t.Error("csv without BOM")
 	}
 	recs, err := csv.NewReader(bytes.NewReader(b[len(utf8BOM):])).ReadAll()
-	if err != nil || len(recs) != active+1 || recs[0][1] != "Название" || recs[1][len(recs[1])-1] != facilityAttribution {
+	if err != nil || len(recs) != active+1 || recs[0][1] != "Название" || !strings.HasPrefix(recs[1][len(recs[1])-1], facilityAttribution) {
 		t.Fatalf("csv: %d records, %v", len(recs), err)
 	}
 
@@ -93,7 +94,7 @@ func TestFacilityExports(t *testing.T) {
 	if err != nil || len(rows) != active+1 {
 		t.Fatalf("xlsx: %d rows, %v", len(rows), err)
 	}
-	if v, _ := x.GetCellValue("Источники", "A1"); v != facilityAttribution {
+	if v, _ := x.GetCellValue("Источники", "A1"); !strings.HasPrefix(v, facilityAttribution) {
 		t.Errorf("xlsx attribution %q", v)
 	}
 
@@ -108,7 +109,7 @@ func TestFacilityExports(t *testing.T) {
 		}
 	}
 	if err := json.Unmarshal(read(FormatGeoJSON), &fc); err != nil || len(fc.Features) != active ||
-		fc.Attribution != facilityAttribution || fc.Features[0].Geometry.Type != "Point" {
+		!strings.HasPrefix(fc.Attribution, facilityAttribution) || fc.Features[0].Geometry.Type != "Point" {
 		t.Fatalf("geojson: %d features, %v", len(fc.Features), err)
 	}
 

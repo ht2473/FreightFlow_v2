@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -94,7 +95,12 @@ func (s *Service) CreateFacilities(ctx context.Context, userID uuid.UUID, format
 		if e, err = scanExport(row); err != nil {
 			return err
 		}
-		_, err = s.jobs.InsertTx(ctx, tx, ExportArgs{ID: e.ID}, &river.InsertOpts{Queue: jobs.QueueReports})
+		// GeoPackage собирает GDAL: такие задания выполняет worker с ogr2ogr.
+		queue := jobs.QueueReports
+		if format == FormatGPKG {
+			queue = jobs.QueueGIS
+		}
+		_, err = s.jobs.InsertTx(ctx, tx, ExportArgs{ID: e.ID}, &river.InsertOpts{Queue: queue})
 		return err
 	})
 	return e, err
@@ -152,6 +158,7 @@ var contentTypes = map[string]string{
 	FormatCSV:     "text/csv; charset=utf-8",
 	FormatXLSX:    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 	FormatGeoJSON: "application/geo+json",
+	FormatGPKG:    "application/geopackage+sqlite3",
 }
 
 // run формирует файл выгрузки: выборка → поток в нужном формате → хранилище.
@@ -173,10 +180,18 @@ func (s *Service) run(ctx context.Context, id uuid.UUID) error {
 	if err := json.Unmarshal(params, &p); err != nil {
 		return s.fail(ctx, id, fmt.Errorf("params: %w", err))
 	}
+	// Дата данных — последняя публикация реестра: она указывается рядом с атрибуцией.
+	var dataDate time.Time
+	_ = s.pool.QueryRow(ctx, `SELECT coalesce(max(published_at), '0001-01-01') FROM ingest.data_version
+		WHERE domain IN ('facility', 'infra')`).Scan(&dataDate)
+	attr := attribution(dataDate)
+	if format == FormatGPKG {
+		return s.runGPKG(ctx, id, p, attr, dataDate)
+	}
 	pr, pw := io.Pipe()
 	rows := 0
 	go func() {
-		w, err := newWriter(format, pw)
+		w, err := newWriter(format, pw, attr)
 		if err == nil {
 			err = s.facilities.Each(ctx, p.Filter, p.Sort, func(it facility.Item) error {
 				rows++
@@ -191,6 +206,31 @@ func (s *Service) run(ctx context.Context, id uuid.UUID) error {
 	obj, err := s.blobs.Put(ctx, "exports", format, pr)
 	if err != nil {
 		_ = pr.CloseWithError(err)
+		return s.fail(ctx, id, err)
+	}
+	_, err = s.pool.Exec(ctx, `UPDATE report.export SET status = 'done', rows = $2, file_path = $3, file_size = $4,
+		finished_at = now() WHERE id = $1`, id, rows, obj.Path, obj.Size)
+	return err
+}
+
+// runGPKG формирует GeoPackage во временном каталоге и кладёт его в хранилище.
+func (s *Service) runGPKG(ctx context.Context, id uuid.UUID, p FacilityParams, attr string, dataDate time.Time) error {
+	dir, err := os.MkdirTemp("", "ff-gpkg-")
+	if err != nil {
+		return s.fail(ctx, id, err)
+	}
+	defer func() { _ = os.RemoveAll(dir) }()
+	path, rows, err := s.writeGPKG(ctx, dir, p, attr, dataDate)
+	if err != nil {
+		return s.fail(ctx, id, err)
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return s.fail(ctx, id, err)
+	}
+	defer func() { _ = f.Close() }()
+	obj, err := s.blobs.Put(ctx, "exports", FormatGPKG, f)
+	if err != nil {
 		return s.fail(ctx, id, err)
 	}
 	_, err = s.pool.Exec(ctx, `UPDATE report.export SET status = 'done', rows = $2, file_path = $3, file_size = $4,

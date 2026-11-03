@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 
 	"github.com/xuri/excelize/v2"
 
@@ -17,20 +18,28 @@ import (
 const facilityAttribution = "© участники OpenStreetMap (ODbL 1.0); адреса — Адресный реестр объектов недвижимости, " +
 	"портал открытых данных Москвы data.mos.ru (CC BY 4.0); время до МКАД — расчёт FreightFlow по графу сети"
 
+// attribution — атрибуция выгрузки с датой данных реестра (последняя публикация домена).
+func attribution(dataDate time.Time) string {
+	if dataDate.IsZero() {
+		return facilityAttribution
+	}
+	return facilityAttribution + "; данные реестра на " + dataDate.Format("02.01.2006")
+}
+
 // rowWriter пишет строки реестра в формат выгрузки.
 type rowWriter interface {
 	Write(it facility.Item) error
 	Close() error
 }
 
-func newWriter(format string, w io.Writer) (rowWriter, error) {
+func newWriter(format string, w io.Writer, attr string) (rowWriter, error) {
 	switch format {
 	case FormatCSV:
-		return newCSVWriter(w)
+		return newCSVWriter(w, attr)
 	case FormatXLSX:
-		return newXLSXWriter(w)
+		return newXLSXWriter(w, attr)
 	case FormatGeoJSON:
-		return newGeoJSONWriter(w)
+		return newGeoJSONWriter(w, attr)
 	}
 	return nil, fmt.Errorf("unknown export format %q", format)
 }
@@ -54,7 +63,7 @@ func str(v *string) string {
 }
 
 // cells — значения строки: числа — числами (для XLSX), пустые — nil.
-func cells(it facility.Item) []any {
+func cells(it facility.Item, attr string) []any {
 	num := func(v *float64) any {
 		if v == nil {
 			return nil
@@ -68,7 +77,7 @@ func cells(it facility.Item) []any {
 	return []any{
 		it.ID.String(), str(it.Name), it.TypeName, str(it.Address), str(it.Okrug), str(it.District), ringNames[str(it.Ring)],
 		num(it.BuildingM2), num(it.FloorM2), num(it.TerritoryM2), it.Buildings, it.Confidence, num(it.MkadMin),
-		permit, it.Lat, it.Lon, it.FirstSeen.Format("2006-01-02"), facilityAttribution,
+		permit, it.Lat, it.Lon, it.FirstSeen.Format("2006-01-02"), attr,
 	}
 }
 
@@ -77,21 +86,22 @@ var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
 
 // csvWriter — UTF-8 с BOM (Excel распознаёт кодировку), разделитель — запятая, дробная часть — точка.
 type csvWriter struct {
-	buf *bufio.Writer
-	w   *csv.Writer
+	attr string
+	buf  *bufio.Writer
+	w    *csv.Writer
 }
 
-func newCSVWriter(w io.Writer) (*csvWriter, error) {
+func newCSVWriter(w io.Writer, attr string) (*csvWriter, error) {
 	buf := bufio.NewWriter(w)
 	if _, err := buf.Write(utf8BOM); err != nil {
 		return nil, err
 	}
-	c := &csvWriter{buf: buf, w: csv.NewWriter(buf)}
+	c := &csvWriter{attr: attr, buf: buf, w: csv.NewWriter(buf)}
 	return c, c.w.Write(facilityHeader)
 }
 
 func (c *csvWriter) Write(it facility.Item) error {
-	vals := cells(it)
+	vals := cells(it, c.attr)
 	rec := make([]string, len(vals))
 	for i, v := range vals {
 		switch x := v.(type) {
@@ -119,15 +129,16 @@ func (c *csvWriter) Close() error {
 
 // xlsxWriter — лист «Объекты» потоковой записью и лист «Источники» с атрибуцией.
 type xlsxWriter struct {
-	out io.Writer
-	f   *excelize.File
-	sw  *excelize.StreamWriter
-	row int
+	attr string
+	out  io.Writer
+	f    *excelize.File
+	sw   *excelize.StreamWriter
+	row  int
 }
 
 const xlsxSheet = "Объекты"
 
-func newXLSXWriter(w io.Writer) (*xlsxWriter, error) {
+func newXLSXWriter(w io.Writer, attr string) (*xlsxWriter, error) {
 	f := excelize.NewFile()
 	if err := f.SetSheetName("Sheet1", xlsxSheet); err != nil {
 		return nil, err
@@ -153,7 +164,7 @@ func newXLSXWriter(w io.Writer) (*xlsxWriter, error) {
 	if err := sw.SetRow("A1", head, excelize.RowOpts{Height: 30}); err != nil {
 		return nil, err
 	}
-	return &xlsxWriter{out: w, f: f, sw: sw, row: 1}, nil
+	return &xlsxWriter{attr: attr, out: w, f: f, sw: sw, row: 1}, nil
 }
 
 func (x *xlsxWriter) Write(it facility.Item) error {
@@ -162,7 +173,7 @@ func (x *xlsxWriter) Write(it facility.Item) error {
 	if err != nil {
 		return err
 	}
-	return x.sw.SetRow(cell, cells(it))
+	return x.sw.SetRow(cell, cells(it, x.attr))
 }
 
 func (x *xlsxWriter) Close() error {
@@ -172,7 +183,7 @@ func (x *xlsxWriter) Close() error {
 	if _, err := x.f.NewSheet("Источники"); err != nil {
 		return err
 	}
-	if err := x.f.SetCellValue("Источники", "A1", facilityAttribution); err != nil {
+	if err := x.f.SetCellValue("Источники", "A1", x.attr); err != nil {
 		return err
 	}
 	if _, err := x.f.WriteTo(x.out); err != nil {
@@ -187,9 +198,9 @@ type geoJSONWriter struct {
 	first bool
 }
 
-func newGeoJSONWriter(w io.Writer) (*geoJSONWriter, error) {
+func newGeoJSONWriter(w io.Writer, attribution string) (*geoJSONWriter, error) {
 	buf := bufio.NewWriter(w)
-	attr, err := json.Marshal(facilityAttribution)
+	attr, err := json.Marshal(attribution)
 	if err != nil {
 		return nil, err
 	}

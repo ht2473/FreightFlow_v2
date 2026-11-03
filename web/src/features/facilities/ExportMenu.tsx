@@ -13,6 +13,7 @@ const formats: { id: Format; label: string }[] = [
   { id: "xlsx", label: "Excel (XLSX)" },
   { id: "csv", label: "CSV (UTF-8, запятая)" },
   { id: "geojson", label: "GeoJSON (точки)" },
+  { id: "gpkg", label: "GeoPackage (для QGIS)" },
 ];
 
 /** Размер файла: «1,2 МБ», «340 КБ». */

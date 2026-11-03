@@ -9262,6 +9262,8 @@ func (s *ExportFormat) Decode(d *jx.Decoder) error {
 		*s = ExportFormatXlsx
 	case ExportFormatGeojson:
 		*s = ExportFormatGeojson
+	case ExportFormatGpkg:
+		*s = ExportFormatGpkg
 	default:
 		*s = ExportFormat(v)
 	}
@@ -9485,6 +9487,8 @@ func (s *ExportRequestFormat) Decode(d *jx.Decoder) error {
 		*s = ExportRequestFormatXlsx
 	case ExportRequestFormatGeojson:
 		*s = ExportRequestFormatGeojson
+	case ExportRequestFormatGpkg:
+		*s = ExportRequestFormatGpkg
 	default:
 		*s = ExportRequestFormat(v)
 	}

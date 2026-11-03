@@ -2535,7 +2535,7 @@ export interface components {
             /** @enum {string} */
             kind: "facilities";
             /** @enum {string} */
-            format: "csv" | "xlsx" | "geojson";
+            format: "csv" | "xlsx" | "geojson" | "gpkg";
             filter?: components["schemas"]["FacilityFilter"];
             sort?: string;
         };
@@ -2545,7 +2545,7 @@ export interface components {
             /** @enum {string} */
             kind: "facilities";
             /** @enum {string} */
-            format: "csv" | "xlsx" | "geojson";
+            format: "csv" | "xlsx" | "geojson" | "gpkg";
             /** @enum {string} */
             status: "queued" | "running" | "done" | "failed";
             rows?: number;

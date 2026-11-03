@@ -24,8 +24,10 @@ import (
 // Очереди задач (03-architecture.md §17). Параллелизм ограничен по очереди: тяжёлые
 // импорты и расчёты не вытесняют доставку уведомлений.
 const (
-	QueueIngest      = "ingest"
-	QueueOSM         = "osm"
+	QueueIngest = "ingest"
+	QueueOSM    = "osm"
+	// QueueGIS — выгрузки, которые собирает GDAL (GeoPackage); обслуживает worker с ogr2ogr.
+	QueueGIS         = "gis"
 	QueueRouting     = "routing"
 	QueueScenario    = "scenario"
 	QueueAnalytics   = "analytics"
@@ -40,6 +42,7 @@ var queueWorkers = map[string]int{
 	river.QueueDefault: 2,
 	QueueIngest:        2,
 	QueueOSM:           1,
+	QueueGIS:           1,
 	QueueRouting:       1,
 	// Сценарии пользователя — отдельно от часового сетевого анализа в routing.
 	QueueScenario:    2,

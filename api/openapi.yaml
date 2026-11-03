@@ -3559,7 +3559,7 @@ components:
       required: [kind, format]
       properties:
         kind: { type: string, enum: [facilities] }
-        format: { type: string, enum: [csv, xlsx, geojson] }
+        format: { type: string, enum: [csv, xlsx, geojson, gpkg] }
         filter: { $ref: "#/components/schemas/FacilityFilter" }
         sort: { type: string, maxLength: 100 }
 
@@ -3569,7 +3569,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         kind: { type: string, enum: [facilities] }
-        format: { type: string, enum: [csv, xlsx, geojson] }
+        format: { type: string, enum: [csv, xlsx, geojson, gpkg] }
         status: { type: string, enum: [queued, running, done, failed] }
         rows: { type: integer }
         fileSize: { type: integer, format: int64 }
