@@ -49,6 +49,7 @@ func commands() []command {
 		{"search", "поиск: reindex [-force] [вид...] (индекс документов)", runSearch},
 		{"migrate", "миграции базы данных: up | down | status", runMigrate},
 		{"admin", "администрирование: create-user | reset-2fa", runAdmin},
+		{"demo", "демонстрационный набор для учётной записи: -email ... (нужен запущенный сервер)", runDemo},
 		{"version", "версия сборки", runVersion},
 	}
 }
