@@ -13,9 +13,9 @@ env:
 
 tasks:
   up:
-    desc: Запустить службы разработки (БД, почта)
+    desc: Запустить службы разработки (БД, почта, служба pdf для отчётов)
     cmds:
-      - "{{.COMPOSE}} up -d --build db mailpit"
+      - "{{.COMPOSE}} --profile pdf up -d --build db mailpit pdf"
 
   down:
     desc: Остановить службы разработки
