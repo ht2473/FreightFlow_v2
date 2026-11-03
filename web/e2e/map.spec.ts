@@ -198,10 +198,31 @@ test("карта: инструменты рисования переживают
   expect(errors).toEqual([]);
 });
 
-test("карта: не уходит за охват подложки", async ({ page }) => {
+test("карта: не уходит за охват подложки и на большом экране", async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1200 });
   await login(page, analyst, "/map?c=30.00000,50.00000&z=5");
-  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
-  // Вид из адреса за пределами охвата приводится к рамке Москвы и агломерации при первом движении.
+  const canvas = page.locator(".maplibregl-canvas");
+  await expect(canvas).toBeVisible();
+  // Вид из адреса за пределами охвата приводится к рамке подложки при первом движении.
   await page.getByRole("button", { name: "Отдалить" }).click();
-  await expect(page).toHaveURL(/c=3[6-9]\.[0-9]+%2C5[4-6]\.[0-9]+&z=8/);
+  await expect(page).toHaveURL(/c=3[6-9]\.[0-9]+%2C5[4-6]\.[0-9]+&z=/);
+  // Тянем карту вниз до упора: верхний край окна не выходит за северную границу рамки (56,55°).
+  const box = await canvas.boundingBox();
+  const cx = (box?.x ?? 0) + (box?.width ?? 0) / 2;
+  const cy = (box?.y ?? 0) + (box?.height ?? 0) / 2;
+  for (let i = 0; i < 3; i++) {
+    await page.mouse.move(cx, cy - 200);
+    await page.mouse.down();
+    await page.mouse.move(cx, cy + 300, { steps: 8 });
+    await page.mouse.up();
+  }
+  await expect(page).toHaveURL(/c=/);
+  await page.waitForTimeout(500);
+  const params = new URL(page.url()).searchParams;
+  const lat = Number((params.get("c") ?? "").split(",")[1]);
+  const z = Number(params.get("z"));
+  const merc = (d: number) => (1 - Math.log(Math.tan(Math.PI / 4 + (d * Math.PI) / 360)) / Math.PI) / 2;
+  const topY = merc(lat) - (box?.height ?? 0) / 2 / (512 * 2 ** z);
+  const topLat = (Math.atan(Math.sinh(Math.PI * (1 - 2 * topY))) * 180) / Math.PI;
+  expect(topLat).toBeLessThanOrEqual(56.56);
 });

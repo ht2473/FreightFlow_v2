@@ -50,7 +50,10 @@ test("сценарий: перекрытие моста, расчёт, срав�
   }
 
   // Одна карта вместо двух.
-  await page.locator("label").filter({ has: page.getByRole("switch", { name: "Сравнение на двух картах" }) }).click();
+  await page
+    .locator("label")
+    .filter({ has: page.getByRole("switch", { name: "Сравнение на двух картах" }) })
+    .click();
   await expect(page.locator(".maplibregl-canvas")).toHaveCount(1);
 
   // Сценарий в списке; удаление.

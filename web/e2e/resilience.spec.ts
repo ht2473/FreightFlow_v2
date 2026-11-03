@@ -26,10 +26,13 @@ test("устойчивость сети: рейтинг ущерба, слой �
 
   // Первое место — сценарий с перекрытием этим элементом.
   const name = (await rows.nth(1).getByRole("cell").nth(1).innerText()).split("\n")[0] ?? "";
-  await rows.nth(1).getByRole("link", { name: /^Сценарий с перекрытием/ }).click();
+  await rows
+    .nth(1)
+    .getByRole("link", { name: /^Сценарий с перекрытием/ })
+    .click();
   await expect(page.getByRole("heading", { level: 1, name: "Новый сценарий" })).toBeVisible();
   await expect(page.getByRole("button", { name: new RegExp(`Убрать перекрытие «${name}`) })).toBeVisible();
-  await expect(page.getByLabel("Название")).toHaveValue(new RegExp("^Выпадение: "));
+  await expect(page.getByLabel("Название")).toHaveValue(/^Выпадение: /);
 
   // Слой устойчивости на карте.
   await page.goto("/map?l=resilience,rings&z=11");

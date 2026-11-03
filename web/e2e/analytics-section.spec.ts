@@ -16,7 +16,9 @@ test("дашборд: плитки, ряды с прогнозом, рейтин
   await expect(page.getByText("Объектов логистики", { exact: true })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("img", { name: /Действующие пропуска грузовиков: ряд и прогноз/ })).toBeVisible();
   await expect(page.getByText(/Прогноз на 12 мес\./).first()).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByRole("list", { name: "Индекс логистической привлекательности" }).getByRole("link").first()).toBeVisible();
+  await expect(
+    page.getByRole("list", { name: "Индекс логистической привлекательности" }).getByRole("link").first(),
+  ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Требуют внимания" })).toBeVisible();
   await expect(page.getByRole("list", { name: "Обновления данных" }).getByRole("listitem").first()).toBeVisible();
   for (const scheme of ["light", "dark"] as const) {
@@ -36,7 +38,9 @@ test("дашборд: плитки, ряды с прогнозом, рейтин
   await dlg.getByRole("button", { name: /Показатель/ }).click();
   await page.getByRole("option", { name: "Плотность складских площадей" }).click();
   await dlg.getByRole("button", { name: "Добавить" }).click();
-  await expect(page.getByRole("list", { name: "Рейтинг: Плотность складских площадей" })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("list", { name: "Рейтинг: Плотность складских площадей" })).toBeVisible({
+    timeout: 15_000,
+  });
   // Тот же виджет второй раз не предлагается.
   await page.getByRole("button", { name: "Добавить виджет" }).click();
   await dlg.getByRole("button", { name: /Вид/ }).click();
@@ -60,7 +64,9 @@ test("дашборд: плитки, ряды с прогнозом, рейтин
   expect(errors).toEqual([]);
 });
 
-test("аналитика: показатели с картограммой, индексы с весами, ряды, горячие точки, методики", async ({ page }, info) => {
+test("аналитика: показатели с картограммой, индексы с весами, ряды, горячие точки, методики", async ({
+  page,
+}, info) => {
   test.setTimeout(150_000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -77,8 +83,13 @@ test("аналитика: показатели с картограммой, ин
   await page.screenshot({ path: info.outputPath("analytics-metrics.png") });
 
   // Методика показателя — подсказка «?».
-  await page.getByRole("button", { name: /^Методика: / }).first().click();
-  await expect(page.getByRole("dialog", { name: /^Методика: / }).getByRole("link", { name: "Все методики" })).toBeVisible();
+  await page
+    .getByRole("button", { name: /^Методика: / })
+    .first()
+    .click();
+  await expect(
+    page.getByRole("dialog", { name: /^Методика: / }).getByRole("link", { name: "Все методики" }),
+  ).toBeVisible();
   await page.keyboard.press("Escape");
 
   // Индексы: изменение веса пересчитывает рейтинг без сохранения; чувствительность.
