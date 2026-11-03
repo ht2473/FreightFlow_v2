@@ -31,7 +31,13 @@ func metricDef(d analytics.Def) gen.MetricDef {
 func metricValue(v analytics.Value) (gen.MetricValue, error) {
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(v.Inputs, &fields); err != nil {
-		return gen.MetricValue{}, err
+		// Входные данные — список (причины достоверности объекта): поле inputs — объект по
+		// спецификации, список передаётся под ключом items.
+		var list []json.RawMessage
+		if lerr := json.Unmarshal(v.Inputs, &list); lerr != nil {
+			return gen.MetricValue{}, err
+		}
+		fields = map[string]json.RawMessage{"items": v.Inputs}
 	}
 	inputs := gen.MetricValueInputs{}
 	for k, raw := range fields {
