@@ -376,3 +376,27 @@
   color: var(--tx2);
   font-size: 12.5px;
 }
+
+.skip {
+  position: fixed;
+  z-index: 100;
+  top: 8px;
+  left: 8px;
+  padding: 8px 12px;
+  border-radius: var(--r2);
+  background: var(--panel);
+  box-shadow: var(--sh2, var(--sh1));
+  color: var(--acc-tx);
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+/* Основная область получает фокус по ссылке «К содержанию», без рамки вокруг всей страницы. */
+.content:focus,
+.contentFull:focus {
+  outline: none;
+}

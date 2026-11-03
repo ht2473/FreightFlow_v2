@@ -61,8 +61,11 @@ svg {
   max-width: 100%;
 }
 
+/* Привязан к началу опорного блока: в широкой таблице не выходит за её прокрутку. */
 .visually-hidden {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 1px;
   height: 1px;
   padding: 0;

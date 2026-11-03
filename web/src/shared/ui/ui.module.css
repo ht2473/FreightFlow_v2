@@ -293,6 +293,14 @@
   margin-top: 2px;
 }
 
+/* Телефон: заголовок и пояснение — над кнопками, не рядом с ними. */
+@media (max-width: 600px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 .pageActions {
   display: flex;
   flex-wrap: wrap;

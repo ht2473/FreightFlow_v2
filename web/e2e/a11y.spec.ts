@@ -76,3 +76,30 @@ test("доступность: разделы администратора в о�
     await check(page, path);
   }
 });
+
+// Планшет — просмотр и мониторинг, телефон — дашборд и алерты (01-product.md): страница не шире
+// экрана, широкие таблицы прокручиваются внутри своих блоков.
+const narrow = [
+  {
+    kind: "планшет",
+    size: { width: 768, height: 1024 },
+    pages: ["/dashboard", "/map", "/operations", "/alerts", "/facilities", "/territories"],
+  },
+  { kind: "телефон", size: { width: 390, height: 844 }, pages: ["/dashboard", "/operations", "/alerts"] },
+];
+
+for (const n of narrow) {
+  test(`узкий экран (${n.kind}): без горизонтальной прокрутки страницы`, async ({ page }) => {
+    test.skip(!analyst.email || !analyst.password, "нужны FF_E2E_EMAIL и FF_E2E_PASSWORD");
+    test.setTimeout(120_000);
+    await page.setViewportSize(n.size);
+    await login(page, analyst, "/dashboard");
+    for (const path of n.pages) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle").catch(() => {});
+      await page.waitForTimeout(800);
+      const width = await page.evaluate(() => document.documentElement.scrollWidth);
+      expect.soft(width, path).toBeLessThanOrEqual(n.size.width);
+    }
+  });
+}

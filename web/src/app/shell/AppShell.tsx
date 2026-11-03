@@ -60,6 +60,10 @@ function Workspace({ pathname }: { pathname: string }) {
 
   return (
     <div className={s.app}>
+      {/* Первая по Tab: мимо меню из двух десятков пунктов сразу к содержимому страницы. */}
+      <a className={s.skip} href="#content">
+        К содержанию
+      </a>
       <aside className={s.sidebar}>
         <Link to="/dashboard" className={s.brand}>
           <span className={s.brandMark} aria-hidden>
@@ -108,7 +112,7 @@ function Workspace({ pathname }: { pathname: string }) {
           <NotificationBell />
           <UserMenu name={user.name} />
         </header>
-        <main className={fullBleed ? s.contentFull : s.content}>
+        <main id="content" tabIndex={-1} className={fullBleed ? s.contentFull : s.content}>
           <Outlet />
         </main>
       </div>

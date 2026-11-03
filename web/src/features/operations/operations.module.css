@@ -5,6 +5,7 @@
 }
 
 .page > * {
+  min-width: 0;
   margin-top: 0;
 }
 
@@ -39,7 +40,9 @@
   font-size: 12.5px;
 }
 
+/* Опорный блок для скрытых подписей таблицы: иначе они выходят за прокрутку и расширяют страницу. */
 .scroll {
+  position: relative;
   overflow-x: auto;
   border-top: 1px solid var(--line);
 }
