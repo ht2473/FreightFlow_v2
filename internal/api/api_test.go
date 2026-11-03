@@ -5,10 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -1018,5 +1021,87 @@ func TestAPIDashboardAndGeo(t *testing.T) {
 	}
 	if resp, body := f.do(t, http.MethodGet, "/api/v1/data/updates", viewer, ""); resp.StatusCode != http.StatusOK {
 		t.Errorf("обновления: %d %s", resp.StatusCode, body)
+	}
+}
+
+// sessionOnly — операции только для сеанса браузера: по токену API они запрещены у любой роли.
+var sessionOnly = map[string]bool{
+	"changePassword": true, "beginTotpSetup": true, "confirmTotp": true, "disableTotp": true,
+	"listTokens": true, "createToken": true, "revokeToken": true,
+}
+
+// Матрица «операция × роль»: каждая операция спецификации для каждой встроенной роли. Отказ
+// 403 — ровно тогда, когда у роли нет права операции (или операция только для сеанса); иначе
+// запрос проходит авторизацию (дальше — 2xx, 400, 404, 422 по существу запроса).
+func TestAPIOperationRoleMatrix(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	// Паники обработчиков без сервисов фикстуры — после авторизации, в журнал теста их не пишем.
+	f.srv.Config.ErrorLog = log.New(io.Discard, "", 0)
+	ops, err := Operations(spec.Spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	param := regexp.MustCompile(`\{[^}]+\}`)
+	for _, role := range identity.BuiltinRoles {
+		token := f.token(t, role.Code+"@matrix.example.com", role.Code)
+		for _, op := range ops {
+			allowed := op.Permission == PermAuthenticated || slices.Contains(role.Permissions, identity.Permission(op.Permission))
+			if sessionOnly[op.ID] {
+				allowed = false
+			}
+			path := param.ReplaceAllString(op.Path, "01a13230-0000-7000-8000-000000000000")
+			body := ""
+			if op.Method == http.MethodPost || op.Method == http.MethodPut || op.Method == http.MethodPatch {
+				body = "{}"
+			}
+			code, out := f.status(op.Method, "/api/v1"+path, token, body)
+			switch {
+			case code == http.StatusUnauthorized:
+				t.Errorf("%s %s %s: 401 по действующему токену", role.Code, op.Method, op.Path)
+			case sessionOnly[op.ID] && code < 400:
+				t.Errorf("%s %s %s: операция только для сеанса выполнена по токену (%d)", role.Code, op.Method, op.Path, code)
+			case !sessionOnly[op.ID] && !allowed && code != http.StatusForbidden:
+				t.Errorf("%s %s %s (%s): %d, ожидался отказ 403", role.Code, op.Method, op.Path, op.Permission, code)
+			case allowed && code == http.StatusForbidden:
+				t.Errorf("%s %s %s (%s): отказ 403 при наличии права; %s", role.Code, op.Method, op.Path, op.Permission, out)
+			}
+		}
+	}
+}
+
+// status — код ответа без остановки теста. Обрыв соединения — запрос прошёл авторизацию и дошёл
+// до обработчика, которому в фикстуре не подключён сервис (код 0).
+func (f *fixture) status(method, path, token, body string) (int, string) {
+	var r io.Reader
+	if body != "" {
+		r = strings.NewReader(body)
+	}
+	req, err := http.NewRequestWithContext(context.Background(), method, f.srv.URL+path, r)
+	if err != nil {
+		return 0, err.Error()
+	}
+	if body != "" {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return 0, err.Error()
+	}
+	defer resp.Body.Close()
+	b, _ := io.ReadAll(resp.Body)
+	return resp.StatusCode, string(b)
+}
+
+func TestAPIResponsesNotCached(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	token := f.token(t, "cache@example.com", identity.RoleViewer)
+	for _, path := range []string{"/api/v1/me", "/api/v1/layers", "/api/v1/nope"} {
+		resp, _ := f.do(t, http.MethodGet, path, token, "")
+		if got := resp.Header.Get("Cache-Control"); got != "no-store" {
+			t.Errorf("%s: Cache-Control %q, want no-store", path, got)
+		}
 	}
 }

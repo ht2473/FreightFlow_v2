@@ -40,7 +40,7 @@ func (s *Server) HandleCookieAuth(ctx context.Context, op gen.OperationName, _ g
 	if !ok {
 		return ctx, errUnauthorized
 	}
-	changedAt, err := s.identity.PasswordChangedAt(ctx, uid)
+	changedAt, err := s.identity.SessionsValidAfter(ctx, uid)
 	if err != nil {
 		return ctx, errUnauthorized
 	}

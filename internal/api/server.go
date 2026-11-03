@@ -150,7 +150,12 @@ func New(d Deps) (http.Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create api server: %w", err)
 	}
-	return srv, nil
+	// Ответы API — данные пользователя: не сохраняются ни браузером, ни общими кешами (ASVS 8.2.1).
+	// Обработчик может задать свой заголовок поверх.
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		srv.ServeHTTP(w, r)
+	}), nil
 }
 
 func meta(ctx context.Context) identity.RequestMeta {
