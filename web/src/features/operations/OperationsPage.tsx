@@ -35,7 +35,7 @@ interface Work {
   end?: string;
   facilities: number;
   impactKm: number;
-  geometry?: { type: string; coordinates: unknown };
+  geometry?: { type: string; coordinates?: unknown; geometries?: Work["geometry"][] };
 }
 
 type StateFilter = "all" | "active" | "planned" | "closure";
@@ -208,6 +208,15 @@ function WorkRow({ w }: { w: Work }) {
 
 /** Первая точка геометрии работы — центр для перехода на карту. */
 function firstPoint(g: Work["geometry"]): [number, number] | null {
+  if (g?.geometries) {
+    for (const part of g.geometries) {
+      const p = firstPoint(part);
+      if (p) {
+        return p;
+      }
+    }
+    return null;
+  }
   let c: unknown = g?.coordinates;
   while (Array.isArray(c) && Array.isArray(c[0])) {
     c = c[0];
