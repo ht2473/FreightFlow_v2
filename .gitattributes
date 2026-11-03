@@ -10,8 +10,3 @@
 *.osm.pbf binary
 *.gz binary
 *.zip binary
-
-# Сгенерированный код: свёрнут в PR и не учитывается в статистике языков GitHub.
-internal/api/gen/** linguist-generated=true
-internal/web/*_templ.go linguist-generated=true
-web/src/shared/api/schema.d.ts linguist-generated=true
