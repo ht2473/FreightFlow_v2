@@ -108,7 +108,8 @@ func (s *Service) Warm(ctx context.Context) {
 		if !l.Visible {
 			continue
 		}
-		for z := uint8(max(l.MinZoom, 0)); z <= warmMaxZoom && int(z) <= l.MaxZoom; z++ {
+		for zi := max(l.MinZoom, 0); zi <= warmMaxZoom && zi <= l.MaxZoom; zi++ {
+			z := uint8(zi)
 			x0, y0 := tileXY(warmBounds[0], warmBounds[3], z)
 			x1, y1 := tileXY(warmBounds[2], warmBounds[1], z)
 			for x := x0; x <= x1; x++ {
@@ -134,7 +135,7 @@ func tileXY(lon, lat float64, z uint8) (uint32, uint32) {
 	r := lat * math.Pi / 180
 	x := (lon + 180) / 360 * n
 	y := (1 - math.Log(math.Tan(r)+1/math.Cos(r))/math.Pi) / 2 * n
-	return uint32(x), uint32(y) //nolint:gosec // координаты в пределах мира
+	return uint32(x), uint32(y)
 }
 
 // domainVersions возвращает версии доменов, перечитывая их по событию или по сроку.
