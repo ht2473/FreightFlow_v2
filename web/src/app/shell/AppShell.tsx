@@ -87,9 +87,7 @@ function Workspace({ pathname }: { pathname: string }) {
           })}
         </nav>
         <Link to="/profile" className={s.user}>
-          <span className={s.avatar} aria-hidden>
-            {initials(user.name)}
-          </span>
+          <Avatar name={user.name} />
           <span className={s.userText}>
             <span className={s.userName}>{user.name}</span>
             <span className={s.userRole}>{role}</span>
@@ -120,6 +118,14 @@ function Workspace({ pathname }: { pathname: string }) {
       <Tour />
     </div>
   );
+}
+
+/**
+ * Кружок с инициалами. Буквы выводятся из атрибута через CSS: в доступное имя ссылки или кнопки
+ * они не попадают, и в обоих местах оболочки выравниваются одинаково.
+ */
+function Avatar({ name }: { name: string }) {
+  return <span className={s.avatar} data-initials={initials(name)} aria-hidden />;
 }
 
 function UserMenu({ name }: { name: string }) {
@@ -154,8 +160,7 @@ function UserMenu({ name }: { name: string }) {
   return (
     <MenuTrigger>
       <AriaButton className={s.menuTrigger} aria-label="Меню пользователя">
-        {/* Инициалы — из атрибута через CSS: в имя кнопки входит только «Меню пользователя». */}
-        <span className={s.avatar} data-initials={initials(name)} aria-hidden />
+        <Avatar name={name} />
       </AriaButton>
       <Popover className={popoverClass} placement="bottom end">
         <Menu onAction={onAction} aria-label="Меню пользователя">
