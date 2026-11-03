@@ -20,6 +20,11 @@
     border-color 0.12s;
 }
 
+/* Иконка кнопки не сжимается, когда кнопке тесно (ячейки таблиц, узкие панели). */
+.btn > svg {
+  flex: none;
+}
+
 .btn:hover {
   background: var(--hover);
   text-decoration: none;

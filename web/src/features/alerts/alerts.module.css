@@ -14,7 +14,7 @@
   display: grid;
   grid-template-columns: minmax(320px, 1fr) minmax(380px, 1.15fr);
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (max-width: 1100px) {
@@ -192,4 +192,9 @@
   padding: 0;
   border: 0;
   min-width: 0;
+}
+
+/* Карточки в одном ряду сетки — без отступа сверху, чтобы верхние края совпадали. */
+.feed > * {
+  margin-top: 0;
 }

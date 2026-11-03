@@ -27,6 +27,11 @@
   text-decoration: none;
 }
 
+/* На главной странице логотип никуда не ведёт — без руки-указателя. */
+.brand[aria-current="page"] {
+  cursor: default;
+}
+
 .brandMark {
   width: 28px;
   height: 28px;
@@ -116,15 +121,19 @@
 }
 
 .avatar {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--acc-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 22%, transparent);
   color: var(--acc-tx);
   display: grid;
   place-items: center;
-  font-weight: 600;
-  font-size: 12px;
+  font-weight: 650;
+  font-size: 12.5px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   flex: none;
 }
 

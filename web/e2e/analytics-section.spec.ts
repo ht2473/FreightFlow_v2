@@ -37,6 +37,24 @@ test("дашборд: плитки, ряды с прогнозом, рейтин
   await page.getByRole("option", { name: "Плотность складских площадей" }).click();
   await dlg.getByRole("button", { name: "Добавить" }).click();
   await expect(page.getByRole("list", { name: "Рейтинг: Плотность складских площадей" })).toBeVisible({ timeout: 15_000 });
+  // Тот же виджет второй раз не предлагается.
+  await page.getByRole("button", { name: "Добавить виджет" }).click();
+  await dlg.getByRole("button", { name: /Вид/ }).click();
+  await page.getByRole("option", { name: "Рейтинг показателя" }).click();
+  await dlg.getByRole("button", { name: /Показатель/ }).click();
+  await expect(page.getByRole("option", { name: "Плотность складских площадей" })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await dlg.getByRole("button", { name: "Отмена" }).click();
+
+  // Порядок: перетаскивание мышью и кнопки на панели виджета.
+  const toolbars = page.getByRole("toolbar", { name: /^Виджет «/ });
+  const firstName = async () => (await toolbars.first().getAttribute("aria-label")) ?? "";
+  const was = await firstName();
+  const cells = page.locator("[draggable=true]");
+  await cells.nth(0).dragTo(cells.nth(1));
+  await expect.poll(firstName).not.toBe(was);
+  await toolbars.nth(1).getByRole("button", { name: "Переместить раньше" }).click();
+  await expect.poll(firstName).toBe(was);
   await page.getByRole("button", { name: "По умолчанию" }).click();
   await expect(page.getByRole("list", { name: "Рейтинг: Плотность складских площадей" })).toHaveCount(0);
   expect(errors).toEqual([]);

@@ -59,13 +59,13 @@ const columns = helper.columns([
   helper.accessor((r) => r.okrug ?? "", { id: "okrug", header: "Округ", enableSorting: false }),
   helper.accessor("buildingAreaM2", {
     id: "area",
-    header: "Площадь застройки",
+    header: "Застройка",
     cell: (c) => area(c.getValue()),
     meta: { numeric: true },
   }),
   helper.accessor("floorAreaM2", {
     id: "floorArea",
-    header: "Общая площадь (оценка)",
+    header: "Общая площадь",
     cell: (c) => area(c.getValue()),
     meta: { numeric: true },
   }),
@@ -81,17 +81,19 @@ const columns = helper.columns([
     cell: (c) => {
       const l = confidenceLevel(c.getValue());
       return (
-        <Badge tone={l.tone}>
-          {num(c.getValue() * 100)} % · {l.label}
-        </Badge>
+        <span className={s.nowrap} title={`Достоверность ${l.label}`}>
+          <Badge tone={l.tone}>
+            {num(c.getValue() * 100)} %<span className="visually-hidden"> · {l.label}</span>
+          </Badge>
+        </span>
       );
     },
   }),
   helper.accessor("hasPermit", {
     id: "permit",
-    header: "Разрешение на ввод",
+    header: "Разрешение",
     enableSorting: false,
-    cell: (c) => (c.getValue() ? "есть" : ""),
+    cell: (c) => (c.getValue() ? "есть" : "—"),
   }),
 ]);
 
@@ -107,11 +109,15 @@ const columnTitles: Record<string, string> = {
 
 const visibilityKey = "ff.facilities.columns";
 
+// Общая площадь по умолчанию скрыта: у большинства объектов совпадает с площадью застройки.
+const defaultVisibility: ColumnVisibilityState = { floorArea: false };
+
 function loadVisibility(): ColumnVisibilityState {
   try {
-    return JSON.parse(localStorage.getItem(visibilityKey) ?? "{}") as ColumnVisibilityState;
+    const saved = localStorage.getItem(visibilityKey);
+    return saved ? (JSON.parse(saved) as ColumnVisibilityState) : defaultVisibility;
   } catch {
-    return {};
+    return defaultVisibility;
   }
 }
 

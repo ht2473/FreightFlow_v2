@@ -1,0 +1,182 @@
+/*
+ * Сетка дашборда: четыре равные колонки; плитки и рейтинги — в одну, ряды и сводки — в две.
+ * Карточки ряда растягиваются до общей высоты, пропуски заполняются следующими виджетами.
+ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.grid + .grid {
+  margin-top: 14px;
+}
+
+/* В режиме настройки над карточками — место для панелей кнопок. */
+.grid.editingGrid {
+  row-gap: 26px;
+}
+
+@media (max-width: 1280px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: var(--r3);
+}
+
+/* Карточка занимает всю высоту ячейки; соседние секции в сетке не получают отступ сверху. */
+.cell > * {
+  flex: 1;
+  margin: 0;
+}
+
+.wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 700px) {
+  .wide {
+    grid-column: span 1;
+  }
+}
+
+/* Режим настройки: карточку можно взять мышью; место, куда она встанет, подсвечено. */
+.editing {
+  cursor: grab;
+}
+
+.editing > * {
+  outline: 1px dashed var(--line2);
+  outline-offset: -1px;
+}
+
+.dragging {
+  opacity: 0.45;
+}
+
+.dropTarget > * {
+  outline: 2px solid var(--acc);
+  outline-offset: -2px;
+}
+
+.cell > .tools {
+  position: absolute;
+  z-index: 2;
+  top: -13px;
+  right: 12px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  border: 1px solid var(--line2);
+  border-radius: var(--r2);
+  background: var(--panel);
+  box-shadow: var(--sh1);
+}
+
+.cell > .tools :global(button) {
+  width: 26px;
+  height: 26px;
+}
+
+.grip {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 26px;
+  color: var(--tx2);
+  cursor: grab;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.list li:last-child {
+  border-bottom: 0;
+}
+
+.list li > :first-child {
+  min-width: 0;
+}
+
+.value {
+  flex: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.subhead {
+  margin: 14px 0 4px;
+  color: var(--tx2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.subhead:first-child {
+  margin-top: 0;
+}
+
+.muted {
+  color: var(--tx2);
+  font-size: 12px;
+}
+
+/* Обновление данных: название и издатель, ниже — время и число записей. */
+.update {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.update:last-child {
+  border-bottom: 0;
+}
+
+.updates {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hint {
+  margin: 0 0 22px;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

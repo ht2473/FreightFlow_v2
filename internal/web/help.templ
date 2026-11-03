@@ -23,7 +23,11 @@ templ helpLayout(p page, current string) {
 		<body class="help-body">
 			<a class="help-skip" href="#content">К содержанию</a>
 			<header class="help-header">
-				<a class="auth-brand" href="/help/guide"><span class="auth-brand-mark" aria-hidden="true">FF</span>FreightFlow · Справка</a>
+				<div class="help-brand">
+					<a class="auth-brand" href="/dashboard" title="На главную системы"><span class="auth-brand-mark" aria-hidden="true">FF</span>FreightFlow</a>
+					<span class="help-brand-sep" aria-hidden="true">/</span>
+					<a class="help-brand-section" href="/help/guide">Справка</a>
+				</div>
 				<a class="btn btn-sm" href="/dashboard">В систему</a>
 			</header>
 			<div class="help-wrap">

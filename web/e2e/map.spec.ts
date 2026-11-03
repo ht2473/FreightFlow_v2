@@ -170,3 +170,38 @@ test("карта: изображение с легендой и источник
   expect(size.w).toBeGreaterThanOrEqual(Math.floor(canvas?.width ?? 0));
   expect(size.h).toBeGreaterThan(Math.floor(canvas?.height ?? 0));
 });
+
+test("карта: инструменты рисования переживают сдвиг карты и отмену", async ({ page }) => {
+  test.setTimeout(60_000);
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await login(page, analyst, "/map?c=37.64179,55.68037&z=15");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  // Линейка: две точки, сдвиг карты посреди рисования (меняет адрес и раньше пересобирал стиль), отмена.
+  await page.getByRole("button", { name: "Измерить расстояние" }).click();
+  await page.mouse.click(900, 500);
+  await page.mouse.click(1100, 550);
+  await page.mouse.move(1000, 700);
+  await page.mouse.down();
+  await page.mouse.move(1050, 650, { steps: 5 });
+  await page.mouse.up();
+  await expect(page).toHaveURL(/c=37\.6[0-9]+%2C55/);
+  await page.getByRole("button", { name: "Отменить измерение" }).click();
+  // Карандаш: начать и отменить дважды подряд.
+  for (let i = 0; i < 2; i++) {
+    await page.getByRole("button", { name: "Выделить область" }).click();
+    await page.mouse.click(900, 400);
+    await page.getByRole("button", { name: "Отменить выделение области" }).click();
+  }
+  await expect(page.getByRole("button", { name: "Выделить область" })).toBeVisible();
+  await expect(page.getByText("Не удалось показать страницу")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("карта: не уходит за охват подложки", async ({ page }) => {
+  await login(page, analyst, "/map?c=30.00000,50.00000&z=5");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  // Вид из адреса за пределами охвата приводится к рамке Москвы и агломерации при первом движении.
+  await page.getByRole("button", { name: "Отдалить" }).click();
+  await expect(page).toHaveURL(/c=3[6-9]\.[0-9]+%2C5[4-6]\.[0-9]+&z=8/);
+});

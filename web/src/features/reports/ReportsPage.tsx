@@ -192,7 +192,7 @@ function ReportList({ highlight }: { highlight?: string }) {
               <td>
                 <Badge tone={statusTone[r.status]}>{statusTitle[r.status]}</Badge>
               </td>
-              <td>{dateTime(r.createdAt)}</td>
+              <td className="nowrap">{dateTime(r.createdAt)}</td>
               <td className={cellClass.right}>
                 <span className={s.actions}>
                   {r.status === "done" && (
@@ -500,7 +500,7 @@ function Schedules() {
                 </td>
                 <td>{scheduleWhen(sc)}</td>
                 <td>{sc.recipients?.length ? sc.recipients.join(", ") : "только в системе"}</td>
-                <td>{dateTime(sc.nextRunAt)}</td>
+                <td className="nowrap">{dateTime(sc.nextRunAt)}</td>
                 <td>
                   <Switch
                     aria-label={`Расписание «${sc.title}» включено`}

@@ -28,19 +28,40 @@
   border-bottom: 1px solid var(--line);
 }
 
+.help-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .help-header .auth-brand {
   margin: 0;
   color: inherit;
   text-decoration: none;
 }
 
+.help-brand-sep {
+  color: var(--tx2);
+}
+
+.help-brand-section {
+  color: var(--tx);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.help-brand-section:hover,
+.help-header .auth-brand:hover {
+  color: var(--acc-tx);
+}
+
 .help-wrap {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
-  gap: 32px;
-  max-width: 1180px;
+  gap: 40px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 32px 32px 56px;
 }
 
 @media (max-width: 860px) {
@@ -51,7 +72,10 @@
 
 .help-nav ul {
   position: sticky;
-  top: 16px;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -81,8 +105,9 @@
 }
 
 .help-main h1 {
-  margin: 0 0 12px;
-  font-size: 24px;
+  margin: 0 0 14px;
+  font-size: 26px;
+  letter-spacing: -0.3px;
 }
 
 .help-main h2 {
@@ -98,8 +123,11 @@
 }
 
 .help-lead {
+  max-width: 820px;
+  margin: 0 0 28px;
   color: var(--tx2);
   font-size: 15px;
+  line-height: 1.65;
 }
 
 .help-toc ul {
@@ -116,8 +144,8 @@
 }
 
 .help-card {
-  margin: 0 0 12px;
-  padding: 14px 16px;
+  margin: 0 0 16px;
+  padding: 18px 20px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--r3, 10px);
@@ -126,8 +154,8 @@
 
 .help-card h2,
 .help-card h3 {
-  margin: 0 0 4px;
-  font-size: 15px;
+  margin: 0 0 8px;
+  font-size: 16px;
 }
 
 .help-card h2 a {
@@ -135,7 +163,9 @@
 }
 
 .help-card p {
-  margin: 6px 0;
+  margin: 8px 0;
+  color: var(--tx2);
+  line-height: 1.6;
 }
 
 .help-card ul {
@@ -160,8 +190,13 @@
 
 .help-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 0 0 24px;
+}
+
+.help-grid > .help-card {
+  margin: 0;
 }
 
 .help-glossary {

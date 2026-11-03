@@ -31,8 +31,11 @@ export function NumberField({
   description,
   errorMessage,
   isDisabled,
+  hideLabel,
 }: {
   label: string;
+  /** Подпись только для экранного диктора: рядом уже есть видимое название. */
+  hideLabel?: boolean;
   value: number | null;
   onChange: (v: number | null) => void;
   minValue?: number;
@@ -55,7 +58,7 @@ export function NumberField({
       isInvalid={Boolean(errorMessage)}
       formatOptions={{ maximumFractionDigits: 3 }}
     >
-      <Label className="label">{label}</Label>
+      <Label className={hideLabel ? "visually-hidden" : "label"}>{label}</Label>
       <Group className={s.numberGroup}>
         <Input className={s.numberInput} />
         {unit && <span className={s.unit}>{unit}</span>}

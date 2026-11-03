@@ -110,3 +110,8 @@ table,
 .num {
   font-variant-numeric: tabular-nums;
 }
+
+/* Ячейка или подпись без переноса строки: даты, числа с единицами. */
+.nowrap {
+  white-space: nowrap;
+}

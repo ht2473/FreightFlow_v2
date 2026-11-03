@@ -32,7 +32,7 @@ test("реестр: фасеты, сортировка, страницы, кар
   await expect(table.getByRole("row").nth(1)).toContainText("Склад");
 
   // Сортировка по площади застройки — по убыванию после двух нажатий.
-  const areaHeader = table.getByRole("columnheader", { name: /Площадь застройки/ });
+  const areaHeader = table.getByRole("columnheader", { name: /Застройка/ });
   await areaHeader.getByRole("button").click();
   await expect(page).toHaveURL(/sort=/);
   await areaHeader.getByRole("button").click();

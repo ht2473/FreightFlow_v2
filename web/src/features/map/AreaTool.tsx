@@ -9,6 +9,9 @@ import s from "./map.module.css";
 
 export type DrawMode = "area" | "measure";
 
+/** Префикс источников и слоёв terra-draw в стиле карты. */
+export const DRAW_PREFIX = "ff-draw";
+
 export interface Drawn {
   mode: DrawMode;
   geometry: Geometry;
@@ -53,7 +56,7 @@ export function AreaTool({
       return;
     }
     const draw = new TerraDraw({
-      adapter: new TerraDrawMapLibreGLAdapter({ map, prefixId: "ff-draw" }),
+      adapter: new TerraDrawMapLibreGLAdapter({ map, prefixId: DRAW_PREFIX }),
       modes: [new TerraDrawPolygonMode(), new TerraDrawLineStringMode()],
     });
     draw.start();
@@ -66,7 +69,13 @@ export function AreaTool({
       onMode(null);
     });
     return () => {
-      draw.stop();
+      // Слои рисования могли уже уйти вместе со сменой стиля (тема, подложка) — остановка
+      // в этом случае не должна ронять страницу.
+      try {
+        draw.stop();
+      } catch {
+        // нечего убирать
+      }
     };
   }, [map, mode, onMode]);
 

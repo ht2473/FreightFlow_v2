@@ -57,6 +57,7 @@
 
 .segmented {
   display: inline-flex;
+  max-width: 100%;
   padding: 2px;
   gap: 2px;
   border-radius: var(--r2);
@@ -64,8 +65,10 @@
 }
 
 .segment {
+  flex: 1 1 auto;
   height: 28px;
-  padding: 0 12px;
+  padding: 0 10px;
+  white-space: nowrap;
   border: 0;
   border-radius: var(--r1);
   background: none;

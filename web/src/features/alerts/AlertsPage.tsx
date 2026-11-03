@@ -1,6 +1,6 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import type { Feature, FeatureCollection } from "geojson";
-import { BellRing, Plus } from "lucide-react";
+import { BellRing, MousePointerClick, Plus } from "lucide-react";
 import type { LayerSpecification } from "maplibre-gl";
 import { useMemo, useState } from "react";
 import { Guard } from "@/app/Guard";
@@ -201,7 +201,9 @@ function Feed({ selected }: { selected?: string }) {
           <AlertDetail id={selected} />
         ) : (
           <Section title="Алерт">
-            <p className="muted">Выберите алерт в ленте: место на карте, подробности, действия и журнал.</p>
+            <EmptyState icon={<MousePointerClick size={20} strokeWidth={1.7} />} title="Алерт не выбран">
+              <p>Выберите алерт в ленте: место на карте, подробности, действия и журнал.</p>
+            </EmptyState>
           </Section>
         )}
       </div>

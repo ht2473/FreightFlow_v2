@@ -12,7 +12,7 @@ import { TerraDrawMapLibreGLAdapter } from "terra-draw-maplibre-gl-adapter";
 import { $api } from "@/shared/api/client";
 import { basemapStyle } from "@/shared/map/basemap";
 import { buildDataLayers, readPalette } from "@/shared/map/dataLayers";
-import { DEFAULT_VIEW, mountMap, onStyleReady, unmountMap } from "@/shared/map/instance";
+import { DEFAULT_VIEW, MIN_ZOOM, MOSCOW_BOUNDS, mountMap, onStyleReady, unmountMap } from "@/shared/map/instance";
 import { emptyStyle, fullStyle, useBasemapAvailable } from "@/shared/map/style";
 import { IconButton } from "@/shared/ui";
 import { useResolvedTheme } from "@/shared/useResolvedTheme";
@@ -214,8 +214,9 @@ export function SecondMap({
       style: st,
       center: DEFAULT_VIEW.center,
       zoom: DEFAULT_VIEW.zoom,
-      minZoom: 5,
+      minZoom: MIN_ZOOM,
       maxZoom: 18,
+      maxBounds: MOSCOW_BOUNDS,
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,

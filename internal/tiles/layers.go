@@ -18,7 +18,8 @@ type Layer struct {
 	// Domains — домены данных: их версии входят в адрес тайлов и ключ кеша.
 	Domains     []string
 	Attribution string
-	// Visible — включён по умолчанию.
+	// Visible — включён по умолчанию. При открытии карты — объекты, их контуры, кольца и работы на
+	// сегодня; остальное включается в «Слоях», чтобы карта не была перегружена.
 	Visible    bool
 	Style      Style
 	Properties []Property
@@ -137,8 +138,8 @@ var Registry = []Layer{
 		Code: "boundaries", Group: "territory", Title: "Округа и районы",
 		Description: "Границы Москвы, административных округов и районов", Geometry: "polygon",
 		MinZoom: 7, MaxZoom: 14, Permission: identity.PermMapView, Domains: []string{"territory"},
-		Attribution: osmAttribution, Visible: true,
-		Style: Style{Kind: "single", Color: "n10"},
+		Attribution: osmAttribution,
+		Style:       Style{Kind: "single", Color: "n10"},
 		Properties: []Property{
 			{Name: "name", Title: "Название", Kind: "text"},
 			{Name: "kind", Title: "Уровень", Kind: "enum", Labels: map[string]string{
@@ -294,7 +295,7 @@ var Registry = []Layer{
 		Code: "restrictions", Group: "network", Title: "Ограничения для грузовиков",
 		Description: "Запреты и пределы массы и габаритов: знаки Москвы и разметка OSM", Geometry: "line",
 		MinZoom: 10, MaxZoom: 15, Permission: identity.PermMapView, Domains: []string{"network"},
-		Attribution: mixedAttribution, Visible: true,
+		Attribution: mixedAttribution,
 		Style: Style{
 			Kind: "category", Property: "severity", DashedBy: "conditional",
 			Note: "Пунктир — ограничение действует по времени",

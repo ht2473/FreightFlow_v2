@@ -1,7 +1,13 @@
 import { useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 import type { Feature, FeatureCollection, Point } from "geojson";
 import { ImageDown, Minus, Plus, X } from "lucide-react";
-import type { ExpressionSpecification, GeoJSONSource, MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
+import type {
+  ExpressionSpecification,
+  GeoJSONSource,
+  MapGeoJSONFeature,
+  Map as MapLibreMap,
+  StyleSpecification,
+} from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Guard } from "@/app/Guard";
 import { $api, type Schemas } from "@/shared/api/client";
@@ -31,7 +37,7 @@ import { useResolvedTheme } from "@/shared/useResolvedTheme";
 import { ViewsMenu } from "@/shared/ViewsMenu";
 import { FacilityDrawer } from "../facilities/FacilityDrawer";
 import { AreaSummary } from "./AreaSummary";
-import { AreaTool, type DrawMode, type Drawn, isPolygon, lineLength } from "./AreaTool";
+import { AreaTool, DRAW_PREFIX, type DrawMode, type Drawn, isPolygon, lineLength } from "./AreaTool";
 import { mapImage } from "./exportImage";
 import { FeatureCard, type Selection } from "./FeatureCard";
 import { LayersPanel } from "./LayersPanel";
@@ -106,12 +112,15 @@ function MapWorkspace() {
   const searchRef = useRef(search);
   searchRef.current = search;
 
+  // Стиль зависит только от фильтра реестра, а не от всего адреса: центр и масштаб меняются при
+  // каждом сдвиге карты, и пересборка стиля на каждый сдвиг мешала бы рисованию.
+  const { ft, fc, fm } = search;
   const data = useMemo(() => {
     const day = new Date();
     day.setDate(day.getDate() + workOffset);
-    const filters = { road_works: workDayFilter(dayNumber(day)), ...facilityFilters(search) };
+    const filters = { road_works: workDayFilter(dayNumber(day)), ...facilityFilters({ ft, fc, fm }) };
     return buildDataLayers(catalog, layerStates(catalog, visible, opacity, filters), palette, undefined, points);
-  }, [catalog, visible, opacity, palette, workOffset, search, points]);
+  }, [catalog, visible, opacity, palette, workOffset, ft, fc, fm, points]);
   const style = useMemo(() => {
     if (basemap.data === undefined) {
       return null;
@@ -150,7 +159,8 @@ function MapWorkspace() {
     if (!map || !style) {
       return;
     }
-    return onStyleReady(map, () => map.setStyle(style, { diff: true }));
+    // Слои инструмента рисования (terra-draw) не входят в стиль страницы — переносятся в новый.
+    return onStyleReady(map, () => map.setStyle(style, { diff: true, transformStyle: keepDrawLayers }));
   }, [map, style]);
 
   // Вид карты — в адрес (без записи в историю).
@@ -512,6 +522,19 @@ function MapWorkspace() {
         ))}
     </div>
   );
+}
+
+/** Переносит источники и слои рисования из прежнего стиля в новый. */
+function keepDrawLayers(prev: StyleSpecification | undefined, next: StyleSpecification): StyleSpecification {
+  if (!prev) {
+    return next;
+  }
+  const sources = Object.entries(prev.sources).filter(([id]) => id.startsWith(DRAW_PREFIX));
+  const layers = prev.layers.filter((l) => l.id.startsWith(DRAW_PREFIX));
+  if (sources.length === 0 && layers.length === 0) {
+    return next;
+  }
+  return { ...next, sources: { ...next.sources, ...Object.fromEntries(sources) }, layers: [...next.layers, ...layers] };
 }
 
 function toObject(f: MapGeoJSONFeature): ObjectItem {

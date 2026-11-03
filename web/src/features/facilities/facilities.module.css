@@ -126,7 +126,7 @@
 }
 
 .table th {
-  padding: 8px 12px;
+  padding: 8px 10px;
   background: var(--n2);
   border-bottom: 1px solid var(--line);
   color: var(--tx2);
@@ -137,9 +137,17 @@
 }
 
 .table td {
-  padding: 8px 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
+}
+
+.table td.right {
+  white-space: nowrap;
+}
+
+.nowrap {
+  white-space: nowrap;
 }
 
 .table tbody tr {
@@ -190,7 +198,8 @@
 }
 
 .table td:first-child {
-  min-width: 260px;
+  min-width: 240px;
+  max-width: 420px;
 }
 
 .muted {
@@ -379,4 +388,9 @@
   border-radius: var(--r2);
   background: var(--info-bg);
   font-size: 12.5px;
+}
+
+/* Карточки в одном ряду сетки — без отступа сверху, чтобы верхние края совпадали. */
+.cardLayout > * {
+  margin-top: 0;
 }

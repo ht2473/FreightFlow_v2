@@ -230,6 +230,7 @@ function SiteSelection() {
                       {weighting === "direct" && (
                         <NumberField
                           label={`Вес: ${c.title}`}
+                          hideLabel
                           value={st.weight}
                           onChange={(v) => set({ weight: v ?? 0 })}
                           minValue={0}

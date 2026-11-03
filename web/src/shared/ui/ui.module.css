@@ -295,6 +295,8 @@
 
 .pageActions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
@@ -340,7 +342,8 @@
   padding: 18px 20px;
 }
 
-.sectionCard + .sectionCard {
+/* Отступ между секциями одной колонки; в сетках его снимают сами сетки (нулевая специфичность). */
+:where(.sectionCard + .sectionCard) {
   margin-top: 14px;
 }
 
@@ -352,6 +355,16 @@
   margin-bottom: 14px;
 }
 
+.sectionHeadText {
+  flex: 1;
+  min-width: 0;
+}
+
+.sectionHead > .pageActions {
+  flex: none;
+  align-items: center;
+}
+
 .sectionTitle {
   font-size: 14px;
   font-weight: 600;
@@ -359,6 +372,7 @@
 
 .sectionDescription {
   color: var(--tx2);
+  font-size: 12.5px;
   margin-top: 2px;
 }
 

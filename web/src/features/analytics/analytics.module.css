@@ -97,8 +97,13 @@
   margin-bottom: 16px;
 }
 
-.toolbar > * {
+/* Поля панели — не уже 200 px; кнопки-иконки (справка «?») — своего размера, по центру поля. */
+.toolbar > :not(button) {
   min-width: 200px;
+}
+
+.toolbar > button {
+  margin-bottom: 1px;
 }
 
 .layout {
@@ -125,8 +130,8 @@
   padding: 0;
   border: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 110px;
-  gap: 8px 12px;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  gap: 14px 16px;
   align-items: center;
   margin-bottom: 12px;
 }
@@ -208,4 +213,9 @@
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* Карточки в одном ряду сетки — без отступа сверху, чтобы верхние края совпадали. */
+.layout > * {
+  margin-top: 0;
 }

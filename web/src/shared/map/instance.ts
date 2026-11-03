@@ -14,6 +14,18 @@ let styleReady = false;
 export const DEFAULT_VIEW = { center: [37.62, 55.75] as [number, number], zoom: 9.6 };
 
 /**
+ * Пределы перемещения карты: охват подложки (Москва и агломерация внутри ЦКАД, рамка загрузки
+ * basemap.BBox) с небольшим запасом — за ним нет ни подложки, ни данных.
+ */
+export const MOSCOW_BOUNDS: [[number, number], [number, number]] = [
+  [36.1, 54.8],
+  [39.2, 56.65],
+];
+
+/** Наименьший масштаб: агломерация целиком, объекты ещё видны группами. */
+export const MIN_ZOOM = 8;
+
+/**
  * Единственный экземпляр карты рабочего пространства. Контейнер создаётся один раз и
  * переносится в элемент страницы; при уходе со страницы карта не уничтожается и сохраняет
  * загруженные тайлы.
@@ -31,8 +43,9 @@ export function mountMap(
       style: init.style,
       center: init.center,
       zoom: init.zoom,
-      minZoom: 5,
+      minZoom: MIN_ZOOM,
       maxZoom: 18,
+      maxBounds: MOSCOW_BOUNDS,
       // Плоская 2D-карта: без поворота и наклона.
       dragRotate: false,
       pitchWithRotate: false,

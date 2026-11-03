@@ -271,7 +271,7 @@ export function Section({
     <section className={`card ${s.sectionCard}${flush ? ` ${s.sectionFlush}` : ""}`}>
       {(title || actions) && (
         <div className={s.sectionHead}>
-          <div>
+          <div className={s.sectionHeadText}>
             {title && <h2 className={s.sectionTitle}>{title}</h2>}
             {description && <p className={s.sectionDescription}>{description}</p>}
           </div>

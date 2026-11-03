@@ -141,6 +141,7 @@ export function IndexPanel({
                 </div>
                 <NumberField
                   label={`Вес: ${c.title}`}
+                  hideLabel
                   value={weights[c.ref] ?? 0}
                   minValue={0}
                   maxValue={100}
