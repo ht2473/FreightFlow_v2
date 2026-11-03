@@ -1,25 +1,17 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, BellOff, Check, LogOut, Search, User } from "lucide-react";
+import { Check, LogOut, Search, User } from "lucide-react";
 import { useEffect } from "react";
-import {
-  Button as AriaButton,
-  Dialog,
-  DialogTrigger,
-  Menu,
-  MenuItem,
-  MenuTrigger,
-  Popover,
-  Separator,
-} from "react-aria-components";
+import { Button as AriaButton, Menu, MenuItem, MenuTrigger, Popover, Separator } from "react-aria-components";
 import { navGroups, titleFor } from "@/app/nav";
 import { useServerDataSync } from "@/shared/api/events";
 import { can, initials, useMe } from "@/shared/auth";
 import { roleTitle } from "@/shared/names";
 import type { Theme } from "@/shared/theme";
 import { useThemePreference, useThemeSync } from "@/shared/themePreference";
-import { IconButton, menuItemClass, menuSeparatorClass, popoverClass } from "@/shared/ui";
+import { menuItemClass, menuSeparatorClass, popoverClass } from "@/shared/ui";
 import { ToastRegion } from "@/shared/ui/toast";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
+import { NotificationBell } from "./NotificationBell";
 import s from "./shell.module.css";
 
 const themes: { id: Theme; title: string }[] = [
@@ -106,17 +98,7 @@ export function AppShell() {
             <span className={s.searchLabel}>Поиск по системе</span>
             <kbd>Ctrl K</kbd>
           </AriaButton>
-          <DialogTrigger>
-            <IconButton label="Уведомления">
-              <Bell size={18} strokeWidth={1.7} />
-            </IconButton>
-            <Popover className={popoverClass} placement="bottom end">
-              <Dialog className={s.notifications} aria-label="Уведомления">
-                <BellOff size={18} strokeWidth={1.7} aria-hidden />
-                <div>Новых уведомлений нет</div>
-              </Dialog>
-            </Popover>
-          </DialogTrigger>
+          <NotificationBell />
           <UserMenu name={user.name} />
         </header>
         <main className={fullBleed ? s.contentFull : s.content}>

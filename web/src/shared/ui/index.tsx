@@ -289,3 +289,4 @@ export const cellClass = { center: s.cellCenter, right: s.cellRight };
 export const menuItemClass = s.menuItem;
 export const menuSeparatorClass = s.menuSeparator;
 export const popoverClass = s.popover;
+export const iconButtonClass = s.iconButton;

@@ -12,6 +12,7 @@ import { useThemePreference } from "@/shared/themePreference";
 import { Badge, Button, Modal, PageHeader, Section, Select } from "@/shared/ui";
 import { applyServerErrors, FormTextField } from "@/shared/ui/form";
 import { toast } from "@/shared/ui/toast";
+import { NotificationsSection } from "./NotificationsSection";
 import s from "./profile.module.css";
 import { TokensSection } from "./TokensSection";
 
@@ -27,6 +28,7 @@ export function ProfilePage() {
       <AppearanceSection />
       <PasswordSection />
       <TwoFactorSection me={me.data} />
+      <NotificationsSection me={me.data} />
       {can(me.data, "tokens.own") && <TokensSection me={me.data} />}
     </div>
   );
