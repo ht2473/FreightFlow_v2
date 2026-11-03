@@ -58,9 +58,12 @@ services:
       FF_RU_CA_FILE: /data/certs/russian_trusted_root_ca.pem
       FF_WORKER_METRICS_ADDR: 0.0.0.0:9091
       FF_VALHALLA_URL: http://routing:8002
+      # Почта уведомлений — в Mailpit по сети compose.
+      FF_SMTP_HOST: mailpit
+      FF_SMTP_PORT: "1025"
       HTTP_PROXY: ${FF_DOCKER_HTTP_PROXY:-}
       HTTPS_PROXY: ${FF_DOCKER_HTTP_PROXY:-}
-      NO_PROXY: db,routing,localhost,127.0.0.1
+      NO_PROXY: db,routing,mailpit,localhost,127.0.0.1
     volumes:
       - ../var:/data
       - ../bin/linux:/opt/freightflow:ro
