@@ -1,11 +1,20 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
 /** События сервера, которые получает браузер (GET /api/v1/events). */
-export const serverEventTypes = ["data.published", "job.progress", "scenario.computed"] as const;
+export const serverEventTypes = [
+  "data.published",
+  "job.progress",
+  "scenario.computed",
+  "alert.created",
+  "alert.updated",
+  "notification.created",
+] as const;
 
 /**
- * Вид события: событие сервера или `reconnected` — соединение восстановлено после разрыва,
- * события за время разрыва не досылаются, данные нужно перечитать.
+ * Вид события: событие сервера или `reconnected` — соединение восстановлено после разрыва.
+ * Сервер досылает пропущенные события по Last-Event-ID, но не больше 500, поэтому данные
+ * после разрыва всё равно перечитываются.
  */
 export type ServerEventType = (typeof serverEventTypes)[number] | "reconnected";
 
@@ -73,4 +82,23 @@ export function useServerEvent(type: ServerEventType, handler: Handler) {
       }
     };
   }, [type]);
+}
+
+/** Задержка обновления кеша: публикации нескольких доменов подряд дают один перезапрос. */
+const syncDelay = 1000;
+
+/**
+ * Обновление кеша запросов по событиям сервера: после публикации данных и после разрыва
+ * соединения активные запросы перезапрашиваются, остальные помечаются устаревшими.
+ */
+export function useServerDataSync() {
+  const qc = useQueryClient();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const refresh = () => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => void qc.invalidateQueries(), syncDelay);
+  };
+  useServerEvent("data.published", refresh);
+  useServerEvent("reconnected", refresh);
+  useEffect(() => () => clearTimeout(timer.current), []);
 }

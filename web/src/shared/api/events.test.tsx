@@ -1,6 +1,7 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useServerEvent } from "./events";
+import { useServerDataSync, useServerEvent } from "./events";
 
 class FakeEventSource {
   static all: FakeEventSource[] = [];
@@ -64,5 +65,27 @@ describe("useServerEvent", () => {
     es?.fire("open");
     expect(re).toHaveBeenCalledTimes(1);
     h.unmount();
+  });
+});
+
+describe("useServerDataSync", () => {
+  it("публикация данных и переподключение обновляют кеш одним перезапросом", async () => {
+    vi.useFakeTimers();
+    const qc = new QueryClient();
+    const invalidate = vi.spyOn(qc, "invalidateQueries");
+    const h = renderHook(() => useServerDataSync(), {
+      wrapper: ({ children }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>,
+    });
+    const es = FakeEventSource.all[0];
+    es?.fire("data.published", '{"versions":{"analytics":3}}');
+    es?.fire("data.published", '{"versions":{"search":7}}');
+    vi.advanceTimersByTime(1000);
+    expect(invalidate).toHaveBeenCalledTimes(1);
+    es?.fire("error");
+    es?.fire("open");
+    vi.advanceTimersByTime(1000);
+    expect(invalidate).toHaveBeenCalledTimes(2);
+    h.unmount();
+    vi.useRealTimers();
   });
 });

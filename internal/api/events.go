@@ -1,10 +1,14 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"maps"
 	"net/http"
+	"slices"
+	"strconv"
 	"time"
 
 	"freightflow/internal/identity"
@@ -16,26 +20,55 @@ type EventAuth interface {
 	Principal(r *http.Request) (identity.Principal, bool)
 }
 
-// streamTypes — события, которые получает браузер: публикации данных (обновить слои и
-// показатели), прогресс задач и готовность сценариев.
-var streamTypes = []string{events.DataPublished, events.JobProgress, events.ScenarioComputed}
+// EventLog — журнал событий для дочитывания после переподключения.
+type EventLog interface {
+	Since(ctx context.Context, after int64, types []string, limit int) ([]events.Event, error)
+}
 
-// heartbeat — интервал комментария-пульса: прокси и браузер не закрывают молчащее соединение.
-const heartbeat = 25 * time.Second
+// streamTypes — события, которые получает браузер, и права, хотя бы одно из которых нужно
+// для события (без прав — всем вошедшим): публикации данных (обновить слои и показатели),
+// прогресс задач, готовность сценариев, алерты, уведомления.
+var streamTypes = map[string][]identity.Permission{
+	events.DataPublished:       nil,
+	events.JobProgress:         nil,
+	events.ScenarioComputed:    nil,
+	events.AlertCreated:        {identity.PermAlertsOwn, identity.PermAlertsManage},
+	events.AlertUpdated:        {identity.PermAlertsOwn, identity.PermAlertsManage},
+	events.NotificationCreated: nil,
+}
+
+const (
+	// heartbeat — интервал комментария-пульса: прокси и браузер не закрывают молчащее соединение.
+	heartbeat = 25 * time.Second
+	// replayLimit — сколько пропущенных событий досылается после переподключения; при
+	// большем разрыве клиент всё равно перечитывает данные.
+	replayLimit = 500
+)
 
 // Events — поток событий для браузера (Server-Sent Events, GET /api/v1/events). Событие с полем
-// userId в данных получает только этот пользователь, остальные — все вошедшие. Пропущенные за
-// время разрыва события не досылаются: клиент после переподключения перечитывает данные.
-func Events(bus *events.Bus, auth EventAuth, log *slog.Logger) http.Handler {
+// userId в данных получает только этот пользователь, событие вида с правами — только субъект
+// с одним из них. После разрыва браузер присылает Last-Event-ID, и пропущенные события
+// досылаются из журнала (не больше replayLimit) до живых; повторов на стыке нет.
+func Events(bus *events.Bus, journal EventLog, auth EventAuth, log *slog.Logger) http.Handler {
+	types := slices.Sorted(maps.Keys(streamTypes))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p, ok := auth.Principal(r)
 		if !ok {
 			writeProblem(w, http.StatusUnauthorized, "Требуется вход")
 			return
 		}
-		// Подписка — до первого кадра: получив его, клиент не пропустит последующих событий.
-		sub := bus.Subscribe(64, streamTypes...)
+		// Подписка — до дочитывания и первого кадра: события после этого момента не теряются.
+		sub := bus.Subscribe(64, types...)
 		defer sub.Close()
+		var missed []events.Event
+		var sent int64
+		if last, err := strconv.ParseInt(r.Header.Get("Last-Event-ID"), 10, 64); err == nil && last > 0 && journal != nil {
+			sent = last
+			missed, err = journal.Since(r.Context(), last, types, replayLimit)
+			if err != nil {
+				log.Warn("event stream replay", "err", err)
+			}
+		}
 		rc := http.NewResponseController(w)
 		h := w.Header()
 		h.Set("Content-Type", "text/event-stream")
@@ -44,6 +77,22 @@ func Events(bus *events.Bus, auth EventAuth, log *slog.Logger) http.Handler {
 		w.WriteHeader(http.StatusOK)
 		if _, err := fmt.Fprint(w, "retry: 5000\n\n"); err != nil {
 			return
+		}
+		write := func(e events.Event) error {
+			if e.ID <= sent {
+				return nil // уже отправлено при дочитывании
+			}
+			sent = e.ID
+			if !visible(e, p) {
+				return nil
+			}
+			_, err := fmt.Fprintf(w, "id: %d\nevent: %s\ndata: %s\n\n", e.ID, e.Type, e.Payload)
+			return err
+		}
+		for _, e := range missed {
+			if err := write(e); err != nil {
+				return
+			}
 		}
 		if err := rc.Flush(); err != nil {
 			log.Warn("event stream flush", "err", err)
@@ -63,10 +112,7 @@ func Events(bus *events.Bus, auth EventAuth, log *slog.Logger) http.Handler {
 				if !ok {
 					return
 				}
-				if !visible(e, p) {
-					continue
-				}
-				if _, err := fmt.Fprintf(w, "id: %d\nevent: %s\ndata: %s\n\n", e.ID, e.Type, e.Payload); err != nil {
+				if err := write(e); err != nil {
 					return
 				}
 			}
@@ -77,8 +123,11 @@ func Events(bus *events.Bus, auth EventAuth, log *slog.Logger) http.Handler {
 	})
 }
 
-// visible — событие адресовано всем или этому пользователю.
+// visible — у субъекта есть право на вид события, и событие адресовано всем или ему.
 func visible(e events.Event, p identity.Principal) bool {
+	if perms := streamTypes[e.Type]; len(perms) > 0 && !slices.ContainsFunc(perms, p.Has) {
+		return false
+	}
 	var to struct {
 		UserID string `json:"userId"`
 	}

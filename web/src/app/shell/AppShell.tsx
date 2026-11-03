@@ -12,6 +12,7 @@ import {
   Separator,
 } from "react-aria-components";
 import { navGroups, titleFor } from "@/app/nav";
+import { useServerDataSync } from "@/shared/api/events";
 import { can, initials, useMe } from "@/shared/auth";
 import { roleTitle } from "@/shared/names";
 import type { Theme } from "@/shared/theme";
@@ -123,6 +124,7 @@ export function AppShell() {
       </div>
       <CommandPalette me={user} isOpen={palette.isOpen} onOpenChange={palette.setOpen} />
       <ToastRegion />
+      <ServerSync />
     </div>
   );
 }
@@ -180,4 +182,10 @@ function UserMenu({ name }: { name: string }) {
 async function logout() {
   await fetch("/logout", { method: "POST", credentials: "same-origin", redirect: "manual" });
   window.location.assign("/login");
+}
+
+/** Подписка на события сервера — только для вошедшего пользователя (поток требует входа). */
+function ServerSync() {
+  useServerDataSync();
+  return null;
 }

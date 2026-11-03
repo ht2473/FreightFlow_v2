@@ -221,3 +221,22 @@ func DeleteOlderThan(ctx context.Context, pool *pgxpool.Pool, age time.Duration)
 	}
 	return tag.RowsAffected(), nil
 }
+
+// Journal — чтение журнала событий.
+type Journal struct{ Pool *pgxpool.Pool }
+
+// Since возвращает до limit событий указанных типов с номером больше after по возрастанию
+// номера — дочитывание потока браузера после переподключения.
+func (j Journal) Since(ctx context.Context, after int64, types []string, limit int) ([]Event, error) {
+	rows, err := j.Pool.Query(ctx,
+		`SELECT id, type, payload, created_at FROM notify.outbox WHERE id > $1 AND type = ANY($2) ORDER BY id LIMIT $3`,
+		after, types, limit)
+	if err != nil {
+		return nil, fmt.Errorf("read events since %d: %w", after, err)
+	}
+	evs, err := pgx.CollectRows(rows, pgx.RowToStructByPos[Event])
+	if err != nil {
+		return nil, fmt.Errorf("scan events: %w", err)
+	}
+	return evs, nil
+}
