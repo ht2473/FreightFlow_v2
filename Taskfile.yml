@@ -201,6 +201,11 @@ tasks:
     cmds:
       - npx playwright test {{.CLI_ARGS}}
 
+  load:
+    desc: "Нагрузочные сценарии по бюджетам производительности (нужен `task serve`); один: task load -- -run TestLoad/tiles"
+    cmds:
+      - go test -tags load -count=1 -v -timeout 15m ./test/load/ {{.CLI_ARGS}}
+
   vuln:
     desc: Проверка уязвимостей в зависимостях
     cmds:
