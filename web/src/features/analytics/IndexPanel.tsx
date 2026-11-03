@@ -200,26 +200,28 @@ export function IndexPanel({
               <h3 className={s.note}>
                 Чувствительность: вес каждой составляющей ±20 %, корреляция Спирмена с исходными рангами
               </h3>
-              <table className={t.table} aria-label="Чувствительность к весам">
-                <thead>
-                  <tr>
-                    <th>Составляющая</th>
-                    <th className={t.right}>ρ при −20 %</th>
-                    <th className={t.right}>ρ при +20 %</th>
-                    <th className={t.right}>Наибольший сдвиг места</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {res.data.sensitivity.map((x) => (
-                    <tr key={x.ref}>
-                      <td>{title(x.ref)}</td>
-                      <td className={`${t.right} num`}>{num(x.rhoMinus, 3)}</td>
-                      <td className={`${t.right} num`}>{num(x.rhoPlus, 3)}</td>
-                      <td className={`${t.right} num`}>{num(x.maxShift)}</td>
+              <div className={s.tableScroll}>
+                <table className={t.table} aria-label="Чувствительность к весам">
+                  <thead>
+                    <tr>
+                      <th>Составляющая</th>
+                      <th className={t.right}>ρ при −20 %</th>
+                      <th className={t.right}>ρ при +20 %</th>
+                      <th className={t.right}>Макс. сдвиг места</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {res.data.sensitivity.map((x) => (
+                      <tr key={x.ref}>
+                        <td>{title(x.ref)}</td>
+                        <td className={`${t.right} num`}>{num(x.rhoMinus, 3)}</td>
+                        <td className={`${t.right} num`}>{num(x.rhoPlus, 3)}</td>
+                        <td className={`${t.right} num`}>{num(x.maxShift)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <div>
                 <table className={t.table} aria-label={`Рейтинг: ${ix?.title ?? ""}`}>
                   <thead>

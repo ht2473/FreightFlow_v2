@@ -224,17 +224,32 @@ export function SecondMap({
     m.touchZoomRotate.disableRotation();
     m.keyboard.disableRotation();
     lockToBounds(m);
+    // Карта создаётся в момент появления колонки, когда её высота ещё не установилась: холст
+    // подстраивается под контейнер при каждом изменении его размера.
+    const ro = new ResizeObserver(() => m.resize());
+    ro.observe(hostRef.current);
     setMap(m);
     return () => {
+      ro.disconnect();
       m.remove();
       setMap(null);
     };
   }, [ready]);
 
+  // Новый стиль — только после загрузки исходного, иначе сравнение стилей невозможно.
   useEffect(() => {
-    if (map && style) {
-      map.setStyle(style, { diff: true });
+    if (!map || !style) {
+      return;
     }
+    if (map.isStyleLoaded()) {
+      map.setStyle(style, { diff: true });
+      return;
+    }
+    const apply = () => map.setStyle(style, { diff: true });
+    map.once("style.load", apply);
+    return () => {
+      map.off("style.load", apply);
+    };
   }, [map, style]);
 
   // Синхронизация вида: изменение на одной карте повторяется на другой; флаг не даёт событию

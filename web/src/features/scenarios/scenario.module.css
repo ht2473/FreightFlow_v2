@@ -228,7 +228,8 @@
 }
 
 .mapHost :global(.ff-map),
-.mapHost :global(.maplibregl-map) {
+.mapHost :global(.maplibregl-map),
+.mapHost:global(.maplibregl-map) {
   position: absolute;
   inset: 0;
 }

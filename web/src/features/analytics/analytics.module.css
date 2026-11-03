@@ -219,3 +219,10 @@
 .layout > * {
   margin-top: 0;
 }
+
+/* Таблица в узкой колонке рядом с картой — прокручивается сама, не залезает под карту. */
+.tableScroll {
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+}

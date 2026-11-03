@@ -100,19 +100,20 @@ function SiteSelection() {
     spacingKm: spacing,
   });
 
-  const run = () => {
-    const p = params();
+  const evaluateWith = (p: Params) => {
     evaluate.mutate(
       { body: p },
       {
         onSuccess: (r) => {
           setResult(r);
-          setUsed(metrics);
+          setUsed(p.criteria.map((c) => c.metric));
           setSelected(new Set(r.top.slice(0, 3).map((c) => c.h3)));
         },
       },
     );
   };
+
+  const run = () => evaluateWith(params());
 
   const load = (r: Schemas["SiteRun"]) => {
     const p = r.params;
@@ -142,6 +143,8 @@ function SiteSelection() {
     }
     setJudgments(js);
     setResult(null);
+    // Карта пригодности не хранится вместе с оценкой — пересчёт по сохранённым параметрам.
+    evaluateWith(p);
   };
 
   const palette = usePalette();

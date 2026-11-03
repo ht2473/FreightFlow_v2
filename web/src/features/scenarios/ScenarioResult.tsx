@@ -300,6 +300,11 @@ function Kpi({ label, value }: { label: string; value: string }) {
   );
 }
 
+/** Ни один объект не доехал до цели в обоих вариантах (медиана пустого набора — 0). */
+function unreachable(t: Schemas["ScenarioTargetSummary"]) {
+  return t.baseMedian === 0 && t.scenarioMedian === 0 && t.lost === 0 && t.gained === 0;
+}
+
 function TargetBlock({ summary }: { summary: Schemas["ScenarioTargetSummary"] | undefined }) {
   if (!summary) {
     return null;
@@ -315,10 +320,17 @@ function TargetBlock({ summary }: { summary: Schemas["ScenarioTargetSummary"] | 
         <Kpi label="Потеряли доступ" value={num(summary.lost)} />
         <Kpi label="Быстрее или получили доступ" value={num(summary.improved + summary.gained)} />
       </div>
-      <p className={s.muted}>
-        Медиана времени: {num(summary.baseMedian, 1)} → {num(summary.scenarioMedian, 1)} мин
-        {summary.blocked > 0 ? `; в закрытой зоне в сценарии — ${num(summary.blocked)} объектов` : ""}.
-      </p>
+      {unreachable(summary) ? (
+        <p className={s.muted}>
+          Цель недостижима ни в базе, ни в сценарии: при этих правилах зон и времени отправления она закрыта для
+          выбранного транспорта. Добавьте пропуск, откройте зону или задайте ночное отправление.
+        </p>
+      ) : (
+        <p className={s.muted}>
+          Медиана времени: {num(summary.baseMedian, 1)} → {num(summary.scenarioMedian, 1)} мин
+          {summary.blocked > 0 ? `; в закрытой зоне в сценарии — ${num(summary.blocked)} объектов` : ""}.
+        </p>
+      )}
     </section>
   );
 }
