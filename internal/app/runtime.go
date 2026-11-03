@@ -125,6 +125,11 @@ func (m *modules) registry(env *Env, pool *pgxpool.Pool) *jobs.Registry {
 	return reg
 }
 
+// consumers — постоянные потребители событий модулей (исполняются вместе с фоновыми задачами).
+func (m *modules) consumers() []events.Consumer {
+	return nil
+}
+
 // runWorkers исполняет фоновые задачи до отмены ctx и дожидается текущих при остановке.
 func (rt *runtime) runWorkers(ctx context.Context, env *Env, reg *jobs.Registry) error {
 	client, err := jobs.NewWorker(rt.pool, env.Log, reg, jobs.Observability{Meters: rt.tel.Meters, Tracers: rt.tel.Tracers})
@@ -161,5 +166,6 @@ func runWorker(ctx context.Context, env *Env, _ []string) error {
 	g.Go(func() error { return rt.serveMetrics(gctx, env, env.Config.WorkerMetricsAddr) })
 	g.Go(func() error { return events.Listen(gctx, rt.pool, rt.bus, env.Log) })
 	g.Go(func() error { return rt.runWorkers(gctx, env, mods.registry(env, rt.pool)) })
+	g.Go(func() error { return events.RunConsumers(gctx, rt.pool, rt.bus, env.Log, mods.consumers()...) })
 	return g.Wait()
 }

@@ -113,6 +113,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	g.Go(func() error { return layers.Watch(gctx, rt.bus) })
 	if *withWorker {
 		g.Go(func() error { return rt.runWorkers(gctx, env, mods.registry(env, pool)) })
+		g.Go(func() error { return events.RunConsumers(gctx, pool, rt.bus, env.Log, mods.consumers()...) })
 	}
 	return g.Wait()
 }
