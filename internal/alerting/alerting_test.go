@@ -7,12 +7,17 @@ import (
 	"log/slog"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"freightflow/internal/alerting"
+	"freightflow/internal/platform/db"
 	"freightflow/internal/platform/dbtest"
+	"freightflow/internal/platform/events"
+	"freightflow/internal/platform/jobs"
 )
 
 // env — база с владельцем правил, вторым аналитиком и оператором.
@@ -437,5 +442,43 @@ func TestRuleValidation(t *testing.T) {
 	}
 	if err := e.svc.DeleteRule(t.Context(), e.owner, r.ID); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestConsumerQueuesCheckOnDataEvents(t *testing.T) {
+	t.Parallel()
+	pool := dbtest.New(t)
+	ctx := t.Context()
+	inserter, err := jobs.NewInserter(pool, slog.New(slog.DiscardHandler))
+	if err != nil {
+		t.Fatal(err)
+	}
+	svc := alerting.New(pool, inserter, slog.New(slog.DiscardHandler))
+	c := svc.Consumer()
+	if err := c.Register(ctx, pool); err != nil {
+		t.Fatal(err)
+	}
+	for _, typ := range []string{events.RoadworkChanged, events.JobProgress, events.DataPublished} {
+		err := db.InTx(ctx, pool, func(tx pgx.Tx) error { return events.Publish(ctx, tx, typ, map[string]any{}) })
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	// Порция с двумя событиями-поводами ставит одну проверку; прогресс задач поводом не является.
+	deadline := time.Now().Add(15 * time.Second)
+	for count(t, pool, `SELECT count(*) FROM queue.river_job WHERE kind = 'alerting.check'`) == 0 {
+		if _, err := c.Step(ctx, pool); err != nil {
+			t.Fatal(err)
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("check job was not queued")
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if _, err := c.Step(ctx, pool); err != nil {
+		t.Fatal(err)
+	}
+	if n := count(t, pool, `SELECT count(*) FROM queue.river_job WHERE kind = 'alerting.check' AND queue = 'alerts'`); n < 1 || n > 2 {
+		t.Fatalf("check jobs = %d", n)
 	}
 }
