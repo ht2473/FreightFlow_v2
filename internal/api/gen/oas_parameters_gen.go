@@ -3073,7 +3073,7 @@ func decodeListAlertsParams(args [0]string, argsEscaped bool, r *http.Request) (
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "status",
 			Style:   uri.QueryStyleForm,
-			Explode: false,
+			Explode: true,
 		}
 
 		if err := q.HasParam(cfg); err == nil {
@@ -3139,7 +3139,7 @@ func decodeListAlertsParams(args [0]string, argsEscaped bool, r *http.Request) (
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "severity",
 			Style:   uri.QueryStyleForm,
-			Explode: false,
+			Explode: true,
 		}
 
 		if err := q.HasParam(cfg); err == nil {

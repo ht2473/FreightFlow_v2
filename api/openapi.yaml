@@ -1971,11 +1971,9 @@ paths:
       parameters:
         - name: status
           in: query
-          explode: false
           schema: { type: array, items: { $ref: "#/components/schemas/AlertStatus" } }
         - name: severity
           in: query
-          explode: false
           schema: { type: array, items: { $ref: "#/components/schemas/AlertSeverity" } }
         - name: kind
           in: query

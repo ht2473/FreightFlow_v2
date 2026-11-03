@@ -8918,7 +8918,7 @@ func (c *Client) sendListAlerts(ctx context.Context, params ListAlertsParams) (r
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "status",
 			Style:   uri.QueryStyleForm,
-			Explode: false,
+			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
@@ -8944,7 +8944,7 @@ func (c *Client) sendListAlerts(ctx context.Context, params ListAlertsParams) (r
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "severity",
 			Style:   uri.QueryStyleForm,
-			Explode: false,
+			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {

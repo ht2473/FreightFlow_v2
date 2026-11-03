@@ -91,7 +91,7 @@ func TestAPIAlerts(t *testing.T) {
 	if p := list(other, ""); len(p.Items) != 0 {
 		t.Fatalf("other analyst sees %d alerts", len(p.Items))
 	}
-	p := list(operator, "?status=active,acknowledged&severity=warning,critical&kind=roadworks")
+	p := list(operator, "?status=active&status=acknowledged&severity=warning&severity=critical&kind=roadworks")
 	if len(p.Items) != 1 || p.Items[0].Severity != "warning" {
 		t.Fatalf("operator feed: %+v", p)
 	}
