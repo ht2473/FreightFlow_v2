@@ -53,8 +53,10 @@ function Dashboard() {
   const [adding, setAdding] = useState(false);
   const refresh = () => qc.invalidateQueries({ queryKey: ["get", "/me/dashboard"] });
   const save = $api.useMutation("put", "/me/dashboard", {
-    onSuccess: () => void refresh(),
-    onError: (e) => toast.error(problemMessage(e)),
+    onError: (e) => {
+      toast.error(problemMessage(e));
+      void refresh();
+    },
   });
   const reset = $api.useMutation("delete", "/me/dashboard", {
     onSuccess: () => {
@@ -62,11 +64,13 @@ function Dashboard() {
       void refresh();
     },
   });
-  // Порядок показывается сразу, не дожидаясь ответа сервера.
-  const [pending, setPending] = useState<Widget[] | null>(null);
-  const widgets = (save.isPending && pending) || dash.data?.widgets || [];
+  const widgets = dash.data?.widgets ?? [];
+  // Новый набор сразу записывается в кеш запроса: порядок не откатывается, пока сервер сохраняет;
+  // при ошибке набор перечитывается.
   const store = (next: Widget[]) => {
-    setPending(next);
+    qc.setQueriesData<typeof dash.data>({ queryKey: ["get", "/me/dashboard"] }, (old) =>
+      old ? { ...old, widgets: next, own: true } : old,
+    );
     save.mutate({ body: { widgets: next } });
   };
   const move = (from: number, to: number) => {

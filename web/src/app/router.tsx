@@ -1,11 +1,11 @@
 import { createRootRoute, createRoute, createRouter, lazyRouteComponent, redirect } from "@tanstack/react-router";
-import { alertsSearchSchema } from "@/features/alerts/AlertsPage";
-import { analyticsSearchSchema } from "@/features/analytics/AnalyticsPage";
+import { alertsSearchSchema } from "@/features/alerts/search";
+import { analyticsSearchSchema } from "@/features/analytics/search";
 import { compareSearchSchema, facilitySearchSchema } from "@/features/facilities/search";
 import { mapSearchSchema } from "@/features/map/state";
 import { networkSearchSchema } from "@/features/network/search";
-import { printSearchSchema } from "@/features/print/PrintPage";
-import { reportsSearchSchema } from "@/features/reports/ReportsPage";
+import { printSearchSchema } from "@/features/print/search";
+import { reportsSearchSchema } from "@/features/reports/search";
 import { territorySearchSchema } from "@/features/territories/search";
 import { ErrorPage, PendingPage } from "./ErrorPage";
 import { NotFound } from "./NotFound";

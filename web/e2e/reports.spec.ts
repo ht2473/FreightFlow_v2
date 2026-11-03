@@ -147,10 +147,15 @@ test("раздел отчётов: заказ из профиля района, 
   await page.getByRole("option", { name: "Качество данных" }).click();
   await sd.getByRole("textbox", { name: /Получатели письма/ }).fill("ops@example.com");
   await sd.getByRole("button", { name: "Сохранить" }).click();
-  const sched = page.getByRole("row").filter({ hasText: "Качество данных" }).first();
+  const rows = page.getByRole("row").filter({ hasText: "Качество данных" }).filter({ hasText: "ops@example.com" });
+  const sched = rows.first();
   await expect(sched.getByText("ops@example.com")).toBeVisible();
   await expect(sched.getByText(/по дням: понедельник, 08:00/)).toBeVisible();
-  await sched.getByRole("button", { name: /^Удалить расписание/ }).click();
-  await expect(page.getByRole("row").filter({ hasText: "ops@example.com" })).toHaveCount(0);
+  // Удаляются и созданное сейчас, и оставшееся от прерванного прогона.
+  while ((await rows.count()) > 0) {
+    const n = await rows.count();
+    await rows.first().getByRole("button", { name: /^Удалить расписание/ }).click();
+    await expect(rows).toHaveCount(n - 1);
+  }
   expect(errors).toEqual([]);
 });

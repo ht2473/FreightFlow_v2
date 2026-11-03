@@ -20,15 +20,6 @@ const templates = {
   quality: QualityReport,
 } as const;
 
-/** Параметры шаблона — строки адреса страницы печати. */
-export function printSearchSchema(search: Record<string, unknown>): Record<string, string | undefined> {
-  const out: Record<string, string | undefined> = {};
-  for (const [k, v] of Object.entries(search)) {
-    out[k] = v === undefined || v === null ? undefined : String(v);
-  }
-  return out;
-}
-
 /** Страница печати отчёта /print/<шаблон>: её открывает служба pdf и пользователь для предпросмотра. */
 export function PrintPage() {
   const { template } = useParams({ from: "/print/$template" });

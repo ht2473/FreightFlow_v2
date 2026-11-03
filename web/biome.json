@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["src/**", "e2e/**", "vite.config.ts", "!src/shared/api/schema.d.ts"]
+    "includes": ["src/**", "e2e/**", "vite.config.ts", "budget.mjs", "!src/shared/api/schema.d.ts"]
   },
   "formatter": {
     "enabled": true,

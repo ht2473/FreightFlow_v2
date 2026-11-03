@@ -68,7 +68,7 @@ export default defineConfig({
               priority: 20,
             },
             // Карта — отдельный чанк: загружается только на страницах с картой.
-            { name: "map", test: /node_modules[/](maplibre-gl|@protomaps)[/]/, priority: 25 },
+            { name: "map", test: /node_modules[/](maplibre-gl|@protomaps|terra-draw[a-z-]*)[/]/, priority: 25 },
             // Графики — тоже по требованию: страницы со статистикой.
             { name: "charts", test: /node_modules[/](echarts|zrender)[/]/, priority: 25 },
             { name: "vendor", test: /node_modules[/]/, priority: 10 },
