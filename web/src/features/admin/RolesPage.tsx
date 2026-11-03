@@ -35,7 +35,9 @@ function RoleMatrix() {
             <Skeleton height={36} />
           </div>
         ) : (
-          <div className={s.scrollX}>
+          // Широкая таблица прокручивается сама; область доступна с клавиатуры (стрелки прокрутки).
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: прокручиваемая область должна получать фокус
+          <section className={s.scrollX} aria-label="Матрица прав по ролям" tabIndex={0}>
             <table className={tableClass}>
               <thead>
                 <tr>
@@ -70,7 +72,7 @@ function RoleMatrix() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </section>
         )}
       </Section>
     </>

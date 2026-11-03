@@ -513,7 +513,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--acc);
+  color: var(--acc-tx);
   font: inherit;
   text-align: left;
   cursor: pointer;

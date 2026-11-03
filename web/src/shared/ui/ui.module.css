@@ -384,3 +384,9 @@
 .sectionFlush > .sectionHead {
   padding: 18px 20px 0;
 }
+
+/* Ссылка в пояснении пустого состояния — с подчёркиванием (WCAG 1.4.1). */
+.empty a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

@@ -154,7 +154,10 @@ test("раздел отчётов: заказ из профиля района, 
   // Удаляются и созданное сейчас, и оставшееся от прерванного прогона.
   while ((await rows.count()) > 0) {
     const n = await rows.count();
-    await rows.first().getByRole("button", { name: /^Удалить расписание/ }).click();
+    await rows
+      .first()
+      .getByRole("button", { name: /^Удалить расписание/ })
+      .click();
     await expect(rows).toHaveCount(n - 1);
   }
   expect(errors).toEqual([]);
