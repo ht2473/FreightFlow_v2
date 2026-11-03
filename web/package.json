@@ -20,7 +20,7 @@
     "@tanstack/react-virtual": "3.14.24",
     "date-fns": "4.4.0",
     "echarts": "6.1.0",
-    "lucide-react": "1.64.0",
+    "lucide-react": "1.66.0",
     "maplibre-gl": "6.16.0",
     "openapi-fetch": "0.17.0",
     "openapi-react-query": "0.5.4",
