@@ -13,6 +13,144 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AlertingAlert struct {
+	ID             uuid.UUID
+	RuleID         uuid.UUID
+	Entity         string
+	Severity       string
+	Status         string
+	Title          string
+	Summary        string
+	Details        json.RawMessage
+	Geom           interface{}
+	Occurrences    int32
+	AssigneeID     *uuid.UUID
+	AcknowledgedBy *uuid.UUID
+	AcknowledgedAt *time.Time
+	ClosedBy       *uuid.UUID
+	ClosedAt       *time.Time
+	Resolution     *string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	LastSeenAt     time.Time
+}
+
+type AlertingAlertLog struct {
+	ID      int64
+	AlertID uuid.UUID
+	At      time.Time
+	ActorID *uuid.UUID
+	Action  string
+	Comment *string
+	Details json.RawMessage
+}
+
+type AlertingHit struct {
+	RuleID  uuid.UUID
+	Key     string
+	AlertID *uuid.UUID
+	At      time.Time
+}
+
+type AlertingRule struct {
+	ID         uuid.UUID
+	OwnerID    uuid.UUID
+	Name       string
+	Kind       string
+	Scope      json.RawMessage
+	Area       interface{}
+	Params     json.RawMessage
+	Severity   string
+	Channels   []string
+	Enabled    bool
+	State      []byte
+	CheckedAt  *time.Time
+	CheckError *string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+// физическая доступность по сети: ограничения участков для профиля учитываются, зоны пропусков — нет (как с пропусками всех зон)
+type AnalyticsAccessibility struct {
+	FacilityID   uuid.UUID
+	ProfileCode  string
+	TargetKind   string
+	Minutes      *float32
+	Km           *float32
+	TargetID     *int32
+	GraphBuiltAt time.Time
+	ComputedAt   time.Time
+}
+
+type AnalyticsAccessibilityTarget struct {
+	ID    int32
+	Kind  string
+	Name  string
+	Point interface{}
+}
+
+type AnalyticsCellAccess struct {
+	H3         interface{}
+	TargetKind string
+	// время до ближайшей цели, мин; пусто — центр ячейки не привязан к сети или путь не найден
+	Minutes      *float32
+	Km           *float32
+	GraphBuiltAt time.Time
+}
+
+type AnalyticsDashboard struct {
+	OwnerID   uuid.UUID
+	Widgets   json.RawMessage
+	UpdatedAt time.Time
+}
+
+type AnalyticsIndexConfig struct {
+	IndexCode     string
+	OwnerID       *uuid.UUID
+	Weights       json.RawMessage
+	Normalization string
+	UpdatedBy     *uuid.UUID
+	UpdatedAt     time.Time
+}
+
+type AnalyticsMetricDef struct {
+	Code     string
+	Title    string
+	Unit     string
+	Levels   []string
+	Formula  string
+	Method   string
+	Domains  []string
+	Depends  []string
+	Version  int32
+	SyncedAt time.Time
+}
+
+type AnalyticsMetricState struct {
+	Code       string
+	Signature  string
+	Rows       int32
+	DurationMs int32
+	ComputedAt time.Time
+}
+
+type AnalyticsMetricValue struct {
+	MetricCode string
+	Level      string
+	Entity     string
+	Period     pgtype.Date
+	Value      float64
+	Inputs     json.RawMessage
+	ComputedAt time.Time
+}
+
+type AnalyticsPrepareState struct {
+	Step       string
+	Signature  string
+	Rows       int32
+	PreparedAt time.Time
+}
+
 type CoreApiToken struct {
 	ID         uuid.UUID
 	UserID     uuid.UUID
@@ -40,6 +178,7 @@ type CoreAppUser struct {
 	LastLoginAt       *time.Time
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
+	SessionsRevokedAt *time.Time
 }
 
 type CoreAuditLog struct {
@@ -87,6 +226,18 @@ type CoreRolePermission struct {
 	Permission string
 }
 
+type CoreSavedView struct {
+	ID      uuid.UUID
+	OwnerID uuid.UUID
+	Page    string
+	Name    string
+	// параметры адреса страницы
+	Params json.RawMessage
+	// общий вид для роли; пусто — личный
+	RoleCode  *string
+	CreatedAt time.Time
+}
+
 type CoreSession struct {
 	Token  string
 	Data   []byte
@@ -110,6 +261,32 @@ type CoreUserSetting struct {
 	Theme     string
 	Settings  json.RawMessage
 	UpdatedAt time.Time
+}
+
+type InfraCommissioning struct {
+	ID           uuid.UUID
+	MosGlobalID  int64
+	PermitNumber *string
+	PermitDate   pgtype.Date
+	ObjectName   *string
+	Address      *string
+	AdmArea      *string
+	District     *string
+	WorkType     *string
+	Purpose      *string
+	Funding      *string
+	AreaM2       pgtype.Numeric
+	LengthM      pgtype.Numeric
+	// объект складского или логистического назначения (по назначению и названию)
+	Logistics   bool
+	AddressUnom *int64
+	// по адресному реестру: точка здания с совпадающим адресом
+	Point       interface{}
+	FacilityID  *uuid.UUID
+	SourceCode  string
+	SnapshotID  *uuid.UUID
+	FirstSeenAt time.Time
+	LastSeenAt  time.Time
 }
 
 type InfraFacility struct {
@@ -144,6 +321,49 @@ type InfraFacility struct {
 	FirstSeenAt       time.Time
 	LastSeenAt        time.Time
 	UpdatedAt         time.Time
+	Territory3857     interface{}
+	AddressUnom       *int64
+	// адрес по адресному реестру Москвы; address — из разметки OSM
+	OfficialAddress *string
+	// поля, значения которых заданы редактором
+	Curated []string
+}
+
+// правки реестра редактором; действует последняя неотменённая правка поля
+type InfraFacilityCuration struct {
+	ID         uuid.UUID
+	FacilityID uuid.UUID
+	Field      string
+	Value      *string
+	// значение по источникам до первой правки поля — возвращается при отмене всех правок
+	SourceValue *string
+	Reason      string
+	AuthorID    *uuid.UUID
+	CreatedAt   time.Time
+	RevokedAt   *time.Time
+	RevokedBy   *uuid.UUID
+}
+
+// сообщения о неточностях записи реестра — очередь редактора
+type InfraFacilityReport struct {
+	ID         uuid.UUID
+	FacilityID uuid.UUID
+	AuthorID   *uuid.UUID
+	Message    string
+	Status     string
+	Resolution *string
+	ResolvedBy *uuid.UUID
+	CreatedAt  time.Time
+	ResolvedAt *time.Time
+}
+
+// address — объект адресного реестра (ref — UNOM); permit — разрешение на ввод (ref — global_id набора 64028)
+type InfraFacilitySource struct {
+	FacilityID uuid.UUID
+	Relation   string
+	Ref        string
+	Details    json.RawMessage
+	MatchedAt  time.Time
 }
 
 type InfraIndustrialZone struct {
@@ -170,12 +390,17 @@ type InfraPoi struct {
 	Point3857   interface{}
 	Area        interface{}
 	Tags        json.RawMessage
-	OsmType     string
-	OsmID       int64
+	OsmType     *string
+	OsmID       *int64
 	SourceCode  string
 	SnapshotID  *uuid.UUID
 	FirstSeenAt time.Time
 	LastSeenAt  time.Time
+	MosDataset  *int32
+	MosGlobalID *int64
+	// у записи OSM — совпадающая официальная запись портала Москвы; на карте показывается официальная
+	OfficialID *uuid.UUID
+	Address    *string
 }
 
 type IngestDataVersion struct {
@@ -255,6 +480,13 @@ type IngestSource struct {
 	SyncedAt   time.Time
 }
 
+type MosStageRecord struct {
+	Dataset  int32
+	GlobalID int64
+	Cells    json.RawMessage
+	Geometry []byte
+}
+
 type NetworkBridge struct {
 	ID         uuid.UUID
 	SegmentID  *uuid.UUID
@@ -268,6 +500,115 @@ type NetworkBridge struct {
 	OsmID      int64
 	SourceCode string
 	SnapshotID *uuid.UUID
+}
+
+type NetworkBridgeRegistry struct {
+	ID           uuid.UUID
+	MosGlobalID  int64
+	MosID        *int64
+	Name         string
+	Location     *string
+	Crossing     *string
+	Commissioned *int16
+	District     *string
+	Geom         interface{}
+	OsmBridgeIds []uuid.UUID
+	SourceCode   string
+	SnapshotID   *uuid.UUID
+	FirstSeenAt  time.Time
+	LastSeenAt   time.Time
+}
+
+type NetworkEdgeMetric struct {
+	VersionID int32
+	EdgeID    int32
+	// доля упорядоченных пар узлов, кратчайший по времени путь между которыми проходит через ребро
+	Centrality   float64
+	CentralitySe float64
+	Rank         int32
+	// место в рейтинге, доля рёбер (0 — первое)
+	Percentile float32
+	// центральность в графе без пределов массы и габаритов
+	FreeCentrality float64
+	FreeRank       int32
+	FreePercentile float32
+	// узкое место: проезд закрыт пределом массы или габарита, без него через ребро шли бы пути
+	Bottleneck bool
+	// дополнительное время объезда узкого места, мин; пусто — объезда нет
+	DetourMin *float32
+}
+
+// мост (проезжие части одного сооружения) или участок дороги (линия OSM)
+type NetworkElementCriticality struct {
+	VersionID  int32
+	ID         int32
+	Kind       string
+	Name       string
+	SegmentIds []uuid.UUID
+	EdgeIds    []int32
+	Centrality float64
+	// место по ущербу (прирост времени плюс 60 мин за объект без доступа): первые 30 по графу — по проверке матрицами, далее по графу
+	Rank       int32
+	Facilities int32
+	// суммарный прирост времени до МКАД по объектам, объекто-минуты
+	DamageMin   float32
+	MaxDelayMin float32
+	// объектов, теряющих доступ к МКАД
+	Disconnected int32
+	// проверено матрицами Valhalla с исключением участков элемента
+	Confirmed            bool
+	ValhallaFacilities   *int32
+	ValhallaDamageMin    *float32
+	ValhallaMaxDelayMin  *float32
+	ValhallaDisconnected *int32
+	Geom                 interface{}
+	Geom3857             interface{}
+}
+
+type NetworkGraphEdge struct {
+	VersionID int32
+	ID        int32
+	SegmentID uuid.UUID
+	FromNode  int32
+	ToNode    int32
+	LengthM   float32
+	// время проезда профилем, мин (без множителя участков «только для подъезда»)
+	Minutes float32
+	// проезд профилю по направлению линии открыт
+	Forward  bool
+	Backward bool
+	// ограничение, закрывающее проезд профилю хотя бы в одном направлении (кроме одностороннего движения)
+	ClosedBy    *string
+	ClosedValue *float32
+	// закрыто только пределом массы или габарита
+	DimsOnly    bool
+	Destination bool
+	Geom        interface{}
+	Geom3857    interface{}
+}
+
+type NetworkGraphNode struct {
+	VersionID int32
+	ID        int32
+	Point     interface{}
+}
+
+type NetworkGraphVersion struct {
+	ID          int32
+	ProfileCode string
+	// версия домена network, по которой построен граф
+	NetworkVersion int64
+	BuiltAt        time.Time
+	Nodes          int32
+	Edges          int32
+	Arcs           int32
+	// доля узлов в наибольшей сильно связной компоненте
+	LargestComponent float32
+	// точность выборочной центральности для профиля (profile) и без пределов габаритов (free): источники, медиана относительной ошибки верхней сотни рёбер, ранговая устойчивость половин выборки
+	Accuracy   json.RawMessage
+	DurationMs int32
+	// привязка объектов и точек МКАД к графу, число оценённых и проверенных матрицами элементов
+	Criticality json.RawMessage
 }
 
 type NetworkRestriction struct {
@@ -284,6 +625,48 @@ type NetworkRestriction struct {
 	Confidence float32
 	SourceCode string
 	SnapshotID *uuid.UUID
+	// знак, которым подтверждено ограничение (origin = sign)
+	SignID *uuid.UUID
+}
+
+type NetworkRestrictionConflict struct {
+	ID        uuid.UUID
+	SegmentID uuid.UUID
+	Kind      string
+	// sign_not_in_osm — знак есть, в OSM ограничения этого вида на участке нет; osm_not_signed — в OSM ограничение есть, знака этого вида рядом с участком нет
+	Type       string
+	SignID     *uuid.UUID
+	Details    json.RawMessage
+	DetectedAt time.Time
+}
+
+type NetworkRestrictionEffective struct {
+	SegmentID  uuid.UUID
+	Kind       string
+	Origin     string
+	Direction  int16
+	Condition  *string
+	Confidence float32
+	Value      pgtype.Numeric
+	Origins    interface{}
+}
+
+type NetworkRoadAsset struct {
+	ID          uuid.UUID
+	Kind        string
+	MosDataset  int32
+	MosGlobalID int64
+	Name        *string
+	Address     *string
+	District    *string
+	Attrs       json.RawMessage
+	Geom        interface{}
+	Geom3857    interface{}
+	Status      string
+	SourceCode  string
+	SnapshotID  *uuid.UUID
+	FirstSeenAt time.Time
+	LastSeenAt  time.Time
 }
 
 type NetworkRoadSegment struct {
@@ -310,11 +693,234 @@ type NetworkRoadSegment struct {
 	LastSeenAt  time.Time
 }
 
+type NetworkRoadSign struct {
+	ID          uuid.UUID
+	MosGlobalID int64
+	MosID       *int64
+	// номер знака по ПДД (3.11, 8.4.1); NULL — не распознан
+	Code *string
+	// тип знака как в наборе («3.11 Ограничение массы»)
+	SignType       string
+	Temporary      *bool
+	PlacedOn       pgtype.Date
+	Location       *string
+	AdmArea        *string
+	District       *string
+	Point          interface{}
+	Point3857      interface{}
+	SegmentID      *uuid.UUID
+	MatchDistanceM *float32
+	MatchStatus    string
+	Status         string
+	SourceCode     string
+	SnapshotID     *uuid.UUID
+	FirstSeenAt    time.Time
+	LastSeenAt     time.Time
+	Plates         []string
+}
+
+type NetworkSignWork struct {
+	ID          uuid.UUID
+	MosGlobalID int64
+	WorkType    *string
+	Place       *string
+	Contractor  *string
+	WorkOn      pgtype.Date
+	District    *string
+	Point       interface{}
+	SourceCode  string
+	SnapshotID  *uuid.UUID
+	FirstSeenAt time.Time
+	LastSeenAt  time.Time
+}
+
+type NotifyConsumer struct {
+	Name      string
+	LastXid   pgtype.Uint64
+	LastID    int64
+	UpdatedAt time.Time
+}
+
+type NotifyDelivery struct {
+	ID             uuid.UUID
+	NotificationID *uuid.UUID
+	UserID         uuid.UUID
+	Channel        string
+	WebhookID      *uuid.UUID
+	Event          string
+	Payload        json.RawMessage
+	Status         string
+	Attempts       int32
+	ResponseCode   *int32
+	LastError      *string
+	ScheduledAt    time.Time
+	SentAt         *time.Time
+	CreatedAt      time.Time
+}
+
+type NotifyNotification struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Kind      string
+	Severity  string
+	Title     string
+	Body      string
+	Link      *string
+	AlertID   *uuid.UUID
+	ReadAt    *time.Time
+	CreatedAt time.Time
+}
+
 type NotifyOutbox struct {
 	ID        int64
 	Type      string
 	Payload   json.RawMessage
 	CreatedAt time.Time
+	Xid       pgtype.Uint64
+}
+
+type NotifyPreference struct {
+	UserID            uuid.UUID
+	EmailMode         string
+	DigestHour        int16
+	QuietFrom         *int16
+	QuietTo           *int16
+	MinSeverity       string
+	SubscribeAll      bool
+	SubscribeSeverity string
+	UpdatedAt         time.Time
+}
+
+type NotifyTelegramBinding struct {
+	UserID   uuid.UUID
+	ChatID   int64
+	Username *string
+	BoundAt  time.Time
+}
+
+type NotifyTelegramCode struct {
+	CodeHash  string
+	UserID    uuid.UUID
+	ExpiresAt time.Time
+}
+
+type NotifyTelegramState struct {
+	ID       bool
+	OffsetID int64
+}
+
+type NotifyWebhook struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Name      string
+	Url       string
+	Secret    string
+	Enabled   bool
+	CreatedAt time.Time
+}
+
+// ежедневные агрегаты для временных рядов (активные работы по видам и значимости)
+type OperationsDailySnapshot struct {
+	Day    pgtype.Date
+	Metric string
+	Scope  string
+	Value  pgtype.Numeric
+}
+
+type OperationsIncident struct {
+	ID         uuid.UUID
+	SourceID   int64
+	OccurredAt time.Time
+	Category   *string
+	// fatal — с погибшими; severe — тяжёлый вред здоровью; light — лёгкий; none — без пострадавших (нет данных)
+	Severity          string
+	Dead              int16
+	Injured           int16
+	Participants      int16
+	Light             *string
+	Weather           []string
+	RoadConditions    []string
+	Nearby            []string
+	Address           *string
+	District          *string
+	VehicleCategories []string
+	// участвовал грузовой автомобиль или грузовой фургон
+	Freight bool
+	// участвовал грузовик, тягач, самосвал, прицеп или спецтехника (без фургонов)
+	HeavyFreight bool
+	Point        interface{}
+	Point3857    interface{}
+	SourceCode   string
+	SnapshotID   *uuid.UUID
+}
+
+type OperationsRoadWork struct {
+	ID          uuid.UUID
+	MosDataset  int32
+	MosGlobalID int64
+	// repair — плановый ремонт (62101 и история 2016–2019), emergency — аварийно-восстановительный ремонт (62461), closure — ограничение движения на период работ (2527)
+	Kind         string
+	Title        string
+	Place        *string
+	AdmArea      *string
+	District     *string
+	SourceStatus *string
+	PlannedStart pgtype.Date
+	PlannedEnd   pgtype.Date
+	ActualStart  pgtype.Date
+	ActualEnd    pgtype.Date
+	// действие: фактические даты, а без них плановые; для перекрытий — время перекрытия
+	Period      pgtype.Range[pgtype.Timestamptz]
+	Customer    *string
+	Contractor  *string
+	Closure     bool
+	LanesClosed *string
+	Attrs       json.RawMessage
+	Geom        interface{}
+	Geom3857    interface{}
+	// по сегодняшней дате и статусу источника; removed — запись исчезла с портала
+	State        string
+	Significance *string
+	// хеш содержательных полей: изменение — событие «изменилась»
+	ContentHash string
+	SourceCode  string
+	SnapshotID  *uuid.UUID
+	FirstSeenAt time.Time
+	LastSeenAt  time.Time
+	ChangedAt   time.Time
+	RemovedAt   *time.Time
+}
+
+type OperationsRoadWorkEvent struct {
+	ID      int64
+	WorkID  uuid.UUID
+	At      time.Time
+	Type    string
+	Details json.RawMessage
+}
+
+type OperationsRoadWorkFacility struct {
+	WorkID     uuid.UUID
+	FacilityID uuid.UUID
+	DistanceM  float32
+}
+
+type OperationsRoadWorkImpact struct {
+	WorkID    uuid.UUID
+	SegmentID uuid.UUID
+	Class     string
+	Bridge    bool
+	LengthM   float32
+}
+
+// workday — рабочий; dayoff — выходной или праздничный; short — сокращённый предпраздничный; nonworking_paid — нерабочий оплачиваемый (указы 2020–2021 гг.)
+type RefCalendarDay struct {
+	Day  pgtype.Date
+	Kind string
+	// год ещё не наступил: переносы выходных утверждаются постановлением Правительства, обычно осенью
+	Preliminary bool
+	SourceCode  string
+	SnapshotID  *uuid.UUID
 }
 
 type RefFacilityType struct {
@@ -323,6 +929,359 @@ type RefFacilityType struct {
 	Description string
 	Icon        string
 	Ord         int16
+}
+
+// act — правовой акт; amendment — акт о внесении изменений (amends — изменяемый акт); page — официальная страница органа власти
+type RefLegalDocument struct {
+	Code        string
+	Kind        string
+	Title       string
+	Number      *string
+	SignedOn    pgtype.Date
+	EffectiveOn pgtype.Date
+	Authority   string
+	Url         *string
+	Status      string
+	Amends      *string
+	Summary     *string
+	// дата сверки правил с текстом документа
+	VerifiedOn pgtype.Date
+}
+
+type RefRoadSignType struct {
+	Code      string
+	Name      string
+	SignGroup int16
+	// вид ограничения для грузового движения, если знак его вводит
+	RestrictionKind *string
+}
+
+type RefVehicleProfile struct {
+	Code string
+	Name string
+	// разрешённая максимальная масса, т
+	GrossT    pgtype.Numeric
+	PayloadT  pgtype.Numeric
+	AxleLoadT pgtype.Numeric
+	HeightM   pgtype.Numeric
+	WidthM    pgtype.Numeric
+	LengthM   pgtype.Numeric
+	// экологический класс (0 — не указан)
+	EcoClass int16
+	Hazmat   bool
+	Ord      int16
+}
+
+type RegulationCargoFrameSegment struct {
+	SegmentID uuid.UUID
+	StreetID  int32
+	Partial   bool
+}
+
+type RegulationCargoFrameStreet struct {
+	ID    int32
+	Okrug string
+	// строка перечня как опубликована
+	Entry  string
+	Street string
+	// границы участка («от … до …»); участки сети отмечаются по всей улице в округе
+	Extent *string
+	// строка перечня — кольцо (СК, ТТК, МКАД): участки по линии кольца
+	Ring       *string
+	Segments   int32
+	LengthKm   float64
+	SourceCode string
+	SnapshotID *uuid.UUID
+}
+
+type RegulationOfficialPage struct {
+	Code        string
+	Title       string
+	Content     string
+	ContentHash string
+	// хеш текста на момент сверки правил; отличие от content_hash — страница изменилась после сверки
+	VerifiedHash *string
+	FetchedAt    time.Time
+	ChangedAt    time.Time
+	SourceCode   string
+	SnapshotID   *uuid.UUID
+}
+
+// valid — действующих на первое число месяца; issued — начавших действовать в месяце; cancelled — аннулированных в месяце
+type RegulationPassStat struct {
+	Month      pgtype.Date
+	Zone       string
+	Series     string
+	Metric     string
+	Value      int32
+	SourceCode string
+	SnapshotID *uuid.UUID
+}
+
+type RegulationSpecialPermit struct {
+	ID            uuid.UUID
+	MosGlobalID   int64
+	IssuedOn      pgtype.Date
+	ValidFrom     pgtype.Date
+	ValidTo       pgtype.Date
+	Trips         *int32
+	TransportType *string
+	CarrierType   *string
+	LengthM       pgtype.Numeric
+	WidthM        pgtype.Numeric
+	HeightM       pgtype.Numeric
+	MassEmptyT    pgtype.Numeric
+	MassLoadedT   pgtype.Numeric
+	SourceCode    string
+	SnapshotID    *uuid.UUID
+	FirstSeenAt   time.Time
+	LastSeenAt    time.Time
+}
+
+type RegulationZoneRule struct {
+	Code   string
+	Zone   string
+	Title  string
+	Effect string
+	// gross — разрешённая максимальная масса; payload — грузоподъёмность (РММ минус масса без нагрузки)
+	MassBasis   *string
+	MassOverT   pgtype.Numeric
+	EcoClassMin *int16
+	// начало действия; интервал через полночь — time_from > time_to; NULL — круглосуточно
+	TimeFrom     pgtype.Time
+	TimeTo       pgtype.Time
+	PassKind     *string
+	PassZones    []string
+	ValidFrom    pgtype.Date
+	ValidTo      pgtype.Date
+	DocumentCode string
+	Clause       *string
+	// правило сверено с официальным источником confirmed_by; неподтверждённые используются с предупреждением
+	Confirmed   bool
+	ConfirmedBy *string
+	Note        *string
+	Ord         int16
+}
+
+type ReportExport struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+	Kind   string
+	Format string
+	// фильтр и сортировка выборки на момент запроса
+	Params json.RawMessage
+	Status string
+	Rows   *int32
+	// путь файла в хранилище (blob)
+	FilePath   *string
+	FileSize   *int64
+	Error      *string
+	CreatedAt  time.Time
+	FinishedAt *time.Time
+	ExpiresAt  time.Time
+}
+
+type ReportReport struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	Template   string
+	Format     string
+	Params     json.RawMessage
+	Title      string
+	Status     string
+	FilePath   *string
+	FileSize   *int64
+	Pages      *int32
+	Error      *string
+	ScheduleID *uuid.UUID
+	CreatedAt  time.Time
+	FinishedAt *time.Time
+	ExpiresAt  time.Time
+}
+
+type ReportSchedule struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	Template   string
+	Format     string
+	Params     json.RawMessage
+	Title      string
+	Frequency  string
+	Weekday    *int16
+	MonthDay   *int16
+	Hour       int16
+	Recipients []string
+	Enabled    bool
+	NextRunAt  time.Time
+	LastRunAt  *time.Time
+	CreatedAt  time.Time
+}
+
+type ScenarioFacilityDeltum struct {
+	ScenarioID     uuid.UUID
+	Entity         string
+	TargetKind     string
+	BaseMin        *float32
+	ScenarioMin    *float32
+	BaseStatus     string
+	ScenarioStatus string
+}
+
+type ScenarioIsochrone struct {
+	ScenarioID uuid.UUID
+	Origin     string
+	Minutes    int32
+	Variant    string
+	Geom       interface{}
+	AreaKm2    float64
+}
+
+type ScenarioResilience struct {
+	RunID           int32
+	ElementID       int32
+	Kind            string
+	Name            string
+	CriticalityRank int32
+	SegmentIds      []uuid.UUID
+	Candidates      int32
+	Affected        int32
+	Lost            int32
+	DelayMin        float32
+	MaxDelayMin     float32
+	Damage          float32
+	Rank            int32
+	// по виду цели: затронуто, потеряли доступ, прирост и наибольший прирост, ущерб
+	ByTarget json.RawMessage
+	Geom     interface{}
+	Geom3857 interface{}
+}
+
+type ScenarioResilienceRun struct {
+	ID int32
+	// версия сетевого анализа (network.element_criticality.version_id)
+	GraphVersion int32
+	GraphBuiltAt time.Time
+	ProfileCode  string
+	Targets      []string
+	// объекты в этом радиусе от элемента пересчитываются, дальние считаются незатронутыми
+	RadiusKm   float32
+	Status     string
+	Elements   int32
+	Requests   int32
+	Error      *string
+	StartedAt  time.Time
+	FinishedAt *time.Time
+}
+
+type ScenarioScenario struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	Name        string
+	Description string
+	// профиль ТС, учёт зон и пропуска, время, переопределения зон, перекрытия, новый объект, цели, изохроны
+	Params json.RawMessage
+	Status string
+	// ход расчёта: этап, выполнено и всего запросов
+	Progress json.RawMessage
+	// итог: затронутые объекты, прирост времени, потеря доступа, перекрытые участки
+	Summary []byte
+	Error   *string
+	// время сборки графа маршрутизации, на котором посчитан сценарий
+	GraphBuiltAt *time.Time
+	CreatedAt    time.Time
+	StartedAt    *time.Time
+	FinishedAt   *time.Time
+}
+
+type ScenarioSiteSelection struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Name      string
+	Params    json.RawMessage
+	Summary   json.RawMessage
+	CreatedAt time.Time
+}
+
+type SearchDocument struct {
+	Kind         string
+	Ref          string
+	Title        string
+	Subtitle     *string
+	Body         *string
+	Point        interface{}
+	Weight       float32
+	OwnerID      *uuid.UUID
+	RoleCode     *string
+	UpdatedAt    time.Time
+	TitleNorm    *string
+	SubtitleNorm *string
+	Tsv          interface{}
+}
+
+type SearchQueryLog struct {
+	ID         int64
+	UserID     *uuid.UUID
+	Mode       string
+	Query      string
+	Filters    json.RawMessage
+	Results    int32
+	DurationMs int32
+	At         time.Time
+}
+
+type SearchState struct {
+	Kind       string
+	Signature  string
+	Documents  int32
+	DurationMs int32
+	IndexedAt  time.Time
+}
+
+type StatisticsIndicator struct {
+	Code        string
+	Name        string
+	Unit        string
+	Periodicity string
+	SourceCode  string
+	Description *string
+}
+
+type StatisticsObservation struct {
+	IndicatorCode string
+	AreaID        *uuid.UUID
+	AreaName      string
+	// начало периода (год — 1 января)
+	Period     pgtype.Date
+	Value      pgtype.Numeric
+	SourceCode string
+	SnapshotID *uuid.UUID
+	UpdatedAt  time.Time
+}
+
+// адресный реестр Москвы (набор 60562): основа адресов объектов и геокодера
+type TerritoryAddress struct {
+	Unom          int64
+	MosGlobalID   int64
+	Address       string
+	SimpleAddress *string
+	ObjType       *string
+	Municipal     *string
+	AdmArea       *string
+	Settlement    *string
+	Street        *string
+	House         *string
+	Korpus        *string
+	Building      *string
+	Status        *string
+	Fias          *string
+	Cadastral     []string
+	Geom          interface{}
+	Point         interface{}
+	SourceCode    string
+	SnapshotID    *uuid.UUID
+	FirstSeenAt   time.Time
+	LastSeenAt    time.Time
+	AddressKey    *string
 }
 
 type TerritoryAdminArea struct {
@@ -342,6 +1301,57 @@ type TerritoryAdminArea struct {
 	SnapshotID  *uuid.UUID
 	FirstSeenAt time.Time
 	LastSeenAt  time.Time
+}
+
+type TerritoryConstraintZone struct {
+	ID          uuid.UUID
+	Kind        string
+	MosDataset  int32
+	MosGlobalID int64
+	Name        *string
+	Attrs       json.RawMessage
+	Geom        interface{}
+	Geom3857    interface{}
+	AreaM2      float64
+	SourceCode  string
+	SnapshotID  *uuid.UUID
+	FirstSeenAt time.Time
+	LastSeenAt  time.Time
+}
+
+type TerritoryH3Cell struct {
+	H3         interface{}
+	Res        int16
+	DistrictID *uuid.UUID
+	OkrugID    *uuid.UUID
+	Geom       interface{}
+	Geom3857   interface{}
+	AreaKm2    float64
+}
+
+type TerritoryLandCover struct {
+	ID         uuid.UUID
+	Kind       string
+	Name       *string
+	Geom       interface{}
+	AreaM2     float64
+	OsmType    string
+	OsmID      int64
+	SourceCode string
+	SnapshotID *uuid.UUID
+}
+
+type TerritoryPopulation struct {
+	AreaID   *uuid.UUID
+	AreaName string
+	Year     int16
+	Value    int32
+	// average — среднегодовая численность, january1 — на 1 января
+	Kind       string
+	SourceCode string
+	SnapshotID *uuid.UUID
+	// код ОКТМО муниципального образования (Росстат)
+	Oktmo *string
 }
 
 type TerritoryRingZone struct {

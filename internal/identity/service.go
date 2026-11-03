@@ -254,11 +254,15 @@ func (s *Service) Principal(ctx context.Context, userID uuid.UUID) (Principal, e
 	}, nil
 }
 
-// PasswordChangedAt возвращает время последней смены пароля: сессии, начатые раньше, недействительны.
-func (s *Service) PasswordChangedAt(ctx context.Context, userID uuid.UUID) (time.Time, error) {
+// SessionsValidAfter возвращает время, раньше которого сеансы пользователя недействительны:
+// последняя смена пароля или отзыв сеансов (сброс второго фактора администратором, блокировка).
+func (s *Service) SessionsValidAfter(ctx context.Context, userID uuid.UUID) (time.Time, error) {
 	u, err := s.q.GetUserByID(ctx, userID)
 	if err != nil {
 		return time.Time{}, mapNotFound(err)
+	}
+	if u.SessionsRevokedAt != nil && u.SessionsRevokedAt.After(u.PasswordChangedAt) {
+		return *u.SessionsRevokedAt, nil
 	}
 	return u.PasswordChangedAt, nil
 }
@@ -332,6 +336,13 @@ func (s *Service) DisableTOTP(ctx context.Context, actor *Principal, userID uuid
 		}
 		if err := q.DeleteRecoveryCodes(ctx, userID); err != nil {
 			return fmt.Errorf("delete recovery codes: %w", err)
+		}
+		// Сброс чужого второго фактора (администратор, командная строка) завершает открытые сеансы
+		// пользователя: войти снова можно только паролем, и администратору — с подключением 2FA.
+		if actor == nil || actor.UserID != userID {
+			if err := q.RevokeSessions(ctx, userID); err != nil {
+				return fmt.Errorf("revoke sessions: %w", err)
+			}
 		}
 		return s.audit(ctx, q, actor, AuditEntry{Action: "auth.totp_disabled", EntityType: "user", EntityID: userID.String()}, meta)
 	})

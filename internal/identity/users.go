@@ -142,6 +142,12 @@ func (s *Service) SetUserStatus(ctx context.Context, actor Principal, userID uui
 		if _, err := q.UpdateUserStatus(ctx, sqlc.UpdateUserStatusParams{ID: userID, Status: status}); err != nil {
 			return mapNotFound(err)
 		}
+		// Сеансы заблокированного не оживают и после разблокировки — вход заново.
+		if status == StatusBlocked {
+			if err := q.RevokeSessions(ctx, userID); err != nil {
+				return fmt.Errorf("revoke sessions: %w", err)
+			}
+		}
 		return s.audit(ctx, q, &actor, AuditEntry{
 			Action: "user.set_status", EntityType: "user", EntityID: userID.String(),
 			Details: map[string]any{"status": status},

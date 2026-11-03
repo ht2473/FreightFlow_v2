@@ -133,11 +133,30 @@ func safeNext(raw string) string {
 	return u.RequestURI()
 }
 
+// userID — пользователь действующего сеанса. Сеанс, начатый до смены пароля или отзыва сеансов
+// (сброс второго фактора администратором, блокировка), и сеанс заблокированного пользователя
+// недействительны: сеанс завершается.
+func (h *handler) userID(r *http.Request) (uuid.UUID, bool) {
+	ctx := r.Context()
+	uid, authAt, ok := h.Sessions.UserID(ctx)
+	if !ok {
+		return uuid.UUID{}, false
+	}
+	after, err := h.Identity.SessionsValidAfter(ctx, uid)
+	if err == nil && !authAt.Before(after.Add(-time.Second)) { // допуск на округление времени при хранении
+		if _, err = h.Identity.Principal(ctx, uid); err == nil {
+			return uid, true
+		}
+	}
+	_ = h.Sessions.Logout(ctx)
+	return uuid.UUID{}, false
+}
+
 // --- Вход ---
 
 func (h *handler) loginForm(w http.ResponseWriter, r *http.Request) {
 	next := safeNext(r.URL.Query().Get("next"))
-	if _, _, ok := h.Sessions.UserID(r.Context()); ok {
+	if _, ok := h.userID(r); ok {
 		http.Redirect(w, r, next, http.StatusSeeOther) //nolint:gosec // next проверен safeNext
 		return
 	}
@@ -244,7 +263,7 @@ func (h *handler) secondFactor(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) setupTOTPForm(w http.ResponseWriter, r *http.Request) {
 	next := safeNext(r.URL.Query().Get("next"))
-	uid, _, ok := h.Sessions.UserID(r.Context())
+	uid, ok := h.userID(r)
 	if !ok {
 		http.Redirect(w, r, "/login?next="+url.QueryEscape("/setup-2fa?next="+next), http.StatusSeeOther)
 		return
@@ -267,7 +286,7 @@ func (h *handler) setupTOTPForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) setupTOTP(w http.ResponseWriter, r *http.Request) {
-	uid, _, ok := h.Sessions.UserID(r.Context())
+	uid, ok := h.userID(r)
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -438,7 +457,7 @@ func (h *handler) app(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	if _, _, ok := h.Sessions.UserID(r.Context()); !ok && !h.printToken(r) {
+	if _, ok := h.userID(r); !ok && !h.printToken(r) {
 		http.Redirect(w, r, "/login?next="+url.QueryEscape(r.URL.RequestURI()), http.StatusSeeOther)
 		return
 	}

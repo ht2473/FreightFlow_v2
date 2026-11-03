@@ -136,7 +136,7 @@ func (f fakeIdentity) Principal(context.Context, uuid.UUID) (identity.Principal,
 	return f.p, nil
 }
 
-func (fakeIdentity) PasswordChangedAt(context.Context, uuid.UUID) (time.Time, error) {
+func (fakeIdentity) SessionsValidAfter(context.Context, uuid.UUID) (time.Time, error) {
 	return time.Time{}, nil
 }
 

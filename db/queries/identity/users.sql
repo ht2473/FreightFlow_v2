@@ -77,3 +77,6 @@ INSERT INTO core.user_setting (user_id, theme, settings)
 VALUES ($1, $2, $3)
 ON CONFLICT (user_id) DO UPDATE SET theme = EXCLUDED.theme, settings = EXCLUDED.settings, updated_at = now()
 RETURNING *;
+
+-- name: RevokeSessions :exec
+UPDATE core.app_user SET sessions_revoked_at = now(), updated_at = now() WHERE id = $1;

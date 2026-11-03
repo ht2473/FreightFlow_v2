@@ -38,7 +38,7 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 const createUser = `-- name: CreateUser :one
 INSERT INTO core.app_user (id, email, name, password_hash, status)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at
+RETURNING id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at, sessions_revoked_at
 `
 
 type CreateUserParams struct {
@@ -72,6 +72,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CoreApp
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SessionsRevokedAt,
 	)
 	return i, err
 }
@@ -104,7 +105,7 @@ func (q *Queries) EnableTOTP(ctx context.Context, id uuid.UUID) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at FROM core.app_user WHERE email = $1
+SELECT id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at, sessions_revoked_at FROM core.app_user WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (CoreAppUser, error) {
@@ -124,12 +125,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (CoreAppUser
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SessionsRevokedAt,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at FROM core.app_user WHERE id = $1
+SELECT id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at, sessions_revoked_at FROM core.app_user WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (CoreAppUser, error) {
@@ -149,6 +151,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (CoreAppUser, e
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SessionsRevokedAt,
 	)
 	return i, err
 }
@@ -184,7 +187,7 @@ func (q *Queries) InsertRecoveryCode(ctx context.Context, arg InsertRecoveryCode
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT u.id, u.email, u.name, u.password_hash, u.password_changed_at, u.status, u.totp_secret, u.totp_enabled, u.failed_logins, u.locked_until, u.last_login_at, u.created_at, u.updated_at,
+SELECT u.id, u.email, u.name, u.password_hash, u.password_changed_at, u.status, u.totp_secret, u.totp_enabled, u.failed_logins, u.locked_until, u.last_login_at, u.created_at, u.updated_at, u.sessions_revoked_at,
        coalesce(array_agg(ur.role_code ORDER BY ur.role_code) FILTER (WHERE ur.role_code IS NOT NULL),
                 '{}')::text[] AS roles
 FROM core.app_user u
@@ -207,6 +210,7 @@ type ListUsersRow struct {
 	LastLoginAt       *time.Time
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
+	SessionsRevokedAt *time.Time
 	Roles             []string
 }
 
@@ -233,6 +237,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 			&i.LastLoginAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.SessionsRevokedAt,
 			&i.Roles,
 		); err != nil {
 			return nil, err
@@ -296,6 +301,15 @@ func (q *Queries) RehashPassword(ctx context.Context, arg RehashPasswordParams) 
 	return err
 }
 
+const revokeSessions = `-- name: RevokeSessions :exec
+UPDATE core.app_user SET sessions_revoked_at = now(), updated_at = now() WHERE id = $1
+`
+
+func (q *Queries) RevokeSessions(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, revokeSessions, id)
+	return err
+}
+
 const setPasswordHash = `-- name: SetPasswordHash :exec
 UPDATE core.app_user
 SET password_hash = $2, password_changed_at = now(), failed_logins = 0, locked_until = NULL, updated_at = now()
@@ -327,7 +341,7 @@ func (q *Queries) SetTOTPSecret(ctx context.Context, arg SetTOTPSecretParams) er
 }
 
 const updateUserProfile = `-- name: UpdateUserProfile :one
-UPDATE core.app_user SET name = $2, updated_at = now() WHERE id = $1 RETURNING id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at
+UPDATE core.app_user SET name = $2, updated_at = now() WHERE id = $1 RETURNING id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at, sessions_revoked_at
 `
 
 type UpdateUserProfileParams struct {
@@ -352,12 +366,13 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfilePa
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SessionsRevokedAt,
 	)
 	return i, err
 }
 
 const updateUserStatus = `-- name: UpdateUserStatus :one
-UPDATE core.app_user SET status = $2, updated_at = now() WHERE id = $1 RETURNING id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at
+UPDATE core.app_user SET status = $2, updated_at = now() WHERE id = $1 RETURNING id, email, name, password_hash, password_changed_at, status, totp_secret, totp_enabled, failed_logins, locked_until, last_login_at, created_at, updated_at, sessions_revoked_at
 `
 
 type UpdateUserStatusParams struct {
@@ -382,6 +397,7 @@ func (q *Queries) UpdateUserStatus(ctx context.Context, arg UpdateUserStatusPara
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SessionsRevokedAt,
 	)
 	return i, err
 }

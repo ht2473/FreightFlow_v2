@@ -49,7 +49,7 @@ func TestValidatePassword(t *testing.T) {
 	if err := ValidatePassword("короткий"); err == nil {
 		t.Error("short password must be rejected")
 	}
-	if err := ValidatePassword(strings.Repeat("я", 12)); err != nil {
+	if err := ValidatePassword("ёжикитуманов"); err != nil {
 		t.Errorf("12 Cyrillic characters must be accepted: %v", err)
 	}
 	if err := ValidatePassword(strings.Repeat("a", 129)); err == nil {
@@ -100,6 +100,20 @@ func TestBuiltinRolesUseKnownPermissions(t *testing.T) {
 			if !KnownPermission(string(p)) {
 				t.Errorf("role %s: unknown permission %s", r.Code, p)
 			}
+		}
+	}
+}
+
+func TestWeakPasswordRejected(t *testing.T) {
+	t.Parallel()
+	for _, p := range []string{"aaaaaaaaaaaa", "123456789012", "210987654321", "qwertyuiopas", "QwertyQwerty", "йцукенгшщзхъ", "abcdefghijkl", "1qaz2wsx3edc"} {
+		if err := ValidatePassword(p); err == nil {
+			t.Errorf("%q: простой пароль принят", p)
+		}
+	}
+	for _, p := range []string{"надёжный пароль 2026", "пароль для тестов 1", "Correct horse battery"} {
+		if err := ValidatePassword(p); err != nil {
+			t.Errorf("%q: отклонён: %v", p, err)
 		}
 	}
 }

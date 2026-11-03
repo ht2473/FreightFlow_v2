@@ -50,7 +50,7 @@ var helpPages = []helpPage{
 
 // helpAuth — справка доступна после входа, как и рабочее пространство.
 func (h *handler) helpAuth(w http.ResponseWriter, r *http.Request) bool {
-	if _, _, ok := h.Sessions.UserID(r.Context()); ok {
+	if _, ok := h.userID(r); ok {
 		return true
 	}
 	http.Redirect(w, r, "/login?next="+url.QueryEscape(r.URL.RequestURI()), http.StatusSeeOther)

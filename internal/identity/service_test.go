@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pquerna/otp/totp"
 
 	"freightflow/internal/platform/dbtest"
@@ -194,7 +195,7 @@ func TestInviteAndPasswordReset(t *testing.T) {
 		t.Fatalf("invite reuse: got %v", err)
 	}
 
-	changedBefore, _ := s.PasswordChangedAt(ctx, u.ID)
+	changedBefore, _ := s.SessionsValidAfter(ctx, u.ID)
 	resetToken, _, ok, err := s.RequestPasswordReset(ctx, "new@example.com", RequestMeta{})
 	if err != nil || !ok {
 		t.Fatalf("request reset: ok=%v err=%v", ok, err)
@@ -202,7 +203,7 @@ func TestInviteAndPasswordReset(t *testing.T) {
 	if err := s.ResetPassword(ctx, resetToken, "совсем новый пароль", RequestMeta{}); err != nil {
 		t.Fatal(err)
 	}
-	changedAfter, _ := s.PasswordChangedAt(ctx, u.ID)
+	changedAfter, _ := s.SessionsValidAfter(ctx, u.ID)
 	if !changedAfter.After(changedBefore) {
 		t.Fatal("password_changed_at must advance after reset")
 	}
@@ -216,5 +217,43 @@ func TestInviteAndPasswordReset(t *testing.T) {
 	records, err := s.ListAudit(ctx, AuditFilter{Limit: 100})
 	if err != nil || len(records) == 0 {
 		t.Fatalf("audit records: %d %v", len(records), err)
+	}
+}
+
+// Сброс второго фактора администратором и блокировка завершают открытые сеансы пользователя,
+// отключение 2FA самим пользователем — нет (его текущий сеанс остаётся).
+func TestSessionsRevokedByAdminReset(t *testing.T) {
+	t.Parallel()
+	s := newTestService(t)
+	ctx := context.Background()
+	admin := createUser(t, s, "root@example.com", RoleAdmin)
+	user := createUser(t, s, "user@example.com", RoleAnalyst)
+	other := createUser(t, s, "other@example.com", RoleAnalyst)
+	ap, err := s.Principal(ctx, admin.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	up, err := s.Principal(ctx, user.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	advanced := func(id uuid.UUID, act func()) bool {
+		before, _ := s.SessionsValidAfter(ctx, id)
+		time.Sleep(10 * time.Millisecond)
+		act()
+		after, _ := s.SessionsValidAfter(ctx, id)
+		return after.After(before)
+	}
+	if advanced(user.ID, func() { _ = s.DisableTOTP(ctx, &up, user.ID, RequestMeta{}) }) {
+		t.Error("отключение 2FA самим пользователем не должно завершать его сеансы")
+	}
+	if !advanced(user.ID, func() { _ = s.DisableTOTP(ctx, &ap, user.ID, RequestMeta{}) }) {
+		t.Error("сброс 2FA администратором должен завершать сеансы пользователя")
+	}
+	if !advanced(user.ID, func() { _ = s.DisableTOTP(ctx, nil, user.ID, RequestMeta{}) }) {
+		t.Error("сброс 2FA из командной строки должен завершать сеансы пользователя")
+	}
+	if !advanced(other.ID, func() { _ = s.SetUserStatus(ctx, ap, other.ID, StatusBlocked, RequestMeta{}) }) {
+		t.Error("блокировка должна завершать сеансы пользователя")
 	}
 }

@@ -17,7 +17,7 @@ import (
 // Identity — проверка учётных записей (модуль доступа).
 type Identity interface {
 	Principal(ctx context.Context, userID uuid.UUID) (identity.Principal, error)
-	PasswordChangedAt(ctx context.Context, userID uuid.UUID) (time.Time, error)
+	SessionsValidAfter(ctx context.Context, userID uuid.UUID) (time.Time, error)
 	AuthenticateAPIToken(ctx context.Context, plain string) (identity.Principal, error)
 }
 
@@ -72,7 +72,7 @@ func (a *Auth) Principal(r *http.Request) (identity.Principal, bool) {
 	if p, ok := a.cache.GetIfPresent(key); ok {
 		return p, true
 	}
-	changedAt, err := a.ids.PasswordChangedAt(ctx, uid)
+	changedAt, err := a.ids.SessionsValidAfter(ctx, uid)
 	if err != nil || authAt.Before(changedAt.Add(-time.Second)) {
 		return identity.Principal{}, false
 	}

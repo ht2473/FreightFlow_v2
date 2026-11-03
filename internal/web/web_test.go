@@ -166,6 +166,16 @@ func TestLogin(t *testing.T) {
 		"email": {"viewer@example.com"}, "password": {testPassword}, "next": {"/map"},
 	})
 	expectRedirect(t, resp, "/map")
+	// Cookie сеанса недоступна скриптам и не уходит с межсайтовыми запросами (ASVS 3.4).
+	var sc *http.Cookie
+	for _, ck := range resp.Cookies() {
+		if ck.Name == session.CookieName {
+			sc = ck
+		}
+	}
+	if sc == nil || !sc.HttpOnly || sc.SameSite != http.SameSiteLaxMode || sc.Path != "/" {
+		t.Fatalf("cookie сеанса %+v", sc)
+	}
 
 	// Вошедшего пользователя страница входа отправляет дальше.
 	resp, _ = get(t, c, f.srv.URL+"/login?next=/profile")

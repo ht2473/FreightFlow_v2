@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -34,8 +35,70 @@ func ValidatePassword(password string) error {
 		return &ValidationError{Field: "password", Message: fmt.Sprintf("Пароль должен содержать не менее %d символов", minPasswordLen)}
 	case n > maxPasswordLen:
 		return &ValidationError{Field: "password", Message: fmt.Sprintf("Пароль должен содержать не более %d символов", maxPasswordLen)}
+	case weakPassword(password):
+		return &ValidationError{Field: "password", Message: "Пароль слишком простой: повтор одного символа или ряд клавиш или цифр"}
 	}
 	return nil
+}
+
+// sequences — ряды, из которых составляют простые пароли: цифры, латиница и кириллица по
+// алфавиту и по клавиатуре.
+var sequences = []string{
+	"012345678901234567890", "abcdefghijklmnopqrstuvwxyz", "абвгдеёжзийклмнопрстуфхцчшщъыьэюя",
+	"qwertyuiopasdfghjklzxcvbnm", "йцукенгшщзхъфывапролджэячсмитьбю", "1qaz2wsx3edc4rfv5tgb6yhn7ujm",
+}
+
+// weakPassword — пароль из одного повторяющегося символа или из отрезка (в любом направлении)
+// одного ряда, возможно повторённого: «aaaaaaaaaaaa», «123456789012», «qwertyqwerty».
+func weakPassword(password string) bool {
+	p := []rune(strings.ToLower(password))
+	if len(p) == 0 {
+		return false
+	}
+	// Повтор короткого фрагмента — проверяется сам фрагмент.
+	for k := 1; k <= len(p)/2; k++ {
+		periodic := true
+		for i := k; i < len(p) && periodic; i++ {
+			periodic = p[i] == p[i%k]
+		}
+		if periodic {
+			p = p[:k]
+			break
+		}
+	}
+	same := true
+	for _, r := range p[1:] {
+		same = same && r == p[0]
+	}
+	if same {
+		return true
+	}
+	for _, seq := range sequences {
+		s := []rune(seq)
+		rev := slices.Clone(s)
+		slices.Reverse(rev)
+		for _, row := range [][]rune{s, rev} {
+			if onRow(p, row) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// onRow — каждый следующий символ пароля стоит в ряду сразу за предыдущим (по кругу).
+func onRow(p, row []rune) bool {
+	pos := slices.Index(row, p[0])
+	if pos < 0 {
+		return false
+	}
+	for _, r := range p[1:] {
+		pos = (pos + 1) % len(row)
+		if row[pos] != r {
+			return false
+		}
+	}
+	return true
 }
 
 // HashPassword возвращает хеш в формате PHC: $argon2id$v=19$m=…,t=…,p=…$соль$хеш.
