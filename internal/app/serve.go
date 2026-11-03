@@ -78,6 +78,11 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthz", healthz())
 	mux.Handle("GET /readyz", readyz(pool, routingClient))
+	specJSON, err := api.SpecJSON()
+	if err != nil {
+		return err
+	}
+	mux.Handle("GET /api/v1/openapi.json", specJSON)
 	mux.Handle("GET /api/v1/events", api.Events(rt.bus, events.Journal{Pool: pool}, auth, env.Log.With("component", "events")))
 	mux.Handle("/api/v1/", apiHandler)
 	mux.Handle("/map/", mapHandler)

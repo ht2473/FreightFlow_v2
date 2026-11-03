@@ -15,10 +15,13 @@ test("выгрузки реестра во всех форматах: атриб
     expect(r.status(), await r.text()).toBe(202);
     const { id } = (await r.json()) as { id: string };
     await expect
-      .poll(async () => ((await (await page.request.get(`/api/v1/exports/${id}`)).json()) as { status: string }).status, {
-        timeout: 180_000,
-        intervals: [2_000],
-      })
+      .poll(
+        async () => ((await (await page.request.get(`/api/v1/exports/${id}`)).json()) as { status: string }).status,
+        {
+          timeout: 180_000,
+          intervals: [2_000],
+        },
+      )
       .toBe("done");
     const body = await (await page.request.get(`/api/v1/exports/${id}/file`)).body();
     await writeFile(info.outputPath(`objects.${format}`), body);

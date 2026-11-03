@@ -3,11 +3,13 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	"freightflow/internal/api/gen"
 	"freightflow/internal/identity"
+	"freightflow/internal/platform/problem"
 )
 
 var (
@@ -58,6 +60,10 @@ func (s *Server) HandleBearerAuth(ctx context.Context, op gen.OperationName, t g
 	p, err := s.identity.AuthenticateAPIToken(ctx, t.Token)
 	if err != nil {
 		return ctx, errUnauthorized
+	}
+	if p.TokenID != nil && !s.tokenLimit.Allow(p.TokenID.String()) {
+		return ctx, problem.TooMany.WithDetail(fmt.Sprintf(
+			"Не более %d запросов подряд по токену, затем 5 в секунду — повторите позже", tokenBurst))
 	}
 	return s.authorize(ctx, op, p)
 }

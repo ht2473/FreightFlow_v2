@@ -6,18 +6,32 @@ const analyst = account("FF_E2E");
 
 test.skip(!analyst.email || !analyst.password, "нужны FF_E2E_EMAIL и FF_E2E_PASSWORD");
 
-async function firstId(page: Page, path: string, pick: (body: unknown) => string | undefined): Promise<string | undefined> {
+async function firstId(
+  page: Page,
+  path: string,
+  pick: (body: unknown) => string | undefined,
+): Promise<string | undefined> {
   const r = await page.request.get(path);
   return r.ok() ? pick(await r.json()) : undefined;
 }
 
 /** Параметры шаблонов на данных стенда; шаблон без данных пропускается. */
 async function templateParams(page: Page): Promise<Record<string, Record<string, string> | undefined>> {
-  const facility = await firstId(page, "/api/v1/facilities?sort=-area&limit=1", (b) => (b as { items: { id: string }[] }).items[0]?.id);
-  const district = await firstId(page, "/api/v1/territories?kind=district", (b) =>
-    (b as { id: string; name: string }[]).find((t) => t.name.startsWith("Пресненский"))?.id,
+  const facility = await firstId(
+    page,
+    "/api/v1/facilities?sort=-area&limit=1",
+    (b) => (b as { items: { id: string }[] }).items[0]?.id,
   );
-  const scenario = await firstId(page, "/api/v1/scenarios", (b) => (b as { id: string; status: string }[]).find((s) => s.status === "done")?.id);
+  const district = await firstId(
+    page,
+    "/api/v1/territories?kind=district",
+    (b) => (b as { id: string; name: string }[]).find((t) => t.name.startsWith("Пресненский"))?.id,
+  );
+  const scenario = await firstId(
+    page,
+    "/api/v1/scenarios",
+    (b) => (b as { id: string; status: string }[]).find((s) => s.status === "done")?.id,
+  );
   const site = await firstId(page, "/api/v1/site-selection/runs", (b) => (b as { id: string }[])[0]?.id);
   return {
     facility: facility ? { facilityId: facility } : undefined,
@@ -100,7 +114,10 @@ test("раздел отчётов: заказ из профиля района, 
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await login(page, analyst, "/territories?kind=district");
-  await page.getByRole("table", { name: "Районы" }).getByRole("link", { name: /^Пресненский/ }).click();
+  await page
+    .getByRole("table", { name: "Районы" })
+    .getByRole("link", { name: /^Пресненский/ })
+    .click();
   await page.getByRole("link", { name: "Сводка PDF" }).click();
   const dlg = page.getByRole("dialog", { name: "Новый отчёт" });
   await expect(dlg.getByRole("button", { name: /Шаблон/ })).toContainText("Сводка по округу или району");
@@ -109,7 +126,10 @@ test("раздел отчётов: заказ из профиля района, 
   await expect(page.getByText(/Отчёт поставлен в очередь/)).toBeVisible();
   const row = page.getByRole("row").filter({ hasText: "Сводка: Пресненский район" }).filter({ hasText: "PDF" }).first();
   await expect(row.getByText("Готов")).toBeVisible({ timeout: 120_000 });
-  const [file] = await Promise.all([page.waitForEvent("download"), row.getByRole("link", { name: /^Скачать/ }).click()]);
+  const [file] = await Promise.all([
+    page.waitForEvent("download"),
+    row.getByRole("link", { name: /^Скачать/ }).click(),
+  ]);
   expect(file.suggestedFilename()).toMatch(/^report-territory-.+\.pdf$/);
   for (const scheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme: scheme });

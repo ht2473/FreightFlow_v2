@@ -1,5 +1,6 @@
 import {
   Bell,
+  Braces,
   Building2,
   ChartLine,
   Construction,
@@ -58,6 +59,7 @@ export const navGroups: NavGroup[] = [
     title: "Данные",
     items: [
       { to: "/reports", title: "Отчёты", icon: FileText, permission: "reports.view" },
+      { to: "/api-docs", title: "API", icon: Braces, permission: "tokens.own" },
       { to: "/data", title: "Источники данных", icon: Database, permission: "data.manage" },
     ],
   },

@@ -33,3 +33,21 @@ func TestRoutingLimitPerUser(t *testing.T) {
 		t.Errorf("other user: %v", err)
 	}
 }
+
+func TestAPITokenRateLimit(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	tok := f.token(t, "limit@example.com", identity.RoleViewer)
+	other := f.token(t, "limit2@example.com", identity.RoleViewer)
+	limited := false
+	for i := 0; i < tokenBurst+20 && !limited; i++ {
+		resp, _ := f.do(t, http.MethodGet, "/api/v1/me", tok, "")
+		limited = resp.StatusCode == http.StatusTooManyRequests
+	}
+	if !limited {
+		t.Fatal("token was not limited")
+	}
+	if resp, _ := f.do(t, http.MethodGet, "/api/v1/me", other, ""); resp.StatusCode != http.StatusOK {
+		t.Fatalf("other token: %d", resp.StatusCode)
+	}
+}

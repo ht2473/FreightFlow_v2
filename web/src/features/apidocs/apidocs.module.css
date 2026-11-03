@@ -1,0 +1,165 @@
+.page {
+  max-width: 1100px;
+}
+
+.steps {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  line-height: 1.55;
+}
+
+.steps li + li {
+  margin-top: 4px;
+}
+
+.code {
+  margin: 8px 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: var(--bg2, var(--panel));
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  white-space: pre;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.columns h4,
+.opBody h4 {
+  margin: 12px 0 4px;
+  font-size: 13px;
+}
+
+.group {
+  margin-top: 18px;
+}
+
+.group h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.op {
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  margin-bottom: 6px;
+}
+
+.op summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.op summary::-webkit-details-marker {
+  display: none;
+}
+
+.op summary:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+.op[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.method {
+  flex: none;
+  min-width: 58px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--acc-on);
+  background: var(--acc);
+}
+
+.method[data-method="get"] {
+  color: var(--tx1, inherit);
+  background: var(--info-bg);
+}
+
+.method[data-method="delete"] {
+  color: var(--tx1, inherit);
+  background: var(--crit-bg);
+}
+
+.method[data-method="put"],
+.method[data-method="patch"] {
+  color: var(--tx1, inherit);
+  background: var(--warn-bg);
+}
+
+.path {
+  font-size: 13px;
+}
+
+.summary {
+  color: var(--tx2);
+  font-size: 13px;
+}
+
+.opBody {
+  padding: 8px 12px 12px;
+}
+
+.description {
+  margin: 0 0 6px;
+  white-space: pre-line;
+}
+
+.note {
+  margin: 4px 0;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.table th,
+.table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--tx2);
+  font-weight: 600;
+}
+
+.req {
+  color: var(--crit);
+}
+
+/* Ссылки в тексте отличаются не только цветом (WCAG 1.4.1). */
+.page p a,
+.page li a {
+  text-decoration: underline;
+}
+
+.columns > div {
+  min-width: 0;
+}

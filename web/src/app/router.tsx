@@ -55,6 +55,11 @@ const routeTree = rootRoute.addChildren([
   sectionRoute("/operations"),
   createRoute({
     getParentRoute: () => rootRoute,
+    path: "/api-docs",
+    component: lazyRouteComponent(() => import("@/features/apidocs/ApiDocsPage"), "ApiDocsPage"),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
     path: "/print/$template",
     validateSearch: printSearchSchema,
     component: lazyRouteComponent(() => import("@/features/print/PrintPage"), "PrintPage"),

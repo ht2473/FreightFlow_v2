@@ -83,6 +83,14 @@ type Deps struct {
 // routingBurst — расчётов маршрутизации подряд на пользователя.
 const routingBurst = 60
 
+// Лимит запросов по токену API: tokenBurst подряд, затем в среднем один за tokenInterval
+// (5 в секунду). Страницы интерфейса и печать отчётов ходят без токена API и лимитом не
+// ограничены.
+const (
+	tokenBurst    = 300
+	tokenInterval = 200 * time.Millisecond
+)
+
 // Server реализует обработчики и проверку безопасности ogen.
 type Server struct {
 	identity    *identity.Service
@@ -100,6 +108,7 @@ type Server struct {
 	search      *search.Service
 	analytics   *analytics.Service
 	routeLimit  *ratelimit.Limiter
+	tokenLimit  *ratelimit.Limiter
 	sessions    *session.Manager
 	mailer      Mailer
 	baseURL     string
@@ -124,6 +133,7 @@ func New(d Deps) (http.Handler, error) {
 	if s.routeLimit == nil {
 		s.routeLimit = ratelimit.New(time.Second, routingBurst)
 	}
+	s.tokenLimit = ratelimit.New(tokenInterval, tokenBurst)
 	opts := []gen.ServerOption{
 		gen.WithPathPrefix("/api/v1"),
 		gen.WithErrorHandler(s.errorHandler),
