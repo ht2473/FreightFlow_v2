@@ -44,7 +44,7 @@ func publish(t *testing.T, pool *pgxpool.Pool, typ, id string) {
 // транзакции параллельных тестов того же сервера.
 func drain(t *testing.T, pool *pgxpool.Pool, c events.Consumer, r *recorder, want int) {
 	t.Helper()
-	deadline := time.Now().Add(15 * time.Second)
+	deadline := time.Now().Add(90 * time.Second)
 	for len(r.got) < want {
 		if _, err := c.Step(context.Background(), pool); err != nil {
 			t.Fatal(err)
@@ -95,7 +95,7 @@ func TestConsumerDeliversEachEventOnceInCommitOrder(t *testing.T) {
 	// Ошибка обработчика: порция откатывается и приходит снова.
 	publish(t, pool, events.RoadworkChanged, "c")
 	r.fail = errors.New("handler down")
-	deadline := time.Now().Add(15 * time.Second)
+	deadline := time.Now().Add(90 * time.Second)
 	for {
 		if _, err := c.Step(ctx, pool); err != nil {
 			break

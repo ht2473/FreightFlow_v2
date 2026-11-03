@@ -84,8 +84,8 @@ test("лента: алерт появляется без перезагрузк�
     const before = await feed.getByRole("listitem").count().catch(() => 0);
     const check = await page.request.post(`/api/v1/alert-rules/${rule.id}/check`);
     expect(check.status()).toBe(200);
-    const { hits } = (await check.json()) as { hits: number };
-    expect(hits).toBeGreaterThan(0);
+    // Срабатывания может найти и фоновая проверка, поставленная при создании правила, — важно,
+    // что алерт появляется в ленте без перезагрузки.
     // Событие alert.created по потоку SSE обновляет ленту без перезагрузки.
     const card = page.getByRole("button", { name: /^Данные устарели:/ }).filter({ hasText: name }).first();
     await expect(card).toBeVisible({ timeout: 15_000 });

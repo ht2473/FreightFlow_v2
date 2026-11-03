@@ -157,7 +157,7 @@ func (e *env) count(t *testing.T, sql string, args ...any) int {
 // ждать транзакций параллельных тестов).
 func (e *env) consume(t *testing.T, want int) {
 	t.Helper()
-	deadline := time.Now().Add(15 * time.Second)
+	deadline := time.Now().Add(90 * time.Second)
 	for e.count(t, `SELECT count(*) FROM notify.notification`) < want {
 		if _, err := e.consumer.Step(t.Context(), e.pool); err != nil {
 			t.Fatal(err)

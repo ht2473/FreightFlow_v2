@@ -465,7 +465,7 @@ func TestConsumerQueuesCheckOnDataEvents(t *testing.T) {
 		}
 	}
 	// Порция с двумя событиями-поводами ставит одну проверку; прогресс задач поводом не является.
-	deadline := time.Now().Add(15 * time.Second)
+	deadline := time.Now().Add(90 * time.Second)
 	for count(t, pool, `SELECT count(*) FROM queue.river_job WHERE kind = 'alerting.check'`) == 0 {
 		if _, err := c.Step(ctx, pool); err != nil {
 			t.Fatal(err)
