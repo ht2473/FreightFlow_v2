@@ -1,7 +1,12 @@
 # FreightFlow
 
 [![Проверка](https://github.com/ht2473/FreightFlow_v2/actions/workflows/ci.yml/badge.svg)](https://github.com/ht2473/FreightFlow_v2/actions/workflows/ci.yml)
+[![Выпуск](https://img.shields.io/github/v/release/ht2473/FreightFlow_v2?label=%D0%B2%D1%8B%D0%BF%D1%83%D1%81%D0%BA)](https://github.com/ht2473/FreightFlow_v2/releases)
 [![Лицензия: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)](go.mod)
+[![PostgreSQL + PostGIS](https://img.shields.io/badge/PostgreSQL_18-PostGIS_3.6-4169E1?logo=postgresql&logoColor=white)](deploy/compose.dev.yaml)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](web/package.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](web/package.json)
 
 Информационная система мониторинга и анализа логистической инфраструктуры Москвы на открытых
 данных: реестр складов, логистических центров и терминалов, дорожная сеть с ограничениями для
@@ -82,10 +87,14 @@ DBSCAN.
 уведомлений, на почту (сразу или дайджестом), в Telegram-бот и на вебхуки с подписью
 HMAC-SHA256; тихие часы и подписки.
 
+![Лента алертов](.github/assets/alerts.webp)
+
 **Отчёты и выгрузки.** Паспорт объекта, сводка по округу или району, проходимость для профиля
 ТС, дорожные работы и влияние, результаты сценария, оценка локации, качество данных — в PDF с
 графиками и картами и в XLSX; по расписанию с рассылкой на почту. Выгрузки реестра — CSV, XLSX,
 GeoJSON и GeoPackage для QGIS; в каждом файле атрибуция источников и дата данных.
+
+![Отчёты](.github/assets/reports.webp)
 
 **API и справка.** Документация API в системе (операции, схемы, примеры `curl`, вебхуки с
 проверкой подписи), токены с правами и сроком, лимит запросов. Справка: руководство по разделам,
@@ -173,7 +182,10 @@ index | forecast`, `freightflow routing accessibility | cells | analyze`.
 
 Готовы реестр, карта, маршрутизация и сетевой анализ, поиск, аналитика и показатели, сценарии
 «что если», устойчивость сети и оценка локации (МАИ + TOPSIS), мониторинг и алерты с доставкой
-по каналам, отчёты и выгрузки, документация API и справка. Дальше — качество и выпуск.
+по каналам, отчёты и выгрузки, документация API и справка. Проверены производительность
+(бюджеты под нагрузкой), безопасность (OWASP ASVS уровня 2, матрица прав по всем операциям) и
+доступность (axe во всех разделах в обеих темах, проход с клавиатуры, планшет и телефон); 51
+сквозной тест ключевых потоков. Дальше — развёртывание на сервер.
 
 ## Лицензия
 
