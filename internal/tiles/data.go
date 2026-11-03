@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
@@ -54,10 +55,23 @@ func NewService(pool *pgxpool.Pool, versions VersionSource, log *slog.Logger) *S
 	}
 }
 
-// Watch обновляет версии при публикации данных; работает до отмены контекста.
+// Watch обновляет версии при публикации данных и прогревает тайлы мелких масштабов — при
+// запуске и после каждой публикации; работает до отмены контекста.
 func (s *Service) Watch(ctx context.Context, bus *events.Bus) error {
 	sub := bus.Subscribe(16, events.DataPublished)
 	defer sub.Close()
+	warm := make(chan struct{}, 1)
+	warm <- struct{}{}
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-warm:
+				s.Warm(ctx)
+			}
+		}
+	}()
 	for {
 		select {
 		case <-ctx.Done():
@@ -69,8 +83,58 @@ func (s *Service) Watch(ctx context.Context, bus *events.Bus) error {
 			s.mu.Lock()
 			s.loadedAt = time.Time{}
 			s.mu.Unlock()
+			// Публикации идут пачками: прогрев ставится один раз и подхватывает последние версии.
+			select {
+			case warm <- struct{}{}:
+			default:
+			}
 		}
 	}
+}
+
+// warmBounds — рамка подложки (basemap.BBox): обзорные масштабы карты не выходят за неё.
+var warmBounds = [4]float64{36.30, 54.90, 39.00, 56.55}
+
+// warmMaxZoom — последний прогреваемый масштаб: дальше тайлов слишком много, а каждый строится
+// быстро.
+const warmMaxZoom = 11
+
+// Warm строит в кеш тайлы слоёв, включённых по умолчанию, на масштабах от их минимального до
+// warmMaxZoom: первый просмотр карты после запуска или обновления данных не ждёт сборки.
+func (s *Service) Warm(ctx context.Context) {
+	start := time.Now()
+	n := 0
+	for _, l := range Registry {
+		if !l.Visible {
+			continue
+		}
+		for z := uint8(max(l.MinZoom, 0)); z <= warmMaxZoom && int(z) <= l.MaxZoom; z++ {
+			x0, y0 := tileXY(warmBounds[0], warmBounds[3], z)
+			x1, y1 := tileXY(warmBounds[2], warmBounds[1], z)
+			for x := x0; x <= x1; x++ {
+				for y := y0; y <= y1; y++ {
+					if ctx.Err() != nil {
+						return
+					}
+					if _, _, err := s.Tile(ctx, l, z, x, y); err != nil {
+						s.log.WarnContext(ctx, "warm tile", "layer", l.Code, "z", z, "x", x, "y", y, "error", err)
+						continue
+					}
+					n++
+				}
+			}
+		}
+	}
+	s.log.InfoContext(ctx, "tiles warmed", "tiles", n, "duration", time.Since(start).Round(time.Millisecond))
+}
+
+// tileXY — номер тайла, содержащего точку, на масштабе z (веб-Меркатор).
+func tileXY(lon, lat float64, z uint8) (uint32, uint32) {
+	n := math.Exp2(float64(z))
+	r := lat * math.Pi / 180
+	x := (lon + 180) / 360 * n
+	y := (1 - math.Log(math.Tan(r)+1/math.Cos(r))/math.Pi) / 2 * n
+	return uint32(x), uint32(y) //nolint:gosec // координаты в пределах мира
 }
 
 // domainVersions возвращает версии доменов, перечитывая их по событию или по сроку.

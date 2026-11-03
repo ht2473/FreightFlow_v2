@@ -205,3 +205,16 @@ func TestDataTileAccess(t *testing.T) {
 		t.Fatalf("headers: %v", resp.Header)
 	}
 }
+
+func TestTileXY(t *testing.T) {
+	// Кремль на масштабе 10 — тайл 619/320 (схема XYZ, как у OpenStreetMap).
+	if x, y := tileXY(37.6176, 55.7520, 10); x != 619 || y != 320 {
+		t.Fatalf("tileXY = %d/%d, want 619/320", x, y)
+	}
+	// Северо-западный угол рамки — меньшие номера, чем юго-восточный.
+	x0, y0 := tileXY(warmBounds[0], warmBounds[3], 11)
+	x1, y1 := tileXY(warmBounds[2], warmBounds[1], 11)
+	if x0 >= x1 || y0 >= y1 {
+		t.Fatalf("рамка %d/%d — %d/%d", x0, y0, x1, y1)
+	}
+}
