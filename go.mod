@@ -12,7 +12,7 @@ require (
 	github.com/go-faster/errors v0.8.0
 	github.com/go-faster/jx v1.2.0
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.11.0
+	github.com/jackc/pgx/v5 v5.12.0
 	github.com/lmittmann/tint v1.2.1
 	github.com/maypok86/otter/v2 v2.4.0
 	github.com/ogen-go/ogen v1.24.0
