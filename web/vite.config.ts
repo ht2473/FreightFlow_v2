@@ -40,6 +40,8 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
   server: {
+    // Явный IPv4: иначе Node на Windows слушает только ::1 и 127.0.0.1:5173 не отвечает.
+    host: "127.0.0.1",
     port: 5173,
     strictPort: true,
     // Служба pdf (Docker) открывает страницы печати отчётов через сервер приложения на хосте.
