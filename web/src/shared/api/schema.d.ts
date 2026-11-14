@@ -2121,6 +2121,10 @@ export interface components {
         InviteCreated: {
             email: string;
             expiresInHours: number;
+            /** @description Ссылка для создания учётной записи — чтобы передать её самому, если письмо не дошло */
+            link: string;
+            /** @description Письмо с приглашением отправлено */
+            emailSent: boolean;
         };
         Role: {
             code: string;

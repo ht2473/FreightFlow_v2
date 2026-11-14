@@ -34,7 +34,7 @@ type fixture struct {
 	identity *identity.Service
 }
 
-func newFixture(t *testing.T) *fixture {
+func newFixture(t *testing.T, opts ...func(*Deps)) *fixture {
 	t.Helper()
 	pool := dbtest.New(t)
 	box, err := secret.NewBox(strings.Repeat("cd", 32))
@@ -46,10 +46,14 @@ func newFixture(t *testing.T) *fixture {
 		t.Fatal(err)
 	}
 	sessions := session.New(pool, false)
-	h, err := New(Deps{
+	deps := Deps{
 		Identity: ids, Sessions: sessions, Mailer: nopMailer{}, BaseURL: "http://test.local",
 		Log: slog.New(slog.NewTextHandler(io.Discard, nil)),
-	})
+	}
+	for _, o := range opts {
+		o(&deps)
+	}
+	h, err := New(deps)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,6 +228,41 @@ func TestAdminSetsUpSecondFactor(t *testing.T) {
 	if err != nil || !res.NeedsSecondFactor {
 		t.Fatalf("2FA must stay enabled: %+v %v", res, err)
 	}
+}
+
+// На сервере администратор без второго фактора не получает сеанс, пока не подключит его.
+func TestAdminMustSetUpSecondFactor(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t, func(d *Deps) { d.RequireAdminTOTP = true })
+	f.user(t, "admin@example.com", identity.RoleAdmin)
+	c := f.client(t)
+
+	resp, _ := post(t, c, f.srv.URL+"/login", url.Values{
+		"email": {"admin@example.com"}, "password": {testPassword}, "next": {"/admin/users"},
+	})
+	expectRedirect(t, resp, "/setup-2fa?next=%2Fadmin%2Fusers")
+
+	// Пропустить подключение нельзя: приложение снова отправляет на вход.
+	resp, _ = get(t, c, f.srv.URL+"/admin/users")
+	expectRedirect(t, resp, "/login?next=%2Fadmin%2Fusers")
+
+	resp, body := get(t, c, f.srv.URL+"/setup-2fa?next=%2Fadmin%2Fusers")
+	m := secretRe.FindStringSubmatch(body)
+	if resp.StatusCode != http.StatusOK || m == nil {
+		t.Fatalf("setup page: status %d", resp.StatusCode)
+	}
+	code, err := totp.GenerateCode(m[1], time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, _ = post(t, c, f.srv.URL+"/setup-2fa", url.Values{"code": {code}, "next": {"/admin/users"}})
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("confirm: status %d", resp.StatusCode)
+	}
+
+	// После подключения сеанс действует.
+	resp, _ = get(t, c, f.srv.URL+"/login?next=/admin/users")
+	expectRedirect(t, resp, "/admin/users")
 }
 
 func TestLogout(t *testing.T) {

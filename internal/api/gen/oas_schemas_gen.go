@@ -7114,6 +7114,11 @@ func (s *IndexResultWeights) init() IndexResultWeights {
 type InviteCreated struct {
 	Email          string `json:"email"`
 	ExpiresInHours int    `json:"expiresInHours"`
+	// Ссылка для создания учётной записи — чтобы передать
+	// её самому, если письмо не дошло.
+	Link string `json:"link"`
+	// Письмо с приглашением отправлено.
+	EmailSent bool `json:"emailSent"`
 }
 
 // GetEmail returns the value of Email.
@@ -7126,6 +7131,16 @@ func (s *InviteCreated) GetExpiresInHours() int {
 	return s.ExpiresInHours
 }
 
+// GetLink returns the value of Link.
+func (s *InviteCreated) GetLink() string {
+	return s.Link
+}
+
+// GetEmailSent returns the value of EmailSent.
+func (s *InviteCreated) GetEmailSent() bool {
+	return s.EmailSent
+}
+
 // SetEmail sets the value of Email.
 func (s *InviteCreated) SetEmail(val string) {
 	s.Email = val
@@ -7134,6 +7149,16 @@ func (s *InviteCreated) SetEmail(val string) {
 // SetExpiresInHours sets the value of ExpiresInHours.
 func (s *InviteCreated) SetExpiresInHours(val int) {
 	s.ExpiresInHours = val
+}
+
+// SetLink sets the value of Link.
+func (s *InviteCreated) SetLink(val string) {
+	s.Link = val
+}
+
+// SetEmailSent sets the value of EmailSent.
+func (s *InviteCreated) SetEmailSent(val bool) {
+	s.EmailSent = val
 }
 
 // Ref: #/components/schemas/IsochroneContour

@@ -57,6 +57,9 @@ func (s *Server) toProblem(ctx context.Context, err error) *problem.Problem {
 	switch {
 	case errors.As(err, &pr):
 		return pr
+	case errors.Is(err, errTOTPSetupRequired):
+		return problem.New(http.StatusForbidden, "totp_setup_required", "Подключите двухфакторную защиту").
+			WithDetail("Для администраторов двухфакторная защита обязательна")
 	case errors.As(err, &secErr):
 		if errors.Is(err, errForbidden) {
 			return problem.Forbidden

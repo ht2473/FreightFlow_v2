@@ -15258,11 +15258,21 @@ func (s *InviteCreated) encodeFields(e *jx.Encoder) {
 		e.FieldStart("expiresInHours")
 		e.Int(s.ExpiresInHours)
 	}
+	{
+		e.FieldStart("link")
+		e.Str(s.Link)
+	}
+	{
+		e.FieldStart("emailSent")
+		e.Bool(s.EmailSent)
+	}
 }
 
-var jsonFieldsNameOfInviteCreated = [2]string{
+var jsonFieldsNameOfInviteCreated = [4]string{
 	0: "email",
 	1: "expiresInHours",
+	2: "link",
+	3: "emailSent",
 }
 
 // Decode decodes InviteCreated from json.
@@ -15298,6 +15308,30 @@ func (s *InviteCreated) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"expiresInHours\"")
 			}
+		case "link":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Link = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"link\"")
+			}
+		case "emailSent":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Bool()
+				s.EmailSent = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"emailSent\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -15308,7 +15342,7 @@ func (s *InviteCreated) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

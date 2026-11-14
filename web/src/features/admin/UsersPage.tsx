@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { MoreHorizontal, Search, Users } from "lucide-react";
+import { Copy, MoreHorizontal, Search, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Input, Menu, MenuItem, MenuTrigger, Popover, SearchField, Separator } from "react-aria-components";
 import { Controller, useForm } from "react-hook-form";
@@ -299,25 +299,56 @@ const inviteSchema = z.object({
 function InviteDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const roles = $api.useQuery("get", "/admin/roles", {}, { enabled: isOpen, staleTime: Number.POSITIVE_INFINITY });
   const form = useForm({ resolver: zodResolver(inviteSchema), defaultValues: { email: "", role: "viewer" } });
+  const [created, setCreated] = useState<Schemas["InviteCreated"] | null>(null);
   const invite = $api.useMutation("post", "/admin/invites", {
-    onSuccess: (r) => {
-      toast.success(`Приглашение отправлено на ${r.email}`);
-      close();
-    },
+    onSuccess: (r) => setCreated(r),
     onError: (e) => applyServerErrors(form.setError, e),
   });
   const close = () => {
     form.reset();
+    setCreated(null);
     onClose();
   };
   const options = (roles.data ?? []).map((r) => ({ id: r.code, label: r.name }));
+
+  if (created) {
+    return (
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={(open) => !open && close()}
+        title={created.emailSent ? "Приглашение отправлено" : "Письмо не отправлено"}
+        description={
+          created.emailSent
+            ? `Письмо со ссылкой отправлено на ${created.email}. Ссылку можно передать и самому — она действует ${created.expiresInHours} часа.`
+            : `Почта на сервере не настроена или недоступна. Передайте ссылку для ${created.email} сами — она действует ${created.expiresInHours} часа и подходит только один раз.`
+        }
+        actions={
+          <Button variant="primary" onPress={close}>
+            Готово
+          </Button>
+        }
+      >
+        <div className={s.secret}>
+          <code>{created.link}</code>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Скопировать ссылку"
+            onPress={() => void navigator.clipboard.writeText(created.link).then(() => toast.success("Скопировано"))}
+          >
+            <Copy size={15} aria-hidden />
+          </Button>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal
       isOpen={isOpen}
       onOpenChange={(open) => !open && close()}
       title="Пригласить пользователя"
-      description="Ссылка для создания учётной записи придёт на почту и действует 72 часа."
+      description="Ссылка для создания учётной записи придёт на почту и действует 72 часа; её также можно будет скопировать."
     >
       <form onSubmit={form.handleSubmit((v) => invite.mutate({ body: v }))} noValidate>
         <FormTextField control={form.control} name="email" label="Электронная почта" type="email" autoFocus />

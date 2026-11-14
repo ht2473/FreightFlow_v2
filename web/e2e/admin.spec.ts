@@ -47,6 +47,18 @@ test("администрирование: пользователь, блокир
   await act("Заблокировать", "Заблокирован");
   await act("Разблокировать", "Активен");
 
+  // Приглашение: ссылку можно скопировать и передать самому, даже если письмо не ушло.
+  await page.getByRole("button", { name: "Пригласить" }).click();
+  const inv = page.getByRole("dialog", { name: "Пригласить пользователя" });
+  await inv.getByLabel("Электронная почта").fill(`e2e-invite-${randomBytes(4).toString("hex")}@example.com`);
+  await inv.getByRole("button", { name: "Отправить приглашение" }).click();
+  const done = page.getByRole("dialog", { name: /Приглашение отправлено|Письмо не отправлено/ });
+  await expect(done.locator("code")).toContainText("/invite/");
+  await expect(done.getByRole("button", { name: "Скопировать ссылку" })).toBeVisible();
+  await page.screenshot({ path: "test-results/invite-link.png" });
+  await done.getByRole("button", { name: "Готово" }).click();
+  await expect(done).toHaveCount(0);
+
   // Матрица ролей и журнал: смена статуса записана.
   await page.goto("/admin/roles");
   await expect(page.getByRole("region", { name: "Матрица прав по ролям" }).getByRole("table")).toBeVisible();

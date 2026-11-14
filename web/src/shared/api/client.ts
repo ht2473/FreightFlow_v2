@@ -16,10 +16,24 @@ export const fetchClient = createFetchClient<paths>({
   credentials: "same-origin",
 });
 
+/** Перенаправляет администратора на подключение обязательной двухфакторной защиты. */
+function redirectToTotpSetup() {
+  const next = window.location.pathname + window.location.search;
+  window.location.assign(`/setup-2fa?next=${encodeURIComponent(next)}`);
+}
+
 fetchClient.use({
-  onResponse({ response }) {
+  async onResponse({ response }) {
     if (response.status === 401) {
       redirectToLogin();
+    } else if (response.status === 403) {
+      const body: unknown = await response
+        .clone()
+        .json()
+        .catch(() => null);
+      if (isProblem(body) && body.code === "totp_setup_required") {
+        redirectToTotpSetup();
+      }
     }
     return response;
   },

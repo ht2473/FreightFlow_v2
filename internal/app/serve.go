@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -64,6 +65,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 		Identity: ids, Ingest: mods.ingest, Layers: layers, Regulation: regulation.New(pool),
 		Routing: routing.NewService(pool, routingClient), Facilities: mods.facilities, Reports: mods.reports, Views: views.New(pool), Territories: territory.New(pool, mods.facilities), Search: search.New(pool, mods.facilities), Analytics: analytics.New(pool), Scenarios: mods.scenarios, Alerts: mods.alerts, Notify: mods.notify, Sessions: sessions, Mailer: mailer,
 		BaseURL: cfg.BaseURL, Log: env.Log, Meters: rt.tel.Meters, Tracers: rt.tel.Tracers,
+		RequireAdminTOTP: !cfg.IsDev(),
 	})
 	if err != nil {
 		return err
@@ -71,6 +73,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	webHandler, err := web.New(web.Deps{
 		Identity: ids, Sessions: sessions, Mailer: mailer, BaseURL: cfg.BaseURL, Dev: cfg.IsDev(), DevVite: cfg.DevViteURL, Log: env.Log,
 		Help: web.NewHelpData(analytics.New(pool), mods.ingest), Version: Version,
+		RequireAdminTOTP: !cfg.IsDev(),
 	})
 	if err != nil {
 		return err
@@ -90,6 +93,10 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 	mux.Handle("/tiles/", mapHandler)
 	mux.Handle("/", webHandler)
 
+	proxies, err := httpx.ParsePrefixes(cfg.TrustedProxies)
+	if err != nil {
+		return fmt.Errorf("FF_TRUSTED_PROXIES: %w", err)
+	}
 	crossOrigin, err := httpx.CrossOrigin()
 	if err != nil {
 		return err
@@ -105,7 +112,7 @@ func runServe(ctx context.Context, env *Env, args []string) error {
 		httpx.AccessLog(env.Log),
 		httpx.SecurityHeaders(!cfg.IsDev()),
 		crossOrigin,
-		httpx.WithClient(),
+		httpx.WithClient(proxies...),
 		sessions.LoadAndSave,
 	)
 

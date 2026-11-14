@@ -27,6 +27,16 @@ const (
 
 var errMalformedHash = errors.New("malformed password hash")
 
+// argonSlots ограничивает число одновременных вычислений argon2id: каждое занимает argonMemory,
+// и поток попыток входа не должен исчерпать память сервера (4 × 64 МБ).
+var argonSlots = make(chan struct{}, 4)
+
+func argonKey(password string, salt []byte, t, m uint32, p uint8, n uint32) []byte {
+	argonSlots <- struct{}{}
+	defer func() { <-argonSlots }()
+	return argon2.IDKey([]byte(password), salt, t, m, p, n)
+}
+
 // ValidatePassword проверяет требования к паролю.
 func ValidatePassword(password string) error {
 	n := utf8.RuneCountInString(password)
@@ -105,7 +115,7 @@ func onRow(p, row []rune) bool {
 func HashPassword(password string) string {
 	salt := make([]byte, argonSaltLen)
 	_, _ = rand.Read(salt)
-	key := argon2.IDKey([]byte(password), salt, argonTime, argonMemory, argonThreads, argonKeyLen)
+	key := argonKey(password, salt, argonTime, argonMemory, argonThreads, argonKeyLen)
 	return fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, argonMemory, argonTime, argonThreads,
 		base64.RawStdEncoding.EncodeToString(salt), base64.RawStdEncoding.EncodeToString(key))
 }
@@ -134,7 +144,7 @@ func VerifyPassword(password, encoded string) (ok, needsRehash bool, err error) 
 	if err != nil || len(want) == 0 {
 		return false, false, errMalformedHash
 	}
-	got := argon2.IDKey([]byte(password), salt, iterations, memory, threads, uint32(len(want))) //nolint:gosec // длина ключа ограничена форматом
+	got := argonKey(password, salt, iterations, memory, threads, uint32(len(want))) //nolint:gosec // длина ключа ограничена форматом
 	if subtle.ConstantTimeCompare(got, want) != 1 {
 		return false, false, nil
 	}

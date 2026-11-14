@@ -18,7 +18,14 @@ var (
 	errSessionOnly  = errors.New("operation requires a browser session")
 	// errAdminTOTPRequired — администратор не может отключить себе двухфакторную защиту.
 	errAdminTOTPRequired = errors.New("two-factor authentication is mandatory for administrators")
+	// errTOTPSetupRequired — администратор ещё не подключил обязательный второй фактор.
+	errTOTPSetupRequired = errors.New("two-factor authentication setup required")
 )
+
+// totpSetupOps — операции, доступные администратору до подключения второго фактора.
+var totpSetupOps = map[gen.OperationName]bool{
+	gen.GetMeOperation: true, gen.BeginTotpSetupOperation: true, gen.ConfirmTotpOperation: true,
+}
 
 type principalKey struct{}
 
@@ -51,6 +58,9 @@ func (s *Server) HandleCookieAuth(ctx context.Context, op gen.OperationName, _ g
 	p, err := s.identity.Principal(ctx, uid)
 	if err != nil {
 		return ctx, errUnauthorized
+	}
+	if s.requireAdminTOTP && p.NeedsTOTPSetup() && !totpSetupOps[op] {
+		return ctx, errTOTPSetupRequired
 	}
 	return s.authorize(ctx, op, p)
 }

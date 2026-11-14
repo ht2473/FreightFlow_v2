@@ -23,6 +23,8 @@ type Config struct {
 	// Pprof — профилировщик /debug/pprof на адресе метрик (только для диагностики).
 	Pprof      bool   `env:"FF_PPROF" envDefault:"false"`
 	DevViteURL string `env:"FF_DEV_VITE_URL" envDefault:"http://localhost:5173"`
+	// TrustedProxies — адреса и сети обратных прокси, которым доверяется X-Forwarded-For.
+	TrustedProxies []string `env:"FF_TRUSTED_PROXIES" envSeparator:","`
 
 	DatabaseURL string `env:"FF_DATABASE_URL,required"`
 	DataDir     string `env:"FF_DATA_DIR" envDefault:"./var"`

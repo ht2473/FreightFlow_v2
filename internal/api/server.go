@@ -78,6 +78,9 @@ type Deps struct {
 	// RoutingLimit — расчёты маршрутизации на пользователя; nil — routingBurst подряд, затем один
 	// в секунду.
 	RoutingLimit *ratelimit.Limiter
+	// RequireAdminTOTP — сессия администратора без второго фактора допускает только его
+	// подключение (на сервере).
+	RequireAdminTOTP bool
 }
 
 // routingBurst — расчётов маршрутизации подряд на пользователя.
@@ -93,27 +96,28 @@ const (
 
 // Server реализует обработчики и проверку безопасности ogen.
 type Server struct {
-	identity    *identity.Service
-	ingest      *ingest.Service
-	layers      *tiles.Service
-	regulation  *regulation.Service
-	routing     *routing.Service
-	scenarios   *scenario.Service
-	alerts      *alerting.Service
-	notify      *notify.Service
-	facilities  *facility.Service
-	reports     *report.Service
-	views       *views.Service
-	territories *territory.Service
-	search      *search.Service
-	analytics   *analytics.Service
-	routeLimit  *ratelimit.Limiter
-	tokenLimit  *ratelimit.Limiter
-	sessions    *session.Manager
-	mailer      Mailer
-	baseURL     string
-	log         *slog.Logger
-	perms       map[string]string
+	identity         *identity.Service
+	ingest           *ingest.Service
+	layers           *tiles.Service
+	regulation       *regulation.Service
+	routing          *routing.Service
+	scenarios        *scenario.Service
+	alerts           *alerting.Service
+	notify           *notify.Service
+	facilities       *facility.Service
+	reports          *report.Service
+	views            *views.Service
+	territories      *territory.Service
+	search           *search.Service
+	analytics        *analytics.Service
+	routeLimit       *ratelimit.Limiter
+	tokenLimit       *ratelimit.Limiter
+	sessions         *session.Manager
+	mailer           Mailer
+	baseURL          string
+	requireAdminTOTP bool
+	log              *slog.Logger
+	perms            map[string]string
 	// readOps — операции GET: субъекту только для чтения (печать отчёта) доступны только они.
 	readOps map[string]bool
 }
@@ -128,7 +132,7 @@ func New(d Deps) (http.Handler, error) {
 	}
 	s := &Server{
 		identity: d.Identity, ingest: d.Ingest, layers: d.Layers, regulation: d.Regulation, routing: d.Routing, scenarios: d.Scenarios, alerts: d.Alerts, notify: d.Notify, facilities: d.Facilities, reports: d.Reports, views: d.Views, territories: d.Territories, search: d.Search, analytics: d.Analytics, sessions: d.Sessions, mailer: d.Mailer,
-		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), readOps: readIndex(ops), routeLimit: d.RoutingLimit,
+		baseURL: strings.TrimRight(d.BaseURL, "/"), log: d.Log, perms: permissionIndex(ops), readOps: readIndex(ops), routeLimit: d.RoutingLimit, requireAdminTOTP: d.RequireAdminTOTP,
 	}
 	if s.routeLimit == nil {
 		s.routeLimit = ratelimit.New(time.Second, routingBurst)
@@ -381,10 +385,13 @@ func (s *Server) CreateInvite(ctx context.Context, req *gen.CreateInvite) (*gen.
 			"логистической инфраструктуры Москвы.\n\nЧтобы создать учётную запись, перейдите по ссылке " +
 			"(действует 72 часа):\n" + link + "\n",
 	}
+	// Без почты приглашение всё равно действует: администратор передаёт ссылку сам.
+	sent := true
 	if err := s.mailer.Send(ctx, msg); err != nil {
-		return nil, fmt.Errorf("send invite: %w", err)
+		sent = false
+		s.log.WarnContext(ctx, "send invite", "error", err)
 	}
-	return &gen.InviteCreated{Email: email, ExpiresInHours: 72}, nil
+	return &gen.InviteCreated{Email: email, ExpiresInHours: 72, Link: link, EmailSent: sent}, nil
 }
 
 func (s *Server) ListRoles(ctx context.Context) ([]gen.Role, error) {

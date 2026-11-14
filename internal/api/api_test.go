@@ -3,11 +3,13 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"log/slog"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
 	"net/url"
 	"regexp"
@@ -15,9 +17,11 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pquerna/otp/totp"
 
 	spec "freightflow/api"
 	"freightflow/internal/alerting"
@@ -66,11 +70,16 @@ func TestEveryOperationHasKnownPermission(t *testing.T) {
 type memoryMailer struct {
 	mu   sync.Mutex
 	sent []mail.Message
+	// fail — почта недоступна: Send возвращает ошибку.
+	fail bool
 }
 
 func (m *memoryMailer) Send(_ context.Context, msg mail.Message) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if m.fail {
+		return errors.New("smtp unavailable")
+	}
 	m.sent = append(m.sent, msg)
 	return nil
 }
@@ -80,9 +89,10 @@ type fixture struct {
 	pool     *pgxpool.Pool
 	identity *identity.Service
 	mailer   *memoryMailer
+	sessions *session.Manager
 }
 
-func newFixture(t *testing.T) *fixture {
+func newFixture(t *testing.T, opts ...func(*Deps)) *fixture {
 	t.Helper()
 	pool := dbtest.New(t)
 	box, err := secret.NewBox(strings.Repeat("ab", 32))
@@ -116,20 +126,32 @@ func newFixture(t *testing.T) *fixture {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h, err := New(Deps{
+	deps := Deps{
 		Identity: ids, Ingest: ing, Layers: layers, Regulation: regulation.New(pool),
 		Routing: routing.NewService(pool, routing.NewClient("http://127.0.0.1:1")), Facilities: facilities,
 		Reports: report.New(pool, inserter, blobs, facilities), Views: views.New(pool), Territories: territory.New(pool, facilities), Search: search.New(pool, facilities), Analytics: analytics.New(pool),
 		Alerts: alerts, Notify: notifier, Sessions: sessions, Mailer: mailer,
 		BaseURL: "http://test.local",
 		Log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
-	})
+	}
+	for _, o := range opts {
+		o(&deps)
+	}
+	h, err := New(deps)
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv := httptest.NewServer(httpx.Chain(h, httpx.WithClient(), sessions.LoadAndSave))
+	// /test/login/{id} начинает сессию браузера пользователя (вход проверяется в пакете web).
+	mux := http.NewServeMux()
+	mux.Handle("/api/v1/", h)
+	mux.HandleFunc("POST /test/login/{id}", func(w http.ResponseWriter, r *http.Request) {
+		if err := sessions.Login(r.Context(), uuid.MustParse(r.PathValue("id"))); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+	srv := httptest.NewServer(httpx.Chain(mux, httpx.WithClient(), sessions.LoadAndSave))
 	t.Cleanup(srv.Close)
-	return &fixture{srv: srv, pool: pool, identity: ids, mailer: mailer}
+	return &fixture{srv: srv, pool: pool, identity: ids, mailer: mailer, sessions: sessions}
 }
 
 func (f *fixture) token(t *testing.T, email string, role string, scopes ...identity.Permission) string {
@@ -289,6 +311,100 @@ func TestAPIAdminCreatesUserAndInvites(t *testing.T) {
 	}
 	if len(f.mailer.sent) != 1 || !strings.Contains(f.mailer.sent[0].Text, "http://test.local/invite/") {
 		t.Fatalf("invite mail not sent: %+v", f.mailer.sent)
+	}
+	var inv struct {
+		Link      string `json:"link"`
+		EmailSent bool   `json:"emailSent"`
+	}
+	_ = json.Unmarshal(body, &inv)
+	if !inv.EmailSent || !strings.Contains(f.mailer.sent[0].Text, inv.Link) {
+		t.Fatalf("invite response %s", body)
+	}
+
+	// Без почты приглашение создаётся, а ссылку администратор передаёт сам.
+	f.mailer.mu.Lock()
+	f.mailer.fail = true
+	f.mailer.mu.Unlock()
+	resp, body = f.do(t, http.MethodPost, "/api/v1/admin/invites", admin, `{"email":"offline@example.com","role":"viewer"}`)
+	if resp.StatusCode != http.StatusCreated {
+		t.Fatalf("invite without mail: %d %s", resp.StatusCode, body)
+	}
+	inv = struct {
+		Link      string `json:"link"`
+		EmailSent bool   `json:"emailSent"`
+	}{}
+	_ = json.Unmarshal(body, &inv)
+	token, ok := strings.CutPrefix(inv.Link, "http://test.local/invite/")
+	if inv.EmailSent || !ok {
+		t.Fatalf("invite without mail: %s", body)
+	}
+	if email, err := f.identity.InviteEmail(context.Background(), token); err != nil || email != "offline@example.com" {
+		t.Fatalf("invite link must be valid: %q %v", email, err)
+	}
+}
+
+// Сессия администратора без второго фактора на сервере допускает только его подключение.
+func TestAPIAdminSessionRequiresTOTP(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t, func(d *Deps) { d.RequireAdminTOTP = true })
+	ctx := context.Background()
+	admin, err := f.identity.CreateUser(ctx, nil, identity.CreateUserInput{
+		Email: "adm@example.com", Name: "Админ", Password: "пароль для тестов 1", Roles: []string{identity.RoleAdmin},
+	}, identity.RequestMeta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	analyst, err := f.identity.CreateUser(ctx, nil, identity.CreateUserInput{
+		Email: "an@example.com", Name: "Аналитик", Password: "пароль для тестов 1", Roles: []string{identity.RoleAnalyst},
+	}, identity.RequestMeta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	browser := func(uid uuid.UUID) *http.Client {
+		jar, _ := cookiejar.New(nil)
+		c := &http.Client{Jar: jar}
+		resp, err := c.Post(f.srv.URL+"/test/login/"+uid.String(), "text/plain", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = resp.Body.Close()
+		return c
+	}
+	get := func(c *http.Client, path string) (int, string) {
+		resp, err := c.Get(f.srv.URL + path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		b, _ := io.ReadAll(resp.Body)
+		return resp.StatusCode, string(b)
+	}
+
+	adm := browser(admin.ID)
+	if code, body := get(adm, "/api/v1/admin/users"); code != http.StatusForbidden || !strings.Contains(body, `"totp_setup_required"`) {
+		t.Fatalf("admin without 2FA: %d %s", code, body)
+	}
+	if code, body := get(adm, "/api/v1/me"); code != http.StatusOK {
+		t.Fatalf("me must stay available: %d %s", code, body)
+	}
+	// Обычному пользователю второй фактор не обязателен.
+	if code, body := get(browser(analyst.ID), "/api/v1/views?page=map"); code != http.StatusOK {
+		t.Fatalf("analyst: %d %s", code, body)
+	}
+
+	setup, err := f.identity.BeginTOTPSetup(ctx, admin.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	code, err := totp.GenerateCode(setup.Secret, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.identity.ConfirmTOTP(ctx, admin.ID, code, identity.RequestMeta{}); err != nil {
+		t.Fatal(err)
+	}
+	if code, body := get(adm, "/api/v1/admin/users"); code != http.StatusOK {
+		t.Fatalf("admin with 2FA: %d %s", code, body)
 	}
 }
 

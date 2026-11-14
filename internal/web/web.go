@@ -12,7 +12,6 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"time"
 
@@ -48,6 +47,9 @@ type Deps struct {
 	Help HelpData
 	// Version — версия сборки (страница «О системе»).
 	Version string
+	// RequireAdminTOTP — администратор без второго фактора не получает сессию, пока не подключит
+	// его (на сервере). В разработке подключение лишь предлагается после входа.
+	RequireAdminTOTP bool
 }
 
 type handler struct {
@@ -55,6 +57,8 @@ type handler struct {
 	assets      *assets
 	loginLimit  *ratelimit.Limiter
 	forgotLimit *ratelimit.Limiter
+	// linkLimit — формы по одноразовым ссылкам (приглашение, смена пароля).
+	linkLimit *ratelimit.Limiter
 }
 
 // New создаёт обработчик серверных страниц и статики.
@@ -68,6 +72,7 @@ func New(d Deps) (http.Handler, error) {
 		assets:      a,
 		loginLimit:  ratelimit.New(6*time.Second, 10),
 		forgotLimit: ratelimit.New(time.Minute, 3),
+		linkLimit:   ratelimit.New(6*time.Second, 10),
 	}
 	h.BaseURL = strings.TrimRight(h.BaseURL, "/")
 
@@ -137,19 +142,35 @@ func safeNext(raw string) string {
 // (сброс второго фактора администратором, блокировка), и сеанс заблокированного пользователя
 // недействительны: сеанс завершается.
 func (h *handler) userID(r *http.Request) (uuid.UUID, bool) {
+	p, ok := h.principal(r)
+	return p.UserID, ok
+}
+
+// principal — субъект действующего сеанса (см. userID).
+func (h *handler) principal(r *http.Request) (identity.Principal, bool) {
 	ctx := r.Context()
 	uid, authAt, ok := h.Sessions.UserID(ctx)
 	if !ok {
-		return uuid.UUID{}, false
+		return identity.Principal{}, false
 	}
 	after, err := h.Identity.SessionsValidAfter(ctx, uid)
 	if err == nil && !authAt.Before(after.Add(-time.Second)) { // допуск на округление времени при хранении
-		if _, err = h.Identity.Principal(ctx, uid); err == nil {
-			return uid, true
+		if p, err := h.Identity.Principal(ctx, uid); err == nil {
+			return p, true
 		}
 	}
 	_ = h.Sessions.Logout(ctx)
-	return uuid.UUID{}, false
+	return identity.Principal{}, false
+}
+
+// setupUser — пользователь, которому нужно подключить второй фактор: из действующего сеанса или
+// из ожидания обязательного подключения после входа (тогда fresh = true).
+func (h *handler) setupUser(r *http.Request) (uid uuid.UUID, fresh, ok bool) {
+	if uid, ok := h.userID(r); ok {
+		return uid, false, true
+	}
+	uid, ok = h.Sessions.TOTPSetup(r.Context())
+	return uid, true, ok
 }
 
 // --- Вход ---
@@ -199,19 +220,29 @@ func (h *handler) login(w http.ResponseWriter, r *http.Request) {
 	h.completeLogin(w, r, res.UserID, next)
 }
 
-// completeLogin начинает сессию. Администратор без второго фактора сначала подключает его.
+// completeLogin начинает сессию. Администратор без второго фактора сначала подключает его: на
+// сервере сессия начинается только после подключения.
 func (h *handler) completeLogin(w http.ResponseWriter, r *http.Request, userID uuid.UUID, next string) {
-	if err := h.Sessions.Login(r.Context(), userID); err != nil {
-		h.internalError(w, r, err)
-		return
-	}
-	u, err := h.Identity.GetUser(r.Context(), userID)
+	p, err := h.Identity.Principal(r.Context(), userID)
 	if err != nil {
 		h.internalError(w, r, err)
 		return
 	}
-	if !u.TOTPEnabled && slices.Contains(u.Roles, identity.RoleAdmin) {
-		http.Redirect(w, r, "/setup-2fa?next="+url.QueryEscape(next), http.StatusSeeOther)
+	setup := "/setup-2fa?next=" + url.QueryEscape(next)
+	if p.NeedsTOTPSetup() && h.RequireAdminTOTP {
+		if err := h.Sessions.StartTOTPSetup(r.Context(), userID); err != nil {
+			h.internalError(w, r, err)
+			return
+		}
+		http.Redirect(w, r, setup, http.StatusSeeOther)
+		return
+	}
+	if err := h.Sessions.Login(r.Context(), userID); err != nil {
+		h.internalError(w, r, err)
+		return
+	}
+	if p.NeedsTOTPSetup() {
+		http.Redirect(w, r, setup, http.StatusSeeOther)
 		return
 	}
 	http.Redirect(w, r, next, http.StatusSeeOther) //nolint:gosec // next проверен safeNext
@@ -263,7 +294,7 @@ func (h *handler) secondFactor(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) setupTOTPForm(w http.ResponseWriter, r *http.Request) {
 	next := safeNext(r.URL.Query().Get("next"))
-	uid, ok := h.userID(r)
+	uid, _, ok := h.setupUser(r)
 	if !ok {
 		http.Redirect(w, r, "/login?next="+url.QueryEscape("/setup-2fa?next="+next), http.StatusSeeOther)
 		return
@@ -286,12 +317,16 @@ func (h *handler) setupTOTPForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) setupTOTP(w http.ResponseWriter, r *http.Request) {
-	uid, ok := h.userID(r)
+	uid, fresh, ok := h.setupUser(r)
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 	next := safeNext(r.PostFormValue("next"))
+	if !h.loginLimit.Allow(clientKey(r)) {
+		http.Redirect(w, r, "/setup-2fa?next="+url.QueryEscape(next), http.StatusSeeOther)
+		return
+	}
 	codes, err := h.Identity.ConfirmTOTP(r.Context(), uid, r.PostFormValue("code"), meta(r))
 	if errors.Is(err, identity.ErrInvalidCode) {
 		// Секрет уже сохранён: показываем тот же код заново.
@@ -312,6 +347,12 @@ func (h *handler) setupTOTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.internalError(w, r, err)
 		return
+	}
+	if fresh {
+		if err := h.Sessions.Login(r.Context(), uid); err != nil {
+			h.internalError(w, r, err)
+			return
+		}
 	}
 	h.render(w, r, http.StatusOK, recoveryCodesPage(h.page(r, "Резервные коды"), codes, next))
 }
@@ -357,6 +398,9 @@ func (h *handler) inviteForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) acceptInvite(w http.ResponseWriter, r *http.Request) {
+	if !h.allowLink(w, r) {
+		return
+	}
 	token := r.PathValue("token")
 	email, err := h.Identity.InviteEmail(r.Context(), token)
 	if errors.Is(err, identity.ErrInvalidToken) {
@@ -380,6 +424,17 @@ func (h *handler) acceptInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.completeLogin(w, r, u.ID, "/")
+}
+
+// allowLink ограничивает частоту отправки форм по одноразовым ссылкам с одного адреса: каждая
+// попытка — поиск токена и при успехе хеширование пароля.
+func (h *handler) allowLink(w http.ResponseWriter, r *http.Request) bool {
+	if h.linkLimit.Allow(clientKey(r)) {
+		return true
+	}
+	h.render(w, r, http.StatusTooManyRequests, messagePage(h.page(r, "Слишком много попыток"),
+		"Слишком много попыток с этого адреса. Подождите минуту и откройте ссылку снова.", "/login", "Ко входу"))
+	return false
 }
 
 // --- Восстановление пароля ---
@@ -429,6 +484,9 @@ func (h *handler) resetForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) reset(w http.ResponseWriter, r *http.Request) {
+	if !h.allowLink(w, r) {
+		return
+	}
 	err := h.Identity.ResetPassword(r.Context(), r.PathValue("token"), r.PostFormValue("password"), meta(r))
 	var ve *identity.ValidationError
 	switch {
@@ -457,8 +515,13 @@ func (h *handler) app(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	if _, ok := h.userID(r); !ok && !h.printToken(r) {
+	p, ok := h.principal(r)
+	if !ok && !h.printToken(r) {
 		http.Redirect(w, r, "/login?next="+url.QueryEscape(r.URL.RequestURI()), http.StatusSeeOther)
+		return
+	}
+	if ok && h.RequireAdminTOTP && p.NeedsTOTPSetup() {
+		http.Redirect(w, r, "/setup-2fa?next="+url.QueryEscape(r.URL.RequestURI()), http.StatusSeeOther)
 		return
 	}
 	if h.Dev {

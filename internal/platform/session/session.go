@@ -24,9 +24,13 @@ const (
 	keyAuthAt     = "auth_at"
 	keyPendingUID = "pending_uid"
 	keyPendingAt  = "pending_at"
+	keySetupUID   = "totp_setup_uid"
+	keySetupAt    = "totp_setup_at"
 
 	// pendingTTL — сколько ждать второй фактор после верного пароля.
 	pendingTTL = 5 * time.Minute
+	// setupTTL — сколько ждать подключения обязательного второго фактора после входа.
+	setupTTL = 15 * time.Minute
 )
 
 func init() {
@@ -69,6 +73,8 @@ func (m *Manager) Login(ctx context.Context, userID uuid.UUID) error {
 	}
 	m.Remove(ctx, keyPendingUID)
 	m.Remove(ctx, keyPendingAt)
+	m.Remove(ctx, keySetupUID)
+	m.Remove(ctx, keySetupAt)
 	m.Put(ctx, keyUserID, userID.String())
 	m.Put(ctx, keyAuthAt, time.Now().UTC())
 	return nil
@@ -113,6 +119,32 @@ func (m *Manager) Pending(ctx context.Context) (uuid.UUID, bool) {
 func (m *Manager) ClearPending(ctx context.Context) {
 	m.Remove(ctx, keyPendingUID)
 	m.Remove(ctx, keyPendingAt)
+}
+
+// StartTOTPSetup запоминает пользователя, прошедшего проверку пароля, которому до входа нужно
+// подключить обязательный второй фактор. Сессия при этом не аутентифицирована; токен сессии
+// меняется.
+func (m *Manager) StartTOTPSetup(ctx context.Context, userID uuid.UUID) error {
+	if err := m.RenewToken(ctx); err != nil {
+		return fmt.Errorf("renew session token: %w", err)
+	}
+	m.Remove(ctx, keyPendingUID)
+	m.Remove(ctx, keyPendingAt)
+	m.Put(ctx, keySetupUID, userID.String())
+	m.Put(ctx, keySetupAt, time.Now().UTC())
+	return nil
+}
+
+// TOTPSetup возвращает пользователя, подключающего обязательный второй фактор, если ожидание не
+// истекло.
+func (m *Manager) TOTPSetup(ctx context.Context) (uuid.UUID, bool) {
+	raw := m.GetString(ctx, keySetupUID)
+	at := m.GetTime(ctx, keySetupAt)
+	if raw == "" || time.Since(at) > setupTTL {
+		return uuid.Nil, false
+	}
+	id, err := uuid.Parse(raw)
+	return id, err == nil
 }
 
 // pgStore хранит сессии в таблице core.session.

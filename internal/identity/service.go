@@ -251,6 +251,7 @@ func (s *Service) Principal(ctx context.Context, userID uuid.UUID) (Principal, e
 	}
 	return Principal{
 		UserID: u.ID, Email: u.Email, Name: u.Name, Roles: roles, Permissions: toPermissions(perms),
+		TOTPEnabled: u.TotpEnabled,
 	}, nil
 }
 

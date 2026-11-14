@@ -39,11 +39,19 @@ type Principal struct {
 	TokenID     *uuid.UUID
 	// ReadOnly — субъект токена печати отчёта: только чтение.
 	ReadOnly bool
+	// TOTPEnabled — у пользователя подключена двухфакторная защита.
+	TOTPEnabled bool
 }
 
 // Has сообщает, есть ли у субъекта право.
 func (p Principal) Has(perm Permission) bool {
 	return slices.Contains(p.Permissions, perm)
+}
+
+// NeedsTOTPSetup сообщает, что субъект управляет пользователями, но второй фактор не подключил:
+// для таких учётных записей двухфакторная защита обязательна.
+func (p Principal) NeedsTOTPSetup() bool {
+	return !p.ReadOnly && !p.TOTPEnabled && p.Has(PermUsersManage)
 }
 
 // Label — подпись субъекта для журнала аудита.
