@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -39,12 +41,22 @@ func TestAPITokenRateLimit(t *testing.T) {
 	f := newFixture(t)
 	tok := f.token(t, "limit@example.com", identity.RoleViewer)
 	other := f.token(t, "limit2@example.com", identity.RoleViewer)
-	limited := false
-	for i := 0; i < tokenBurst+20 && !limited; i++ {
-		resp, _ := f.do(t, http.MethodGet, "/api/v1/me", tok, "")
-		limited = resp.StatusCode == http.StatusTooManyRequests
+	// Запросы идут параллельно: последовательно на медленной машине ведро успевает пополниться.
+	var limited atomic.Bool
+	var wg sync.WaitGroup
+	slots := make(chan struct{}, 32)
+	for range 2 * tokenBurst {
+		wg.Add(1)
+		slots <- struct{}{}
+		go func() {
+			defer func() { <-slots; wg.Done() }()
+			if code, _ := f.status(http.MethodGet, "/api/v1/me", tok, ""); code == http.StatusTooManyRequests {
+				limited.Store(true)
+			}
+		}()
 	}
-	if !limited {
+	wg.Wait()
+	if !limited.Load() {
 		t.Fatal("token was not limited")
 	}
 	if resp, _ := f.do(t, http.MethodGet, "/api/v1/me", other, ""); resp.StatusCode != http.StatusOK {
