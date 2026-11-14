@@ -37,4 +37,4 @@ tar -C var -czf - \
 echo "== восстановление базы"
 ssh "$HOST" 'bash /srv/freightflow/transfer/server-restore.sh'
 rm -f tmp/transfer/freightflow.dump
-echo "== готово. Учётных записей на сервере нет: создайте администратора (deploy/prod/README.md)"
+echo "== готово. Учётных записей на сервере нет: создайте администратора (DEPLOY.md, шаг 5)"
