@@ -162,18 +162,33 @@ type readiness struct {
 // «degraded» с кодом 200; при готовности указывается время сборки графа.
 func readyz(pool *pgxpool.Pool, rc *routing.Client) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
-		defer cancel()
+		// У каждой проверки свой срок: занятая расчётами служба маршрутизации отвечает медленно
+		// и не должна делать базу «недоступной».
+		check := func(parent context.Context, d time.Duration, f func(context.Context) error) <-chan error {
+			ch := make(chan error, 1)
+			go func() {
+				ctx, cancel := context.WithTimeout(parent, d)
+				defer cancel()
+				ch <- f(ctx)
+			}()
+			return ch
+		}
+		var st routing.Status
+		routingErr := check(r.Context(), 3*time.Second, func(ctx context.Context) (err error) {
+			st, err = rc.Status(ctx)
+			return err
+		})
+		dbErr := check(r.Context(), 2*time.Second, pool.Ping)
 
 		res := readiness{Status: "ok", Checks: map[string]string{"database": "ok"}}
 		code := http.StatusOK
-		if st, err := rc.Status(ctx); err != nil {
+		if err := <-routingErr; err != nil {
 			res.Status = "degraded"
 			res.Checks["routing"] = "unavailable"
 		} else {
 			res.Checks["routing"] = "ok, graph " + time.Unix(st.Tileset, 0).UTC().Format(time.RFC3339)
 		}
-		if err := pool.Ping(ctx); err != nil {
+		if err := <-dbErr; err != nil {
 			res.Status = "unavailable"
 			res.Checks["database"] = "unavailable"
 			code = http.StatusServiceUnavailable

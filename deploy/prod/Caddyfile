@@ -1,0 +1,23 @@
+# Обратный прокси: HTTPS-сертификат Let's Encrypt выпускается и продлевается автоматически.
+
+{$FF_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		# Система закрыта входом: поисковикам индексировать нечего.
+		X-Robots-Tag "noindex, nofollow"
+		-Server
+	}
+
+	handle /robots.txt {
+		respond "User-agent: *
+Disallow: /
+" 200
+	}
+
+	reverse_proxy app:8080
+}
+
+www.{$FF_DOMAIN} {
+	redir https://{$FF_DOMAIN}{uri} permanent
+}

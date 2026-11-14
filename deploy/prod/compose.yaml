@@ -1,0 +1,133 @@
+# Службы FreightFlow на сервере. Каталог на сервере: /srv/freightflow (рядом .env, var, backups).
+# Наружу открыт только Caddy (80, 443); база, приложение, маршрутизация и pdf — во внутренней сети.
+name: freightflow
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
+x-app: &app
+  image: freightflow/app:current
+  env_file: .env
+  environment:
+    FF_ENV: prod
+    FF_HTTP_ADDR: ":8080"
+    FF_DATABASE_URL: postgres://freightflow:${FF_DB_PASSWORD:?задайте FF_DB_PASSWORD в .env}@db:5432/freightflow?sslmode=disable
+    FF_DATA_DIR: /data
+    FF_RU_CA_FILE: /data/certs/russian_trusted_root_ca.pem
+    FF_VALHALLA_URL: http://routing:8002
+    FF_PDF_CDP_URL: ws://pdf:9222
+    FF_PRINT_BASE_URL: http://app:8080
+    # Адрес Caddy во внутренней сети: только ему доверяется X-Forwarded-For.
+    FF_TRUSTED_PROXIES: 172.30.0.10
+  volumes:
+    - ./var:/data
+  depends_on:
+    db:
+      condition: service_healthy
+  restart: unless-stopped
+  logging: *logging
+
+services:
+  caddy:
+    image: caddy:2.10.2
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      FF_DOMAIN: ${FF_DOMAIN:?задайте FF_DOMAIN в .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      default:
+        ipv4_address: 172.30.0.10
+    depends_on:
+      - app
+    restart: unless-stopped
+    mem_limit: 256m
+    logging: *logging
+
+  app:
+    <<: *app
+    command: ["serve"]
+    mem_limit: 1g
+
+  # Фоновые задачи: загрузки по расписанию, расчёты, отчёты, уведомления.
+  worker:
+    <<: *app
+    command: ["worker"]
+    mem_limit: 2g
+
+  db:
+    build:
+      context: ./build
+      dockerfile: postgres.Dockerfile
+    image: freightflow/postgres:18-3.6
+    environment:
+      POSTGRES_USER: freightflow
+      POSTGRES_PASSWORD: ${FF_DB_PASSWORD:?задайте FF_DB_PASSWORD в .env}
+      POSTGRES_DB: freightflow
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - effective_cache_size=2GB
+      - -c
+      - work_mem=16MB
+      - -c
+      - maintenance_work_mem=256MB
+      - -c
+      - max_wal_size=2GB
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U freightflow -d freightflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+    shm_size: 256m
+    mem_limit: 2g
+    logging: *logging
+
+  # Маршрутизация: граф в var/routing/current (переносится с машины разработки).
+  routing:
+    image: ghcr.io/valhalla/valhalla:3.9.1
+    entrypoint: ["valhalla_service", "/custom_files/current/valhalla.json", "2"]
+    volumes:
+      - ./var/routing:/custom_files
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8002/status"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    mem_limit: 3g
+    logging: *logging
+
+  # Печать отчётов в PDF.
+  pdf:
+    image: chromedp/headless-shell:stable
+    shm_size: 256m
+    restart: unless-stopped
+    mem_limit: 768m
+    logging: *logging
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
