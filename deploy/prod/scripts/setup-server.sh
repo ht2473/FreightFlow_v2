@@ -24,12 +24,18 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get -y upgrade
 apt-get install -y --no-install-recommends \
-	docker.io docker-compose-v2 ufw fail2ban unattended-upgrades ca-certificates curl openssl
+	docker.io docker-compose-v2 docker-buildx ufw fail2ban unattended-upgrades ca-certificates curl openssl
 systemctl enable --now docker
 
 timedatectl set-timezone Europe/Moscow
 
-# Подкачка 2 ГБ: страховка от остановки служб по памяти при импорте и сборке.
+# Подкачка 2 ГБ: страховка от остановки служб по памяти при импорте и сборке. Образы хостинга
+# бывают с подкачкой 512 МБ — она пересоздаётся.
+if [ "$(swapon --show=SIZE --bytes --noheadings 2>/dev/null | head -1)" -lt 2000000000 ] 2>/dev/null; then
+	swapoff /swapfile 2>/dev/null || true
+	rm -f /swapfile
+	sed -i '\|^/swapfile |d' /etc/fstab
+fi
 if ! swapon --show | grep -q /swapfile; then
 	fallocate -l 2G /swapfile
 	chmod 600 /swapfile

@@ -18,6 +18,8 @@ if [ "$VERSION" = "rollback" ]; then
 	exit 0
 fi
 
+# Копирование с Windows не сохраняет право на исполнение.
+chmod +x build/bin/linux/freightflow
 docker build -q -f build/worker.Dockerfile -t "freightflow/app:$VERSION" build >/dev/null
 if docker image inspect freightflow/app:current >/dev/null 2>&1; then
 	docker tag freightflow/app:current freightflow/app:previous

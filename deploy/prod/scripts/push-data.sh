@@ -30,9 +30,14 @@ scp tmp/transfer/freightflow.dump deploy/prod/scripts/cleanup.sql deploy/prod/sc
 	"$HOST:/srv/freightflow/transfer/"
 
 echo "== копирование данных var"
+# Каталоги, созданные службами (routing — от root), открываются на запись группе deploy;
+# права самих каталогов при распаковке не меняются.
+ssh "$HOST" 'cd /srv/freightflow && docker compose stop routing >/dev/null 2>&1;
+	docker run --rm -v /srv/freightflow/var:/v alpine:3.22 sh -c "chown -R 10001:$(id -g) /v && chmod -R g+rwX /v"'
 tar -C var -czf - \
 	--exclude='raw/osm' --exclude='routing/prev' --exclude='routing/next' --exclude='routing/routing.osm.pbf' \
-	basemap certs routing raw | ssh "$HOST" 'tar -C /srv/freightflow/var -xzf - --no-same-owner'
+	basemap certs routing raw |
+	ssh "$HOST" 'tar -C /srv/freightflow/var -xzf - --no-same-owner --no-same-permissions --no-overwrite-dir --touch'
 
 echo "== восстановление базы"
 ssh "$HOST" 'bash /srv/freightflow/transfer/server-restore.sh'
