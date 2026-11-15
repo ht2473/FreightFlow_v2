@@ -11,7 +11,9 @@
 ## 1. Ключ SSH и DNS
 
 1. Создать ключ на своей машине, если его ещё нет: `ssh-keygen -t ed25519`. Открытую часть
-   (`~/.ssh/id_ed25519.pub`) добавить в панели хостинга при создании сервера.
+   (`~/.ssh/id_ed25519.pub`) добавить в панели хостинга при создании сервера или, если хостинг
+   выдал только пароль root, один раз (пароль вводится вручную):
+   `cat ~/.ssh/id_ed25519.pub | ssh root@<IP> "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"`.
 2. У регистратора домена: A-записи `freightflow.ru` и `www.freightflow.ru` → `<IP>`.
 
 ## 2. Настройка сервера (один раз)
@@ -23,7 +25,8 @@ ssh deploy@<IP> 'docker ps'                 # вход под deploy работ�
 ssh root@<IP> 'bash /root/setup-server.sh harden-ssh'
 ```
 
-После `harden-ssh` вход только по ключу и только под `deploy`.
+После `harden-ssh` вход только по ключу и только под `deploy`. У `deploy` нет `sudo`:
+перезагрузка и другие действия root — из консоли и кнопок панели хостинга.
 
 ## 3. Настройки
 
@@ -93,9 +96,12 @@ docker compose ps                       # состояние служб
 docker compose logs -f --tail 100 app   # журнал приложения (worker, caddy, db, routing)
 docker compose restart app              # перезапуск службы
 cat RELEASE                             # выложенная версия
-sudo fail2ban-client status sshd        # заблокированные адреса
+docker stats --no-stream               # память и процессор служб
 ```
 
 Проверка доступности российских источников с сервера:
 `for u in https://apidata.mos.ru https://data.mos.ru; do curl -s -o /dev/null -w "$u %{http_code}\n" --max-time 15 $u; done`.
-Если источники недоступны, загрузки выполняются на машине разработки и переносятся `push-data.sh`.
+Если источники недоступны (сервер вне РФ, так у freightflow.ru), их плановые загрузки на сервере
+выключены (`cleanup.sql`: `ingest.source.enabled = false` для `ru_network`), загрузки выполняются
+на машине разработки. Перенос `push-data.sh` заменяет базу целиком: учётные записи сервера после
+него создаются заново.
